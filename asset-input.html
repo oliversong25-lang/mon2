@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>자산 입력</title>
+  <style>
+    :root { color-scheme: light; --ink:#17191c; --muted:#6f737a; --line:#e6e7e9; --soft:#f5f6f7; --brand:#176b5a; --brand-soft:#e9f4f1; --paper:#fff; }
+    html,body { margin:0; min-height:100%; background:#f1f2f3; color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif; }
+    button,input,select { font:inherit; }
+    button { cursor:pointer; }
+    .app { width:100%; min-height:100vh; background:var(--paper); overflow-x:hidden; }
+    .shell { padding:24px 20px calc(32px + env(safe-area-inset-bottom)); }
+    h1 { margin:0 0 8px; font-size:25px; line-height:1.3; letter-spacing:-.7px; }
+    h2 { margin:28px 0 12px; font-size:18px; }
+    p { margin:0; }
+    .sub { color:var(--muted); font-size:14px; line-height:1.55; }
+    .trust { margin:20px 0 24px; padding:16px; border:1px solid #d7e7e2; border-radius:16px; background:#f3f9f7; }
+    .trust strong { display:block; font-size:15px; line-height:1.5; }
+    .trust p { margin-top:8px; color:#53605d; font-size:12px; line-height:1.55; }
+    .group-list { display:grid; gap:10px; }
+    .group-option { display:flex; align-items:center; gap:13px; padding:15px 14px; border:1px solid var(--line); border-radius:15px; background:#fff; }
+    .group-option:has(input:checked) { border-color:var(--brand); background:var(--brand-soft); }
+    .group-option input { width:20px; height:20px; margin:0; accent-color:var(--brand); }
+    .group-option b { flex:1; font-size:16px; }
+    .group-option small { color:var(--muted); }
+    .sticky-actions { position:sticky; bottom:0; z-index:4; display:flex; gap:10px; margin:26px -20px -32px; padding:14px 20px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); background:rgba(255,255,255,.96); }
+    .btn { min-height:50px; padding:0 17px; border:0; border-radius:13px; font-weight:750; }
+    .btn.primary { flex:1; background:var(--brand); color:#fff; }
+    .btn.secondary { background:#eef0f1; color:#33383d; }
+    .btn.ghost { background:transparent; color:var(--brand); }
+    .btn:disabled { opacity:.38; cursor:default; }
+    .resume { margin:0 0 22px; padding:16px; border-radius:16px; background:#202522; color:#fff; }
+    .resume p { font-size:15px; line-height:1.5; }
+    .resume-actions { display:flex; gap:8px; margin-top:13px; }
+    .resume-actions button { padding:9px 12px; border:0; border-radius:10px; font-weight:700; }
+    .resume-actions .continue { background:#fff; color:#202522; }
+    .resume-actions .restart { background:#3c423e; color:#fff; }
+    .progress { margin-bottom:20px; color:var(--brand); font-size:14px; font-weight:800; }
+    .notice { margin:12px 0 18px; padding:12px 14px; border-radius:12px; background:var(--soft); color:#555b61; font-size:13px; line-height:1.5; }
+    .section { margin-top:24px; }
+    .section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+    .section-title h2 { margin:0; }
+    .field { margin:0 0 18px; }
+    .label-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    .label-row label,.label-row .label { font-size:14px; font-weight:750; }
+    .optional-tag,.estimate-tag { display:inline-flex; align-items:center; padding:3px 7px; border-radius:999px; background:#eceeef; color:#6b7075; font-size:11px; font-weight:750; }
+    .estimate-tag { margin-left:6px; }
+    .control { box-sizing:border-box; width:100%; min-height:48px; padding:0 13px; border:1px solid #d9dbde; border-radius:12px; background:#fff; color:var(--ink); outline:none; }
+    .control:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(23,107,90,.1); }
+    .help { margin-top:7px; color:var(--muted); font-size:12px; line-height:1.45; }
+    .readback { margin-top:7px; color:var(--brand); font-size:12px; font-weight:700; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .chip { min-height:38px; padding:0 13px; border:1px solid #dfe1e3; border-radius:999px; background:#fff; color:#4e5358; font-size:13px; }
+    .chip.active { border-color:var(--brand); background:var(--brand-soft); color:var(--brand); font-weight:750; }
+    .field-tools { display:flex; justify-content:flex-end; margin-top:7px; }
+    .how { border:0; background:transparent; color:#62686e; font-size:12px; text-decoration:underline; text-underline-offset:3px; }
+    details.auto-card { margin-top:22px; border-radius:15px; background:#f0f1f2; color:#454a4f; }
+    details.auto-card summary,details.optional summary { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:15px; list-style:none; cursor:pointer; }
+    details summary::-webkit-details-marker { display:none; }
+    .summary-title { font-size:14px; font-weight:800; }
+    .summary-meta { color:#73787d; font-size:12px; white-space:nowrap; }
+    .auto-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; padding:0 15px 15px; font-size:12px; }
+    .auto-grid div { min-width:0; }
+    .auto-grid span { display:block; margin-bottom:3px; color:#7b8085; }
+    .auto-grid b { overflow-wrap:anywhere; font-weight:650; }
+    details.optional { margin-top:22px; border:1px solid var(--line); border-radius:15px; }
+    .optional-body { padding:3px 15px 1px; }
+    .search-results { margin-top:8px; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    .search-result { display:block; width:100%; padding:12px 13px; border:0; border-bottom:1px solid var(--line); background:#fff; text-align:left; }
+    .search-result:last-child { border-bottom:0; }
+    .search-result b { display:block; font-size:13px; }
+    .search-result small { display:block; margin-top:4px; color:var(--muted); line-height:1.4; }
+    .empty-search { padding:12px; color:var(--muted); font-size:12px; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:48px; }
+    .toggle { width:46px; height:26px; border:0; border-radius:999px; background:#d9dcde; position:relative; }
+    .toggle::after { content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:.18s; }
+    .toggle.on { background:var(--brand); }
+    .toggle.on::after { transform:translateX(20px); }
+    .saved-items { margin-top:22px; }
+    .saved-item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid var(--line); }
+    .saved-item b { font-size:13px; }
+    .saved-item button { border:0; background:transparent; color:var(--muted); font-size:12px; }
+    .sheet-backdrop { position:fixed; inset:0; z-index:20; display:flex; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.38); }
+    .sheet { box-sizing:border-box; width:100%; max-width:420px; max-height:84vh; overflow:auto; padding:20px 20px calc(22px + env(safe-area-inset-bottom)); border-radius:22px 22px 0 0; background:#fff; }
+    .sheet-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .sheet h2 { margin:0; font-size:19px; }
+    .close { width:38px; height:38px; border:0; border-radius:50%; background:var(--soft); font-size:20px; }
+    .path { margin-top:18px; padding:13px; border-radius:12px; background:var(--soft); font-size:13px; line-height:1.65; }
+    .path b { display:block; }
+    .cant-find { display:block; width:100%; margin-top:18px; padding:16px 0 2px; border:0; border-top:1px solid var(--line); background:#fff; color:var(--brand); text-align:left; font-weight:800; }
+    .dialog-actions { display:grid; gap:9px; margin-top:18px; }
+    .choice { padding:13px; border:1px solid var(--line); border-radius:12px; background:#fff; text-align:left; }
+    .choice b,.choice span { display:block; }
+    .choice span { margin-top:3px; color:var(--muted); font-size:12px; }
+    .review-list { margin-top:24px; }
+    .review-row { display:flex; align-items:center; gap:10px; padding:15px 0; border-bottom:1px solid var(--line); }
+    .review-row b { flex:1; }
+    .review-row span { font-size:14px; }
+    .review-total { display:flex; justify-content:flex-end; padding:18px 0; font-size:19px; font-weight:850; }
+    .done { padding-top:48px; text-align:center; }
+    .done-mark { display:grid; place-items:center; width:62px; height:62px; margin:0 auto 18px; border-radius:50%; background:var(--brand-soft); color:var(--brand); font-size:28px; font-weight:900; }
+    .hidden { display:none !important; }
+    @media (min-width:600px) { body { padding:28px 0; } .app { width:420px; min-height:calc(100vh - 56px); margin:0 auto; border-radius:24px; box-shadow:0 12px 40px rgba(0,0,0,.09); } }
+  </style>
+</head>
+<body>
+<main id="app" class="app"></main>
+<script>
+const MOCK = {
+  asOf: "2026-08-03T06:00+09:00",
+  rates: { KRW:1, USD:1380.5, JPY:9.25, EUR:1510.2, CNY:190.4 },
+  products: {
+    equity:[
+      { code:"005930", name:"삼성전자", aliases:"samsung electronics", currentPrice:73400, currency:"KRW", market:"KRX", sector:"반도체", country:"한국" },
+      { code:"AAPL", name:"Apple", aliases:"애플", currentPrice:218.24, currency:"USD", market:"NASDAQ", sector:"정보기술", country:"미국" },
+      { code:"SPY", name:"SPDR S&P 500 ETF", aliases:"에스앤피 spy", currentPrice:632.08, currency:"USD", market:"NYSE", sector:"ETF", country:"미국", etfType:"주식형", underlying:"S&P 500" }
+    ],
+    fund:[
+      { code:"F-AI-AE", name:"미래에셋 글로벌 AI&로보틱스", aliases:"글로벌 인공지능", standardPrice:1421.62, currency:"KRW", fundType:"주식형", region:"해외", hedge:"환노출 · A-e" },
+      { code:"F-KB-VAL", name:"KB 밸류 포커스", aliases:"케이비 가치", standardPrice:1187.20, currency:"KRW", fundType:"주식형", region:"국내", hedge:"해당 없음" }
+    ],
+    bond:[
+      { code:"국고03000-3906(23-9)", name:"대한민국 국채", aliases:"국고채 2039", maturity:"2039-06", currency:"KRW", bondType:"국채", rating:"정부", coupon:"3.00%", interestCycle:"6개월" },
+      { code:"US91282C", name:"미국 국채", aliases:"treasury 미국채", maturity:"2034-05", currency:"USD", bondType:"해외채권", rating:"AA+", coupon:"4.38%", interestCycle:"6개월" }
+    ],
+    crypto:[
+      { code:"BTC", name:"비트코인", aliases:"bitcoin", currentPrice:158200000, currency:"KRW", category:"L1", marketCap:"초대형" },
+      { code:"ETH", name:"이더리움", aliases:"ethereum", currentPrice:5250000, currency:"KRW", category:"L1", marketCap:"초대형" },
+      { code:"USDT", name:"테더", aliases:"tether", currentPrice:1381, currency:"KRW", category:"스테이블", marketCap:"대형" }
+    ]
+  },
+  commodityPrices:{ goldPerGram:151200, silverPerGram:1650 }
+};
+
+const STORAGE_KEY="assetInput.session";
+const GROUPS=[
+  {id:"cash",name:"현금",hint:"원화·외화 통합"},
+  {id:"savings",name:"예금·적금",hint:"예금·적금·CMA"},
+  {id:"equity",name:"주식·ETF",hint:"국내·해외·ETF"},
+  {id:"crypto",name:"가상자산",hint:"코인"},
+  {id:"fund",name:"펀드",hint:"공모·사모펀드"},
+  {id:"bond",name:"채권",hint:"국채·회사채"},
+  {id:"commodity",name:"원자재·실물자산",hint:"금·은·에너지"},
+  {id:"realestate",name:"부동산",hint:"간단 등록"}
+];
+const GROUP_MAP=Object.fromEntries(GROUPS.map(group=>[group.id,group]));
+const emptySession=()=>({selectedGroups:[],currentGroupIndex:0,assets:[],completed:false,drafts:{},recentSearches:[]});
+let session=loadSession();
+let screen=session.completed?"done":"checklist";
+let resumeVisible=!session.completed&&session.selectedGroups.length>0;
+let selectedProduct={};
+let sheetState=null;
+let duplicateState=null;
+
+function loadSession(){
+  try { return Object.assign(emptySession(),JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")); }
+  catch(error){ return emptySession(); }
+}
+function saveSession(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(session)); }
+function esc(value){ return String(value??"").replace(/[&<>\"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[char])); }
+function uid(){ return "asset-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function groupName(id){ return GROUP_MAP[id]?.name||id; }
+function draft(group){
+  if(!session.drafts[group]) session.drafts[group]={fields:{},autoFields:{},estimatedFields:{}};
+  return session.drafts[group];
+}
+function persistDraft(group,name,value){
+  const item=draft(group); item.fields[name]=value; item.updatedAt=new Date().toISOString(); saveSession();
+}
+function setAuto(group,data){ draft(group).autoFields=data||{}; saveSession(); }
+function hasEstimate(item){ return Object.values(item.estimatedFields||{}).some(Boolean)||(item.fields.basis==="자체 추정"); }
+function moneyDigits(value){ return String(value||"").replace(/[^0-9]/g,""); }
+function comma(value){ const digits=moneyDigits(value); return digits?Number(digits).toLocaleString("ko-KR"):""; }
+function koreanMoney(value){
+  const n=Number(moneyDigits(value)); if(!n) return "";
+  const units=[[100000000,"억"],[10000,"만"]]; let rest=n; const parts=[];
+  units.forEach(unit=>{ const count=Math.floor(rest/unit[0]); if(count){parts.push(count.toLocaleString("ko-KR")+unit[1]);rest%=unit[0];} });
+  if(rest) parts.push(rest.toLocaleString("ko-KR")); return parts.join(" ")+" 원";
+}
+function label(text,optional=false,estimated=false){ return `<div class="label-row"><span class="label">${text}${estimated?'<span class="estimate-tag">추정</span>':""}</span>${optional?'<span class="optional-tag">선택</span>':""}</div>`; }
+function howButton(target,title){ return `<div class="field-tools"><button type="button" class="how" data-how="${target}" data-title="${title}">확인 방법</button></div>`; }
+function inputField(group,name,title,opts={}){
+  const item=draft(group),value=item.fields[name]??opts.defaultValue??"",estimated=Boolean(item.estimatedFields[name]);
+  if(item.fields[name]===undefined&&opts.defaultValue!==undefined) persistDraft(group,name,opts.defaultValue);
+  const attrs=[`data-field="${name}"`,`data-group="${group}"`,`class="control ${opts.className||""}"`,`value="${esc(opts.money?comma(value):value)}"`,`placeholder="${esc(opts.placeholder||"")}"`];
+  if(opts.type) attrs.push(`type="${opts.type}"`); else attrs.push("type=\"text\"");
+  if(opts.inputmode) attrs.push(`inputmode="${opts.inputmode}"`);
+  if(opts.maxlength) attrs.push(`maxlength="${opts.maxlength}"`);
+  return `<div class="field">${label(title,opts.optional,estimated)}<input ${attrs.join(" ")}>${opts.money?`<div class="readback" data-readback="${name}">${koreanMoney(value)}</div>`:""}${opts.help?`<div class="help">${opts.help}</div>`:""}${opts.how?howButton(name,opts.how):""}</div>`;
+}
+function selectField(group,name,title,options,opts={}){
+  const item=draft(group),value=item.fields[name]??opts.defaultValue??"";
+  if(item.fields[name]===undefined&&opts.defaultValue!==undefined) persistDraft(group,name,opts.defaultValue);
+  return `<div class="field">${label(title,opts.optional,Boolean(item.estimatedFields[name]))}<select class="control" data-field="${name}" data-group="${group}">${opts.placeholder?`<option value="">${opts.placeholder}</option>`:""}${options.map(option=>`<option ${value===option?"selected":""}>${option}</option>`).join("")}</select>${opts.how?howButton(name,opts.how):""}</div>`;
+}
+function chips(group,name,title,values,opts={}){
+  const item=draft(group),value=item.fields[name]??opts.defaultValue??"";
+  if(item.fields[name]===undefined&&opts.defaultValue!==undefined) persistDraft(group,name,opts.defaultValue);
+  return `<div class="field">${label(title,opts.optional,Boolean(item.estimatedFields[name]))}<div class="chips" data-chipset="${name}" data-group="${group}">${values.map(v=>`<button type="button" class="chip ${value===v?"active":""}" data-value="${v}">${v}</button>`).join("")}</div>${opts.help?`<div class="help">${opts.help}</div>`:""}${opts.how?howButton(name,opts.how):""}</div>`;
+}
+function monthField(group,name,title,optional=true){
+  const item=draft(group),unknown=item.fields[name]==="모름";
+  return `<div class="field">${label(title,optional,false)}<div class="row"><input class="control" type="month" data-field="${name}" data-group="${group}" value="${unknown?"":esc(item.fields[name]||"")}" ${unknown?"disabled":""}><button type="button" class="btn secondary" data-unknown="${name}" data-group="${group}">${unknown?"다시 입력":"모름"}</button></div></div>`;
+}
+function searchField(group,title,placeholder){
+  const item=draft(group),query=item.fields.search||"";
+  let products=MOCK.products[group]||[];
+  if(query){ const q=query.toLowerCase(); products=products.filter(product=>`${product.name} ${product.code} ${product.aliases}`.toLowerCase().includes(q)); }
+  const recent=session.recentSearches.filter(entry=>entry.group===group).map(entry=>entry.code);
+  products.sort((a,b)=>Number(recent.includes(b.code))-Number(recent.includes(a.code)));
+  return `<div class="field">${label(title)}<input class="control" data-search="${group}" data-field="search" data-group="${group}" value="${esc(query)}" placeholder="${placeholder}" autocomplete="off"><div class="search-results">${products.length?products.map(product=>searchResult(group,product)).join(""):`<div class="empty-search">검색 결과가 없습니다.</div>`}</div>${(group==="fund"||group==="bond")?`<button type="button" class="how" data-direct="${group}">검색 실패 시 직접 등록</button>`:""}</div>`;
+}
+function searchResult(group,p){
+  let info=p.code;
+  if(group==="fund") info=`${p.fundType} · ${p.region} · ${p.hedge} · ${p.code}`;
+  if(group==="bond") info=`${p.maturity.replace("-","년 ")}월 만기 · 표면 ${p.coupon}<br>${p.code}`;
+  return `<button type="button" class="search-result" data-product="${p.code}" data-product-group="${group}"><b>${esc(p.name)}</b><small>${info}</small></button>`;
+}
+function autoCard(group){
+  const auto=draft(group).autoFields||{},entries=Object.entries(auto); if(!entries.length) return "";
+  const labels={currentPrice:"현재가",currency:"통화",market:"시장",sector:"섹터",country:"국가",etfType:"ETF 유형",underlying:"기초자산",valuation:"평가금액",exchangeRate:"환율",krwValue:"원화 환산액",standardPrice:"기준가",fundType:"펀드 유형",region:"투자 지역",hedge:"환헤지 여부",maturity:"만기일",bondType:"채권 유형",rating:"신용등급",coupon:"표면금리",interestCycle:"이자 지급 주기",category:"카테고리",marketCap:"시총 구간",price:"시세"};
+  return `<details class="auto-card"><summary><span class="summary-title">자동으로 확인했어요</span><span class="summary-meta">${entries.length}개⌄</span></summary><div class="auto-grid">${entries.map(entry=>`<div><span>${labels[entry[0]]||entry[0]}</span><b>${esc(formatAuto(entry[0],entry[1]))}</b></div>`).join("")}<div><span>업데이트</span><b>오늘 오전 6시 기준</b></div></div></details>`;
+}
+function formatAuto(key,value){ return ["currentPrice","valuation","krwValue","standardPrice","price"].includes(key)&&Number.isFinite(Number(value))?Number(value).toLocaleString("ko-KR")+(key==="standardPrice"?"":"원"):value; }
+function optionalSection(title,count,body){ return `<details class="optional"><summary><span class="summary-title">＋ ${title} · ${count}개 더</span><span class="summary-meta">선택⌄</span></summary><div class="optional-body">${body}</div></details>`; }
+
+function checklist(){
+  return `<div class="shell"><h1>어떤 자산을 등록할까요?</h1><p class="sub">가지고 있는 자산만 골라주세요. 쉬운 순서대로 입력합니다.</p>${resumeVisible?resumeCard():""}<div class="trust"><strong>계좌를 연결하지 않습니다. 직접 입력한 정보만 사용합니다.</strong><p>묻지 않는 것 — 계좌번호 · 지갑 주소 · 비밀번호 · 금융기관 로그인 · 이름과 주민번호 · 상세 주소</p></div><div class="group-list">${GROUPS.map((group,index)=>`<label class="group-option"><input type="checkbox" data-group-check="${group.id}" ${session.selectedGroups.includes(group.id)?"checked":""}><small>${index+1}</small><b>${group.name}</b><small>${group.hint}</small></label>`).join("")}</div><div class="sticky-actions"><button class="btn primary" data-start ${session.selectedGroups.length?"":"disabled"}>입력 시작하기</button></div></div>`;
+}
+function resumeCard(){
+  const current=session.selectedGroups[session.currentGroupIndex]||session.selectedGroups[0];
+  return `<div class="resume"><p>${groupName(current)}부터 이어서 하시겠어요?</p><div class="resume-actions"><button class="continue" data-resume>이어하기</button><button class="restart" data-restart>처음부터</button></div></div>`;
+}
+function cash(){
+  const g="cash",item=draft(g),currency=item.fields.currency||"KRW",amount=Number(moneyDigits(item.fields.amount));
+  if(amount){ setAuto(g,{exchangeRate:MOCK.rates[currency],krwValue:Math.round(amount*MOCK.rates[currency]),currency}); }
+  return `${selectField(g,"currency","통화",["KRW","USD","JPY","EUR","CNY"],{defaultValue:"KRW"})}${inputField(g,"amount","금액",{money:true,inputmode:"numeric",placeholder:"0"})}${autoCard(g)}${optionalSection("현금의 역할도 나누려면",2,`${inputField(g,"storageLabel","보관처 라벨",{optional:true,placeholder:"예: 주거래 통장"})}${chips(g,"purpose","용도",["생활비","투자 대기","비상금"],{optional:true,help:"용도를 넣으면 현금 비중을 상황에 맞게 해석할 수 있어요."})}`)}<button type="button" class="btn ghost" data-add-currency>＋ 외화 추가</button>`;
+}
+function savings(){
+  const g="savings",type=draft(g).fields.productType||"예금",noMaturity=["파킹통장","CMA"].includes(type);
+  return `${chips(g,"productType","상품 유형",["예금","적금","파킹통장","CMA"],{defaultValue:"예금"})}${inputField(g,"balance","현재 잔액",{money:true,inputmode:"numeric",placeholder:"0"})}${noMaturity?"":selectField(g,"maturityRange","만기",["6개월 이내","6개월~1년","1~3년","3년 이상","만기 없음"],{placeholder:"만기 구간 선택",how:"만기일 확인하기"})}${optionalSection("금리와 납입 정보까지 더하면",type==="적금"?6:5,`${inputField(g,"institution","금융기관",{optional:true,placeholder:"예: 한국은행"})}${inputField(g,"interestRate","금리",{optional:true,inputmode:"decimal",placeholder:"예: 3.5",how:"금리 확인하기"})}${monthField(g,"joinedAt","가입일")}${type==="적금"?inputField(g,"monthlyPayment","월 납입액",{optional:true,money:true,inputmode:"numeric"}):""}${chips(g,"taxType","세제 유형",["일반","비과세","세금우대"],{optional:true})}${!noMaturity?monthField(g,"maturityDate","정확한 만기일"):""}`)}`;
+}
+function updateMarketValuation(group){
+  const item=draft(group),product=(MOCK.products[group]||[]).find(entry=>entry.code===item.fields.productCode),quantity=Number(item.fields.quantity||0);
+  if(product&&quantity&&product.currentPrice) item.autoFields.valuation=Math.round(quantity*product.currentPrice);
+}
+function equity(){ const g="equity"; updateMarketValuation(g); return `${searchField(g,"종목 검색","한글명 · 영문명 · 티커")}${inputField(g,"quantity","보유 수량",{inputmode:"decimal",placeholder:"0.000000",help:"소수점 아래 6자리까지 입력할 수 있어요."})}${autoCard(g)}${optionalSection("손익과 세금 분석까지 보려면",3,`${inputField(g,"averagePrice","평균 매입단가",{optional:true,money:true,inputmode:"numeric",how:"평균 매입단가 확인하기"})}${monthField(g,"firstBoughtAt","최초 매입일")}${chips(g,"accountType","계좌 유형",["일반","ISA","연금저축","IRP","DC"],{optional:true,defaultValue:"일반",help:"평균 매입단가를 넣으면 수익률과 세금 분석이 열립니다."})}`)}`; }
+function crypto(){ const g="crypto"; updateMarketValuation(g); return `<div class="notice">지갑 주소는 묻지 않습니다. 수량만 입력합니다.</div>${searchField(g,"코인 검색","한글명 · 영문명 · 심볼")}${inputField(g,"quantity","보유 수량",{inputmode:"decimal",placeholder:"0.00000000",help:"소수점 아래 8자리까지 입력할 수 있어요."})}${autoCard(g)}${optionalSection("손익과 보관 구성을 더 자세히 보려면",3,`${inputField(g,"averagePrice","평균 매입단가",{optional:true,money:true,inputmode:"numeric"})}${monthField(g,"firstBoughtAt","최초 매입일")}${chips(g,"storageType","보관처 라벨",["국내 거래소","해외 거래소","개인 지갑"],{optional:true})}`)}`; }
+function fund(){ const g="fund",direct=draft(g).fields.directMode; return `${direct?`${chips(g,"fundTypeManual","펀드 유형",["주식형","채권형","혼합형","대체투자","기타"])}${chips(g,"regionManual","투자 지역",["국내","해외","글로벌"])}<button class="btn ghost" type="button" data-direct="fund">상품 검색으로 돌아가기</button>`:searchField(g,"상품 검색","펀드명 · 펀드코드")}${inputField(g,"valuation","현재 평가금액",{money:true,inputmode:"numeric",how:"평가금액 확인하기"})}${autoCard(g)}${optionalSection("수익과 적립 계획까지 보려면",5,`${inputField(g,"purchaseAmount","매입금액",{optional:true,money:true,inputmode:"numeric"})}${monthField(g,"firstBoughtAt","최초 매입일")} ${chips(g,"installment","적립식",["적립식","거치식"],{optional:true})}${draft(g).fields.installment==="적립식"?inputField(g,"monthlyPayment","월 납입액",{optional:true,money:true,inputmode:"numeric"}):""}${inputField(g,"seller","판매사",{optional:true})}`)}`; }
+function bond(){ const g="bond",direct=draft(g).fields.directMode; return `${direct?`${selectField(g,"countryCurrency","국가·통화",["한국 KRW","미국 USD","기타"],{placeholder:"선택"})}${chips(g,"bondTypeManual","채권 종류",["국채","지방채·특수채","회사채","해외채권"])}${chips(g,"maturityManual","만기 구간",["1년 이하","1~5년","5~10년","10년 이상"])}<button class="btn ghost" type="button" data-direct="bond">채권 검색으로 돌아가기</button>`:searchField(g,"채권 검색","채권명 · 종목코드")}${inputField(g,"valuation","현재 평가금액",{money:true,inputmode:"numeric",how:"평가금액 확인하기"})}${autoCard(g)}${optionalSection("매입 정보까지 더하면",3,`${inputField(g,"purchaseAmount","매입금액",{optional:true,money:true,inputmode:"numeric"})}${monthField(g,"boughtAt","매입일")}${inputField(g,"faceQuantity","액면가·보유 수량",{optional:true,inputmode:"decimal"})}`)}`; }
+function commodity(){
+  const g="commodity",item=draft(g),kind=item.fields.assetKind||"금",method=item.fields.holdingMethod||"KRX 현물",direct=method==="기타",physical=method==="실물 보유",unit=physical&&kind==="금"?"돈":"g";
+  const qty=Number(item.fields.quantity||0),price=kind==="은"?MOCK.commodityPrices.silverPerGram:MOCK.commodityPrices.goldPerGram;
+  if(qty&&!direct){ const grams=unit==="돈"?qty*3.75:qty; setAuto(g,{price,valuation:Math.round(grams*price),currency:"KRW"}); }
+  return `${chips(g,"assetKind","자산 종류",["금","은","기타 귀금속","원유/에너지","기타 원자재"],{defaultValue:"금"})}${chips(g,"holdingMethod","보유 방식",["KRX 현물","금통장","실물 보유","기타"],{defaultValue:"KRX 현물"})}${direct?inputField(g,"valuation","현재 평가금액",{money:true,inputmode:"numeric"}):inputField(g,"quantity",`보유 수량 (${unit})`,{inputmode:"decimal",placeholder:"0",how:"보유 수량 확인하기",help:unit==="돈"&&qty?`${qty}돈 = ${(qty*3.75).toLocaleString("ko-KR")}g`:unit==="돈"?"1돈은 3.75g으로 자동 환산합니다.":"수량과 시세로 평가금액을 자동 계산합니다."})}${autoCard(g)}${optionalSection("매입과 보관 정보까지 더하면",4,`${inputField(g,"purchaseAmount","매입금액",{optional:true,money:true,inputmode:"numeric"})}${monthField(g,"boughtAt","매입일")}${physical?chips(g,"purity","순도",["24K","18K","14K"],{optional:true}):""}${inputField(g,"storageLabel","보관처 라벨",{optional:true,placeholder:"예: 집 금고"})}`)}`;
+}
+function realestate(){
+  const g="realestate",item=draft(g),joint=item.fields.joint===true||item.fields.joint==="true";
+  return `<div class="notice">부동산 가격은 매일 바뀌지 않습니다. 월 단위로 갱신하거나 직접 수정할 수 있어요.</div><div class="notice">상세 주소는 묻지 않습니다. 지역까지만 입력합니다.</div>${chips(g,"propertyType","종류",["아파트","오피스텔","빌라/다세대","단독/다가구","토지","상가/기타"],{defaultValue:"아파트"})}${chips(g,"purpose","보유 목적",["실거주","임대","투자"],{defaultValue:"실거주"})}<div class="row">${selectField(g,"province","시·도",["서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","제주"],{placeholder:"선택"})}${inputField(g,"district","시·군·구",{placeholder:"예: 마포구"})}</div>${inputField(g,"valuation","현재 추정가치",{money:true,inputmode:"numeric",how:"추정가치 확인하기"})}${chips(g,"basis","산정 기준",["실거래가","시세","공시가격","자체 추정"],{defaultValue:"시세"})}${inputField(g,"priceDate","가격 기준일",{type:"date",defaultValue:new Date().toISOString().slice(0,10)})}<div class="field">${label("공동명의 지분율")}<div class="toggle-row"><span>공동명의예요</span><button type="button" class="toggle ${joint?"on":""}" data-toggle="joint" data-group="${g}" aria-pressed="${joint}"></button></div>${joint?inputField(g,"ownershipRate","지분율 (%)",{inputmode:"decimal",defaultValue:"100"}):'<div class="help">기본값 100%</div>'}</div>${optionalSection("취득 정보와 면적까지 더하면",3,`${inputField(g,"purchasePrice","매입가격",{optional:true,money:true,inputmode:"numeric"})}${monthField(g,"boughtAt","매입일")}${inputField(g,"area","면적",{optional:true,inputmode:"decimal",placeholder:"숫자 입력"})}${chips(g,"areaUnit","면적 단위",["㎡","평"],{optional:true,defaultValue:"㎡"})}`)}`;
+}
+function groupBody(group){ return ({cash,savings,equity,crypto,fund,bond,commodity,realestate})[group](); }
+function savedList(group){
+  const assets=session.assets.filter(asset=>asset.group===group); if(!assets.length) return "";
+  return `<div class="saved-items"><h2>등록한 ${groupName(group)}</h2>${assets.map(asset=>`<div class="saved-item"><b>${esc(assetLabel(asset))}${asset.isEstimated?'<span class="estimate-tag">추정</span>':""}</b><span><button data-edit-asset="${asset.id}">수정</button><button data-remove="${asset.id}">삭제</button></span></div>`).join("")}</div>`;
+}
+function assetLabel(asset){ return asset.fields.productName||asset.fields.search||asset.fields.storageLabel||groupName(asset.group); }
+function inputScreen(){
+  const group=session.selectedGroups[session.currentGroupIndex]; if(!group){ screen="review"; return review(); }
+  return `<div class="shell"><div class="progress">자산 ${session.currentGroupIndex+1} / ${session.selectedGroups.length}</div><h1>${groupName(group)}</h1><p class="sub">필수 정보만 먼저 입력하세요. 변경 내용은 바로 저장됩니다.</p><section class="section"><div class="section-title"><h2>필수 정보</h2></div>${groupBody(group)}</section><button type="button" class="btn ghost" data-add-another>＋ 같은 자산군 하나 더 등록</button>${savedList(group)}<div class="sticky-actions"><button class="btn secondary" data-back>${session.currentGroupIndex?"이전":"목록"}</button><button class="btn primary" data-next>등록하고 ${session.currentGroupIndex===session.selectedGroups.length-1?"검토하기":"다음"}</button></div></div>`;
+}
+function requiredReady(group,item){
+  const f=item.fields||{},present=name=>String(f[name]??"").trim()!=="";
+  if(group==="cash") return present("currency")&&Number(moneyDigits(f.amount))>0;
+  if(group==="savings") return present("productType")&&Number(moneyDigits(f.balance))>0&&(["파킹통장","CMA"].includes(f.productType)||present("maturityRange"));
+  if(group==="equity"||group==="crypto") return present("productCode")&&Number(f.quantity)>0;
+  if(group==="fund") return Number(moneyDigits(f.valuation))>0&&(f.directMode?(present("fundTypeManual")&&present("regionManual")):present("productCode"));
+  if(group==="bond") return Number(moneyDigits(f.valuation))>0&&(f.directMode?(present("countryCurrency")&&present("bondTypeManual")&&present("maturityManual")):present("productCode"));
+  if(group==="commodity") return present("assetKind")&&present("holdingMethod")&&Number(f.holdingMethod==="기타"?moneyDigits(f.valuation):f.quantity)>0;
+  if(group==="realestate") return present("propertyType")&&present("purpose")&&present("province")&&present("district")&&Number(moneyDigits(f.valuation))>0&&present("basis")&&present("priceDate")&&(!f.joint||Number(f.ownershipRate)>0);
+  return false;
+}
+function addCurrent(){
+  const group=session.selectedGroups[session.currentGroupIndex],item=draft(group);
+  if(!requiredReady(group,item)){ toastHelp("필수 정보를 확인해주세요. 입력한 값은 그대로 유지됩니다."); return; }
+  const duplicate=item.fields.productCode&&session.assets.find(asset=>asset.group===group&&asset.fields.productCode===item.fields.productCode);
+  if(duplicate){ duplicateState={existing:duplicate,newItem:structuredClone(item),group,after:"advance"}; render(); return; }
+  commitAsset(group,item); advance();
+}
+function addAnother(){
+  const group=session.selectedGroups[session.currentGroupIndex],item=draft(group);
+  if(!requiredReady(group,item)){ toastHelp("필수 정보를 확인해주세요. 입력한 값은 그대로 유지됩니다."); return; }
+  const duplicate=item.fields.productCode&&session.assets.find(asset=>asset.group===group&&asset.fields.productCode===item.fields.productCode);
+  if(duplicate){ duplicateState={existing:duplicate,newItem:structuredClone(item),group,after:"stay"};render();return; }
+  commitAsset(group,item);render();
+}
+function commitAsset(group,item,extraFields={}){
+  const now=new Date().toISOString(); session.assets.push({id:uid(),group,fields:Object.assign({},item.fields,extraFields),autoFields:item.autoFields||{},isEstimated:hasEstimate(item),createdAt:now,updatedAt:now});
+  session.drafts[group]={fields:{},autoFields:{},estimatedFields:{}}; saveSession();
+}
+function advance(){ if(session.currentGroupIndex<session.selectedGroups.length-1){session.currentGroupIndex+=1;screen="input";}else screen="review"; saveSession(); render(); }
+function review(){
+  const rows=GROUPS.map(group=>{ const assets=session.assets.filter(asset=>asset.group===group.id); if(!assets.length)return""; const estimated=assets.filter(asset=>asset.isEstimated).length; return `<div class="review-row"><b>${group.name}</b><span>${assets.length}건</span>${estimated?`<span class="estimate-tag">${estimated}건 추정</span>`:""}</div>`; }).join("");
+  const incomplete=session.assets.reduce((sum,asset)=>sum+missingOptional(asset),0);
+  return `<div class="shell"><h1>등록하신 자산</h1><p class="sub">금액 없이 등록 건수만 확인합니다.</p><div class="review-list">${rows}</div><div class="review-total">${session.assets.length}건</div><details class="optional"><summary><span class="summary-title">나중에 채우면 열리는 분석</span><span class="summary-meta">${incomplete}개⌄</span></summary><div class="optional-body"><p class="sub">손익 · 세금 · 보유기간 분석 항목을 나중에 더할 수 있어요.</p></div></details><h2>자산 입력을 완료하시겠습니까?</h2><div class="sticky-actions"><button class="btn primary" data-complete>완료하기</button><button class="btn secondary" data-edit>수정하기</button></div></div>`;
+}
+function missingOptional(asset){
+  const optional={cash:["storageLabel","purpose"],savings:["institution","interestRate","joinedAt","monthlyPayment","taxType"],equity:["averagePrice","firstBoughtAt","accountType"],crypto:["averagePrice","firstBoughtAt","storageType"],fund:["purchaseAmount","firstBoughtAt","installment","monthlyPayment","seller"],bond:["purchaseAmount","boughtAt","faceQuantity"],commodity:["purchaseAmount","boughtAt","purity","storageLabel"],realestate:["purchasePrice","boughtAt","area"]};
+  return (optional[asset.group]||[]).filter(key=>!asset.fields[key]).length;
+}
+function done(){ return `<div class="shell done"><div class="done-mark">✓</div><h1>자산 입력을 완료했어요</h1><p class="sub">등록한 ${session.assets.length}건의 자산을 바탕으로 보유 자산 가치를 확인할 수 있어요.</p><button class="btn secondary" style="margin-top:24px" data-edit>등록 내용 수정하기</button></div>`; }
+function sheet(){
+  if(!sheetState&&!duplicateState)return"";
+  if(duplicateState){
+    const name=duplicateState.newItem.fields.productName||duplicateState.newItem.fields.search;
+    if(duplicateState.mode==="account") return `<div class="sheet-backdrop"><div class="sheet"><div class="sheet-head"><h2>계좌 유형을 골라주세요</h2><button class="close" data-close>×</button></div><p class="sub">다른 계좌에 있는 ${esc(name)}로 따로 등록합니다.</p><div class="dialog-actions">${["일반","ISA","연금저축","IRP","DC"].map(type=>`<button class="choice" data-separate-account="${type}"><b>${type}</b></button>`).join("")}</div></div></div>`;
+    return `<div class="sheet-backdrop"><div class="sheet"><div class="sheet-head"><h2>${esc(name)}를 이미 등록하셨어요.</h2><button class="close" data-close>×</button></div><div class="dialog-actions"><button class="choice" data-duplicate="merge"><b>합치기</b><span>수량을 더합니다</span></button><button class="choice" data-duplicate="separate"><b>따로 두기</b><span>다른 계좌에 있는 경우</span></button></div></div></div>`;
+  }
+  const paths={maturityRange:["은행 앱","상품 › 보유상품 › 상품 상세 › 만기일","앱에 따라 ‘계약 만기일’로 표시됩니다."],interestRate:["은행 앱","상품 › 보유상품 › 상품 상세 › 적용 금리","앱에 따라 ‘약정이율’로 표시됩니다."],valuation:["금융사 앱","계좌 › 잔고 › 보유상품 › 평가금액","앱에 따라 ‘현재가치’ 또는 ‘잔고평가금액’으로 표시됩니다."],averagePrice:["증권사 앱","계좌 › 잔고 › 종목 상세 › 평균 매입단가","앱에 따라 ‘매입평균가’로 표시됩니다."],quantity:["보유 내역","자산 상세 › 보유 수량","실물은 보증서나 구매 내역의 중량을 확인하세요."],realestate:["부동산 정보","국토교통부 실거래가 공개시스템 또는 시세 화면","지역과 면적이 비슷한 최근 거래를 확인하세요."]};
+  const key=sheetState.group==="realestate"?"realestate":sheetState.target,info=paths[key]||paths.valuation;
+  return `<div class="sheet-backdrop" data-backdrop><div class="sheet"><div class="sheet-head"><h2>${esc(sheetState.title)}</h2><button class="close" data-close>×</button></div><div class="path"><b>${info[0]}</b>${info[1]}<br>${info[2]}</div><button class="cant-find" data-estimate>그래도 못 찾겠어요 → 대략적인 값으로 입력</button></div></div>`;
+}
+function render(){ document.getElementById("app").innerHTML=(screen==="checklist"?checklist():screen==="input"?inputScreen():screen==="review"?review():done())+sheet(); bind(); }
+function bind(){
+  document.querySelectorAll("[data-group-check]").forEach(box=>box.addEventListener("change",()=>{ session.selectedGroups=GROUPS.filter(group=>document.querySelector(`[data-group-check=\"${group.id}\"]`)?.checked).map(group=>group.id); session.currentGroupIndex=Math.min(session.currentGroupIndex,Math.max(0,session.selectedGroups.length-1)); saveSession(); render(); }));
+  document.querySelector("[data-start]")?.addEventListener("click",()=>{session.currentGroupIndex=0;screen="input";resumeVisible=false;saveSession();render();});
+  document.querySelector("[data-resume]")?.addEventListener("click",()=>{screen="input";resumeVisible=false;render();});
+  document.querySelector("[data-restart]")?.addEventListener("click",()=>{session=emptySession();saveSession();resumeVisible=false;render();});
+  document.querySelectorAll("[data-field]").forEach(control=>control.addEventListener("input",event=>handleField(event.currentTarget)));
+  document.querySelectorAll("[data-chipset]").forEach(set=>set.querySelectorAll(".chip").forEach(chip=>chip.addEventListener("click",()=>{persistDraft(set.dataset.group,set.dataset.chipset,chip.dataset.value);render();})));
+  document.querySelectorAll("[data-product]").forEach(button=>button.addEventListener("click",()=>chooseProduct(button.dataset.productGroup,button.dataset.product)));
+  document.querySelectorAll("[data-how]").forEach(button=>button.addEventListener("click",()=>{sheetState={group:button.closest(".field")?.querySelector("[data-group]")?.dataset.group||session.selectedGroups[session.currentGroupIndex],target:button.dataset.how,title:button.dataset.title};render();}));
+  document.querySelectorAll("[data-unknown]").forEach(button=>button.addEventListener("click",()=>{const item=draft(button.dataset.group);persistDraft(button.dataset.group,button.dataset.unknown,item.fields[button.dataset.unknown]==="모름"?"":"모름");render();}));
+  document.querySelectorAll("[data-direct]").forEach(button=>button.addEventListener("click",()=>{const g=button.dataset.direct;persistDraft(g,"directMode",!draft(g).fields.directMode);render();}));
+  document.querySelectorAll("[data-toggle]").forEach(button=>button.addEventListener("click",()=>{persistDraft(button.dataset.group,button.dataset.toggle,button.getAttribute("aria-pressed")!=="true");render();}));
+  document.querySelector("[data-next]")?.addEventListener("click",addCurrent);
+  document.querySelector("[data-add-another]")?.addEventListener("click",addAnother);
+  document.querySelector("[data-back]")?.addEventListener("click",()=>{if(session.currentGroupIndex){session.currentGroupIndex-=1;screen="input";}else screen="checklist";saveSession();render();});
+  document.querySelectorAll("[data-remove]").forEach(button=>button.addEventListener("click",()=>{session.assets=session.assets.filter(asset=>asset.id!==button.dataset.remove);saveSession();render();}));
+  document.querySelectorAll("[data-edit-asset]").forEach(button=>button.addEventListener("click",()=>editAsset(button.dataset.editAsset)));
+  document.querySelector("[data-complete]")?.addEventListener("click",()=>{session.completed=true;screen="done";saveSession();render();});
+  document.querySelectorAll("[data-edit]").forEach(button=>button.addEventListener("click",()=>{session.completed=false;session.currentGroupIndex=0;screen="checklist";saveSession();render();}));
+  document.querySelector("[data-close]")?.addEventListener("click",closeSheet);
+  document.querySelector("[data-backdrop]")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeSheet();});
+  document.querySelector("[data-estimate]")?.addEventListener("click",enableEstimate);
+  document.querySelectorAll("[data-duplicate]").forEach(button=>button.addEventListener("click",()=>resolveDuplicate(button.dataset.duplicate)));
+  document.querySelectorAll("[data-separate-account]").forEach(button=>button.addEventListener("click",()=>commitSeparate(button.dataset.separateAccount)));
+  document.querySelector("[data-add-currency]")?.addEventListener("click",()=>{const item=draft("cash");if(requiredReady("cash",item)){commitAsset("cash",item);render();}else toastHelp("현재 통화의 금액을 먼저 입력해주세요.");});
+}
+function handleField(control){
+  let value=control.value;
+  if(control.classList.contains("money")) value=moneyDigits(value);
+  if(control.dataset.field==="quantity"){
+    const max=control.dataset.group==="crypto"?8:6,parts=value.replace(/[^0-9.]/g,"").split("."); value=parts[0]+(parts.length>1?"."+parts.slice(1).join("").slice(0,max):""); control.value=value;
+  }
+  persistDraft(control.dataset.group,control.dataset.field,value);
+  if(control.classList.contains("money")){control.value=comma(value);const readback=document.querySelector(`[data-readback=\"${control.dataset.field}\"]`);if(readback)readback.textContent=koreanMoney(value);}
+  if(control.dataset.search){ window.clearTimeout(handleField.timer);handleField.timer=window.setTimeout(render,180); return; }
+  if(["currency","amount","quantity","valuation"].includes(control.dataset.field)) window.setTimeout(render,120);
+}
+function chooseProduct(group,code){
+  const product=MOCK.products[group].find(entry=>entry.code===code),item=draft(group); if(!product)return;
+  item.fields.search=product.name;item.fields.productName=product.name;item.fields.productCode=product.code;
+  const map={equity:["currentPrice","currency","market","sector","country","etfType","underlying"],fund:["standardPrice","currency","fundType","region","hedge"],bond:["maturity","currency","bondType","rating","coupon","interestCycle"],crypto:["currentPrice","currency","category","marketCap"]};
+  item.autoFields=Object.fromEntries(map[group].filter(key=>product[key]!==undefined).map(key=>[key,product[key]]));
+  const qty=Number(item.fields.quantity||0); if(qty&&product.currentPrice)item.autoFields.valuation=Math.round(qty*product.currentPrice);
+  session.recentSearches=[{group,code},...session.recentSearches.filter(entry=>entry.code!==code)].slice(0,8); saveSession(); render();
+}
+function closeSheet(){sheetState=null;duplicateState=null;render();}
+function enableEstimate(){ const group=sheetState.group,item=draft(group);item.estimatedFields[sheetState.target]=true;if(sheetState.target==="maturityRange"&&!item.fields.maturityRange)item.fields.maturityRange="1~3년";sheetState=null;saveSession();render(); }
+function resolveDuplicate(choice){
+  const state=duplicateState;
+  if(choice==="merge"){
+    const existing=state.existing,newItem=state.newItem; existing.fields.quantity=Number(existing.fields.quantity||0)+Number(newItem.fields.quantity||0); existing.updatedAt=new Date().toISOString(); existing.isEstimated=existing.isEstimated||hasEstimate(newItem); session.drafts[state.group]={fields:{},autoFields:{},estimatedFields:{}};
+  } else { duplicateState.mode="account"; render(); return; }
+  duplicateState=null;saveSession();state.after==="stay"?render():advance();
+}
+function commitSeparate(accountType){ const state=duplicateState;duplicateState=null;commitAsset(state.group,state.newItem,{accountType});state.after==="stay"?render():advance(); }
+function editAsset(id){
+  const asset=session.assets.find(entry=>entry.id===id); if(!asset)return;
+  session.drafts[asset.group]={fields:Object.assign({},asset.fields),autoFields:Object.assign({},asset.autoFields),estimatedFields:asset.isEstimated?{restored:true}:{}};
+  session.assets=session.assets.filter(entry=>entry.id!==id);saveSession();render();
+}
+function toastHelp(message){ let note=document.querySelector(".validation-note");if(!note){note=document.createElement("div");note.className="notice validation-note";document.querySelector(".section")?.prepend(note);}note.textContent=message;note.scrollIntoView({behavior:"smooth",block:"center"}); }
+render();
+  </script>
+</body>
+</html>
