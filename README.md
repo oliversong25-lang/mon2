@@ -11,7 +11,9 @@ python -m http.server 4174 --bind 127.0.0.1
 종목 데이터는 앱 런타임과 분리된 1회성 빌드로 갱신합니다.
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-tickers.txt
 node scripts/build-tickers.mjs
 ```
 
-생성 파일은 `data/tickers-kr.json`, `data/tickers-us.json`, `data/tickers-global.json`입니다. 수집 실패는 종료 코드 `1`과 콘솔 오류로 표시되며 조용히 넘어가지 않습니다.
+생성 파일은 `data/tickers-kr.json`, `data/tickers-us.json`, `data/tickers-global.json`입니다. 국내 ETF·ETN은 `pykrx`를 우선 사용하고, KRX 인증이 필요한 환경에서는 공개 시세 목록으로 재시도합니다. 빌드는 한국 2,500건, 미국 5,000건, 글로벌 1,000건의 최소 건수를 검증하고 스코프별 전체 건수와 ETF·ETN 건수를 출력합니다. 수집 실패나 최소 건수 미달은 종료 코드 `1`과 콘솔 오류로 표시됩니다.
