@@ -1,0 +1,14 @@
+{
+  "name": "mon2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:focus": "node scripts/test-focus.mjs",
+    "test:numeric": "node scripts/test-numeric.mjs",
+    "test:groups": "node scripts/test-remaining-groups.mjs",
+    "test": "npm run test:focus && npm run test:numeric && npm run test:groups"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}
