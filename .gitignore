@@ -1,2 +1,9 @@
 .venv/
 node_modules/
+
+# 배치 실행 로그(PowerShell 리다이렉트 산출물). UTF-16이라 diff도 안 되고 매번 바뀐다.
+quotes-log.txt
+tickers-log.txt
+
+# 에디터/도구 로컬 설정 (launch.json 등)
+.claude/

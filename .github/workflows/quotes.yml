@@ -1,0 +1,115 @@
+name: Daily domestic quotes batch
+
+on:
+  schedule:
+    # 06:00 KST daily. cron is UTC — KST is UTC+9, so 06:00 KST == 21:00 UTC the
+    # previous day.
+    - cron: "0 21 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: quotes-batch
+  cancel-in-progress: false
+
+jobs:
+  build-quotes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run quotes batch
+        id: batch
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          KOREAEXIM_AUTH_KEY: ${{ secrets.KOREAEXIM_AUTH_KEY }}
+          ECOS_AUTH_KEY: ${{ secrets.ECOS_AUTH_KEY }}
+          ECOS_SILVER_STAT_CODE: ${{ secrets.ECOS_SILVER_STAT_CODE }}
+        run: node scripts/build-quotes.mjs
+
+      - name: Commit data/quotes.json if it changed
+        id: commit
+        run: |
+          if git diff --quiet -- data/quotes.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "quotes.json unchanged, nothing to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/quotes.json
+            git commit -m "data: refresh domestic quotes ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            # 주 1회 도는 종목 목록 배치(tickers.yml)도 같은 브랜치에 커밋하므로,
+            # 두 배치가 겹친 주말에 push가 non-fast-forward로 튕길 수 있다.
+            git pull --rebase origin main
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # GitHub does NOT notify anyone when a scheduled workflow fails — without this
+      # step a batch could silently stop updating for weeks and the app would keep
+      # serving stale (but structurally valid) data with no signal to anyone.
+      - name: Open a tracking issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "quotes-batch-failure";
+            const title = "시세 배치 실패: data/quotes.json 갱신 안 됨";
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: label,
+            });
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `${new Date().toISOString()} 실행에서 시세 배치가 실패했습니다.\n\n실행 로그: ${runUrl}\n\n이 이슈는 배치가 다시 성공할 때까지 재사용됩니다 (중복 생성 없음). data/quotes.json은 마지막 성공 시점 값으로 남아있으니 원인 파악 전까지는 앱이 오래된 데이터로 계속 정상 동작합니다.`;
+            if (existing.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing[0].number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [label],
+              });
+            }
+
+      - name: Close the tracking issue on recovery
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "quotes-batch-failure";
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: label,
+            });
+            for (const issue of existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `${new Date().toISOString()} 실행에서 배치가 다시 성공했습니다. 이슈를 닫습니다.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "closed",
+              });
+            }

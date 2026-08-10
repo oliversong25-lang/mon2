@@ -6,7 +6,12 @@
     "test:focus": "node scripts/test-focus.mjs",
     "test:numeric": "node scripts/test-numeric.mjs",
     "test:groups": "node scripts/test-remaining-groups.mjs",
-    "test": "npm run test:focus && npm run test:numeric && npm run test:groups"
+    "test:quotes-mock": "node scripts/test-quotes-mock.mjs",
+    "test:tickers-mock": "node scripts/test-tickers-mock.mjs",
+    "test:quotes-integration": "node scripts/test-quotes-integration.mjs",
+    "test": "npm run test:focus && npm run test:numeric && npm run test:groups && npm run test:quotes-mock && npm run test:tickers-mock && npm run test:quotes-integration",
+    "build:tickers": "node scripts/build-tickers.mjs",
+    "build:quotes": "node scripts/build-quotes.mjs"
   },
   "devDependencies": {
     "playwright": "^1.62.1"

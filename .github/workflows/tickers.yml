@@ -1,0 +1,121 @@
+name: Weekly ticker universe refresh
+
+# 시세 배치(quotes.yml)와 일부러 분리했다. 종목 목록 갱신은 DART 업종 조회 때문에
+# 2,700회 넘는 외부 호출이 필요해 시세 배치보다 훨씬 잘 깨지는데, 같은 잡에 넣으면
+# 업종 조회가 실패한 날 시세까지 갱신이 멈춘다. 시세가 매일 도는 게 더 중요하다.
+on:
+  schedule:
+    # 매주 일요일 05:00 KST (= 토요일 20:00 UTC). 주말에 돌려서 평일 시세 배치와
+    # 커밋이 겹치지 않게 한다.
+    - cron: "0 20 * * 6"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: tickers-batch
+  cancel-in-progress: false
+
+jobs:
+  build-tickers:
+    runs-on: ubuntu-latest
+    # DART 업종 조회는 분당 한도(900회)에 맞춰 스스로 속도를 줄이므로 2,700종목이면
+    # 3분 남짓 걸린다. 기본 6시간 타임아웃은 과하게 길어 매달아 두기만 하니 줄인다.
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # JPX 전 종목 파일이 .xls라 xlrd가 필요하고, DART corpCode.xml(zip) 해제도
+      # python stdlib(zipfile)로 한다 — build-tickers.mjs가 python을 직접 부른다.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-tickers.txt
+
+      - name: Run ticker build
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: node scripts/build-tickers.mjs
+
+      - name: Commit refreshed ticker files
+        run: |
+          if git diff --quiet -- data/tickers-kr.json data/tickers-us.json data/tickers-global.json; then
+            echo "ticker files unchanged, nothing to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/tickers-kr.json data/tickers-us.json data/tickers-global.json
+            git commit -m "data: refresh ticker universe ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            # 매일 도는 시세 배치(quotes.yml)와 커밋이 겹칠 수 있다.
+            git pull --rebase origin main
+            git push
+          fi
+
+      # 시세 배치와 같은 이유로 실패를 이슈로 남긴다 — 예약 워크플로가 실패해도
+      # GitHub은 아무에게도 알리지 않는다. 종목 목록이 굳으면 신규 상장 종목이
+      # 영원히 검색되지 않는데, 앱은 멀쩡해 보이므로 신호가 없으면 아무도 모른다.
+      - name: Open a tracking issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "tickers-batch-failure";
+            const title = "종목 목록 배치 실패: data/tickers-*.json 갱신 안 됨";
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: label,
+            });
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `${new Date().toISOString()} 실행에서 종목 목록 배치가 실패했습니다.\n\n실행 로그: ${runUrl}\n\n기존 data/tickers-*.json은 그대로 남아 있어 앱과 매일 시세 배치는 계속 동작합니다. 다만 이 배치가 계속 실패하면 신규 상장 종목이 검색되지 않고 업종 정보도 갱신되지 않습니다.\n\n자주 나오는 원인: DART 요청 제한(020) 또는 인증키 만료, 공공데이터포털 활용기간 만료.`;
+            if (existing.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing[0].number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [label],
+              });
+            }
+
+      - name: Close the tracking issue on recovery
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "tickers-batch-failure";
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: label,
+            });
+            for (const issue of existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `${new Date().toISOString()} 실행에서 종목 목록 배치가 다시 성공했습니다. 이슈를 닫습니다.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "closed",
+              });
+            }

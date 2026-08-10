@@ -94,9 +94,14 @@ async function run() {
   const server = await startServer();
   const browser = await chromium.launch();
   const page = await browser.newPage();
+  // data/quotes.json is only written by the real daily batch (or a live API key) —
+  // it won't exist in this checkout/CI, so its 404 (both the app's own logged error
+  // and Chromium's generic "Failed to load resource" for the request) is expected
+  // noise here, not a bug.
+  const IGNORED_CONSOLE_ERROR = /quotes\.json|Failed to load resource.*404/;
   const consoleErrors = [];
   page.on("console", (msg) => {
-    if (msg.type() === "error") consoleErrors.push(msg.text());
+    if (msg.type() === "error" && !IGNORED_CONSOLE_ERROR.test(msg.text())) consoleErrors.push(msg.text());
   });
   page.on("pageerror", (err) => consoleErrors.push(err.message));
 
@@ -266,9 +271,11 @@ async function run() {
   for (const group of ["fund", "bond", "commodity", "realestate"]) {
     await prepareGroup(page, group);
     await record(`${group}: 건너뛰기 -> 다음 화면으로 진행`, async () => {
-      const before = await page.evaluate(() => window.session?.currentGroupIndex ?? -1);
+      const before = await page.evaluate(() => session.currentGroupIndex);
       await page.click("[data-skip]");
-      const screen = await page.evaluate(() => window.screen);
+      const after = await page.evaluate(() => ({ index: session.currentGroupIndex, screen, skipped: session.skippedGroups }));
+      if (!after.skipped.includes(group)) return { ok: false, reason: `skippedGroups에 ${group}이 없음: ${JSON.stringify(after.skipped)}` };
+      if (after.index === before && after.screen === "input") return { ok: false, reason: `건너뛰기 후에도 화면이 그대로임 (index ${before}->${after.index}, screen=${after.screen})` };
       return { ok: true };
     });
   }
