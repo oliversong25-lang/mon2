@@ -67,7 +67,18 @@ function fxEnvelopeForDate(date) {
   ];
 }
 
-function makeFetchMock({ stockRows = STOCK_ROWS } = {}) {
+// 실측: 코인게코는 잘못된 ID를 줘도 HTTP 200에 빈 객체 {}를 돌려준다. cryptoMode로
+// 그 경로들을 재현한다.
+const CRYPTO_BODY = { bitcoin: { krw: 91530787 }, ethereum: { krw: 2691101 }, tether: { krw: 1416.7 } };
+function cryptoResponseFor(mode) {
+  if (mode === "empty") return jsonResponse({}); // HTTP 200 + {} — 성공으로 오인되던 형태
+  if (mode === "error-envelope") return jsonResponse({ status: { error_code: 429, error_message: "rate limited" } });
+  if (mode === "partial") return jsonResponse({ bitcoin: CRYPTO_BODY.bitcoin, ethereum: CRYPTO_BODY.ethereum });
+  if (mode === "http-500") return { ok: false, status: 500, json: async () => ({}), text: async () => "" };
+  return jsonResponse(CRYPTO_BODY);
+}
+
+function makeFetchMock({ stockRows = STOCK_ROWS, cryptoMode = "ok" } = {}) {
   const fetchCallLog = [];
   const fn = async (input) => {
     const url = new URL(String(input));
@@ -105,6 +116,8 @@ function makeFetchMock({ stockRows = STOCK_ROWS } = {}) {
       return jsonResponse(fxEnvelopeForDate(searchdate));
     }
 
+    if (url.hostname === "api.coingecko.com") return cryptoResponseFor(cryptoMode);
+
     throw new Error(`unmocked host: ${url.hostname}`);
   };
   return { fn, fetchCallLog };
@@ -116,8 +129,8 @@ function jsonResponse(body) {
 
 // build-quotes.mjs is a top-level-await-free "main().catch()" script; importing it
 // twice needs a cache-busting specifier since Node caches ES modules by URL.
-async function runBatch({ stockRows } = {}) {
-  const { fn, fetchCallLog } = makeFetchMock({ stockRows });
+async function runBatch({ stockRows, cryptoMode } = {}) {
+  const { fn, fetchCallLog } = makeFetchMock({ stockRows, cryptoMode });
   global.fetch = fn;
   process.exitCode = undefined;
   await import(`./build-quotes.mjs?t=${Date.now()}-${Math.random()}`);
@@ -172,6 +185,10 @@ try {
     record("USD rate parsed (no unit divisor)", quotes.rates.USD === 1380.5, `got ${quotes.rates.USD}`);
     record("JPY(100)-style unit divided correctly (925.00/100) — regex left untouched", quotes.rates.JPY === 9.25, `got ${quotes.rates.JPY}`);
     record("gold parsed from the 1g row", quotes.commodities.goldPerGram === 151200, JSON.stringify(quotes.commodities));
+    record("가상자산 시세가 원화로 들어감 (BTC)", quotes.crypto?.BTC?.price === 91530787 && quotes.crypto.BTC.currency === "KRW", JSON.stringify(quotes.crypto));
+    record("가상자산 심볼 3종 모두 확보 (BTC/ETH/USDT)", Object.keys(quotes.crypto || {}).sort().join(",") === "BTC,ETH,USDT", JSON.stringify(quotes.crypto));
+    record("가상자산은 국내 종목 quotes와 분리 저장됨 (코드 체계가 다름)", quotes.quotes.BTC === undefined, "BTC가 국내 종목 quotes에 섞임");
+    record("sources.crypto에 CoinGecko 출처가 기록됨 (약관 요구 표기)", quotes.sources.crypto === "CoinGecko", JSON.stringify(quotes.sources));
     record("silver skipped cleanly (no ECOS key) instead of failing the batch", quotes.commodities.silverPerGram === undefined, JSON.stringify(quotes.commodities));
     record("sources.silver is null when silver was skipped", quotes.sources.silver === null, JSON.stringify(quotes.sources));
     record(
@@ -227,6 +244,33 @@ try {
   record("매칭률이 100%를 넘지 않음 (분자가 교집합이므로 구조적으로 불가능)", stockLine?.includes("4,000 / 4,000 (100.0%)"), stockLine || "매칭 로그를 찾지 못함");
   // 주식 200건(4,200 - 4,000) + 부분 목록에 없는 ETF 1건 = 201건
   record("목록에 없는 시세 코드 건수가 별도로 보고됨", logLines.some((line) => line.includes("종목 목록에 없는 코드 201건")), logLines.filter((l) => l.includes("시세 확보")).join(" | "));
+
+  // ===== 5. 가상자산 실패 경로 =====
+  // 하드코딩된 BTC 158,200,000원을 지운 이유가 여기 있다. 시세를 못 받았는데 배치가
+  // 성공하면 앱이 옛 값이나 0으로 총자산을 계산해 버린다. 못 받으면 죽어야 한다.
+  await writeFile(TICKERS_KR_PATH, JSON.stringify(tickerFixture), "utf8");
+  for (const [mode, label] of [
+    ["empty", "빈 객체 {} (HTTP 200이지만 실패)"],
+    ["error-envelope", "status.error_code 응답"],
+    ["http-500", "HTTP 500"],
+  ]) {
+    await writeFile(QUOTES_PATH, seededQuotes, "utf8");
+    const failed = await runBatch({ cryptoMode: mode });
+    record(`가상자산 ${label} -> 배치 실패(exit 1)`, failed.exitCode === 1, `exitCode=${failed.exitCode}`);
+    record(`가상자산 ${label} -> 기존 quotes.json 보존`, (await readFile(QUOTES_PATH, "utf8")) === seededQuotes, "quotes.json이 덮어써짐");
+  }
+
+  // 일부만 실패하면 배치는 진행하고 그 종목만 빠진다 — 해당 자산은 앱에서 "시세 확인 불가".
+  await rm(QUOTES_PATH, { force: true });
+  const partialLog = [];
+  const originalWarn = console.warn;
+  console.warn = (...args) => { partialLog.push(args.join(" ")); originalWarn(...args); };
+  const partial = await runBatch({ cryptoMode: "partial" });
+  console.warn = originalWarn;
+  const partialQuotes = JSON.parse(await readFile(QUOTES_PATH, "utf8"));
+  record("가상자산 일부 실패 -> 배치는 성공", partial.exitCode !== 1, `exitCode=${partial.exitCode}`);
+  record("가상자산 일부 실패 -> 받은 종목만 저장됨 (USDT 제외)", Object.keys(partialQuotes.crypto).sort().join(",") === "BTC,ETH", JSON.stringify(partialQuotes.crypto));
+  record("가상자산 일부 실패 -> 미확보 종목이 경고로 보고됨", partialLog.some((line) => line.includes("가상자산 시세 미확보") && line.includes("USDT")), partialLog.join(" | "));
 } finally {
   if (originalTickersKr !== null) await writeFile(TICKERS_KR_PATH, originalTickersKr, "utf8");
   else await rm(TICKERS_KR_PATH, { force: true });

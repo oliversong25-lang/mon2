@@ -32,6 +32,9 @@ jobs:
           KOREAEXIM_AUTH_KEY: ${{ secrets.KOREAEXIM_AUTH_KEY }}
           ECOS_AUTH_KEY: ${{ secrets.ECOS_AUTH_KEY }}
           ECOS_SILVER_STAT_CODE: ${{ secrets.ECOS_SILVER_STAT_CODE }}
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          # 유료 전환(Analyst 이상) 시 "pro"로 바꾼다 — 호스트와 인증 헤더가 달라진다.
+          COINGECKO_PLAN: demo
         run: node scripts/build-quotes.mjs
 
       - name: Commit data/quotes.json if it changed

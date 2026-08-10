@@ -1,12 +1,26 @@
-# 자산 입력 화면
+# 자산 입력 · 홈 화면
 
-브라우저 보안 정책 때문에 `asset-input.html`을 `file://`로 직접 열면 `data/tickers-*.json` 로드가 차단될 수 있습니다. 저장소 루트에서 로컬 서버를 실행한 뒤 접속하세요.
+브라우저 보안 정책 때문에 HTML을 `file://`로 직접 열면 `data/*.json` 로드가 차단될 수 있습니다. 저장소 루트에서 로컬 서버를 실행한 뒤 접속하세요.
 
 ```powershell
 python -m http.server 4174 --bind 127.0.0.1
 ```
 
-브라우저에서 `http://127.0.0.1:4174/asset-input.html`을 엽니다.
+- 자산 입력: `http://127.0.0.1:4174/asset-input.html`
+- 홈 화면: `http://127.0.0.1:4174/home.html`
+
+## 화면 구조
+
+| 파일 | 역할 |
+|---|---|
+| `asset-input.html` | 자산 입력 (8개 자산군) |
+| `home.html` | 홈 — 총자산·구성·요약·추이·보유 자산 |
+| `lib/valuation.js` | **평가금액의 단일 출처**. 시세 로딩·환율 환산·자산별 원화 평가 |
+| `lib/portfolio.js` | 홈 집계와 분류(원금 보장 / 현금화 / 성장 가능성) |
+
+`lib/valuation.js`를 두 화면이 공유합니다. 평가 로직이 화면마다 따로 있으면 한쪽만 고쳐지는 순간 같은 자산이 다른 금액으로 보이는데, 총자산은 사용자가 가장 먼저 보는 숫자라 그런 불일치는 곧바로 신뢰 문제가 됩니다. 두 파일 모두 클래식 스크립트로 두고 전역(`window.Valuation`)으로 노출합니다 — ES 모듈로 바꾸면 `asset-input.html`이 의존하는 전역 스코프와 회귀 테스트의 `page.evaluate` 경로가 함께 깨집니다.
+
+홈 화면의 스냅샷(`session.snapshots`)은 `asOf`가 바뀐 것을 감지한 첫 실행에만 `{date, total}` 1건을 쌓습니다. 앱을 연 시각 기준으로 하면 하루에 여러 번 열 때 중복되고 며칠 안 열면 구멍이 생깁니다. 기록이 없는 날짜 구간은 직선으로 잇지 않고 점선으로 끊은 뒤 비어 있는 일수를 표기합니다 — 매끄럽게 이으면 그 기간에 자산이 그렇게 변한 것처럼 보이고, 그건 사실이 아닙니다.
 
 종목 데이터는 앱 런타임과 분리된 1회성 빌드로 갱신합니다.
 
@@ -46,6 +60,7 @@ $env:DATA_GO_KR_KEY="..."; $env:KOREAEXIM_AUTH_KEY="..."; node scripts/build-quo
 |---|---|---|
 | `DATA_GO_KR_KEY` | [data.go.kr](https://www.data.go.kr) — 금융위원회_주식시세정보(15094808)·증권상품시세정보(15094806)·일반상품시세정보(15094805)·KRX상장종목정보(15094775) 활용신청 | 국내 주식·ETF·ETN·금 시세, 종목 목록 |
 | `KOREAEXIM_AUTH_KEY` | [한국수출입은행 Open API](https://www.koreaexim.go.kr/ir/HPHKIR020M01) | 환율 |
+| `COINGECKO_API_KEY` | [CoinGecko](https://www.coingecko.com/en/api) | 가상자산 원화 시세 |
 | `DART_API_KEY` | [OPEN DART](https://opendart.fss.or.kr) | 종목 업종 (선택 — 없으면 업종 없이 진행). `build-tickers.mjs`만 씁니다 |
 | `ECOS_AUTH_KEY` + `ECOS_SILVER_STAT_CODE` | [한국은행 ECOS](https://ecos.bok.or.kr/api) | 은 시세 (선택 — 통계표코드는 키 발급 후 `StatisticItemList`로 확인 필요, 없으면 은 없이 진행) |
 
@@ -53,7 +68,7 @@ GitHub Actions에서 쓰려면 위 값들을 저장소 Settings → Secrets and 
 
 | 워크플로 | 주기 | 쓰는 Secret |
 |---|---|---|
-| `quotes.yml` (시세) | 매일 06:00 KST | `DATA_GO_KR_KEY`, `KOREAEXIM_AUTH_KEY`, `ECOS_AUTH_KEY`, `ECOS_SILVER_STAT_CODE` |
+| `quotes.yml` (시세) | 매일 06:00 KST | `DATA_GO_KR_KEY`, `KOREAEXIM_AUTH_KEY`, `COINGECKO_API_KEY`, `ECOS_AUTH_KEY`, `ECOS_SILVER_STAT_CODE` |
 | `tickers.yml` (종목 목록·업종) | 매주 일요일 05:00 KST | `DATA_GO_KR_KEY`, `DART_API_KEY` |
 
 `quotes.json` 형식:
@@ -68,6 +83,16 @@ GitHub Actions에서 쓰려면 위 값들을 저장소 Settings → Secrets and 
 ```
 `asOf`는 배치 실행 시각이 아니라 실제 시세 기준일입니다(환율 조회는 주식 기준일부터 역순으로 탐색해서 시작하고, 그래도 갈리면 더 이른 쪽을 씀). 시세를 못 받은 종목은 앱에서 "시세 확인 불가"로 명시되고 평가금액 계산에서 빠집니다 — 조용히 사라지지 않습니다.
 
+### 가상자산 시세 (CoinGecko)
+
+**유료 서비스로 전환할 때 반드시 CoinGecko Analyst 이상 플랜으로 올려야 합니다.** Demo 플랜에는 상업 라이선스가 없습니다. 전환 시 `COINGECKO_PLAN=pro`로 바꾸면 호스트와 인증 헤더가 함께 바뀝니다(코드 수정 불필요).
+
+국내 거래소를 먼저 검토했으나 업비트 Open API 이용약관 제5조(데이터 저작권은 회사에 있고 무단 사용·변경 금지)와 제4조 2항 ③(서비스를 이용하는 응용프로그램을 유상으로 양도·배포·이용허락하면 이용 제한)이 "시세를 받아 `quotes.json`에 구워 배포하는" 이 구조와 정면으로 걸리는데, 유료 상업 라이선스를 살 경로 자체가 없었습니다. CoinGecko는 유료 플랜에 상업 라이선스가 포함돼 키만 바꾸면 합법화됩니다 — yfinance·증권사 API를 뺐던 기준(합법화 경로의 유무)과 같은 판단입니다.
+
+**코인 ID 매핑**: 자산 입력이 저장하는 코드는 심볼(`BTC`)이고 CoinGecko ID는 다릅니다(`bitcoin`). `lib/crypto.mjs`의 `COINGECKO_IDS` 표로만 매핑하고, 표에 없는 심볼은 매칭 실패로 세어 출력합니다. 심볼로 ID를 자동 추론(`coins/list` 검색 등)하지 않는 이유는 같은 심볼을 쓰는 코인이 수백 개라 자동 매칭이 조용히 엉뚱한 코인의 시세를 물어오기 때문입니다 — 종목코드 `A` 접두어와 같은 종류의 사고이고, 그때는 값이 비어서 티라도 났지만 이건 그럴듯한 숫자가 들어와 더 나쁩니다.
+
+화면에는 `Data provided by CoinGecko`(약관 요구 출처 표기)와 **국제 시세 기준**임을 함께 밝힙니다. CoinGecko는 국제 평균가라 국내 거래소 체결가와 김치 프리미엄만큼 차이가 날 수 있고, 사용자가 업비트에서 샀다면 평가손익이 실제와 어긋납니다.
+
 ### 종목코드 형식
 
 `data.go.kr`의 두 엔드포인트는 같은 종목에 다른 코드 형식을 씁니다 — KRX상장종목정보는 `srtnCd`에 `A` 접두어를 붙이고(`"A900110"`), 주식시세정보는 안 붙입니다(`"900110"`). `lib/data-go-kr.mjs`의 `normalizeKrCode(srtnCd, isinCd)`가 모든 코드 추출 지점에서 이걸 흡수합니다 — 표준 국내 ISIN(`KR7` + 6자리 + 검사숫자)이면 ISIN에서 6자리를 복원하고, 아니면(외국적 상장사 등) 접두어만 제거합니다. `data/tickers-*.json`이나 사용자 자산 레코드에 `A` 접두어가 남아있으면 안 됩니다.
@@ -77,7 +102,8 @@ GitHub Actions에서 쓰려면 위 값들을 저장소 Settings → Secrets and 
 `build-quotes.mjs`는 쓰기 전에 검증하고, 실패하면 **기존 `data/quotes.json`을 건드리지 않습니다**(임시 파일에 먼저 쓰고 통과해야 원자적으로 교체):
 
 - 실패(종료 코드 1, 기존 파일 보존): 주식·ETF·ETN **각각의** 시세 매칭률 90% 미만, 환율 통화 10개 미만, 금 시세 누락, `asOf`가 7일 이상 과거, 전체 시세 3,000건 미만
-- 경고(로그만, 게시는 진행): 직전 산출물 대비 시세 건수 ±30% 초과 변동, 종목 목록에 없는 시세 코드 300건 초과
+- 실패: 가상자산 시세 0건 (CoinGecko는 잘못된 ID에도 HTTP 200 + 빈 객체 `{}`를 돌려주므로 status만 보면 성공으로 읽힙니다 — 명시적으로 끊습니다)
+- 경고(로그만, 게시는 진행): 직전 산출물 대비 시세 건수 ±30% 초과 변동, 종목 목록에 없는 시세 코드 300건 초과, 가상자산 일부 종목 미확보(해당 자산만 앱에서 "시세 확인 불가")
 
 매칭률의 분자는 **종목 목록과 시세 코드의 교집합**입니다. 시세 API가 돌려준 행 수를 그대로 분자로 쓰면 목록에 없는 코드까지 세어 100%를 넘고(실측 104.1%), 그보다 나쁜 건 코드 조인이 깨져 교집합이 0이 돼도 행 수는 그대로라 검증이 통과해 버린다는 점입니다 — 접두어 버그를 잡으려고 넣은 검증이 정확히 그 버그를 통과시켰습니다. 이 케이스는 `test-quotes-mock.mjs`에 회귀 테스트로 고정돼 있습니다.
 
@@ -101,4 +127,5 @@ npm test
 - `npm run test:numeric` — `numeric:true` 필드(수량·지분율·금리 등)에 문자·한글이 섞여 들어가지 않는지. beforeinput 정제, 붙여넣기, 한글 IME 조합 커밋, 자산군별 소수점 자릿수 제한, 지분율 0~100 clamp.
 - `npm run test:groups` — 펀드·채권·원자재·부동산 4개 자산군의 실클릭 E2E. 필드별 클릭·타이핑·삭제·재입력, 복수 등록·중복 방지, 통화 전환, 원자재 종류 전환, 시·도 연동, 건너뛰기/이전/이어하기, 새로고침 보존, 최종 검토 화면, 모바일 뷰포트.
 - `npm run test:quotes-integration` — `data/quotes.json`이 실제로 화면에 반영되는지. MOCK에 한 번도 없던 종목(카카오)을 실제 검색·등록해 평가금액이 정상 계산되는지, 시세 없는 종목(현대차)은 "확인 불가"로 명시되고 조용히 사라지지 않는지, 기준일 표기가 `asOf` 기반인지, `quotes.json` 자체가 없어도(배치 실패/최초 상태) 앱이 죽지 않는지 확인합니다. 실제 커밋된 `data/tickers-kr.json`을 그대로 쓰고 테스트용 `quotes.json`만 임시로 얹었다 지웁니다.
+- `npm run test:home` — 홈 화면. 자산을 JS로 주입하지 않고 입력 화면에서 실제로 클릭·타이핑해 5건(예적금·삼성전자·카카오·BTC·공동명의 부동산)을 등록한 뒤 홈으로 이동해, 총자산이 손으로 계산한 값과 일치하는지, 부동산 지분율 50%가 반영되는지, 구성 축 3개의 비중 합이 각각 100%인지, 손익 모집단과 총자산 모집단이 다르다는 것이 화면에 드러나는지, 도넛 조각·목록 행 클릭이 실제로 이동하는지, 모바일 폭 첫 화면에 총자산과 자산 구성이 함께 보이는지, 자산 0건·첫날·시세 로드 실패·기록 끊긴 구간이 정상 동작하는지 확인합니다.
 - `npm run test:quotes-mock` / `npm run test:tickers-mock` — `build-quotes.mjs`/`build-tickers.mjs`의 페이징·기준일 탐색·필드 매핑·DART corpCode zip 파싱 로직을 실제 API 키 없이 mock fetch로 검증합니다. **실제 공공데이터 API 응답 필드명 자체를 검증하지는 않습니다** — 그건 실제 키로 첫 배치를 돌려봐야 확인됩니다(`build-quotes.mjs`/`build-tickers.mjs`는 `[raw-sample]`로 각 응답의 원본 첫 행을 콘솔에 출력합니다).

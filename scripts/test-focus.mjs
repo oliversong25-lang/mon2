@@ -339,12 +339,20 @@ async function run() {
     return { ok: true };
   });
 
-  // 회귀: script 태그가 1개씩만 존재한다
-  await record("script tag count is exactly one open/close pair", async () => {
+  // 회귀: script 태그의 여닫이 짝이 맞는다 (과거에 짝이 어긋나 본문 일부가 통째로
+  // 스크립트로 먹힌 적이 있다). 공통 평가 모듈(lib/valuation.js)이 외부 스크립트로
+  // 하나 더 붙으므로 개수가 아니라 균형과 구성으로 검사한다.
+  await record("script tags are balanced, with the shared valuation module loaded", async () => {
     const html = await page.content();
     const opens = (html.match(/<script/g) || []).length;
     const closes = (html.match(/<\/script>/g) || []).length;
-    if (opens !== 1 || closes !== 1) return { ok: false, reason: `opens=${opens} closes=${closes}` };
+    if (opens !== closes) return { ok: false, reason: `opens=${opens} closes=${closes}` };
+    if (opens !== 2) return { ok: false, reason: `expected 2 script tags (valuation.js + inline app), got ${opens}` };
+    if (!/<script src="lib\/valuation\.js"><\/script>/.test(html)) return { ok: false, reason: "lib/valuation.js script tag not found" };
+    // 평가 로직이 홈 화면과 공유되는 단일 출처인지 — 전역이 실제로 노출됐는지 확인한다.
+    // liveQuotes는 const 선언이라 window 프로퍼티가 아니다(전역 렉시컬 바인딩) — 이름으로 참조한다.
+    const hasApi = await page.evaluate(() => typeof window.Valuation?.valuate === "function" && liveQuotes === window.Valuation.state);
+    if (!hasApi) return { ok: false, reason: "Valuation 전역이 없거나 liveQuotes가 공유 상태를 가리키지 않음" };
     return { ok: true };
   });
 

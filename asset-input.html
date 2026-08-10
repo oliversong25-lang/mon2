@@ -113,6 +113,7 @@
 </head>
 <body>
 <main id="app" class="app"></main>
+<script src="lib/valuation.js"></script>
 <script>
 // data-attr convention: bind()/bindFieldControls()/bindDynamic() only ever query
 // TAG-QUALIFIED selectors (e.g. "button[data-foo]", never bare "[data-foo]") so a
@@ -124,36 +125,20 @@ const MOCK={
   products:{
     fund:[{code:"F-AI-AE",name:"미래에셋 글로벌 AI&로보틱스",aliases:"글로벌 인공지능",standardPrice:1421.62,currency:"KRW",fundType:"주식형",region:"해외",hedge:"환노출 · A-e"},{code:"F-KB-VAL",name:"KB 밸류 포커스",aliases:"케이비 가치",standardPrice:1187.2,currency:"KRW",fundType:"주식형",region:"국내",hedge:"해당 없음"}],
     bond:[{code:"국고03000-3906(23-9)",name:"대한민국 국채",aliases:"국고채 2039",maturity:"2039-06",currency:"KRW",bondType:"국채",rating:"정부",coupon:"3.00%",interestCycle:"6개월"},{code:"US91282C",name:"미국 국채",aliases:"treasury 미국채",maturity:"2034-05",currency:"USD",bondType:"해외채권",rating:"AA+",coupon:"4.38%",interestCycle:"6개월"}],
-    crypto:[{code:"BTC",name:"비트코인",aliases:"bitcoin 비티씨",currentPrice:158200000,currency:"KRW",category:"L1"},{code:"ETH",name:"이더리움",aliases:"ethereum 이더",currentPrice:5250000,currency:"KRW",category:"L1"},{code:"USDT",name:"테더",aliases:"tether",currentPrice:1381,currency:"KRW",category:"스테이블"}]
+    // 가상자산은 검색용 메타데이터만 둔다 — 시세는 반드시 quotes.json(CoinGecko)에서 온다.
+    // 예전엔 여기 BTC 158,200,000원이 박혀 있었는데, 그런 값이 남아 있으면 시세 조회가
+    // 실패해도 가짜 값으로 조용히 대체된다(이번 트랙에서 같은 패턴을 세 번 겪었다).
+    crypto:[{code:"BTC",name:"비트코인",aliases:"bitcoin 비티씨",currency:"KRW",category:"L1"},{code:"ETH",name:"이더리움",aliases:"ethereum 이더",currency:"KRW",category:"L1"},{code:"USDT",name:"테더",aliases:"tether",currency:"KRW",category:"스테이블"}]
   }
 };
 // 국내 주식·ETF·ETN 시세, 환율, 금·은 시세는 매일 배치(scripts/build-quotes.mjs)가
 // 구운 data/quotes.json에서 읽는다 — 하드코딩된 시세를 여기 다시 넣지 말 것.
 // 펀드·채권·해외종목 시세는 이번 트랙 범위 밖이라 위 MOCK.products가 계속 쓰인다.
-const liveQuotes={status:"loading",asOf:null,sources:{},quotes:{},rates:{KRW:1},commodities:{}};
-async function loadQuotesData(){
-  try{
-    const url=new URL("data/quotes.json",document.baseURI),response=await fetch(url);
-    if(!response.ok)throw new Error(`HTTP ${response.status}`);
-    const payload=await response.json();
-    liveQuotes.asOf=payload.asOf||null;
-    liveQuotes.sources=payload.sources||{};
-    liveQuotes.quotes=payload.quotes||{};
-    liveQuotes.rates=Object.assign({KRW:1},payload.rates||{});
-    liveQuotes.commodities=payload.commodities||{};
-    liveQuotes.status="ready";
-  }catch(error){
-    console.error("[시세 데이터] quotes.json 로드 실패:",error);
-    liveQuotes.status="error";
-  }
-  render();
-}
-function quotesAsOfLabel(){
-  if(!liveQuotes.asOf)return"";
-  const parsed=new Date(liveQuotes.asOf);
-  if(Number.isNaN(parsed.getTime()))return"";
-  return `${parsed.getMonth()+1}월 ${parsed.getDate()}일 종가 기준`;
-}
+// 시세 상태와 평가금액 계산은 lib/valuation.js가 단일 출처다 — 홈 화면과 같은 코드를 쓴다.
+// liveQuotes는 그 상태를 가리키는 별칭이라 기존 참조가 그대로 동작한다.
+const liveQuotes=Valuation.state;
+async function loadQuotesData(){await Valuation.load();render();}
+function quotesAsOfLabel(){return Valuation.asOfLabel();}
 const TICKER_FALLBACK=Object.freeze([
   {c:"005930",n:"삼성전자",e:"Samsung Electronics",m:"KOSPI",cur:"KRW",t:"stock",x:1281601610113000},
   {c:"365340",n:"성일하이텍",e:"SungEel HiTech",m:"KOSDAQ",cur:"KRW",t:"stock",x:650000000000},
@@ -231,8 +216,15 @@ function tickerScore(row,q){const code=row.c.toLowerCase(),names=[row.n,row.e||"
 function marketPriority(market){if(["KOSPI","KOSDAQ","KONEX"].includes(market))return 0;if(["NASDAQ","NYSE","AMEX","NYSE Arca","BATS"].includes(market))return 1;return 2;}
 async function searchTickers(query,{type,limit=20}={}){const q=String(query||"").trim().toLowerCase();if(!q)return[];const loads=[loadTickerFile("kr"),loadTickerFile("global")];if(/[a-z0-9]/i.test(q))loads.push(loadTickerFile("us"));await Promise.all(loads);return tickerStore.items.filter(row=>(!type||row.t===type||(type==="etf"&&row.t==="etn"))&&tickerScore(row,q)<99).sort((a,b)=>tickerScore(a,q)-tickerScore(b,q)||marketPriority(a.m)-marketPriority(b.m)||Number(b.x||0)-Number(a.x||0)||Number(a.r||999999)-Number(b.r||999999)).slice(0,limit).map(tickerToProduct);}
 function lookupProducts(group,query){const source=MOCK.products[group]||[],q=String(query||"").trim().toLowerCase();if(!q)return[];return source.filter(product=>`${product.name} ${product.code} ${product.aliases||""} ${initials(product.name)}`.toLowerCase().includes(q)).slice(0,20);}
-function productByCode(group,code){return group==="equity"?tickerStore.byCode.get(code)||tickerToProduct(TICKER_FALLBACK.find(row=>row.c===code)||{}):(MOCK.products[group]||[]).find(product=>product.code===code);}
-function refreshDerived(group){const item=draft(group),fields=item.fields;if(group==="cash"){const rate=liveQuotes.rates[fields.currency]||1;item.autoFields=fields.currency==="KRW"?{}:{currency:fields.currency,exchangeRate:rate,krwValue:Math.round(Number(fields.amount||0)*rate)};}if(["equity","crypto"].includes(group)){const product=productByCode(group,fields.productCode),price=product?.currentPrice,quantity=Number(fields.quantity||0),average=Number(fields.averagePrice||0);if(quantity&&price){item.autoFields.valuation=roundedMoney(quantity*price,currencyCode(group,item));delete item.autoFields.priceUnavailable;}else{delete item.autoFields.valuation;if(quantity&&fields.productCode&&!price&&liveQuotes.status!=="loading")item.autoFields.priceUnavailable=true;else delete item.autoFields.priceUnavailable;}if(quantity&&average)item.autoFields.purchaseAmount=roundedMoney(quantity*average,currencyCode(group,item));else delete item.autoFields.purchaseAmount;}if(group==="commodity"){if(Number(fields.quantity)>0&&fields.holdingMethod!=="기타"){const unit=getQuantityUnit(fields.assetKind,fields.holdingMethod),grams=unit==="돈"?Number(fields.quantity)*3.75:Number(fields.quantity),price=fields.assetKind==="은"?liveQuotes.commodities.silverPerGram:liveQuotes.commodities.goldPerGram;if(price)item.autoFields={price,valuation:Math.round(grams*price),currency:"KRW"};else item.autoFields=liveQuotes.status==="loading"?{}:{priceUnavailable:true};}else item.autoFields={};}}
+function productByCode(group,code){
+  if(group==="equity")return tickerStore.byCode.get(code)||tickerToProduct(TICKER_FALLBACK.find(row=>row.c===code)||{});
+  const product=(MOCK.products[group]||[]).find(product=>product.code===code);
+  // 가상자산 시세는 MOCK이 아니라 quotes.json(CoinGecko)에서 붙인다. 못 받았으면
+  // currentPrice를 비워 두고 "시세 확인 불가" 경로를 타게 한다.
+  if(product&&group==="crypto"){const price=Valuation.priceFor("crypto",code);return price?{...product,currentPrice:price}:{...product,currentPrice:undefined};}
+  return product;
+}
+function refreshDerived(group){const item=draft(group),fields=item.fields;if(group==="cash"){const rate=liveQuotes.rates[fields.currency]||1;item.autoFields=fields.currency==="KRW"?{}:{currency:fields.currency,exchangeRate:rate,krwValue:Math.round(Number(fields.amount||0)*rate)};}if(["equity","crypto"].includes(group)){const price=Valuation.priceFor(group,fields.productCode,fields),quantity=Number(fields.quantity||0),average=Number(fields.averagePrice||0);if(quantity&&price){item.autoFields.valuation=roundedMoney(quantity*price,currencyCode(group,item));delete item.autoFields.priceUnavailable;}else{delete item.autoFields.valuation;if(quantity&&fields.productCode&&!price&&liveQuotes.status!=="loading")item.autoFields.priceUnavailable=true;else delete item.autoFields.priceUnavailable;}if(quantity&&average)item.autoFields.purchaseAmount=roundedMoney(quantity*average,currencyCode(group,item));else delete item.autoFields.purchaseAmount;}if(group==="commodity"){if(Number(fields.quantity)>0&&fields.holdingMethod!=="기타"){const grams=Valuation.gramsOf(fields),price=Valuation.priceFor("commodity",null,fields);if(price)item.autoFields={price,valuation:Math.round(grams*price),currency:"KRW"};else item.autoFields=liveQuotes.status==="loading"?{}:{priceUnavailable:true};}else item.autoFields={};}}
 
 function label(text,opts={}){return `<div class="label-row"><span class="label">${text}${opts.estimated?'<span class="estimate-tag">추정</span>':""}</span><span class="label-actions">${opts.how?`<button type="button" class="how" data-how="${opts.target}" data-title="${opts.how}">확인 방법</button>`:""}${opts.optional?'<span class="optional-tag">선택</span>':""}</span></div>`;}
 function inputField(group,name,title,opts={}){const item=draft(group),value=item.fields[name]??"",money=Boolean(opts.money),numericOnly=Boolean(opts.numeric)&&!money,currency=opts.currency||currencyCode(group,item),attrs=[`id="field-${group}-${name}"`,`data-field="${name}"`,`data-group="${group}"`,`class="control ${money?"money":numericOnly?"numeric":""}"`,`value="${esc(money&&document.activeElement?.id!==`field-${group}-${name}`?comma(value,currency):value)}"`,`placeholder="${esc(opts.placeholder||"")}"`,`type="${opts.type||"text"}"`];if(opts.numeric||money)attrs.push('inputmode="decimal"');if(money)attrs.push(`data-currency="${currency}"`);return `<div class="field">${label(title,{optional:opts.optional,estimated:Boolean(item.estimatedFields[name]),how:opts.how,target:name})}<input ${attrs.join(" ")}>${money?`<div class="readback" data-readback="${group}-${name}">${readMoney(value,currency)}</div>`:""}<div class="field-help" data-field-help="${group}-${name}"></div>${opts.help?`<div class="help"${opts.helpId?` data-help-id="${opts.helpId}"`:""}>${opts.help}</div>`:""}</div>`;}

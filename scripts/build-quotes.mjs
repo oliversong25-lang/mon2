@@ -16,6 +16,7 @@ import { mkdir, writeFile, readFile, rename } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { fetchAll, kstToday, shiftDate, resolveLatestBasDt, normalizeKrCode, setupUtf8Console } from "./lib/data-go-kr.mjs";
+import { fetchCryptoQuotes, COINGECKO_IDS } from "./lib/crypto.mjs";
 
 setupUtf8Console();
 
@@ -25,6 +26,8 @@ const DATA_DIR = resolve(ROOT, "data");
 const DATA_GO_KR_KEY = process.env.DATA_GO_KR_KEY;
 const KOREAEXIM_AUTH_KEY = process.env.KOREAEXIM_AUTH_KEY;
 const ECOS_AUTH_KEY = process.env.ECOS_AUTH_KEY; // optional — silver is skipped (not failed) without it
+const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY;
+const COINGECKO_PLAN = process.env.COINGECKO_PLAN || "demo"; // 유료 전환 시 "pro"
 
 const STOCK_URL = "https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo";
 const ETF_URL = "https://apis.data.go.kr/1160100/service/GetSecuritiesProductInfoService/getETFPriceInfo";
@@ -146,6 +149,20 @@ async function fetchSilverPerGram(krwPerUsd) {
   }
 }
 
+// 가상자산은 앱이 지원하는 심볼 전부를 매일 받는다(종목 수가 적어 한 번의 호출로 끝난다).
+// 시세를 하나도 못 받으면 배치 실패다 — 예전에 MOCK에 BTC 158,200,000원이 박혀 있었고,
+// 그런 하드코딩이 남아 있으면 호출 실패가 가짜 값으로 조용히 대체된다.
+async function fetchCrypto() {
+  const symbols = Object.keys(COINGECKO_IDS);
+  if (!COINGECKO_API_KEY) {
+    console.warn("COINGECKO_API_KEY 미설정 — 키 없이 공개 엔드포인트로 시도합니다(운영에서는 키를 설정하세요)");
+  }
+  const result = await fetchCryptoQuotes(symbols, COINGECKO_API_KEY, { plan: COINGECKO_PLAN });
+  const got = Object.keys(result.quotes);
+  if (got.length) console.log("[raw-sample] crypto:", JSON.stringify({ [got[0]]: result.quotes[got[0]] }));
+  return { requested: symbols, ...result };
+}
+
 async function loadKrTickerCodes() {
   try {
     const raw = await readFile(resolve(DATA_DIR, "tickers-kr.json"), "utf8");
@@ -191,7 +208,7 @@ async function loadPreviousQuoteCount() {
 // 실패(exit 1) 조건은 임계값 미만이면 절대 게시하면 안 되는 것들 — 인증이 죽었거나
 // 코드 조인이 깨졌는데도 "성공"으로 끝나는 걸 막는다(이번에 실제로 두 번 겪었다).
 // 경고는 게시는 하되 사람이 확인해야 하는 이상 신호다.
-function validateQuotes({ quoteCount, matches, rateCount, goldPerGram, asOfIso, previousQuoteCount, unlistedQuoteCount }) {
+function validateQuotes({ quoteCount, matches, rateCount, goldPerGram, asOfIso, previousQuoteCount, unlistedQuoteCount, crypto }) {
   const failures = [];
   const warnings = [];
 
@@ -208,6 +225,14 @@ function validateQuotes({ quoteCount, matches, rateCount, goldPerGram, asOfIso, 
     warnings.push(`종목 목록에 없는 시세 코드 ${unlistedQuoteCount}건 — 종목 목록(build-tickers.mjs) 갱신이 밀렸는지 확인하세요`);
   }
   if (rateCount < 10) failures.push(`환율 통화 수 ${rateCount}개 — 10개 미만`);
+
+  // 전부 실패면 배치 실패(가상자산이 통째로 빠진 총자산을 게시하지 않는다).
+  // 일부만 실패면 경고 — 그 종목만 앱에서 "시세 확인 불가"로 표시된다.
+  if (crypto) {
+    if (!Object.keys(crypto.quotes).length) failures.push(`가상자산 시세 0건 (요청 ${crypto.requested.length}종목)`);
+    else if (crypto.missing.length) warnings.push(`가상자산 시세 미확보 ${crypto.missing.length}종목: ${crypto.missing.join(", ")} — 해당 자산은 앱에서 "시세 확인 불가"로 표시됩니다`);
+    if (crypto.unmapped.length) warnings.push(`코인게코 ID 매핑이 없는 심볼 ${crypto.unmapped.length}건: ${crypto.unmapped.join(", ")} — lib/crypto.mjs의 COINGECKO_IDS에 추가하세요`);
+  }
   if (!goldPerGram) failures.push("금 시세 확보 실패");
   const asOfAgeDays = Math.floor((Date.now() - new Date(asOfIso).getTime()) / 86400000);
   if (asOfAgeDays > 7) failures.push(`asOf가 ${asOfAgeDays}일 전 — 7일 초과`);
@@ -228,13 +253,20 @@ async function main() {
   await mkdir(DATA_DIR, { recursive: true });
 
   const stockBasDt = await resolveLatestBasDt(STOCK_URL, {}, DATA_GO_KR_KEY);
-  const [stockQuotes, etfEtnQuotes, goldPerGram, fx, tickerCodes, previousQuoteCount] = await Promise.all([
+  const [stockQuotes, etfEtnQuotes, goldPerGram, fx, tickerCodes, previousQuoteCount, crypto] = await Promise.all([
     fetchStockQuotes(stockBasDt),
     fetchEtfEtnQuotes(stockBasDt),
     fetchGoldPerGram(stockBasDt),
     fetchFxRates(stockBasDt),
     loadKrTickerCodes(),
     loadPreviousQuoteCount(),
+    // 코인게코가 죽어도 여기서 예외를 밖으로 던지지 않고 빈 결과로 내려보낸 뒤
+    // validateQuotes가 "가상자산 시세 0건"으로 실패시킨다 — 실패 이유가 다른 검증
+    // 결과와 같은 형식으로 한 자리에 모여야 원인을 찾기 쉽다.
+    fetchCrypto().catch((error) => {
+      console.warn(`가상자산 시세 조회 실패: ${error.message}`);
+      return { requested: Object.keys(COINGECKO_IDS), quotes: {}, unmapped: [], missing: Object.keys(COINGECKO_IDS) };
+    }),
   ]);
   const silverPerGram = await fetchSilverPerGram(fx.rates.USD);
 
@@ -265,8 +297,13 @@ async function main() {
       gold: goldPerGram ? "금융위원회_일반상품시세정보" : null,
       silver: silverPerGram ? "한국은행 ECOS" : null,
       fx: "한국수출입은행",
+      // 코인게코 약관이 요구하는 출처 표기. 화면에도 "Data provided by CoinGecko"로 뜬다.
+      crypto: Object.keys(crypto.quotes).length ? "CoinGecko" : null,
     },
     quotes,
+    // 국내 종목 코드와 섞지 않고 따로 둔다 — 심볼 체계가 다르고, 섞으면 종목 목록
+    // 교집합 검증에서 "목록에 없는 코드"로 잡혀 지표가 흐려진다.
+    crypto: crypto.quotes,
     rates: fx.rates,
     commodities: {
       ...(goldPerGram ? { goldPerGram } : {}),
@@ -283,6 +320,7 @@ async function main() {
     asOfIso,
     previousQuoteCount,
     unlistedQuoteCount,
+    crypto,
   });
 
   console.log(`asOf: ${payload.asOf}`);
@@ -293,6 +331,11 @@ async function main() {
   console.log(`금: ${goldPerGram ? `${goldPerGram.toLocaleString("ko-KR")}원/g` : "확인 불가"}`);
   console.log(`은: ${silverPerGram ? `${silverPerGram.toLocaleString("ko-KR")}원/g` : "확인 불가"}`);
   console.log(`환율: ${rateCount}개 통화`);
+  console.log(
+    `가상자산: ${Object.keys(crypto.quotes).length} / ${crypto.requested.length}종목` +
+      `${crypto.missing.length ? ` · 시세 미확보 ${crypto.missing.join(", ")}` : ""}` +
+      `${crypto.unmapped.length ? ` · ID 매핑 없음 ${crypto.unmapped.join(", ")}` : ""}`
+  );
   warnings.forEach((warning) => console.warn(`[경고] ${warning}`));
 
   if (failures.length) {

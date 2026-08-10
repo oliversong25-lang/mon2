@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>내 자산</title>
+  <style>
+    :root {
+      color-scheme:light;
+      --content-max:26.25rem; --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem; --space-6:1.5rem; --space-7:1.75rem; --space-8:2rem;
+      --font-xs:.75rem; --font-sm:.875rem; --font-md:1rem; --font-lg:1.125rem; --font-xl:1.5625rem; --font-total:2.125rem;
+      --radius-sm:.625rem; --radius-md:.8125rem; --radius-lg:1rem; --radius-round:62.4375rem; --border:.0625rem;
+      --ink:#17191c; --muted:#70757b; --line:#e4e6e8; --soft:#f4f5f6; --brand:#176b5a; --brand-soft:#e9f4f1; --paper:#fff; --page:#f0f2f3;
+      /* 손익에만 색을 쓴다. 구성·집중도 같은 축에는 좋고 나쁨을 암시하는 색을 쓰지 않는다. */
+      --pos:#c4553f; --neg:#3b6ea8;
+      --ease:cubic-bezier(.22,1,.36,1);
+    }
+    html,body { margin:0; min-height:100%; background:var(--page); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif; }
+    button,input,select { font:inherit; } button { cursor:pointer; } p { margin:0; }
+    .app { width:100%; max-width:var(--content-max); min-height:100vh; margin:0 auto; padding-bottom:var(--space-8); background:var(--page); }
+    .head { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-3); padding:var(--space-6) var(--space-5) var(--space-4); }
+    .head h1 { margin:0 0 var(--space-1); font-size:var(--font-xl); letter-spacing:-.04rem; }
+    .head .sub { color:var(--muted); font-size:var(--font-xs); }
+    .add { flex:none; padding:var(--space-2) var(--space-3); border:var(--border) solid var(--line); border-radius:var(--radius-round); background:var(--paper); color:var(--brand); font-size:var(--font-sm); font-weight:800; }
+    .card { margin:0 var(--space-5) var(--space-3); padding:var(--space-5); border-radius:var(--radius-lg); background:var(--paper); }
+    .card h2 { margin:0 0 var(--space-3); font-size:var(--font-md); }
+    .card-note { margin-top:var(--space-3); padding-top:var(--space-3); border-top:var(--border) solid var(--line); color:var(--muted); font-size:var(--font-xs); line-height:1.6; }
+    .total-amount { font-size:var(--font-total); font-weight:800; letter-spacing:-.05rem; line-height:1.2; }
+    .total-change { margin-top:var(--space-2); font-size:var(--font-sm); font-weight:700; }
+    .total-change.flat { color:var(--muted); font-weight:600; }
+    .pos { color:var(--pos); } .neg { color:var(--neg); }
+    .excluded { margin-top:var(--space-3); padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm); background:var(--soft); color:var(--muted); font-size:var(--font-xs); line-height:1.5; }
+    details.fold { margin:0 var(--space-5) var(--space-3); border-radius:var(--radius-lg); background:var(--paper); }
+    details.fold > summary { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-4) var(--space-5); font-size:var(--font-sm); font-weight:700; list-style:none; cursor:pointer; }
+    details.fold > summary::-webkit-details-marker { display:none; }
+    details.fold > summary .count { margin-left:auto; color:var(--muted); font-weight:600; }
+    details.fold > summary::after { content:"⌄"; color:var(--muted); transition:transform .2s var(--ease); }
+    details.fold[open] > summary::after { transform:rotate(180deg); }
+    .fold-body { padding:0 var(--space-5) var(--space-4); }
+    .line-item { display:flex; width:100%; align-items:center; gap:var(--space-3); padding:var(--space-3); border:0; border-radius:var(--radius-sm); background:var(--soft); text-align:left; font-size:var(--font-sm); }
+    .line-item + .line-item { margin-top:var(--space-2); }
+    .line-item .grow { flex:1; min-width:0; }
+    .line-item .meta { color:var(--muted); font-size:var(--font-xs); }
+    .tabs { display:flex; gap:var(--space-2); margin-bottom:var(--space-4); }
+    .tab { flex:1; padding:var(--space-2) 0; border:var(--border) solid var(--line); border-radius:var(--radius-round); background:var(--paper); color:var(--muted); font-size:var(--font-xs); font-weight:700; }
+    .tab.active { border-color:var(--brand); background:var(--brand-soft); color:var(--brand); }
+    .donut-wrap { display:flex; align-items:center; gap:var(--space-4); }
+    .donut { flex:none; }
+    .donut-center { font-size:var(--font-xs); fill:var(--muted); }
+    .legend { flex:1; min-width:0; }
+    /* 자산명·비율·금액을 한 줄에 다 넣으면 좁은 폭에서 이름이 먼저 잘려나간다
+       ("가상자산"이 통째로 사라졌었다). 이름+비율을 윗줄, 금액을 아랫줄로 나눈다. */
+    .legend-row { display:grid; width:100%; grid-template-columns:auto 1fr auto; align-items:center; gap:0 var(--space-2); padding:var(--space-2); border:0; border-radius:var(--radius-sm); background:transparent; text-align:left; font-size:var(--font-sm); }
+    .legend-row:hover { background:var(--soft); }
+    .swatch { flex:none; width:.625rem; height:.625rem; border-radius:.1875rem; }
+    .legend-row .name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .legend-row .share { font-weight:700; font-variant-numeric:tabular-nums; }
+    .legend-row .amount { grid-column:2 / -1; color:var(--muted); font-size:var(--font-xs); font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .summary-text { margin-bottom:var(--space-4); font-size:var(--font-sm); line-height:1.6; }
+    .meter + .meter { margin-top:var(--space-4); }
+    .meter-head { display:flex; justify-content:space-between; margin-bottom:var(--space-1); font-size:var(--font-sm); }
+    .meter-head .val { color:var(--muted); font-variant-numeric:tabular-nums; }
+    /* 중앙 기준선에서 좌우로 벌어진다. 0에서 차오르는 막대가 아니다 — 완성도가 아니라 위치를 나타낸다. */
+    .meter-track { position:relative; height:.5rem; border-radius:var(--radius-round); background:var(--soft); }
+    .meter-track::before { content:""; position:absolute; top:-.125rem; bottom:-.125rem; left:50%; width:var(--border); background:var(--line); }
+    .meter-fill { position:absolute; top:0; bottom:0; border-radius:var(--radius-round); background:#9aa3a8; }
+    .meter-scale { display:flex; justify-content:space-between; margin-top:var(--space-1); color:var(--muted); font-size:var(--font-xs); }
+    .chart { width:100%; height:8.75rem; }
+    .chart-note { margin-top:var(--space-2); color:var(--muted); font-size:var(--font-xs); }
+    .holding { display:flex; width:100%; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-2); border:0; border-bottom:var(--border) solid var(--line); background:transparent; text-align:left; }
+    .holding:last-child { border-bottom:0; }
+    .holding .grow { flex:1; min-width:0; }
+    .holding .nm { display:block; overflow:hidden; font-size:var(--font-sm); font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
+    .holding .tag { color:var(--muted); font-size:var(--font-xs); }
+    .holding .right { flex:none; text-align:right; }
+    .holding .amt { display:block; font-size:var(--font-sm); font-weight:700; font-variant-numeric:tabular-nums; }
+    .holding .pl { display:block; font-size:var(--font-xs); font-variant-numeric:tabular-nums; }
+    .strip { display:flex; gap:var(--space-2); overflow-x:auto; padding:0 var(--space-5) var(--space-2); scrollbar-width:none; }
+    .strip::-webkit-scrollbar { display:none; }
+    .strip button { flex:none; width:8.75rem; padding:var(--space-4); border:var(--border) dashed var(--line); border-radius:var(--radius-md); background:var(--paper); text-align:left; }
+    .strip b { display:block; font-size:var(--font-sm); } .strip span { display:block; margin-top:var(--space-1); color:var(--muted); font-size:var(--font-xs); }
+    .empty { padding:var(--space-8) var(--space-5); text-align:center; }
+    .empty h1 { margin:0 0 var(--space-3); font-size:var(--font-xl); }
+    .empty p { margin-bottom:var(--space-6); color:var(--muted); font-size:var(--font-sm); line-height:1.6; }
+    .cta { display:inline-block; padding:var(--space-4) var(--space-6); border:0; border-radius:var(--radius-md); background:var(--brand); color:#fff; font-weight:800; text-decoration:none; }
+    .sources { padding:var(--space-4) var(--space-5) var(--space-6); color:var(--muted); font-size:var(--font-xs); line-height:1.7; }
+    .banner { margin:0 var(--space-5) var(--space-3); padding:var(--space-4); border:var(--border) solid var(--line); border-radius:var(--radius-lg); background:var(--paper); color:var(--muted); font-size:var(--font-sm); line-height:1.6; }
+    @media (min-width:37.5rem) { body { padding:var(--space-7) 0; } .app { min-height:calc(100vh - 3.5rem); border-radius:1.5rem; box-shadow:0 .75rem 2.5rem rgba(0,0,0,.09); } }
+    @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+  </style>
+</head>
+<body>
+<main id="app" class="app"></main>
+<script src="lib/valuation.js"></script>
+<script src="lib/portfolio.js"></script>
+<script>
+// 홈 화면. 금액 계산은 lib/valuation.js, 집계·분류는 lib/portfolio.js가 담당한다.
+// 이 파일은 그 결과를 그리기만 한다 — 여기서 평가금액을 다시 계산하지 말 것.
+const STORAGE_KEY="assetInput.session";
+const SESSION_SCHEMA=7;
+const INPUT_URL="asset-input.html";
+
+let session=loadSession();
+let axis="group";
+
+function loadSession(){
+  try{
+    const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
+    if(stored.schema!==SESSION_SCHEMA)return {schema:SESSION_SCHEMA,assets:[],snapshots:[],skippedGroups:[]};
+    stored.assets=(stored.assets||[]).filter(asset=>asset&&asset.group&&asset.fields);
+    stored.snapshots=stored.snapshots||[];
+    return stored;
+  }catch{return {schema:SESSION_SCHEMA,assets:[],snapshots:[],skippedGroups:[]};}
+}
+function saveSession(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(session));}catch(error){console.error("[홈] 저장 실패:",error);}}
+
+// 스냅샷은 asOf(시세 기준일)가 바뀐 걸 감지한 첫 실행에만 쌓는다. 앱을 연 시각을
+// 기준으로 하면 하루에 여러 번 열 때 중복되고 며칠 안 열면 구멍이 생긴다.
+// 형식을 {date,total}로 단순하게 유지한다 — 서버가 도입되면 그대로 옮긴다.
+function recordSnapshot(total){
+  const date=Valuation.asOfDate();
+  if(!date||!Number.isFinite(total))return;
+  const last=session.snapshots[session.snapshots.length-1];
+  if(last&&last.date===date){if(last.total!==total){last.total=total;saveSession();}return;}
+  session.snapshots.push({date,total});
+  saveSession();
+}
+
+function won(value){
+  if(!Number.isFinite(value))return"–";
+  const sign=value<0?"-":"";
+  const n=Math.abs(Math.round(value));
+  if(n>=100000000){const eok=Math.floor(n/100000000),man=Math.floor((n%100000000)/10000);return `${sign}${eok.toLocaleString("ko-KR")}억${man?` ${man.toLocaleString("ko-KR")}만`:""}원`;}
+  if(n>=10000){const man=Math.floor(n/10000),rest=n%10000;return `${sign}${man.toLocaleString("ko-KR")}만${rest?` ${rest.toLocaleString("ko-KR")}`:""}원`;}
+  return `${sign}${n.toLocaleString("ko-KR")}원`;
+}
+function pct(value,digits=1){return `${(value*100).toFixed(digits)}%`;}
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
+
+// 구성 축의 색은 범주를 구분하기 위한 것이지 좋고 나쁨을 뜻하지 않는다.
+// 단일 색상의 명도 사다리를 써서 어느 조각도 "경고"로 읽히지 않게 한다.
+const SLICE_COLORS=["#176b5a","#3e8f7c","#68ac9b","#93c5b8","#b9dcd2","#8d99a3","#b3bcc3","#d5dade"];
+
+function donut(parts){
+  const size=132,stroke=22,radius=(size-stroke)/2,circumference=2*Math.PI*radius;
+  if(!parts.length)return"";
+  let offset=0;
+  const rings=parts.map((part,index)=>{
+    const length=circumference*part.share;
+    const dash=`${length} ${circumference-length}`;
+    const ring=`<circle r="${radius}" cx="${size/2}" cy="${size/2}" fill="none" stroke="${SLICE_COLORS[index%SLICE_COLORS.length]}" stroke-width="${stroke}" stroke-dasharray="${dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${size/2} ${size/2})" data-slice="${escapeHtml(part.label)}" style="cursor:pointer"><title>${escapeHtml(part.label)} ${pct(part.share)}</title></circle>`;
+    offset+=length;
+    return ring;
+  }).join("");
+  return `<svg class="donut" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="자산 구성 도넛">${rings}<text class="donut-center" x="${size/2}" y="${size/2+4}" text-anchor="middle">${parts.length}개 항목</text></svg>`;
+}
+
+function legend(parts){
+  return `<div class="legend">${parts.map((part,index)=>`
+    <button type="button" class="legend-row" data-slice="${escapeHtml(part.label)}">
+      <span class="swatch" style="background:${SLICE_COLORS[index%SLICE_COLORS.length]}"></span>
+      <span class="name">${escapeHtml(part.label)}</span>
+      <span class="share">${pct(part.share)}</span>
+      <span class="amount">${won(part.krw)}</span>
+    </button>`).join("")}</div>`;
+}
+
+function meterRow(meter){
+  // 중앙(50%)을 기준으로 좌우 폭이 결정된다. value가 .5면 눈금이 중앙에 붙는다.
+  const value=Math.max(0,Math.min(1,meter.value));
+  const left=Math.min(value,0.5)*100,width=Math.abs(value-0.5)*100;
+  return `<div class="meter">
+    <div class="meter-head"><span>${meter.label}</span><span class="val">${pct(value,0)}</span></div>
+    <div class="meter-track"><span class="meter-fill" style="left:${left}%; width:${width}%"></span></div>
+    <div class="meter-scale"><span>낮음</span><span>높음</span></div>
+  </div>`;
+}
+
+function trendChart(snapshots){
+  if(snapshots.length<2)return"";
+  const width=320,height=120,padding=8;
+  const totals=snapshots.map(point=>point.total);
+  const min=Math.min(...totals),max=Math.max(...totals),span=max-min||1;
+  const start=new Date(snapshots[0].date),end=new Date(snapshots[snapshots.length-1].date);
+  const spanDays=Math.max(1,daysBetween(start,end));
+  const at=point=>({
+    x:padding+(daysBetween(start,new Date(point.date))/spanDays)*(width-padding*2),
+    y:padding+(1-(point.total-min)/span)*(height-padding*2),
+  });
+  // 기록이 없는 날짜 구간을 직선으로 이으면 그 기간에 자산이 매끄럽게 변한 것처럼
+  // 보인다. 사실이 아니므로 하루 이상 벌어진 구간은 점선으로 끊어 그린다.
+  let gapDays=0;
+  const segments=snapshots.slice(1).map((point,index)=>{
+    const previous=snapshots[index],gap=daysBetween(previous.date,point.date);
+    if(gap>1)gapDays+=gap-1;
+    const from=at(previous),to=at(point);
+    return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="var(--brand)" stroke-width="2" stroke-linecap="round"${gap>1?' stroke-dasharray="3 3" opacity=".55"':""} />`;
+  }).join("");
+  const dots=snapshots.map(point=>{const spot=at(point);return `<circle cx="${spot.x}" cy="${spot.y}" r="2.5" fill="var(--brand)"><title>${point.date} ${won(point.total)}</title></circle>`;}).join("");
+  return `<svg class="chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="자산 추이">${segments}${dots}</svg>
+    ${gapDays?`<div class="chart-note">${gapDays}일치 기록이 비어 있어요 · 그 구간은 점선입니다</div>`:""}`;
+}
+
+function checkItems(summary){
+  const items=[];
+  if(summary.unavailable.length)items.push({text:`시세를 확인하지 못한 자산 ${summary.unavailable.length}건`,meta:summary.unavailable.map(entry=>entry.name).join(", "),go:"input"});
+  if(summary.noPurchaseCount)items.push({text:`매입 정보가 없어 손익 계산에서 빠진 자산 ${summary.noPurchaseCount}건`,meta:"매입금액을 입력하면 평가손익에 포함됩니다",go:"input"});
+  const soon=maturingSoon(90);
+  if(soon.length)items.push({text:`만기가 90일 이내인 자산 ${soon.length}건`,meta:soon.map(entry=>entry.name).join(", "),go:"input"});
+  const skipped=(session.skippedGroups||[]).length;
+  if(skipped)items.push({text:`아직 입력하지 않은 자산군 ${skipped}개`,meta:(session.skippedGroups||[]).map(id=>Portfolio.GROUP_NAMES[id]||id).join(", "),go:"input"});
+  return items;
+}
+
+function maturingSoon(days){
+  const today=Valuation.asOfDate()||new Date().toISOString().slice(0,10);
+  return (session.assets||[]).map(asset=>{
+    const raw=asset.fields.maturityDate||(asset.group==="bond"?(asset.autoFields||{}).maturity:null);
+    if(!raw)return null;
+    const date=String(raw).length===7?`${raw}-01`:String(raw);
+    const left=daysBetween(today,date);
+    if(!Number.isFinite(left)||left<0||left>days)return null;
+    return {name:Portfolio.assetName(asset),date,left};
+  }).filter(Boolean).sort((a,b)=>a.left-b.left);
+}
+
+function summarySentence(summary){
+  const guaranteed=summary.meters.find(meter=>meter.key==="guaranteed");
+  const concentration=summary.meters.find(meter=>meter.key==="concentration");
+  if(!guaranteed||!concentration)return"";
+  return `원금 보장 자산이 ${pct(guaranteed.value,0)}이고, 상위 ${Math.min(3,summary.rows.length)}개 자산이 전체의 ${pct(concentration.value,0)}예요.`;
+}
+
+function sourcesLine(){
+  const sources=Valuation.state.sources||{};
+  const names=[...new Set(Object.values(sources).filter(Boolean))];
+  if(!names.length)return"";
+  return `<div class="sources">출처: ${escapeHtml(names.join(" · "))}
+    ${sources.crypto?"<br>Data provided by CoinGecko · 가상자산은 국제 시세 기준이라 국내 거래소 체결가와 다를 수 있어요":""}</div>`;
+}
+
+function render(){
+  const app=document.getElementById("app");
+  const assets=session.assets||[];
+
+  if(!assets.length){
+    app.innerHTML=`<div class="empty">
+      <h1>아직 등록된 자산이 없어요</h1>
+      <p>자산을 입력하면 총자산과 구성을<br>한 화면에서 볼 수 있어요.</p>
+      <a class="cta" href="${INPUT_URL}">자산 입력하러 가기</a>
+    </div>`;
+    return;
+  }
+
+  if(Valuation.state.status==="error"){
+    app.innerHTML=`${header()}
+      <div class="banner">시세를 불러오지 못해 총자산을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>
+      ${holdingsCard(null)}`;
+    bind();
+    return;
+  }
+
+  const summary=Portfolio.summarize(assets);
+  recordSnapshot(summary.total);
+
+  app.innerHTML=[
+    header(),
+    totalCard(summary),
+    checkCard(summary),
+    scheduleCard(),
+    compositionCard(summary),
+    portfolioCard(summary),
+    trendCard(),
+    holdingsCard(summary),
+    comingCard(),
+    sourcesLine(),
+  ].join("");
+  bind();
+}
+
+function header(){
+  const asOf=Valuation.asOfLabel();
+  return `<div class="head">
+    <div><h1>내 자산</h1><div class="sub">${asOf?escapeHtml(asOf):"시세 기준일 확인 중"}</div></div>
+    <a class="add" href="${INPUT_URL}">+ 자산 추가</a>
+  </div>`;
+}
+
+function totalCard(summary){
+  const snapshots=session.snapshots||[];
+  const previous=snapshots.length>1?snapshots[snapshots.length-2]:null;
+  let change=`<div class="total-change flat">내일부터 변화를 보여드려요</div>`;
+  if(previous){
+    const delta=summary.total-previous.total;
+    const rate=previous.total?delta/previous.total:0;
+    const tone=delta>0?"pos":delta<0?"neg":"flat";
+    const mark=delta>0?"+":delta<0?"−":"";
+    change=`<div class="total-change ${tone}">${mark}${won(Math.abs(delta)).replace("-","")} (${mark}${pct(Math.abs(rate))}) · ${previous.date} 대비</div>`;
+  }
+  const excluded=summary.unavailable.length
+    ?`<div class="excluded">시세를 확인하지 못한 자산 ${summary.unavailable.length}건은 총자산에서 제외했어요 · ${escapeHtml(summary.unavailable.map(entry=>entry.name).join(", "))}</div>`
+    :"";
+  return `<div class="card">
+    <h2>총자산</h2>
+    <div class="total-amount">${won(summary.total)}</div>
+    ${change}
+    ${excluded}
+  </div>`;
+}
+
+function checkCard(summary){
+  const items=checkItems(summary);
+  if(!items.length)return"";
+  return `<details class="fold"><summary>확인이 필요한 항목<span class="count">${items.length}</span></summary>
+    <div class="fold-body">${items.map(item=>`<button type="button" class="line-item" data-go="${item.go}">
+      <span class="grow"><span>${escapeHtml(item.text)}</span><span class="meta" style="display:block">${escapeHtml(item.meta)}</span></span><span>›</span>
+    </button>`).join("")}</div></details>`;
+}
+
+function scheduleCard(){
+  const soon=maturingSoon(365);
+  if(!soon.length)return""; // 일정이 없으면 카드를 숨긴다
+  return `<details class="fold"><summary>다가오는 일정<span class="count">${soon.length}</span></summary>
+    <div class="fold-body">${soon.map(entry=>`<button type="button" class="line-item" data-go="input">
+      <span class="grow"><span>${escapeHtml(entry.name)}</span><span class="meta" style="display:block">${escapeHtml(entry.date)} 만기 · ${entry.left}일 남음</span></span><span>›</span>
+    </button>`).join("")}</div></details>`;
+}
+
+const AXES=[["group","자산 유형"],["guaranteed","원금 보장"],["currency","통화"]];
+const AXIS_NOTES={
+  group:"자산 입력에서 선택한 자산군 기준입니다.",
+  guaranteed:"원금 보장 = 원화 현금·예금·적금. 그 외는 시가 변동으로 분류합니다(외화 현금 포함 — 환율에 따라 원화 가치가 변합니다). '안전·위험'이 아니라 원금 보장 여부로 나눕니다.",
+  currency:"자산을 매입한 통화 기준입니다. 모든 자산이 통화를 가지므로 분류되지 않는 자산이 없습니다.",
+};
+
+function compositionCard(summary){
+  const parts=summary.axes[axis]||[];
+  return `<div class="card">
+    <h2>자산 구성</h2>
+    <div class="tabs">${AXES.map(([key,label])=>`<button type="button" class="tab ${axis===key?"active":""}" data-axis="${key}">${label}</button>`).join("")}</div>
+    <div class="donut-wrap">${donut(parts)}${legend(parts)}</div>
+    <div class="card-note">${escapeHtml(AXIS_NOTES[axis])}</div>
+  </div>`;
+}
+
+function portfolioCard(summary){
+  if(!summary.total)return"";
+  return `<div class="card">
+    <h2>포트폴리오 요약</h2>
+    <div class="summary-text">${escapeHtml(summarySentence(summary))}</div>
+    ${summary.meters.map(meterRow).join("")}
+    <div class="card-note">축은 위치를 나타냅니다. 점수나 등급이 아니며, 높다고 좋거나 낮다고 나쁜 것이 아닙니다.<br>
+    분류 기준: 원금 보장 = 원화 현금·예적금 / 현금화 즉시 = 현금·주식·ETF·가상자산 / 성장 가능성은 자산군과 입력하신 세부 정보로 3단계(낮음·중간·높음)를 매겨 금액으로 가중평균합니다. 부동산은 지역과 무관하게 '중간'으로 고정합니다.</div>
+  </div>`;
+}
+
+function trendCard(){
+  const snapshots=session.snapshots||[];
+  return `<div class="card">
+    <h2>자산 추이</h2>
+    ${snapshots.length<2
+      ?`<div class="chart-note">기록이 하루치예요. 내일부터 변화를 볼 수 있어요.</div>`
+      :trendChart(snapshots)}
+  </div>`;
+}
+
+function holdingsCard(summary){
+  const assets=session.assets||[];
+  if(!summary){
+    return `<div class="card"><h2>보유 자산</h2>${assets.map(asset=>`<button type="button" class="holding" data-go="input">
+      <span class="grow"><span class="nm">${escapeHtml(Portfolio.assetName(asset))}</span><span class="tag">${escapeHtml(Portfolio.GROUP_NAMES[asset.group]||asset.group)}</span></span>
+      <span class="right"><span class="amt">–</span><span class="pl tag">시세 없음</span></span>
+    </button>`).join("")}</div>`;
+  }
+  const rows=summary.rows.map(row=>{
+    const share=summary.total?row.krw/summary.total:0;
+    const pl=row.profit===null
+      ?`<span class="pl tag">매입 정보 없음</span>`
+      :`<span class="pl ${row.profit>0?"pos":row.profit<0?"neg":""}">${row.profit>0?"+":row.profit<0?"−":""}${won(Math.abs(row.profit)).replace("-","")}</span>`;
+    return `<button type="button" class="holding" data-asset="${escapeHtml(row.id||"")}" data-go="input">
+      <span class="grow"><span class="nm">${escapeHtml(row.name)}</span><span class="tag">${escapeHtml(row.groupName)} · 전체의 ${pct(share)}</span></span>
+      <span class="right"><span class="amt">${won(row.krw)}</span>${pl}</span>
+    </button>`;
+  }).join("");
+  const profit=summary.profit;
+  const head=profit.count
+    ?`<div class="summary-text">평가손익 <b class="${profit.sum>0?"pos":profit.sum<0?"neg":""}">${profit.sum>0?"+":profit.sum<0?"−":""}${won(Math.abs(profit.sum)).replace("-","")}</b>
+       ${profit.rate===null?"":`(${profit.sum>0?"+":profit.sum<0?"−":""}${pct(Math.abs(profit.rate))})`}
+       <span class="tag" style="display:block; color:var(--muted)">매입 정보가 있는 ${profit.count}개 자산 기준 · 총자산은 ${summary.rows.length}개 자산 기준</span></div>`
+    :`<div class="summary-text tag" style="color:var(--muted)">매입 정보가 있는 자산이 없어 평가손익을 계산하지 않았어요.</div>`;
+  return `<div class="card"><h2>보유 자산</h2>${head}${rows}</div>`;
+}
+
+function comingCard(){
+  const items=[["목표 자산","목표를 정하고 진행률을 봅니다"],["월간 현금흐름","들어오고 나간 돈을 봅니다"],["보유자산 주요 이슈","내 자산과 연결된 소식만"]];
+  return `<h2 style="margin:var(--space-6) var(--space-5) var(--space-3); font-size:var(--font-md)">준비 중인 기능</h2>
+    <div class="strip">${items.map(([title,note])=>`<button type="button" data-coming="${escapeHtml(title)}"><b>${escapeHtml(title)}</b><span>${escapeHtml(note)}</span></button>`).join("")}</div>`;
+}
+
+// 진입점은 시각화 자체다 — 기능 진입 전용 버튼을 두지 않는다. 도넛 조각·범례·목록 행·
+// 일정 항목을 누르면 이동한다. 개별 자산 상세 화면은 P0 범위 밖이라 지금은 입력 화면으로 간다.
+function bind(){
+  document.querySelectorAll("button[data-axis]").forEach(button=>{
+    button.addEventListener("click",()=>{axis=button.dataset.axis;render();});
+  });
+  document.querySelectorAll("[data-slice]").forEach(node=>{
+    node.addEventListener("click",()=>{location.href=`${INPUT_URL}#composition=${encodeURIComponent(node.dataset.slice)}`;});
+  });
+  document.querySelectorAll("button[data-go]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      const id=button.dataset.asset;
+      location.href=id?`${INPUT_URL}#asset=${encodeURIComponent(id)}`:INPUT_URL;
+    });
+  });
+  document.querySelectorAll("button[data-coming]").forEach(button=>{
+    button.addEventListener("click",()=>{alert(`${button.dataset.coming}은 준비 중이에요.`);});
+  });
+}
+
+render();
+Valuation.load().then(render);
+</script>
+</body>
+</html>
