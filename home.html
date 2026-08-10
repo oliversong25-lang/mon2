@@ -283,7 +283,7 @@ function header(){
   const asOf=Valuation.asOfLabel();
   return `<div class="head">
     <div><h1>내 자산</h1><div class="sub">${asOf?escapeHtml(asOf):"시세 기준일 확인 중"}</div></div>
-    <a class="add" href="${INPUT_URL}">+ 자산 추가</a>
+    <a class="add" href="${INPUT_URL}#add">+ 자산 추가</a>
   </div>`;
 }
 
@@ -410,7 +410,7 @@ function bind(){
   document.querySelectorAll("button[data-go]").forEach(button=>{
     button.addEventListener("click",()=>{
       const id=button.dataset.asset;
-      location.href=id?`${INPUT_URL}#asset=${encodeURIComponent(id)}`:INPUT_URL;
+      location.href=id?`${INPUT_URL}#asset=${encodeURIComponent(id)}`:`${INPUT_URL}#add`;
     });
   });
   document.querySelectorAll("button[data-coming]").forEach(button=>{

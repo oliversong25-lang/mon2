@@ -158,6 +158,37 @@ try {
     registered === 5 ? { ok: true } : { ok: false, reason: `등록된 자산 ${registered}건 (5건 기대)` }
   );
 
+  // ===== 2b. 입력 완료 -> 홈 (원래 완료 화면에 갇혀 홈으로 갈 방법이 아예 없었다) =====
+  await record("검토 화면에서 완료하면 완료 화면이 뜬다", async () => {
+    await page.click("[data-complete]");
+    const text = await page.locator(".done").textContent();
+    return text.includes("자산 입력을 완료했어요") ? { ok: true } : { ok: false, reason: `완료 화면이 아님: ${text.slice(0, 80)}` };
+  });
+
+  await record("완료 화면에 등록 건수가 표시된다", async () => {
+    const text = await page.locator(".done .sub").textContent();
+    return text.includes("5건") ? { ok: true } : { ok: false, reason: `안내 문구: "${text}"` };
+  });
+
+  await record("완료 화면에서 홈으로 넘어간다", async () => {
+    await page.click("button[data-home]");
+    await page.waitForURL(/home\.html/, { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 5000 });
+    const total = await page.locator(".total-amount").textContent();
+    // 넘어간 홈이 방금 입력한 자산으로 계산돼야 한다 — 이동만 하고 빈 화면이면 의미가 없다.
+    return total.includes("4억") ? { ok: true } : { ok: false, reason: `홈 총자산: "${total}"` };
+  });
+
+  await record("홈의 '+ 자산 추가'가 완료 화면에 갇히지 않고 검토 화면으로 연다", async () => {
+    await page.locator("a.add").click();
+    await page.waitForURL(/asset-input\.html#add/, { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector(".review-list, .done"), { timeout: 5000 });
+    const stuck = await page.locator(".done").count();
+    if (stuck) return { ok: false, reason: "완료 화면에 갇힘 — 자산을 더 추가할 수 없다" };
+    const hasReview = await page.locator(".review-list").count();
+    return hasReview ? { ok: true } : { ok: false, reason: "검토 화면이 열리지 않음" };
+  });
+
   // ===== 3. 홈 화면 =====
   await page.goto(HOME_URL);
   await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 5000 });
