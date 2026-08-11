@@ -210,6 +210,14 @@ try {
   await page.click("[data-next]");
 
   const registered = await page.evaluate(() => session.assets.length);
+  // 아래 검사 일부는 localStorage를 덮어쓰므로, 실제 등록으로 만든 세션을 붙잡아 두고
+  // 그 뒤 검사들 전에 되돌린다(등록 경로로 만든 상태를 다시 만들 방법이 없다).
+  const REGISTERED = await page.evaluate(() => localStorage.getItem("assetInput.session"));
+  const restoreRegistered = async () => {
+    await page.evaluate((raw) => localStorage.setItem("assetInput.session", raw), REGISTERED);
+    await page.goto(HOME_URL);
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+  };
   await record("자산 입력 화면에서 5건이 실제로 등록됨", async () =>
     registered === 5 ? { ok: true } : { ok: false, reason: `등록된 자산 ${registered}건 (5건 기대)` }
   );
@@ -315,11 +323,28 @@ try {
     return { ok: true };
   });
 
-  await record("구성 그래프가 도넛이 아니라 가로 누적 막대다", async () => {
-    if (await page.locator("svg.donut").count()) return { ok: false, reason: "도넛이 아직 있음" };
-    const segments = await page.locator(".stackbar .stackbar-seg").count();
+  await record("구성 그래프가 도넛이고 조각 수가 범례와 일치한다", async () => {
+    if (await page.locator(".stackbar").count()) return { ok: false, reason: "가로 누적 막대가 아직 있음" };
+    const segments = await page.locator("svg.donut .donut-seg").count();
     const legends = await page.locator(".legend-row").count();
-    return segments === legends && segments > 0 ? { ok: true } : { ok: false, reason: `막대 조각 ${segments}개 / 범례 ${legends}개` };
+    return segments === legends && segments > 0 ? { ok: true } : { ok: false, reason: `도넛 조각 ${segments}개 / 범례 ${legends}개` };
+  });
+
+  await record("도넛 조각 클릭이 해당 자산군 화면으로 이동한다", async () => {
+    const seg = page.locator("svg.donut .donut-seg").first();
+    const label = await seg.getAttribute("data-slice");
+    // 도넛은 fill="none"이라 칠해진 호만 반응한다 — 요소 중심(구멍)이 아니라 링 위를 누른다.
+    const box = await seg.boundingBox();
+    // 12시 방향은 마지막 조각이 끝나는 지점이라 첫 조각의 시작과 겹친다(나중에 그려진
+    // 쪽이 위에 놓인다). 최대 조각의 한가운데인 3시 방향 링 위를 누른다.
+    await seg.click({ position: { x: box.width * (169 / 184), y: box.height * 0.5 } });
+    await page.waitForURL(/assets\.html/, { timeout: 5000 });
+    const url = page.url();
+    const activeTab = await page.locator(".group-tab.active").textContent();
+    await page.goBack();
+    await page.waitForFunction(() => document.querySelector("svg.donut"), { timeout: 5000 });
+    if (!url.includes("composition=")) return { ok: false, reason: `이동한 URL: ${url}` };
+    return activeTab.includes(label) ? { ok: true } : { ok: false, reason: `"${label}" 조각을 눌렀는데 열린 탭: "${activeTab}"` };
   });
 
   await record("범례 행의 터치 타겟이 충분하다 (44px 이상)", async () => {
@@ -345,12 +370,134 @@ try {
     return { ok: true };
   });
 
-  await record("요약 축이 채움 막대가 아니라 위치 마커다", async () => {
-    if (await page.locator(".meter-fill").count()) return { ok: false, reason: "채움 막대가 남아 있음" };
-    const marks = await page.locator(".meter-mark").count();
-    // 축은 3개다 — 성장 가능성 축은 위험자산 비중과 같은 값이 나와서 내렸다.
-    return marks === 3 ? { ok: true } : { ok: false, reason: `마커 ${marks}개 (3개 기대)` };
+  // 왼쪽 끝부터 채우면 "가득 채울수록 좋다"로 읽힌다. 이 축들은 점수가 아니므로
+  // 중앙(50%)에서 값까지만 뻗어야 한다.
+  await record("요약 축이 중앙에서 값까지만 채워진다 (왼쪽 끝부터 차오르지 않음)", async () => {
+    const fills = await page.locator(".meter-fill").evaluateAll((nodes) => nodes.map((node) => {
+      const track = node.parentElement.getBoundingClientRect();
+      const fill = node.getBoundingClientRect();
+      const center = track.left + track.width / 2;
+      return {
+        fromLeftEdge: Math.abs(fill.left - track.left) < 1.5 && fill.width > track.width * 0.52,
+        touchesCenter: Math.abs(fill.left - center) < 2 || Math.abs(fill.right - center) < 2,
+      };
+    }));
+    if (fills.length !== 3) return { ok: false, reason: `채워진 선 ${fills.length}개 (축 3개 기대)` };
+    const fromEdge = fills.filter((fill) => fill.fromLeftEdge);
+    if (fromEdge.length) return { ok: false, reason: `왼쪽 끝부터 채워진 축 ${fromEdge.length}개` };
+    const detached = fills.filter((fill) => !fill.touchesCenter);
+    if (detached.length) return { ok: false, reason: `중앙에서 시작하지 않는 축 ${detached.length}개` };
+    return { ok: true };
   });
+
+  await record("축 설명 문구가 그대로 유지된다", async () => {
+    const text = await page.locator("#app").textContent();
+    return text.includes("축은 위치를 나타냅니다. 점수나 등급이 아니며, 높다고 좋거나 낮다고 나쁜 것이 아닙니다.")
+      ? { ok: true } : { ok: false, reason: "문구가 사라졌거나 바뀜" };
+  });
+
+  // 4번: 카드를 없애지 않고 총자산 아래 한 줄로 옮긴다. 이 줄은 화면의 숫자가 왜
+  // 불완전한지 설명하는 신뢰 장치라, 사라지면 총자산이 왜 어긋나는지 알 수 없다.
+  await record("확인이 필요한 항목이 총자산 카드 안으로 옮겨졌다", async () => {
+    const inTotalCard = await page.evaluate(() => {
+      const line = document.querySelector(".check-line");
+      if (!line) return null;
+      return Boolean(line.closest(".card") && line.closest(".card").querySelector(".total-amount"));
+    });
+    if (inTotalCard === null) return { ok: false, reason: "확인이 필요한 항목 줄이 없음 (이 포트폴리오에는 항목이 있어야 한다)" };
+    if (!inTotalCard) return { ok: false, reason: "총자산 카드 밖에 있음" };
+    // 카드로 남아 있으면 안 된다 — 상단 3열의 그 자리는 뉴스 칸이 쓴다.
+    const topCards = await page.locator(".grid-top > .card h2").allTextContents();
+    if (topCards.some((text) => text.includes("확인이 필요한 항목"))) return { ok: false, reason: "아직 상단에 별도 카드로 남아 있음" };
+    return { ok: true };
+  });
+
+  await record("항목이 없으면 그 줄이 숨는다", async () => {
+    // 시세·매입 정보가 모두 갖춰지고 건너뛴 자산군도 없는 세션.
+    await page.evaluate(() => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], skippedGroups: [], assets: [
+        { id: "x1", group: "equity", fields: { productName: "삼성전자", productCode: "005930", quantity: 10, averagePrice: 60000 }, autoFields: { currency: "KRW" } },
+      ] }));
+    });
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+    const count = await page.locator(".check-line").count();
+    return count === 0 ? { ok: true } : { ok: false, reason: "확인할 항목이 없는데도 줄이 보인다" };
+  });
+
+  await record("시세를 못 받은 자산이 있으면 그 안내가 실제로 뜬다", async () => {
+    await page.evaluate(() => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], skippedGroups: [], assets: [
+        { id: "y1", group: "equity", fields: { productName: "삼성전자", productCode: "005930", quantity: 10, averagePrice: 60000 }, autoFields: { currency: "KRW" } },
+        // quotes 픽스처에 없는 종목 — 시세를 받을 수 없다.
+        { id: "y2", group: "equity", fields: { productName: "없는종목", productCode: "999999", quantity: 5, averagePrice: 10000 }, autoFields: { currency: "KRW" } },
+      ] }));
+    });
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+    const text = await page.locator("#app").textContent();
+    if (!text.includes("시세를 확인하지 못한")) return { ok: false, reason: "시세 확인 불가 안내가 없음" };
+    if (!text.includes("없는종목")) return { ok: false, reason: "어떤 자산인지 밝히지 않음" };
+    return { ok: true };
+  });
+
+  // 3번: 좌측 자산 탭을 눌렀을 때 보유하지 않은 자산군까지 8개 전부 펼쳐져야 한다.
+  await record("좌측 자산을 누르면 자산군 8개가 모두 펼쳐진다 (0건 포함)", async () => {
+    await page.goto(HOME_URL);
+    await page.evaluate((assets) => {
+      // 현금만 보유 — 나머지 7개 자산군은 0건이다.
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], assets: assets.slice(0, 1) }));
+    }, AXIS_ASSETS);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+    if (await page.locator(".nav-sub").count()) return { ok: false, reason: "누르지 않았는데 이미 펼쳐져 있음" };
+    await page.locator("[data-nav-toggle]").click();
+    const items = await page.locator(".nav-subitem").allTextContents();
+    if (items.length !== 8) return { ok: false, reason: `펼쳐진 자산군 ${items.length}개 (8개 기대): ${items.join(", ")}` };
+    // 보유하지 않은 자산군을 숨기면 무엇을 더 넣을 수 있는지 알 수 없다.
+    for (const label of ["현금", "예금·적금", "주식·ETF", "펀드", "채권", "가상자산", "원자재·실물자산", "부동산"]) {
+      if (!items.some((item) => item.includes(label))) return { ok: false, reason: `"${label}"이 목록에 없음` };
+    }
+    const zeros = await page.locator(".nav-count.zero").count();
+    if (zeros !== 7) return { ok: false, reason: `0건 표시 ${zeros}개 (7개 기대)` };
+    return { ok: true };
+  });
+
+  await record("펼쳐진 자산군을 누르면 그 자산군 화면이 열린다", async () => {
+    await page.locator('.nav-subitem[data-nav-group="bond"]').click();
+    await page.waitForURL(/assets\.html#group=bond/, { timeout: 5000 });
+    await page.waitForSelector(".group-tabs", { timeout: 5000 });
+    const active = await page.locator(".group-tab.active").textContent();
+    // 자산 화면에서는 하위 목록이 기본으로 펼쳐져 있어야 한다(지금 어디인지 보여야 한다).
+    const subOpen = await page.locator(".nav-sub").count();
+    if (!subOpen) return { ok: false, reason: "자산 화면에서 하위 목록이 접혀 있음" };
+    const navActive = await page.locator(".nav-subitem.active").textContent();
+    if (!active.includes("채권")) return { ok: false, reason: `열린 탭: "${active}"` };
+    return navActive.includes("채권") ? { ok: true } : { ok: false, reason: `내비 강조: "${navActive}"` };
+  });
+
+  // 5번: 자리만 잡아둔 칸들
+  await record("오늘의 주요 뉴스·주요 경제지표·다가오는 일정이 준비 중으로 자리를 잡는다", async () => {
+    await page.goto(HOME_URL);
+    await page.evaluate((assets) => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], assets }));
+    }, AXIS_ASSETS);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector("svg.donut"), { timeout: 8000 });
+    const headings = await page.locator(".card h2").allTextContents();
+    for (const title of ["오늘의 주요 뉴스", "주요 경제지표", "다가오는 일정"]) {
+      const found = headings.find((text) => text.includes(title));
+      if (!found) return { ok: false, reason: `"${title}" 칸이 없음: ${headings.join(" | ")}` };
+      if (!found.includes("준비 중")) return { ok: false, reason: `"${title}"에 준비 중 표시가 없음` };
+    }
+    // 다가오는 일정은 자산 만기가 아니라 거시 경제 일정 칸이다.
+    const schedule = await page.locator(".card").filter({ hasText: "다가오는 일정" }).textContent();
+    if (/만기/.test(schedule)) return { ok: false, reason: "다가오는 일정이 아직 자산 만기를 가리킨다" };
+    return { ok: true };
+  });
+
+  // 위 몇 검사가 localStorage를 덮어썼으므로, 등록으로 만든 세션으로 되돌린다.
+  await restoreRegistered();
 
   await record("성장 가능성 축은 노출하지 않는다 (위험자산 비중과 같은 값)", async () => {
     const keys = await page.evaluate(() => Portfolio.summarize(session.assets).meters.map((meter) => meter.key));
@@ -400,20 +547,20 @@ try {
 
   // PC 1440px에서 목업 1페이지의 배치가 재현되는지. 세로 단일 스택으로 돌아가면
   // 이 검사가 깨진다.
-  await record("PC 1440px에서 상단이 3열, 그 아래가 2열로 배치된다", async () => {
+  await record("PC 1440px에서 상단이 3열, 그 아래도 3열로 배치된다", async () => {
     const boxes = await page.evaluate(() => {
       const pick = (selector) => [...document.querySelectorAll(selector)].map((node) => {
         const rect = node.getBoundingClientRect();
         return { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.width) };
       });
-      return { top: pick(".grid-top > .card"), half: pick(".grid-half > .card"), nav: pick(".nav")[0] };
+      return { top: pick(".grid-top > .card"), half: pick(".grid-mid > .card"), nav: pick(".nav")[0] };
     });
     if (!boxes.nav) return { ok: false, reason: "좌측 내비가 없음" };
     if (boxes.top.length !== 3) return { ok: false, reason: `상단 카드 ${boxes.top.length}개 (3개 기대)` };
     if (new Set(boxes.top.map((box) => box.y)).size !== 1) return { ok: false, reason: `상단 3열이 같은 행에 있지 않음: ${JSON.stringify(boxes.top)}` };
-    if (boxes.half.length !== 2) return { ok: false, reason: `2열 카드 ${boxes.half.length}개` };
-    if (new Set(boxes.half.map((box) => box.y)).size !== 1) return { ok: false, reason: "자산 구성과 포트폴리오 요약이 같은 행에 있지 않음" };
-    if (boxes.half[0].y <= boxes.top[0].y) return { ok: false, reason: "2열 행이 상단 행보다 위에 있음" };
+    if (boxes.half.length !== 3) return { ok: false, reason: `중간 행 카드 ${boxes.half.length}개 (3개 기대)` };
+    if (new Set(boxes.half.map((box) => box.y)).size !== 1) return { ok: false, reason: "자산 구성·경제지표·포트폴리오 요약이 같은 행에 있지 않음" };
+    if (boxes.half[0].y <= boxes.top[0].y) return { ok: false, reason: "중간 행이 상단 행보다 위에 있음" };
     return { ok: true };
   });
 
@@ -510,7 +657,7 @@ try {
       localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, assets, snapshots: [] }));
     }, SAMPLE_ASSETS);
     await page.reload();
-    await page.waitForFunction(() => document.querySelector(".stackbar"), { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector("svg.donut"), { timeout: 5000 });
     const colorsOf = () => page.locator(".legend-row .swatch").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).backgroundColor));
     const financial = await colorsOf();
     if (financial.length !== 6) return { ok: false, reason: `금융자산 항목 ${financial.length}개 (6개 기대)` };
@@ -535,6 +682,8 @@ try {
     // 금융자산만 따로 보면 가장 작은 항목도 1% 이상으로 올라온다(전체 기준이면 0.3%대).
     return shares.smallestFinancial > 0.01 ? { ok: true } : { ok: false, reason: `가장 작은 금융자산 항목 비중 ${shares.smallestFinancial}` };
   });
+
+  await restoreRegistered();
 
   // ===== 5a-1b. 축 전환이 실제로 갈리는지 =====
   await record("원금 보장 축이 원화 현금·예적금과 나머지로 갈린다", async () => {
@@ -670,7 +819,7 @@ try {
       while (Date.now() < deadline) {
         const snap = await page.evaluate(() => ({
           skeleton: Boolean(document.querySelector(".skel")),
-          text: document.body.innerText,
+          text: (document.getElementById("page") || document.body).innerText,
         }));
         if (snap.skeleton) sawSkeleton = true;
         // 금액 형태(…원)가 보이면 기록한다.
@@ -754,6 +903,9 @@ try {
   });
 
   // ===== 6. 성장 가능성 축이 독립적인 정보를 주는가 =====
+  // 위 몇 검사가 localStorage를 덮어썼으므로, 등록으로 만든 세션으로 되돌린다.
+  await restoreRegistered();
+
   // 축을 내린 근거를 코드로 고정해 둔다. 나중에 누가 되살리려 할 때 왜 뺐는지가
   // 문장이 아니라 실행되는 검사로 남아 있어야 한다.
   await record("성장 가능성을 금융자산 기준으로 계산하면 위험자산 비중과 같은 값이 된다", async () => {

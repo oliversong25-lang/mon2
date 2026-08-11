@@ -98,6 +98,18 @@ a { color: var(--brand-ink); }
 .nav-icon { width: 1.125rem; flex: none; text-align: center; opacity: .9; }
 .nav-badge { margin-left: auto; padding: .125rem var(--space-2); border-radius: var(--radius-round);
   background: var(--surface-2); color: var(--dim); font-size: var(--font-xs); }
+.nav-toggle { font: inherit; }
+.nav-caret { margin-left: auto; color: var(--muted); font-size: var(--font-xs); }
+.nav-sub { display: grid; gap: .125rem; margin: var(--space-1) 0 var(--space-2) var(--space-5); }
+.nav-subitem { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm); color: var(--muted); font-size: var(--font-sm); text-decoration: none; }
+.nav-subitem:hover { background: var(--surface-2); color: var(--ink); }
+.nav-subitem.active { background: var(--brand-soft); color: var(--ink); font-weight: 700; }
+.nav-subitem > span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-count { flex: none; padding: 0 var(--space-2); border-radius: var(--radius-round);
+  background: var(--surface-2); color: var(--muted); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
+/* 0건도 흐리게라도 남긴다 — 목록에서 빼면 무엇을 더 넣을 수 있는지 알 수 없다. */
+.nav-count.zero { background: transparent; color: var(--dim); }
 .nav-foot { display: flex; align-items: center; gap: var(--space-3); margin-top: auto;
   padding-top: var(--space-4); border-top: var(--border) solid var(--line); color: var(--muted); font-size: var(--font-sm); }
 .nav-foot .nav-mark { background: var(--surface-2); color: var(--ink); border-radius: 50%; }
@@ -125,6 +137,9 @@ a { color: var(--brand-ink); }
 /* 목업 1행: 총자산이 넓고 나머지 둘이 같은 폭 */
 .grid-top { grid-template-columns: 1.35fr 1fr 1fr; }
 .grid-half { grid-template-columns: 1fr 1fr; }
+/* 중간 3열: 자산 구성 · 주요 경제지표 · 포트폴리오 요약. 가운데를 좁게 잡아
+   도넛과 요약 축이 각각 숨 쉴 폭을 갖게 한다. */
+.grid-mid { grid-template-columns: 1.15fr .8fr 1.15fr; }
 .grid-third { grid-template-columns: repeat(3, 1fr); }
 .stack-rows { display: grid; gap: var(--space-4); }
 
@@ -185,5 +200,5 @@ table.data .name { font-weight: 700; }
   .nav-item.active { border-left: 0; border-bottom-color: var(--brand); }
   .nav-foot { display: none; }
   .main { padding: var(--space-5); }
-  .grid-top, .grid-half, .grid-third { grid-template-columns: 1fr; }
+  .grid-top, .grid-half, .grid-third, .grid-mid { grid-template-columns: 1fr; }
 }

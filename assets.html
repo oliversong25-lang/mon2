@@ -49,36 +49,42 @@ let sessionState=SessionStore.read();
 let assets=sessionState.assets;
 let activeGroup=initialGroup();
 
-// 홈의 범례에서 자산군 이름을 달고 넘어온다(#composition=주식·ETF).
+// 두 경로로 들어온다: 홈의 도넛·범례는 자산군 이름을 달고(#composition=주식·ETF),
+// 좌측 내비의 하위 목록은 자산군 id를 달고(#group=equity) 넘어온다.
 function initialGroup(){
-  const match=/^#composition=(.+)$/.exec(location.hash);
-  if(match){
-    const label=decodeURIComponent(match[1]);
+  const byId=/^#group=([a-z]+)$/.exec(location.hash);
+  if(byId&&GROUP_TABS.includes(byId[1]))return byId[1];
+  const byLabel=/^#composition=(.+)$/.exec(location.hash);
+  if(byLabel){
+    const label=decodeURIComponent(byLabel[1]);
     const found=GROUP_TABS.find(id=>Portfolio.GROUP_NAMES[id]===label);
     if(found)return found;
   }
   return GROUP_TABS[0];
 }
 
+// 좌측 내비가 지금 보고 있는 자산군을 표시할 수 있도록 함께 넘긴다.
+function navOptions(){return {assetCounts:Shell.countByGroup(assets),activeGroup};}
+
 function render(){
   if(sessionState.status==="legacy-empty"){
     Shell.mount("app","assets",`<div class="empty-state">
       <h1>예전 형식으로 저장된 기록이 있어요</h1>
       <p>지금 앱이 쓰는 형식(v${SessionStore.SCHEMA})과 달라서 불러오지 못했어요.<br>저장된 기록은 지우지 않고 그대로 두었습니다.</p>
-      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`);
+      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`,navOptions());
     return;
   }
   if(!assets.length){
     Shell.mount("app","assets",`<div class="empty-state">
       <h1>아직 등록된 자산이 없어요</h1>
       <p>자산을 입력하면 자산군별로 나눠 볼 수 있어요.</p>
-      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`);
+      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`,navOptions());
     return;
   }
 
   if(Valuation.state.status==="error"){
     Shell.mount("app","assets",`${pageHead()}
-      <div class="banner">시세를 불러오지 못해 평가금액을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>`);
+      <div class="banner">시세를 불러오지 못해 평가금액을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>`,navOptions());
     return;
   }
 
@@ -88,7 +94,7 @@ function render(){
     const bar=(width)=>`<span class="skel" style="width:${width}"></span>`;
     Shell.mount("app","assets",`${pageHead()}
       <div class="kpis">${[0,1,2].map(()=>`<div class="kpi">${bar("50%")}${bar("70%")}</div>`).join("")}</div>
-      <div class="card"><h2>보유 자산</h2><div style="margin-top:var(--space-4)">${bar("100%")}${bar("100%")}${bar("80%")}</div></div>`);
+      <div class="card"><h2>보유 자산</h2><div style="margin-top:var(--space-4)">${bar("100%")}${bar("100%")}${bar("80%")}</div></div>`,navOptions());
     return;
   }
 
@@ -99,7 +105,7 @@ function render(){
     tabs(summary),
     groupBody(summary),
     sourcesLine(),
-  ].join(""));
+  ].join(""),navOptions());
   bind();
 }
 

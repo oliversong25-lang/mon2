@@ -21,6 +21,14 @@
     .excluded { margin-top:var(--space-4); padding:var(--space-3); border-radius:var(--radius-sm);
       background:var(--surface-2); color:var(--muted); font-size:var(--font-xs); line-height:1.6; }
 
+    .check-line { margin-top:var(--space-4); padding-top:var(--space-3); border-top:var(--border) solid var(--line); }
+    .check-head { margin-bottom:var(--space-2); color:var(--muted); font-size:var(--font-xs); font-weight:700; }
+    .check-item { display:flex; width:100%; align-items:flex-start; gap:var(--space-2); padding:var(--space-2);
+      border:0; border-radius:var(--radius-sm); background:transparent; color:inherit; text-align:left; font-size:var(--font-sm); }
+    .check-item:hover { background:var(--surface-2); }
+    .check-item .grow { flex:1; min-width:0; }
+    .check-item .meta { display:block; margin-top:.125rem; color:var(--dim); font-size:var(--font-xs); line-height:1.5; }
+    .soon-body { color:var(--dim); font-size:var(--font-sm); line-height:1.7; }
     .list-item { display:flex; width:100%; align-items:flex-start; gap:var(--space-3); padding:var(--space-3);
       border:0; border-radius:var(--radius-sm); background:transparent; color:inherit; text-align:left; font-size:var(--font-sm); }
     .list-item:hover { background:var(--surface-2); }
@@ -36,13 +44,17 @@
     .chart-head .toolbar { flex:none; }
     .toolbar { display:flex; align-items:center; gap:var(--space-2); }
 
-    /* 가로 누적 막대 — PC로 넓어졌다고 도넛으로 돌아가지 않는다. 부동산 편중은 공간
-       부족이 아니라 분포 문제였고, 넓은 화면에서도 조각 구분과 진입 문제는 그대로다. */
-    .stackbar { display:flex; width:100%; height:1.75rem; overflow:hidden; border-radius:var(--radius-sm); background:var(--surface-2); }
-    .stackbar-seg { min-width:.1875rem; border-right:.125rem solid var(--surface); }
-    .stackbar-seg:last-child { border-right:0; }
-    .stackbar-note { margin-top:var(--space-2); color:var(--dim); font-size:var(--font-xs); }
-    .legend { margin-top:var(--space-3); }
+    /* 도넛으로 복귀. 예전에 막대로 바꾼 이유는 부동산이 91%를 차지해 나머지가 실 가닥으로
+       뭉쳤던 것인데, 금융자산·실물자산을 나눈 뒤로는 금융자산 안에서 고르게 분포한다.
+       조각 색이 초록 계열 그라데이션이라 구분되지 않았던 문제는 팔레트로 해결했다. */
+    .donut-wrap { display:flex; flex-direction:column; align-items:center; gap:var(--space-2); }
+    .donut { display:block; max-width:11.5rem; }
+    .donut-seg { cursor:pointer; transition:opacity .15s var(--ease); }
+    .donut-seg:hover { opacity:.75; }
+    .donut-center-label { fill:var(--dim); font-size:.5rem; }
+    .donut-center-value { fill:var(--ink); font-size:.75rem; font-weight:800; }
+    .stackbar-note { margin-top:var(--space-1); color:var(--dim); font-size:var(--font-xs); }
+    .legend { width:100%; margin-top:var(--space-2); }
     /* 범례가 진입점이므로 터치·클릭 타겟을 충분히 준다(44px 이상). */
     .legend-row { display:grid; width:100%; min-height:2.75rem; grid-template-columns:auto 1fr auto auto;
       align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-3); border:0;
@@ -58,9 +70,10 @@
     .meter-head .val { color:var(--muted); }
     /* 위치만 찍는다 — 채운 막대는 "많이 채울수록 좋다"로 읽힌다. */
     .meter-track { position:relative; height:.375rem; border-radius:var(--radius-round); background:var(--surface-2); }
-    .meter-track::before { content:""; position:absolute; top:-.1875rem; bottom:-.1875rem; left:50%; width:var(--border); background:var(--line); }
+    .meter-track::before { content:""; position:absolute; top:-.25rem; bottom:-.25rem; left:50%; width:var(--border); background:var(--line); }
+    .meter-fill { position:absolute; top:0; bottom:0; border-radius:var(--radius-round); background:#7b8bb0; }
     .meter-mark { position:absolute; top:50%; width:.75rem; height:.75rem; margin:-.375rem 0 0 -.375rem;
-      border:.125rem solid var(--surface); border-radius:50%; background:#94a1bd; }
+      border:.125rem solid var(--surface); border-radius:50%; background:#aab6d0; }
     .meter-scale { display:flex; justify-content:space-between; margin-top:var(--space-1); color:var(--dim); font-size:var(--font-xs); }
     .summary-text { margin-bottom:var(--space-5); font-size:var(--font-sm); line-height:1.7; }
 
@@ -100,6 +113,10 @@ let session=toSession(sessionState);
 let axis="group";
 let assetClass="financial";
 
+// 내비의 자산군 건수는 어떤 화면 상태에서도 같아야 한다 — 로딩 중이나 빈 상태에서
+// 0으로 보이면 자산이 사라진 것처럼 읽힌다.
+function navOptions(){return {assetCounts:Shell.countByGroup(session.assets||[])};}
+
 function toSession(state){
   const raw=SessionStore.readRaw()||{};
   return {schema:SessionStore.SCHEMA,assets:state.assets,snapshots:Array.isArray(raw.snapshots)?raw.snapshots:[],skippedGroups:Array.isArray(raw.skippedGroups)?raw.skippedGroups:[]};
@@ -123,16 +140,34 @@ function recordSnapshot(total){
 }
 
 // 범주를 구분하기 위한 색이지 좋고 나쁨을 뜻하지 않는다. 빨강·초록을 뺀 이유가 그것이다
-// (손익에만 색을 쓰기로 했는데, 구성 그래프에 빨강·초록이 있으면 그 의미가 번진다).
-// 이 순서는 색각 이상 시뮬레이션을 포함한 검증을 통과했다. 순서를 바꾸면 다시 검증할 것.
-const SERIES_COLORS=["#5b8dee","#eb8a4b","#2ec39a","#e0b13c","#e58cb4","#8e7ae8"];
+// (손익에만 색을 쓰기로 했는데, 구성 그래프에 빨강·초록이 있으면 비중이 큰 게 좋거나
+// 나쁜 것처럼 읽힌다). 이 순서는 다크 표면(#141b2b) 기준으로 색각 이상 시뮬레이션을
+// 포함한 검증을 통과했다 — 인접쌍 최저 CVD ΔE 8.4, 일반 시야 최저 19.3, 대비 전부 3:1 이상.
+// 순서나 색을 바꾸면 다시 검증할 것.
+const SERIES_COLORS=["#3987e5","#d95926","#199e70","#c98500","#d55181","#9085e9"];
 
-function stackedBar(parts){
+// 도넛. 조각도 진입점이지만 작은 조각은 누르기 어려우므로 범례 행이 주 진입점이다.
+function donut(parts,centerLabel,centerValue){
   if(!parts.length)return"";
-  const segments=parts.map((part,index)=>
-    `<span class="stackbar-seg" style="flex:${Math.max(part.share,0.0001)} 1 0; background:${SERIES_COLORS[index%SERIES_COLORS.length]}" title="${escapeHtml(part.label)} ${pct(part.share)}"></span>`
-  ).join("");
-  return `<div class="stackbar" role="img" aria-label="${escapeHtml(parts.map(part=>`${part.label} ${pct(part.share)}`).join(", "))}">${segments}</div>`;
+  const size=184,stroke=30,radius=(size-stroke)/2,circumference=2*Math.PI*radius;
+  let offset=0;
+  const segments=parts.map((part,index)=>{
+    const length=circumference*part.share;
+    // 조각 사이에 표면색 간격을 둬 인접한 색이 서로 번지지 않게 한다.
+    const gap=parts.length>1?Math.min(2,length):0;
+    const ring=`<circle class="donut-seg" data-slice="${escapeHtml(part.label)}" r="${radius}" cx="${size/2}" cy="${size/2}"
+      fill="none" stroke="${SERIES_COLORS[index%SERIES_COLORS.length]}" stroke-width="${stroke}"
+      stroke-dasharray="${Math.max(length-gap,0.5)} ${circumference-Math.max(length-gap,0.5)}"
+      stroke-dashoffset="${-offset}" transform="rotate(-90 ${size/2} ${size/2})"
+      role="button" tabindex="0"><title>${escapeHtml(part.label)} ${pct(part.share)}</title></circle>`;
+    offset+=length;
+    return ring;
+  }).join("");
+  return `<svg class="donut" viewBox="0 0 ${size} ${size}" role="img" aria-label="${escapeHtml(parts.map(part=>`${part.label} ${pct(part.share)}`).join(", "))}">
+    ${segments}
+    <text class="donut-center-label" x="${size/2}" y="${size/2-6}" text-anchor="middle">${escapeHtml(centerLabel)}</text>
+    <text class="donut-center-value" x="${size/2}" y="${size/2+10}" text-anchor="middle">${escapeHtml(centerValue)}</text>
+  </svg>`;
 }
 
 function legend(parts){
@@ -145,11 +180,19 @@ function legend(parts){
     </button>`).join("")}</div>`;
 }
 
+// 중앙(50%)에서 값까지만 채운다. 왼쪽 끝부터 채우면 "가득 채울수록 좋다"로 읽히는데
+// 이 축들은 점수가 아니다 — 집중도가 높은 것도, 원금 보장 비중이 낮은 것도 나쁜 게 아니다.
+// 중앙 기준이면 선이라 잘 보이면서도 방향(어느 쪽으로 치우쳤는지)만 드러난다.
 function meterRow(meter){
   const value=Math.max(0,Math.min(1,meter.value));
+  const left=Math.min(value,0.5)*100;
+  const width=Math.abs(value-0.5)*100;
   return `<div class="meter">
     <div class="meter-head"><span>${meter.label}</span><span class="val num">${pct(value,0)}</span></div>
-    <div class="meter-track"><span class="meter-mark" style="left:${value*100}%"></span></div>
+    <div class="meter-track">
+      <span class="meter-fill" style="left:${left}%; width:${width}%"></span>
+      <span class="meter-mark" style="left:${value*100}%"></span>
+    </div>
     <div class="meter-scale"><span>낮음</span><span>높음</span></div>
   </div>`;
 }
@@ -219,19 +262,19 @@ function render(){
     Shell.mount("app","home",`<div class="empty-state">
       <h1>예전 형식으로 저장된 기록이 있어요</h1>
       <p>지금 앱이 쓰는 형식(v${SessionStore.SCHEMA})과 달라서 불러오지 못했어요.<br>저장된 기록은 지우지 않고 그대로 두었습니다.</p>
-      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`);
+      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`,navOptions());
     return;
   }
   if(!assets.length){
     Shell.mount("app","home",`<div class="empty-state">
       <h1>아직 등록된 자산이 없어요</h1>
       <p>자산을 입력하면 총자산과 구성을 한 화면에서 볼 수 있어요.</p>
-      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`);
+      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`,navOptions());
     return;
   }
   if(Valuation.state.status==="error"){
     Shell.mount("app","home",`${pageHead()}
-      <div class="banner">시세를 불러오지 못해 총자산을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>`);
+      <div class="banner">시세를 불러오지 못해 총자산을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>`,navOptions());
     return;
   }
 
@@ -240,23 +283,24 @@ function render(){
   // 잠깐 보였다가 정정됐다. 게다가 "시세를 확인하지 못했어요"라는 사실 아닌 경고가
   // 떴다 사라졌는데, 그 문구는 정말로 시세를 못 받았을 때의 신뢰 장치라 그렇게 닳으면 안 된다.
   if(Valuation.state.status==="loading"){
-    Shell.mount("app","home",skeleton());
+    Shell.mount("app","home",skeleton(),navOptions());
     return;
   }
 
   const summary=Portfolio.summarize(assets);
   recordSnapshot(summary.total);
 
-  // 목업 1페이지의 배치: 3열 → 2열 → 전체 폭 → 전체 폭 → 3열
+  // 상단 3열: 총자산(+확인이 필요한 항목 줄) · 오늘의 주요 뉴스 · 다가오는 일정.
+  // 중간 3열: 자산 구성 · 주요 경제지표 · 포트폴리오 요약.
   Shell.mount("app","home",[
     pageHead(),
     legacyBanner(),
-    `<div class="grid grid-top">${totalCard(summary)}${checkCard(summary)}${scheduleCard()}</div>`,
-    `<div class="grid grid-half" style="margin-top:var(--space-4)">${compositionCard(summary)}${portfolioCard(summary)}</div>`,
+    `<div class="grid grid-top">${totalCard(summary)}${newsCard()}${scheduleCard()}</div>`,
+    `<div class="grid grid-mid" style="margin-top:var(--space-4)">${compositionCard(summary)}${indicatorCard()}${portfolioCard(summary)}</div>`,
     `<div class="stack-rows" style="margin-top:var(--space-4)">${trendCard()}${holdingsCard(summary)}</div>`,
     comingCards(),
     sourcesLine(),
-  ].join(""));
+  ].join(""),{assetCounts:Shell.countByGroup(assets)});
   bind();
 }
 
@@ -277,11 +321,12 @@ function skeleton(){
     pageHead(),
     `<div class="grid grid-top">
       ${card("총자산",`${bar("60%")}${bar("40%")}`)}
-      ${card("확인이 필요한 항목",`${bar("80%")}${bar("55%")}`)}
-      ${card("다가오는 일정",`${bar("70%")}${bar("45%")}`)}
+      ${newsCard()}
+      ${scheduleCard()}
     </div>`,
-    `<div class="grid grid-half" style="margin-top:var(--space-4)">
+    `<div class="grid grid-mid" style="margin-top:var(--space-4)">
       ${card("자산 구성",`${bar("100%")}${bar("70%")}${bar("60%")}`)}
+      ${indicatorCard()}
       ${card("포트폴리오 요약",`${bar("85%")}${bar("60%")}${bar("60%")}`)}
     </div>`,
     `<div style="margin-top:var(--space-4)">${card("보유 자산",`${bar("100%")}${bar("100%")}${bar("80%")}`)}</div>`,
@@ -314,31 +359,30 @@ function totalCard(summary){
   return `<div class="card">
     <h2>총자산</h2>
     <div class="total-amount num">${won(summary.total)}</div>
-    ${change}${excluded}${split}
+    ${change}${excluded}${split}${checkLine(summary)}
   </div>`;
 }
 
-// 모바일에서 접어뒀던 두 카드는 PC에서 펼친다.
-function checkCard(summary){
+// 카드 하나를 통째로 쓰지 않고 총자산 카드 아래 한 줄로 붙인다. 다만 내용을 없애지는
+// 않는다 — 이 줄은 "시세 확인 불가 N건", "매입 정보가 없어 손익에서 빠진 N건"처럼
+// 화면의 숫자가 왜 불완전한지 설명하는 신뢰 장치다. 사라지면 총자산이 왜 어긋나는지
+// 알 방법이 없어진다. 항목이 없을 때만 줄 자체를 숨긴다.
+function checkLine(summary){
   const items=checkItems(summary);
-  const body=items.length
-    ?items.map((item,index)=>`<button type="button" class="list-item" data-go="input">
-        <span class="idx">${index+1}</span>
-        <span class="grow">${escapeHtml(item.text)}<span class="meta">${escapeHtml(item.meta)}</span></span>
-      </button>`).join("")
-    :`<p class="card-sub" style="margin:0">확인이 필요한 항목이 없어요.</p>`;
-  return `<div class="card"><h2>확인이 필요한 항목 ${items.length?`<span class="pill">${items.length}</span>`:""}</h2><div style="margin-top:var(--space-3)">${body}</div></div>`;
+  if(!items.length)return"";
+  return `<div class="check-line">
+    <div class="check-head">확인이 필요한 항목 <span class="pill">${items.length}</span></div>
+    ${items.map(item=>`<button type="button" class="check-item" data-go="input">
+      <span class="grow">${escapeHtml(item.text)}<span class="meta">${escapeHtml(item.meta)}</span></span><span>›</span>
+    </button>`).join("")}
+  </div>`;
 }
 
+// 이 카드의 용도는 자산 만기가 아니라 거시 경제 일정이다 — FOMC 금리 발표, CPI·고용지표
+// 발표처럼 투자 판단에 영향을 주는 일정. 자산 만기는 위의 '확인이 필요한 항목' 줄이 맡는다.
 function scheduleCard(){
-  const soon=maturingSoon(365);
-  const body=soon.length
-    ?soon.slice(0,4).map(entry=>`<button type="button" class="list-item" data-go="input">
-        <span class="when">${escapeHtml(entry.date.slice(5).replace("-","월 "))}일</span>
-        <span class="grow">${escapeHtml(entry.name)}<span class="meta">만기 · ${entry.left}일 남음</span></span>
-      </button>`).join("")
-    :`<p class="card-sub" style="margin:0">등록된 자산에 예정된 일정이 없어요. 만기일을 입력하면 여기에 표시됩니다.</p>`;
-  return `<div class="card"><h2>다가오는 일정 ${soon.length?`<span class="pill">${soon.length}</span>`:""}</h2><div style="margin-top:var(--space-3)">${body}</div></div>`;
+  return soonCard("다가오는 일정","FOMC · CPI · 고용지표 등 경제 일정",
+    "금리 발표나 물가·고용 지표처럼 판단에 영향을 주는 일정을<br>날짜와 함께 보여드릴 예정이에요.");
 }
 
 const AXES=[["group","자산 유형"],["guaranteed","원금 보장"],["currency","통화"]];
@@ -361,16 +405,44 @@ function compositionCard(summary){
   const note=active==="physical"
     ?"실물자산은 전부 시가 변동이고 전부 원화라 원금 보장·통화 축을 두지 않았습니다."
     :AXIS_NOTES[axis];
+  const centerLabel=active==="physical"?"실물자산":"금융자산";
   return `<div class="card">
     <div class="chart-head">
       <div><h2>자산 구성</h2><div class="card-sub" style="margin:0">카테고리별 평가금액과 비중</div></div>
-      <div class="toolbar">${classToggle}${axisTabs}</div>
+      <div class="toolbar">${classToggle}</div>
     </div>
-    ${stackedBar(parts)}
-    <div class="stackbar-note num">${won(side.total)} · ${parts.length}개 항목</div>
+    ${axisTabs?`<div class="toolbar" style="margin-bottom:var(--space-4)">${axisTabs}</div>`:""}
+    <div class="donut-wrap">
+      ${donut(parts,centerLabel,won(side.total))}
+      <div class="stackbar-note num">${parts.length}개 항목</div>
+    </div>
     ${legend(parts)}
     <div class="card-note">${escapeHtml(note)}</div>
   </div>`;
+}
+
+// 자리와 제목만 만든다. 데이터 연동은 별도 트랙이다.
+function soonCard(title,sub,body){
+  return `<div class="card">
+    <h2>${escapeHtml(title)} <span class="pill">준비 중</span></h2>
+    <div class="card-sub">${escapeHtml(sub)}</div>
+    <p class="soon-body">${body}</p>
+  </div>`;
+}
+
+// 이 칸은 일반 경제 뉴스가 아니라 "보유 자산과 연결된 뉴스"만 담는다.
+// 삼성전자를 보유하면 삼성전자 뉴스, 달러 자산이 있으면 환율 뉴스.
+// 이 앱은 경제를 공부시키는 도구가 아니라 본인 돈을 이해하게 만드는 도구다 —
+// 보유와 무관한 뉴스를 채우면 그 순간 다른 종류의 앱이 된다.
+function newsCard(){
+  return soonCard("오늘의 주요 뉴스","보유한 자산과 연결된 소식만 모읍니다",
+    "삼성전자를 보유하면 삼성전자 소식, 달러 자산이 있으면 환율 소식처럼<br>내 자산에 영향을 주는 것만 보여드릴 예정이에요.");
+}
+
+// 기준금리·장단기 금리차·소비자심리 같은 핵심 지표 몇 개가 들어갈 자리.
+function indicatorCard(){
+  return soonCard("주요 경제지표","기준금리 · 장단기 금리차 · 소비자심리",
+    "내 자산에 영향을 주는 지표 몇 개만 골라 보여드릴 예정이에요.");
 }
 
 // 요약 축은 금융자산 기준으로 고정한다(구성 카드의 전환과 연동하지 않는다).
@@ -490,9 +562,9 @@ function comingCards(){
     `<div class="soon-card"><span class="pill">준비 중인 기능</span><b>${escapeHtml(title)}</b><span>${escapeHtml(note)}</span></div>`).join("")}</div>`;
 }
 
-// 진입점은 시각화 자체다 — 기능 진입 전용 버튼을 두지 않는다. 다만 누적 막대의 조각은
-// 진입점으로 쓰지 않는다: 비중 2%짜리는 폭이 몇 픽셀이라 누를 수가 없다. 금액·비율이
-// 함께 적힌 범례 행과 표의 행이 진입점이다.
+// 진입점은 시각화 자체다 — 기능 진입 전용 버튼을 두지 않는다. 도넛 조각과 범례 행 모두
+// 해당 자산군 화면으로 이동하지만, 작은 조각은 누르기 어려우므로 금액·비율이 함께 적힌
+// 범례 행이 주 진입점이다.
 function bind(){
   document.querySelectorAll("button[data-class]").forEach(button=>{
     button.addEventListener("click",()=>{assetClass=button.dataset.class;render();});
@@ -500,8 +572,11 @@ function bind(){
   document.querySelectorAll("button[data-axis]").forEach(button=>{
     button.addEventListener("click",()=>{axis=button.dataset.axis;render();});
   });
-  document.querySelectorAll("button[data-slice]").forEach(button=>{
-    button.addEventListener("click",()=>{location.href=`${ASSETS_URL}#composition=${encodeURIComponent(button.dataset.slice)}`;});
+  document.querySelectorAll("[data-slice]").forEach(node=>{
+    const go=()=>{location.href=`${ASSETS_URL}#composition=${encodeURIComponent(node.dataset.slice)}`;};
+    node.addEventListener("click",go);
+    // 도넛 조각은 SVG라 키보드 접근을 직접 열어준다(tabindex는 마크업에서 부여).
+    node.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();go();}});
   });
   document.querySelectorAll("button[data-go]").forEach(button=>{
     button.addEventListener("click",()=>{location.href=`${INPUT_URL}#add`;});
