@@ -31,10 +31,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 한 번만 사람이 해야 하는 설정이 있다: 저장소 Settings → Pages →
+      # "Build and deployment" → Source를 "GitHub Actions"로 바꿔야 한다.
+      # enablement:true로 자동화해 보려 했으나 실패했다 — Pages 사이트를 생성하는 API는
+      # 저장소 관리자 권한을 요구하고 워크플로의 GITHUB_TOKEN에는 그 권한이 없다.
+      # 설정을 켜기 전까지는 이 단계에서 멈추며, 켠 뒤 재실행하면 그대로 배포된다.
       - uses: actions/configure-pages@v5
-        with:
-          # 저장소 설정에서 Pages를 켜두지 않았어도 첫 실행에서 켜준다.
-          enablement: true
 
       # 저장소 루트를 그대로 올린다. index.html이 진입점이고 data/·lib/는 상대 경로로
       # 참조하므로 하위 경로(/mon2/)에서도 그대로 동작한다.

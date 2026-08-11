@@ -13,7 +13,9 @@ python -m http.server 4174 --bind 127.0.0.1
 
 ## 배포 (GitHub Pages)
 
-`main`에 푸시되면 `.github/workflows/pages.yml`이 저장소 루트를 그대로 Pages에 올립니다. 시세 배치(`quotes.yml`)와 종목 배치(`tickers.yml`)도 `main`에 커밋을 밀어넣으므로, 배치가 `data/quotes.json`을 갱신하면 배포도 자동으로 따라 갱신됩니다. concurrency 그룹이 서로 달라(`pages` / `quotes-batch` / `tickers-batch`) 세 워크플로가 막지 않습니다.
+**최초 1회 수동 설정이 필요합니다.** 저장소 Settings → Pages → "Build and deployment" → Source를 **GitHub Actions**로 바꾸세요. 이걸 켜기 전까지는 워크플로가 `configure-pages` 단계에서 멈춥니다. 자동화를 시도했지만(`enablement: true`) Pages 사이트 생성 API가 저장소 관리자 권한을 요구하고 워크플로의 `GITHUB_TOKEN`에는 그 권한이 없어 실패했습니다.
+
+설정을 켠 뒤에는 `main`에 푸시되면 `.github/workflows/pages.yml`이 저장소 루트를 그대로 Pages에 올립니다. 배포 주소는 `https://oliversong25-lang.github.io/mon2/`입니다. 시세 배치(`quotes.yml`)와 종목 배치(`tickers.yml`)도 `main`에 커밋을 밀어넣으므로, 배치가 `data/quotes.json`을 갱신하면 배포도 자동으로 따라 갱신됩니다. concurrency 그룹이 서로 달라(`pages` / `quotes-batch` / `tickers-batch`) 세 워크플로가 막지 않습니다.
 
 경로는 전부 상대 경로라 하위 경로(`/mon2/`)에서도 그대로 동작합니다 — 절대 경로(`/data/...`)를 새로 쓰면 배포에서만 깨집니다.
 
