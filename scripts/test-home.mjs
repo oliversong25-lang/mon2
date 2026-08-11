@@ -852,13 +852,17 @@ try {
     await page.goto(HOME_URL);
     await page.evaluate(() => {
       localStorage.clear();
-      localStorage.setItem("assetInput.session", JSON.stringify({
+      const legacy = {
         schema: 99, // 미래(또는 과거) 스키마
         assets: [
           { id: "x1", group: "savings", fields: { productType: "예금", balance: 3000000 }, autoFields: {} },
           { id: "x2", group: "cash", fields: { currency: "KRW", amount: 1000000 }, autoFields: {} },
         ],
-      }));
+      };
+      localStorage.setItem("assetInput.session", JSON.stringify(legacy));
+      // 원격 사본도 같은 값으로 둔다 — 비어 있으면 앱이 로컬을 비우고 시작하므로
+      // "예전 형식이 이 계정에 실제로 저장돼 있는" 상황이 재현되지 않는다.
+      sessionStorage.setItem("assetflow.test.remote", JSON.stringify(legacy));
     });
     await page.reload();
     await page.waitForFunction(() => document.querySelector(".total-amount, .empty-state"), { timeout: 5000 });
@@ -866,19 +870,25 @@ try {
     if (text.includes("아직 등록된 자산이 없어요")) return { ok: false, reason: "자산이 있는데 빈 상태로 표시됨" };
     if (!text.includes("400만원")) return { ok: false, reason: `총자산이 계산되지 않음: ${text.slice(0, 160)}` };
     if (!text.includes("예전 형식")) return { ok: false, reason: "예전 형식 안내가 없음" };
+    // 계정 저장이 원격 조회 후 로컬을 다시 쓰는 구간이 있어, 값이 자리를 잡을 때까지 기다린다.
+    await page.waitForFunction(() => localStorage.getItem("assetInput.session") !== null, { timeout: 5000 });
     const preserved = await page.evaluate(() => JSON.parse(localStorage.getItem("assetInput.session")).schema);
     return preserved === 99 ? { ok: true } : { ok: false, reason: `원본이 덮어써짐 (schema=${preserved})` };
   });
 
   await record("살릴 자산이 없는 예전 형식은 '자산 0건'과 구분해 안내한다", async () => {
     await page.evaluate(() => {
-      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 99, foo: "bar" }));
+      const legacy = { schema: 99, foo: "bar" };
+      localStorage.setItem("assetInput.session", JSON.stringify(legacy));
+      sessionStorage.setItem("assetflow.test.remote", JSON.stringify(legacy));
     });
     await page.reload();
     await page.waitForSelector(".empty-state", { timeout: 5000 });
     const text = await page.locator("#app").textContent();
     if (text.includes("아직 등록된 자산이 없어요")) return { ok: false, reason: "자산 0건 화면과 구분되지 않음" };
     if (!text.includes("예전 형식으로 저장된 기록이 있어요")) return { ok: false, reason: `안내 문구 없음: ${text.slice(0, 160)}` };
+    // 계정 저장이 원격 조회 후 로컬을 다시 쓰는 구간이 있어, 값이 자리를 잡을 때까지 기다린다.
+    await page.waitForFunction(() => localStorage.getItem("assetInput.session") !== null, { timeout: 5000 });
     const preserved = await page.evaluate(() => JSON.parse(localStorage.getItem("assetInput.session")).schema);
     return preserved === 99 ? { ok: true } : { ok: false, reason: `원본이 덮어써짐 (schema=${preserved})` };
   });

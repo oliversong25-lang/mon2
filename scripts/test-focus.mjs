@@ -350,8 +350,12 @@ async function run() {
     const closes = (html.match(/<\/script>/g) || []).length;
     if (opens !== closes) return { ok: false, reason: `opens=${opens} closes=${closes}` };
     if (opens !== 6) return { ok: false, reason: `expected 6 script tags (auth 3 + session.js + valuation.js + inline app), got ${opens}` };
+    // 캐시 무효화용 쿼리스트링(?v=...)이 붙을 수 있으므로 경로만 보고 판단한다 —
+    // 태그 문자열을 그대로 비교하면 버전을 올릴 때마다 이 검사가 깨진다.
     for (const src of ["lib/supabase-config.js", "lib/account-store.js", "lib/auth-guard.js", "lib/session.js", "lib/valuation.js"]) {
-      if (!html.includes(`<script src="${src}"></script>`)) return { ok: false, reason: `${src} script tag not found` };
+      if (!new RegExp(`<script src="${src.replace(/[.]/g, "\\.")}(\\?[^"]*)?"></script>`).test(html)) {
+        return { ok: false, reason: `${src} script tag not found` };
+      }
     }
     // 평가 로직이 홈 화면과 공유되는 단일 출처인지 — 전역이 실제로 노출됐는지 확인한다.
     // liveQuotes는 const 선언이라 window 프로퍼티가 아니다(전역 렉시컬 바인딩) — 이름으로 참조한다.

@@ -25,6 +25,11 @@ export async function installTestAuth(page) {
     Storage.prototype.clear = function () {
       if (this !== localStorage) return clear.call(this);
       clear.call(this);
+      // 목 원격 사본도 함께 비운다. 기존 회귀 테스트는 localStorage.clear()를 "깨끗한
+      // 상태에서 시작"이라는 뜻으로 쓰는데, 원격 사본이 남아 있으면 다음 로드에서 앱이
+      // 직전 세션을 되살려 이전 테스트의 입력이 그대로 이어진다 — 실제로 통합 테스트
+      // 두 건이 그렇게 깨졌다(초기화한 줄 알았던 화면에 옛 평가금액이 남아 있었다).
+      sessionStorage.removeItem("assetflow.test.remote");
       this.setItem("assetflow.auth", auth);
       this.setItem("assetInput.owner", id);
     };
