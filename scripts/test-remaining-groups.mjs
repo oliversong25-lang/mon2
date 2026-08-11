@@ -9,6 +9,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { installTestAuth, launchTestBrowser } from "./lib/test-auth.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = 4328;
@@ -92,8 +93,9 @@ async function checkFieldFull(page, fieldId, typedText) {
 
 async function run() {
   const server = await startServer();
-  const browser = await chromium.launch();
+  const browser = await launchTestBrowser(chromium);
   const page = await browser.newPage();
+  await installTestAuth(page);
   // data/quotes.json is only written by the real daily batch (or a live API key) —
   // it won't exist in this checkout/CI, so its 404 (both the app's own logged error
   // and Chromium's generic "Failed to load resource" for the request) is expected

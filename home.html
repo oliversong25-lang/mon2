@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>내 자산</title>
   <link rel="stylesheet" href="lib/app.css">
+  <script src="lib/supabase-config.js"></script>
+  <script src="lib/account-store.js"></script>
+  <script src="lib/auth-guard.js"></script>
   <style>
     /* 홈 화면 전용. 공통 토큰·셸·표는 lib/app.css에 있다. */
     .total-amount { font-size:var(--font-total); font-weight:800; letter-spacing:-.035em; line-height:1.15; }
@@ -105,8 +108,7 @@ function toSession(state){
 // 원본이 현재 스키마로 대체돼 되돌릴 수 없다. 스냅샷 몇 건보다 원본 보존이 우선이다.
 function saveSession(){
   if(sessionState.status!=="ok")return;
-  try{localStorage.setItem(SessionStore.KEY,JSON.stringify(Object.assign({},SessionStore.readRaw(),session)));}
-  catch(error){console.error("[홈] 저장 실패:",error);}
+  SessionStore.write(Object.assign({},SessionStore.readRaw(),session));
 }
 
 // 스냅샷은 asOf(시세 기준일)가 바뀐 걸 감지한 첫 실행에만 쌓는다. 앱을 연 시각을

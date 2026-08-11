@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>자산 입력</title>
+  <script src="lib/supabase-config.js"></script>
+  <script src="lib/account-store.js"></script>
+  <script src="lib/auth-guard.js"></script>
   <style>
     /* PC 우선. 색·간격 토큰은 lib/app.css(다크 네이비)와 같은 값을 쓴다 — 홈·자산 화면과
        한 제품으로 보여야 한다. 입력 흐름 전용 변수(--control-h 등)만 여기 남긴다.
@@ -223,7 +226,7 @@ function loadSession(){
   if(!raw){
     // JSON이 깨져 아무것도 해석할 수 없는 경우. 내용은 못 살려도 원문은 남긴다.
     try{localStorage.setItem(SessionStore.backupKey("corrupt"),rawText);}catch(error){console.error("[세션] 원문 백업 실패:",error);}
-    const fresh=emptySession();localStorage.setItem(STORAGE_KEY,JSON.stringify(fresh));return fresh;
+    const fresh=emptySession();SessionStore.write(fresh);return fresh;
   }
   const state=SessionStore.classify(raw);
   if(state.status==="ok"){
@@ -240,7 +243,7 @@ function loadSession(){
   sessionRecovered=migrated.assets.length;
   return migrated;
 }
-function saveNow(){clearTimeout(saveTimer);session.screen=screen;localStorage.setItem(STORAGE_KEY,JSON.stringify(session));}
+function saveNow(){clearTimeout(saveTimer);session.screen=screen;SessionStore.write(session);}
 function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,300);}
 function esc(value){return String(value??"").replace(/[&<>\"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[char]));}
 function uid(){return "asset-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}

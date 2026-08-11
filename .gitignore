@@ -1,5 +1,10 @@
 .venv/
 node_modules/
+.npm-cache/
+.env
+.env.*
+supabase/.temp/
+node_modules/
 
 # 배치 실행 로그(PowerShell 리다이렉트 산출물). UTF-16이라 diff도 안 되고 매번 바뀐다.
 quotes-log.txt

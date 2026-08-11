@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { installTestAuth, launchTestBrowser } from "./lib/test-auth.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = 4321;
@@ -110,8 +111,9 @@ async function checkFieldFocus(page, fieldId, typedText = "1234567") {
 
 async function run() {
   const server = await startServer();
-  const browser = await chromium.launch();
+  const browser = await launchTestBrowser(chromium);
   const page = await browser.newPage();
+  await installTestAuth(page);
   const results = [];
 
   const record = async (label, fn) => {
@@ -347,8 +349,8 @@ async function run() {
     const opens = (html.match(/<script/g) || []).length;
     const closes = (html.match(/<\/script>/g) || []).length;
     if (opens !== closes) return { ok: false, reason: `opens=${opens} closes=${closes}` };
-    if (opens !== 3) return { ok: false, reason: `expected 3 script tags (session.js + valuation.js + inline app), got ${opens}` };
-    for (const src of ["lib/session.js", "lib/valuation.js"]) {
+    if (opens !== 6) return { ok: false, reason: `expected 6 script tags (auth 3 + session.js + valuation.js + inline app), got ${opens}` };
+    for (const src of ["lib/supabase-config.js", "lib/account-store.js", "lib/auth-guard.js", "lib/session.js", "lib/valuation.js"]) {
       if (!html.includes(`<script src="${src}"></script>`)) return { ok: false, reason: `${src} script tag not found` };
     }
     // 평가 로직이 홈 화면과 공유되는 단일 출처인지 — 전역이 실제로 노출됐는지 확인한다.

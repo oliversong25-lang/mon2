@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { readFile, writeFile } from "node:fs/promises";
 import { writeFileSync } from "node:fs";
+import { installTestAuth, launchTestBrowser } from "./lib/test-auth.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = 4332;
@@ -137,8 +138,9 @@ let browser;
 try {
   await writeFile(QUOTES_PATH, JSON.stringify(QUOTES_FIXTURE), "utf8");
   server = await startServer();
-  browser = await chromium.launch();
+  browser = await launchTestBrowser(chromium);
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } }); // PC 폭
+  await installTestAuth(page);
 
   // ===== 1. 자산 0건 =====
   await page.goto(HOME_URL);

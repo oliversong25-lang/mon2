@@ -13,6 +13,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { installTestAuth, launchTestBrowser } from "./lib/test-auth.mjs";
 import { readFile, writeFile, rm } from "node:fs/promises";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -102,8 +103,9 @@ try {
       await writeFile(QUOTES_PATH, JSON.stringify(quotesFixture), "utf8");
 
       server = await startServer();
-      browser = await chromium.launch();
+      browser = await launchTestBrowser(chromium);
       const page = await browser.newPage();
+      await installTestAuth(page);
 
       // 1. 카카오(MOCK에 없던 종목) 실제 검색·선택·수량 입력 -> 평가금액 정상 계산
       await prepareGroup(page, "equity");

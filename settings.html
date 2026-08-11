@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>설정 · AssetFlow</title><link rel="stylesheet" href="lib/app.css">
+  <script src="lib/supabase-config.js"></script><script src="lib/account-store.js"></script><script src="lib/auth-guard.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script src="lib/shell.js"></script>
+<script>
+  const current=AccountStore.auth();
+  Shell.mount("app","settings",`<header class="page-head"><div><p class="eyebrow">계정</p><h1>설정</h1></div></header><section class="card settings-card"><h2>로그인 계정</h2><p class="sub">${Shell.escapeHtml(current?.user?.email||"")}</p><button type="button" class="btn secondary" id="logout">로그아웃</button></section>`);
+  document.getElementById("logout").addEventListener("click",()=>AccountStore.signOut());
+</script>
+</body>
+</html>

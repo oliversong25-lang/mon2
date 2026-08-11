@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로그인 · AssetFlow</title>
+  <link rel="stylesheet" href="lib/app.css">
+</head>
+<body>
+<main class="auth-page">
+  <section class="auth-card" aria-labelledby="auth-title">
+    <div class="auth-brand"><span class="nav-mark">A</span><b>AssetFlow</b></div>
+    <h1 id="auth-title">내 자산 불러오기</h1>
+    <p class="sub">같은 계정으로 로그인하면 어느 기기에서든 등록한 자산을 이어서 볼 수 있어요.</p>
+    <div class="auth-tabs" role="tablist" aria-label="계정 메뉴">
+      <button type="button" role="tab" aria-selected="true" data-mode="login">로그인</button>
+      <button type="button" role="tab" aria-selected="false" data-mode="signup">회원가입</button>
+    </div>
+    <form id="auth-form" novalidate>
+      <label class="auth-field">이메일<input type="email" name="email" autocomplete="email" inputmode="email" required></label>
+      <label class="auth-field">비밀번호<input type="password" name="password" autocomplete="current-password" minlength="6" required></label>
+      <p class="field-help" id="auth-help">이메일과 비밀번호를 입력해 주세요.</p>
+      <button class="btn primary auth-submit" type="submit">로그인</button>
+    </form>
+    <div class="load-error" id="auth-error" role="alert" hidden></div>
+    <p class="auth-security">자산 데이터는 로그인한 본인 계정에서만 조회됩니다.</p>
+  </section>
+</main>
+<script src="lib/supabase-config.js"></script>
+<script src="lib/account-store.js"></script>
+<script>
+(function(){
+  "use strict";
+  const params=new URLSearchParams(location.search);
+  const safeReturn=/^(home|assets|asset-input|settings)\.html(?:[?#].*)?$/.test(params.get("return")||"")?params.get("return"):"home.html";
+  const form=document.getElementById("auth-form"),errorBox=document.getElementById("auth-error"),help=document.getElementById("auth-help"),submit=form.querySelector("button[type=submit]");
+  let mode="login";
+
+  function message(text){errorBox.textContent=text;errorBox.hidden=!text;}
+  function destination(remote){return safeReturn==="home.html"&&(!remote||remote.status==="empty"||!remote.session?.assets?.length)?"asset-input.html":safeReturn;}
+  function setMode(next){mode=next;document.querySelectorAll("[data-mode]").forEach(button=>button.setAttribute("aria-selected",String(button.dataset.mode===mode)));submit.textContent=mode==="login"?"로그인":"회원가입";form.password.autocomplete=mode==="login"?"current-password":"new-password";help.textContent=mode==="login"?"이메일과 비밀번호를 입력해 주세요.":"비밀번호는 6자 이상 입력해 주세요.";message("");}
+  document.querySelectorAll("[data-mode]").forEach(button=>button.addEventListener("click",()=>setMode(button.dataset.mode)));
+
+  if(params.has("expired"))message("로그인이 만료되었습니다. 다시 로그인해 주세요.");
+  if(params.has("signedout"))help.textContent="로그아웃했습니다.";
+  if(!AccountStore.config().ready)message("Supabase 연결 정보가 아직 설정되지 않았습니다. lib/supabase-config.js를 확인해 주세요.");
+
+  // 이미 로그인했더라도 이 출처의 자산 사본이 없으면 서버에서 먼저 받아 온 뒤 이동한다.
+  const existing=AccountStore.auth();
+  if(existing&&existing.user){submit.disabled=true;AccountStore.loadRemote({required:true}).then(remote=>location.replace(destination(remote))).catch(err=>{console.error("[로그인] 계정 데이터 조회 실패:",err);submit.disabled=false;message("계정 데이터를 불러오지 못했습니다. 연결을 확인하고 다시 시도해 주세요.");});}
+
+  form.addEventListener("submit",async event=>{
+    event.preventDefault();message("");
+    if(!form.reportValidity())return;
+    submit.disabled=true;submit.textContent=mode==="login"?"불러오는 중…":"계정을 만드는 중…";
+    try{
+      let remote;
+      if(mode==="signup"){
+        const result=await AccountStore.signUp(form.email.value.trim(),form.password.value);
+        if(result.confirmationRequired){help.textContent="이메일 확인 링크를 누른 뒤 로그인해 주세요.";setMode("login");return;}
+        remote=result.remote;
+      }else remote=await AccountStore.signIn(form.email.value.trim(),form.password.value);
+      location.replace(destination(remote));
+    }catch(error){
+      console.error("[로그인] 처리 실패:",error);
+      const known=error.code==="invalid_credentials"||error.status===400?"이메일 또는 비밀번호를 확인해 주세요.":error.code==="network"?"네트워크에 연결할 수 없습니다. 입력한 내용은 그대로 유지됩니다.":error.message;
+      message(known);
+    }finally{submit.disabled=false;submit.textContent=mode==="login"?"로그인":"회원가입";}
+  });
+})();
+</script>
+</body>
+</html>

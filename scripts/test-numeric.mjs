@@ -9,6 +9,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { installTestAuth, launchTestBrowser } from "./lib/test-auth.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = 4327;
@@ -118,8 +119,9 @@ async function checkDecimalLimit(page, fieldId, typedText, expected) {
 
 async function run() {
   const server = await startServer();
-  const browser = await chromium.launch();
+  const browser = await launchTestBrowser(chromium);
   const page = await browser.newPage();
+  await installTestAuth(page);
   const results = [];
 
   const record = async (label, fn) => {

@@ -6,7 +6,8 @@
 python -m http.server 4174 --bind 127.0.0.1
 ```
 
-- 진입점: `http://127.0.0.1:4174/` — 등록된 자산이 있으면 홈, 없으면 자산 입력으로 보냅니다
+- 진입점: `http://127.0.0.1:4174/` — 로그인 뒤 계정 데이터를 불러와 홈 또는 자산 입력으로 보냅니다
+- 로그인: `http://127.0.0.1:4174/login.html`
 - 홈 화면: `http://127.0.0.1:4174/home.html`
 - 자산군별: `http://127.0.0.1:4174/assets.html`
 - 자산 입력: `http://127.0.0.1:4174/asset-input.html`
@@ -19,7 +20,34 @@ python -m http.server 4174 --bind 127.0.0.1
 
 경로는 전부 상대 경로라 하위 경로(`/mon2/`)에서도 그대로 동작합니다 — 절대 경로(`/data/...`)를 새로 쓰면 배포에서만 깨집니다.
 
-**공개되는 것은 앱 코드와 공개 시세 데이터뿐입니다.** API 키는 배치에서만 쓰이고 GitHub Actions Secrets에만 있습니다(클라이언트 코드에 키 문자열이 없는지 배포 전 확인). 사용자의 자산 데이터는 브라우저 `localStorage`에만 있어 배포물에 포함되지 않습니다 — 서버가 없으므로 어디로도 전송되지 않습니다.
+**공개되는 것은 앱 코드·공개 시세 데이터·Supabase anon key입니다.** anon key는 브라우저 앱에서 쓰도록 설계된 공개 키이며, `supabase/schema.sql`의 RLS가 계정 데이터를 격리합니다. `service_role` key는 클라이언트와 저장소에 절대 두지 않습니다. 시세 배치용 비밀 키는 계속 GitHub Actions Secrets에서만 씁니다.
+
+## 로그인과 계정별 저장
+
+1. Supabase 프로젝트의 SQL Editor에서 `supabase/schema.sql`을 실행합니다.
+2. Authentication → URL Configuration에 로컬 주소와 Pages 주소를 Redirect URL로 등록합니다.
+3. `lib/supabase-config.js`의 `url`과 `anonKey`를 프로젝트의 URL·anon key로 바꿉니다. 이 파일에 service_role key를 넣지 않습니다.
+4. 로컬 서버에서 `login.html`을 열어 이메일 회원가입·로그인을 확인합니다.
+
+현재 `assetInput.session` 문서 전체를 사용자별 `user_asset_sessions` 한 행의 `payload`에 저장합니다. 자산 배열·입력 진행 상태·스냅샷을 한 번에 교체해야 서로 다른 시점의 값으로 갈라지지 않고, 기존 `lib/valuation.js`와 `lib/portfolio.js`를 수정하지 않아도 되기 때문입니다. 스키마 번호는 별도 열과 payload 양쪽에 유지하며, 버전이 달라도 기존 `SessionStore.classify`가 자산을 보존하고 안내합니다.
+
+저장은 **로컬 즉시 저장 + Supabase 800ms 디바운스 저장**입니다. 네트워크가 끊기면 계정별 pending 사본을 localStorage에 남기고 화면 하단에 실패를 알립니다. 연결이 돌아오면 자동 재시도합니다. 따라서 키 입력마다 네트워크를 호출하지 않으면서도 화면 이동이나 통신 실패로 입력을 잃지 않습니다.
+
+RLS는 SQL 존재 여부가 아니라 실제 두 계정으로 검증합니다. 아래 환경 변수에는 테스트 전용 계정을 사용하세요.
+
+```powershell
+$env:SUPABASE_URL="https://<project>.supabase.co"
+$env:SUPABASE_ANON_KEY="<anon-key>"
+$env:RLS_TEST_A_EMAIL="account-a@example.com"
+$env:RLS_TEST_A_PASSWORD="..."
+$env:RLS_TEST_B_EMAIL="account-b@example.com"
+$env:RLS_TEST_B_PASSWORD="..."
+npm run test:rls
+```
+
+검증은 A의 행·스냅샷 저장, A의 본인 조회, B의 A 행 조회 0건, B가 A의 user_id로 행을 쓰려는 시도 차단까지 수행합니다. URL·키·두 테스트 계정이 없으면 성공으로 가장하지 않고 종료 코드 1로 실패합니다.
+
+종단간 암호화는 이번 범위 밖입니다. 확장할 때는 키 복구 정책, 비밀번호 분실 시 데이터 복구 불가 위험, 기기별 키 동기화를 먼저 결정해야 합니다.
 
 ## 시세 로딩 중 표시 규칙
 
@@ -45,12 +73,14 @@ python -m http.server 4174 --bind 127.0.0.1
 | `asset-input.html` | 자산 입력 (8개 자산군) |
 | `lib/app.css` | **다크 네이비 테마와 셸의 단일 출처**. 색·간격·카드·표 |
 | `lib/shell.js` | 좌측 내비게이션 (홈/자산/분석·목표 관리·알림·설정) |
-| `lib/session.js` | **세션 읽기의 단일 출처**. 저장 키·스키마 번호·마이그레이션 |
+| `lib/session.js` | **세션 읽기·로컬 우선 저장의 단일 출처**. 저장 키·스키마 번호·마이그레이션 |
+| `lib/account-store.js` | Supabase 인증·계정 세션 조회·오프라인 대기열·원격 저장 |
+| `login.html` / `settings.html` | 이메일 로그인·회원가입 / 로그아웃 |
 | `lib/valuation.js` | **평가금액의 단일 출처**. 시세 로딩·환율 환산·자산별 원화 평가 |
 | `lib/portfolio.js` | 집계와 분류(금융/실물 · 원금 보장 · 현금화 · 성장 가능성) |
 | `lib/format.js` | 금액·비율 표기. 같은 금액이 화면마다 다르게 반올림되면 안 됩니다 |
 
-`assets.html`은 자산군마다 내용이 크게 달라질 예정이라, 탭 정의(`GROUP_TABS`)와 본문 렌더(`groupBody`)를 분리해 뒀습니다. 자산군별 화면을 채울 때는 `groupBody`에 분기를 더하면 됩니다. 내비의 `분석`·`목표 관리`·`알림`·`설정`은 아직 화면이 없어 "준비 중"으로 표시하고 누를 수 없게 했습니다 — 없는 화면으로 보내 빈 페이지를 띄우느니 아직 없다는 사실을 그대로 보여줍니다.
+`assets.html`은 자산군마다 내용이 크게 달라질 예정이라, 탭 정의(`GROUP_TABS`)와 본문 렌더(`groupBody`)를 분리해 뒀습니다. 자산군별 화면을 채울 때는 `groupBody`에 분기를 더하면 됩니다. 내비의 설정은 로그아웃만 제공하며, `분석`·`목표 관리`·`알림`은 아직 "준비 중"입니다.
 
 `asset-input.html`의 `--content-max`(38rem)는 폼의 상한입니다. 화면이 넓다고 입력 필드를 끝까지 늘이면 한 줄에서 눈이 왕복하는 거리가 길어져 오히려 쓰기 나빠집니다.
 

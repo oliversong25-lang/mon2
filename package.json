@@ -10,6 +10,8 @@
     "test:tickers-mock": "node scripts/test-tickers-mock.mjs",
     "test:quotes-integration": "node scripts/test-quotes-integration.mjs",
     "test:home": "node scripts/test-home.mjs",
+    "test:auth": "node scripts/test-auth-flow.mjs",
+    "test:rls": "node scripts/test-rls.mjs",
     "test": "npm run test:focus && npm run test:numeric && npm run test:groups && npm run test:quotes-mock && npm run test:tickers-mock && npm run test:quotes-integration && npm run test:home",
     "build:tickers": "node scripts/build-tickers.mjs",
     "build:quotes": "node scripts/build-quotes.mjs"
