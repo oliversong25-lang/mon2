@@ -57,13 +57,24 @@
       let remote;
       if(mode==="signup"){
         const result=await AccountStore.signUp(form.email.value.trim(),form.password.value);
-        if(result.confirmationRequired){help.textContent="이메일 확인 링크를 누른 뒤 로그인해 주세요.";setMode("login");return;}
+        if(result.confirmationRequired){
+          setMode("login");
+          help.textContent="가입 확인 이메일을 보냈습니다. 메일의 확인 링크를 누른 뒤 로그인해 주세요.";
+          message("이메일 확인 전에는 로그인할 수 없습니다.");
+          return;
+        }
         remote=result.remote;
       }else remote=await AccountStore.signIn(form.email.value.trim(),form.password.value);
       location.replace(destination(remote));
     }catch(error){
       console.error("[로그인] 처리 실패:",error);
-      const known=error.code==="invalid_credentials"||error.status===400?"이메일 또는 비밀번호를 확인해 주세요.":error.code==="network"?"네트워크에 연결할 수 없습니다. 입력한 내용은 그대로 유지됩니다.":error.message;
+      const known=error.code==="email_not_confirmed"
+        ?"이메일 확인이 필요합니다. 받은 메일의 확인 링크를 먼저 눌러 주세요."
+        :error.code==="invalid_credentials"||error.status===400
+          ?"이메일 또는 비밀번호를 확인해 주세요."
+          :error.code==="network"
+            ?"네트워크에 연결할 수 없습니다. 입력한 내용은 그대로 유지됩니다."
+            :error.message;
       message(known);
     }finally{submit.disabled=false;submit.textContent=mode==="login"?"로그인":"회원가입";}
   });
