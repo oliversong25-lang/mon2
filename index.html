@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AssetFlow</title>
+  <link rel="stylesheet" href="lib/app.css">
+</head>
+<body>
+<!-- 진입점. 등록된 자산이 있으면 홈으로, 없으면 자산 입력으로 보낸다.
+     자산 판단은 localStorage만 보므로 시세를 기다리지 않는다 — 여기서 숫자를 그리지
+     않기 때문에 로딩 중 잘못된 값이 보일 여지도 없다. -->
+<main class="empty-state" id="fallback" hidden>
+  <h1>AssetFlow</h1>
+  <p>자동으로 이동하지 않으면 아래에서 선택해 주세요.</p>
+  <p><a class="btn primary" href="home.html">내 자산 보기</a> <a class="btn" href="asset-input.html">자산 입력하기</a></p>
+</main>
+<script src="lib/session.js"></script>
+<script>
+  (function () {
+    // replace를 쓰는 이유: 뒤로가기를 눌렀을 때 이 라우터로 되돌아와 다시 튕기는
+    // 무한 왕복을 만들지 않기 위해서다.
+    try {
+      var state = SessionStore.read();
+      // 예전 형식(legacy-empty)도 홈으로 보낸다 — 홈이 "예전 형식으로 저장된 기록이
+      // 있어요"를 안내한다. 입력 화면으로 보내면 그 사실이 묻힌다.
+      var target = state.assets.length || state.status !== "empty" ? "home.html" : "asset-input.html";
+      location.replace(target);
+    } catch (error) {
+      // 스토리지를 못 읽는 환경(사생활 보호 모드 등)에서도 막히지 않게 선택지를 남긴다.
+      console.error("[진입점] 세션 확인 실패:", error);
+      document.getElementById("fallback").hidden = false;
+    }
+  })();
+</script>
+</body>
+</html>

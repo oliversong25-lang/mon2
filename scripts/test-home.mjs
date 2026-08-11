@@ -11,6 +11,7 @@ import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { readFile, writeFile } from "node:fs/promises";
+import { writeFileSync } from "node:fs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = 4332;
@@ -106,6 +107,30 @@ async function type(page, selector, text) {
 }
 
 const originalQuotes = await readFile(QUOTES_PATH, "utf8").catch(() => null);
+
+// finally만으로는 부족하다. 이 테스트는 브라우저 라우트 핸들러 안에서 비동기로 도는
+// 코드가 있어, 거기서 예외가 나면 Node가 uncaughtException으로 프로세스를 즉시 죽인다.
+// 실제로 그렇게 죽어서 커밋된 실배치 산출물(4,402건)이 2건짜리 픽스처로 덮어써진 채
+// 남았다. 어떤 경로로 끝나든 원본이 돌아오도록 종료 훅에 동기 복원을 걸어 둔다.
+function restoreQuotesSync() {
+  try {
+    if (originalQuotes !== null) writeFileSync(QUOTES_PATH, originalQuotes, "utf8");
+  } catch (error) {
+    console.error("[정리] data/quotes.json 복원 실패:", error.message);
+  }
+}
+process.on("exit", restoreQuotesSync);
+process.on("uncaughtException", (error) => {
+  console.error("[치명] 처리되지 않은 예외:", error);
+  restoreQuotesSync();
+  process.exit(1);
+});
+process.on("unhandledRejection", (error) => {
+  console.error("[치명] 처리되지 않은 거부:", error);
+  restoreQuotesSync();
+  process.exit(1);
+});
+
 let server;
 let browser;
 
@@ -539,6 +564,52 @@ try {
     await page.locator(".group-tab").filter({ hasText: "주식·ETF" }).click();
     const financialHeaders = await page.locator("table.data thead th").allTextContents();
     return financialHeaders.includes("평가손익") ? { ok: true } : { ok: false, reason: `금융자산 탭 열 이름: ${financialHeaders.join(", ")}` };
+  });
+
+  // ===== 5a-3. 시세 로딩 중에는 숫자를 내지 않는다 =====
+  // 실측 버그: quotes.json 도착 전에 한 번 렌더해서 환율이 없는 총자산(6억 2,350만원)이
+  // 뜨고 2초 뒤 6억 5,866만원으로 정정됐다. 3,516만원 차이가 깜빡였고, 게다가
+  // "시세를 확인하지 못했어요"라는 사실 아닌 경고가 떴다 사라졌다.
+  for (const [pageName, url] of [["홈", HOME_URL], ["자산", `http://127.0.0.1:${PORT}/assets.html`]]) {
+    await record(`${pageName} 화면: 시세 로딩이 느려도 금액이 바뀌는 순간이 없다`, async () => {
+      // quotes.json 응답을 1.2초 지연시켜 로딩 구간을 실제로 만든다.
+      await page.route("**/data/quotes.json", async (route) => {
+        await new Promise((done) => setTimeout(done, 1200));
+        // 지연 도중 페이지를 벗어나면 라우트가 이미 처리돼 있을 수 있다 — 그건 오류가 아니다.
+        await route.continue().catch(() => {});
+      });
+      await page.goto(url);
+      // 로딩 구간 동안 화면을 반복 관찰한다.
+      const seen = new Set();
+      const deadline = Date.now() + 1100;
+      let sawSkeleton = false;
+      while (Date.now() < deadline) {
+        const snap = await page.evaluate(() => ({
+          skeleton: Boolean(document.querySelector(".skel")),
+          text: document.body.innerText,
+        }));
+        if (snap.skeleton) sawSkeleton = true;
+        // 금액 형태(…원)가 보이면 기록한다.
+        (snap.text.match(/[\d,]+(?:억|만)?\s?[\d,]*원/g) || []).forEach((money) => seen.add(money));
+        if (/시세를 확인하지 못한/.test(snap.text)) return { ok: false, reason: "로딩 중에 '시세를 확인하지 못한' 경고가 떴다" };
+        await new Promise((done) => setTimeout(done, 120));
+      }
+      await page.unroute("**/data/quotes.json");
+      if (!sawSkeleton) return { ok: false, reason: "로딩 자리표시(.skel)가 한 번도 보이지 않음 — 로딩 구간이 재현되지 않았을 수 있다" };
+      if (seen.size) return { ok: false, reason: `로딩 중에 금액이 표시됐다: ${[...seen].slice(0, 4).join(", ")}` };
+      await page.waitForFunction(() => !document.querySelector(".skel"), { timeout: 8000 });
+      return { ok: true };
+    });
+  }
+
+  await record("두 화면의 총자산이 서로 같다", async () => {
+    await page.goto(HOME_URL);
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+    const homeTotal = await page.evaluate(() => Portfolio.summarize(session.assets).total);
+    await page.goto(`http://127.0.0.1:${PORT}/assets.html`);
+    await page.waitForSelector(".group-tabs", { timeout: 8000 });
+    const assetsTotal = await page.evaluate(() => Portfolio.summarize(SessionStore.read().assets).total);
+    return homeTotal === assetsTotal ? { ok: true } : { ok: false, reason: `홈 ${homeTotal} ≠ 자산 ${assetsTotal}` };
   });
 
   // ===== 5b. 스키마 불일치: 데이터를 조용히 버리지 않는다 =====

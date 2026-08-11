@@ -73,18 +73,39 @@ function render(){
     return;
   }
 
+  if(Valuation.state.status==="error"){
+    Shell.mount("app","assets",`${pageHead()}
+      <div class="banner">시세를 불러오지 못해 평가금액을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>`);
+    return;
+  }
+
+  // 시세가 도착하기 전에는 숫자를 내지 않는다. 홈과 이 화면이 잠시라도 서로 다른
+  // 총자산을 보여주는 상태가 생기면 안 된다.
+  if(Valuation.state.status==="loading"){
+    const bar=(width)=>`<span class="skel" style="width:${width}"></span>`;
+    Shell.mount("app","assets",`${pageHead()}
+      <div class="kpis">${[0,1,2].map(()=>`<div class="kpi">${bar("50%")}${bar("70%")}</div>`).join("")}</div>
+      <div class="card"><h2>보유 자산</h2><div style="margin-top:var(--space-4)">${bar("100%")}${bar("100%")}${bar("80%")}</div></div>`);
+    return;
+  }
+
   const summary=Portfolio.summarize(assets);
-  const asOf=Valuation.asOfLabel();
   Shell.mount("app","assets",[
-    `<div class="page-head">
-      <div><h1>전체 자산</h1><div class="sub">${asOf?escapeHtml(asOf):"시세 기준일 확인 중"} · 보유 자산을 자산군별로 나눠 봅니다</div></div>
-      <div class="head-actions"><a class="btn primary" href="${INPUT_URL}#add">＋ 자산 추가</a></div>
-    </div>`,
+    pageHead(),
     tabs(summary),
     groupBody(summary),
     sourcesLine(),
   ].join(""));
   bind();
+}
+
+function pageHead(){
+  const asOf=Valuation.asOfLabel();
+  const sub=Valuation.state.status==="loading"?"시세 불러오는 중":`${asOf||"시세 기준일 확인 중"} · 보유 자산을 자산군별로 나눠 봅니다`;
+  return `<div class="page-head">
+    <div><h1>전체 자산</h1><div class="sub">${escapeHtml(sub)}</div></div>
+    <div class="head-actions"><a class="btn primary" href="${INPUT_URL}#add">＋ 자산 추가</a></div>
+  </div>`;
 }
 
 function tabs(summary){

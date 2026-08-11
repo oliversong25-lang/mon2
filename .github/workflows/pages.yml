@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+# 정적 파일만 올리는 배포다. 서버는 없다 — 앱은 data/*.json을 fetch만 한다.
+#
+# main에 푸시될 때마다 돈다. 시세 배치(quotes.yml)와 종목 배치(tickers.yml)도 main에
+# 커밋을 밀어넣으므로, 배치가 data/quotes.json을 갱신하면 이 워크플로가 자동으로 이어
+# 돌아 배포도 함께 갱신된다 — 따로 연결할 필요가 없다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# 배치 워크플로와 권한이 겹치지 않게 여기서는 읽기만 한다(배포에 필요한 pages·id-token만 추가).
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배치가 연달아 커밋해도 마지막 것만 배포되면 되므로 진행 중인 배포는 취소한다.
+# 배치 쪽 concurrency 그룹(quotes-batch·tickers-batch)과는 이름이 달라 서로 막지 않는다.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+        with:
+          # 저장소 설정에서 Pages를 켜두지 않았어도 첫 실행에서 켜준다.
+          enablement: true
+
+      # 저장소 루트를 그대로 올린다. index.html이 진입점이고 data/·lib/는 상대 경로로
+      # 참조하므로 하위 경로(/mon2/)에서도 그대로 동작한다.
+      # 올라가는 것은 앱 코드와 공개 시세 데이터뿐이다 — API 키는 배치(Actions Secrets)에만
+      # 있고 클라이언트 코드에 들어가지 않으며, 사용자의 자산 데이터는 브라우저
+      # localStorage에만 있으므로 배포물에 포함되지 않는다.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

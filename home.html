@@ -233,6 +233,15 @@ function render(){
     return;
   }
 
+  // 시세가 도착하기 전에는 숫자를 아예 내지 않는다. 예전에는 여기서 한 번 그리고
+  // 로드 후 다시 그려서, 환율이 없는 동안 외화가 빠진 총자산(실측 3,516만원 차이)이
+  // 잠깐 보였다가 정정됐다. 게다가 "시세를 확인하지 못했어요"라는 사실 아닌 경고가
+  // 떴다 사라졌는데, 그 문구는 정말로 시세를 못 받았을 때의 신뢰 장치라 그렇게 닳으면 안 된다.
+  if(Valuation.state.status==="loading"){
+    Shell.mount("app","home",skeleton());
+    return;
+  }
+
   const summary=Portfolio.summarize(assets);
   recordSnapshot(summary.total);
 
@@ -251,10 +260,30 @@ function render(){
 
 function pageHead(){
   const asOf=Valuation.asOfLabel();
+  const sub=Valuation.state.status==="loading"?"시세 불러오는 중":(asOf||"시세 기준일 확인 중");
   return `<div class="page-head">
-    <div><h1>내 자산</h1><div class="sub">${asOf?escapeHtml(asOf):"시세 기준일 확인 중"}</div></div>
+    <div><h1>내 자산</h1><div class="sub">${escapeHtml(sub)}</div></div>
     <div class="head-actions"><a class="btn primary" href="${INPUT_URL}#add">＋ 자산 추가</a></div>
   </div>`;
+}
+
+// 카드 골격만 띄우고 금액 자리는 비워 둔다. 레이아웃이 튀지 않게 같은 격자를 쓴다.
+function skeleton(){
+  const bar=(width)=>`<span class="skel" style="width:${width}"></span>`;
+  const card=(title,body)=>`<div class="card"><h2>${title}</h2><div style="margin-top:var(--space-4)">${body}</div></div>`;
+  return [
+    pageHead(),
+    `<div class="grid grid-top">
+      ${card("총자산",`${bar("60%")}${bar("40%")}`)}
+      ${card("확인이 필요한 항목",`${bar("80%")}${bar("55%")}`)}
+      ${card("다가오는 일정",`${bar("70%")}${bar("45%")}`)}
+    </div>`,
+    `<div class="grid grid-half" style="margin-top:var(--space-4)">
+      ${card("자산 구성",`${bar("100%")}${bar("70%")}${bar("60%")}`)}
+      ${card("포트폴리오 요약",`${bar("85%")}${bar("60%")}${bar("60%")}`)}
+    </div>`,
+    `<div style="margin-top:var(--space-4)">${card("보유 자산",`${bar("100%")}${bar("100%")}${bar("80%")}`)}</div>`,
+  ].join("");
 }
 
 function legacyBanner(){
