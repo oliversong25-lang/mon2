@@ -29,6 +29,7 @@ const QUOTES_FIXTURE = {
   quotes: {
     "005930": { price: 73400, currency: "KRW" }, // 삼성전자
     "035720": { price: 52300, currency: "KRW" }, // 카카오
+    "000660": { price: 474000, currency: "KRW" }, // SK하이닉스 — 축·열 확인용
   },
   crypto: { BTC: { price: 91000000, currency: "KRW" }, ETH: { price: 2700000, currency: "KRW" } },
   rates: { USD: 1380.5, JPY: 9.25 },
@@ -56,6 +57,17 @@ const SAMPLE_ASSETS = [
   { id: "s6", group: "bond", fields: { valuation: 6000000 }, autoFields: { bondType: "국채", currency: "KRW" } },
   { id: "s7", group: "commodity", fields: { assetKind: "금", holdingMethod: "KRX 금시장", quantity: 60 }, autoFields: {} },
   { id: "s8", group: "realestate", fields: { propertyType: "아파트", valuation: 1200000000, joint: true, ownershipRate: 50 }, autoFields: {} },
+];
+
+// 축 전환 확인용. 원화 현금과 외화 현금을 함께 둬야 원금 보장·통화 축이 실제로 갈리는지 볼 수 있다.
+const AXIS_ASSETS = [
+  { id: "c1", group: "cash", fields: { currency: "KRW", amount: 3000000 }, autoFields: {} },
+  { id: "c2", group: "cash", fields: { currency: "USD", amount: 2000 }, autoFields: {} },
+  { id: "s1", group: "savings", fields: { productType: "예금", balance: 12000000 }, autoFields: {} },
+  { id: "e1", group: "equity", fields: { productName: "SK하이닉스", productCode: "000660", quantity: 30, averagePrice: 300000 }, autoFields: { currency: "KRW" } },
+  { id: "k1", group: "crypto", fields: { productName: "비트코인", productCode: "BTC", quantity: 0.05, averagePrice: 80000000 }, autoFields: { currency: "KRW" } },
+  { id: "m1", group: "commodity", fields: { assetKind: "금", holdingMethod: "KRX 금시장", quantity: 50 }, autoFields: {} },
+  { id: "r1", group: "realestate", fields: { propertyType: "아파트", valuation: 1200000000, joint: true, ownershipRate: 50 }, autoFields: {} },
 ];
 
 async function startServer() {
@@ -522,6 +534,76 @@ try {
     if (shares.physicalShareOfTotal < 0.8) return { ok: false, reason: `실물 비중 ${shares.physicalShareOfTotal} — 검증 전제가 성립하지 않음` };
     // 금융자산만 따로 보면 가장 작은 항목도 1% 이상으로 올라온다(전체 기준이면 0.3%대).
     return shares.smallestFinancial > 0.01 ? { ok: true } : { ok: false, reason: `가장 작은 금융자산 항목 비중 ${shares.smallestFinancial}` };
+  });
+
+  // ===== 5a-1b. 축 전환이 실제로 갈리는지 =====
+  await record("원금 보장 축이 원화 현금·예적금과 나머지로 갈린다", async () => {
+    await page.goto(HOME_URL);
+    await page.evaluate((assets) => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, assets, snapshots: [] }));
+    }, AXIS_ASSETS);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".legend-row"), { timeout: 8000 });
+    await page.locator('button[data-axis="guaranteed"]').click();
+    const parts = await page.evaluate(() => Portfolio.summarize(session.assets).financial.axes.guaranteed);
+    const guaranteed = parts.find((part) => part.label === "원금 보장");
+    // 원화 현금 300만 + 예적금 1,200만 = 1,500만. USD 현금은 환율에 따라 원화 가치가
+    // 변하므로 시가 변동 쪽이어야 한다.
+    if (!guaranteed || guaranteed.krw !== 15000000) return { ok: false, reason: `원금 보장 ${guaranteed ? guaranteed.krw : "없음"} (15,000,000 기대)` };
+    const sum = parts.reduce((acc, part) => acc + part.share, 0);
+    return Math.abs(sum - 1) < 1e-9 ? { ok: true } : { ok: false, reason: `합계 ${sum}` };
+  });
+
+  await record("통화 축에서 USD 현금이 달러로 잡히고 커버리지가 100%다", async () => {
+    await page.locator('button[data-axis="currency"]').click();
+    const parts = await page.evaluate(() => Portfolio.summarize(session.assets).financial.axes.currency);
+    const usd = parts.find((part) => part.label === "달러");
+    if (!usd) return { ok: false, reason: `달러 항목 없음: ${parts.map((part) => part.label).join(", ")}` };
+    // USD 2,000 × 실제 환율. 1:1로 계산됐다면 2,000원이 나온다.
+    if (usd.krw < 1000000) return { ok: false, reason: `달러 ${usd.krw}원 — 환율이 적용되지 않은 값으로 보임` };
+    const sum = parts.reduce((acc, part) => acc + part.share, 0);
+    if (Math.abs(sum - 1) > 1e-9) return { ok: false, reason: `합계 ${sum}` };
+    // 분류되지 않은 자산이 없어야 한다.
+    const rows = await page.evaluate(() => Portfolio.summarize(session.assets).financial.rows.length);
+    const counted = await page.evaluate(() => Portfolio.summarize(session.assets).financial.axes.currency.length);
+    return counted > 0 && rows > 0 ? { ok: true } : { ok: false, reason: "통화 축에 자산이 없음" };
+  });
+
+  await record("실물자산으로 전환하면 부동산·원자재만 나오고 3축 탭이 숨는다", async () => {
+    await page.locator('button[data-class="physical"]').click();
+    const labels = await page.locator(".legend-row .name").allTextContents();
+    const unexpected = labels.filter((label) => !["부동산", "원자재·실물자산"].includes(label));
+    if (unexpected.length) return { ok: false, reason: `실물자산에 없어야 할 항목: ${unexpected.join(", ")}` };
+    const axisTabs = await page.locator("button[data-axis]").count();
+    if (axisTabs) return { ok: false, reason: `축 탭이 ${axisTabs}개 남아 있음` };
+    const note = await page.locator(".card-note").first().textContent();
+    return note.includes("원금 보장·통화 축을 두지 않았습니다") ? { ok: true } : { ok: false, reason: `안내 문구: ${note.slice(0, 60)}` };
+  });
+
+  // ===== 5a-1c. 현재가·보유 수량 열 =====
+  await record("보유 자산 표에 현재가와 보유 수량이 있고, 단가 개념이 없는 자산군은 비어 있다", async () => {
+    await page.goto(HOME_URL);
+    await page.waitForFunction(() => document.querySelector("table.data tbody tr"), { timeout: 8000 });
+    const headers = await page.locator("table.data thead th").allTextContents();
+    for (const want of ["현재가", "보유 수량"]) {
+      if (!headers.includes(want)) return { ok: false, reason: `"${want}" 열이 없음: ${headers.join(", ")}` };
+    }
+    const priceIndex = headers.indexOf("현재가");
+    const rows = await page.locator("table.data tbody tr").evaluateAll((nodes, index) =>
+      nodes.map((node) => {
+        const cells = [...node.querySelectorAll("td")].map((cell) => cell.textContent.trim());
+        return { name: cells[0], price: cells[index], qty: cells[index + 1] };
+      }), priceIndex);
+    const withUnit = ["SK하이닉스", "비트코인", "금"];
+    for (const row of rows) {
+      const shouldHave = withUnit.includes(row.name);
+      const has = row.price !== "–";
+      if (shouldHave && !has) return { ok: false, reason: `${row.name}에 현재가가 없음` };
+      // 예적금 잔액이나 부동산 추정가에 억지로 단가를 붙이면 없는 개념을 만들어내는 셈이다.
+      if (!shouldHave && has) return { ok: false, reason: `${row.name}에 현재가가 억지로 채워짐: ${row.price}` };
+      if (shouldHave && row.qty === "–") return { ok: false, reason: `${row.name}에 보유 수량이 없음` };
+    }
+    return { ok: true };
   });
 
   // ===== 5a-2. 자산군 탭 =====

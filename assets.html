@@ -93,6 +93,7 @@ function render(){
   }
 
   const summary=Portfolio.summarize(assets);
+  allTotal=summary.total;
   Shell.mount("app","assets",[
     pageHead(),
     tabs(summary),
@@ -120,8 +121,32 @@ function tabs(summary){
   }).join("")}</div>`;
 }
 
-// 자산군별 본문. 지금은 모든 자산군이 같은 형태(요약 3칸 + 보유 목록)를 쓴다.
-// 자산군마다 내용이 달라지면 여기서 분기한다.
+// 자산군마다 의미 있는 열이 다르다. 홈은 자산군이 섞여 있어 공통 열을 쓰지만, 여기서는
+// 그 자산군에 맞는 열만 보여준다 — 예적금에 현재가 칸을 두면 영원히 비어 있을 뿐이다.
+// 자산군별 화면을 채울 때 이 표에 줄을 더하면 된다.
+const COL={
+  name:{head:"자산명",cls:"name",cell:row=>escapeHtml(row.name)},
+  price:{head:"현재가",align:"right",cls:"num",cell:row=>row.unitPrice==null?dash():`${Math.round(row.unitPrice).toLocaleString("ko-KR")}${row.unitLabel==="g"?"원/g":"원"}`},
+  qty:{head:"보유 수량",align:"right",cls:"num",cell:row=>row.quantity==null?dash():`${row.quantity.toLocaleString("ko-KR",{maximumFractionDigits:8})}${row.unitLabel?` ${row.unitLabel}`:""}`},
+  avg:{head:"평균단가",align:"right",cls:"num",cell:row=>row.averagePrice==null?dash():`${Math.round(row.averagePrice).toLocaleString("ko-KR")}원`},
+  value:{head:"평가금액",align:"right",cls:"num",cell:row=>won(row.krw)},
+  shareInGroup:{head:"자산군 내 비중",align:"right",cls:"num",cell:(row,total)=>total?pct(row.krw/total):"–"},
+  shareOfAll:{head:"전체 대비 비중",align:"right",cls:"num",cell:row=>allTotal?pct(row.krw/allTotal):"–"},
+};
+function dash(){return `<span style="color:var(--dim)">–</span>`;}
+function profitCol(label){
+  return {head:label,align:"right",cell:row=>row.profit===null?`<span class="pill">매입 정보 없음</span>`
+    :`<span class="num ${row.profit>0?"pos":row.profit<0?"neg":""}">${row.profit>0?"+":row.profit<0?"−":""}${won(Math.abs(row.profit))}</span>`};
+}
+let allTotal=0;
+function columnsFor(group,profitLabel){
+  if(group==="equity"||group==="crypto")return [COL.name,COL.price,COL.qty,COL.avg,COL.value,profitCol(profitLabel),COL.shareInGroup,COL.shareOfAll];
+  if(group==="commodity")return [COL.name,COL.price,COL.qty,COL.value,profitCol(profitLabel),COL.shareInGroup,COL.shareOfAll];
+  // 현금·예적금·펀드·채권·부동산은 단가 개념이 없다 — 빈 칸을 만들지 않는다.
+  return [COL.name,COL.value,profitCol(profitLabel),COL.shareInGroup,COL.shareOfAll];
+}
+
+// 자산군별 본문. 요약 3칸 + 보유 목록이라는 뼈대는 공통이고, 표의 열만 자산군을 탄다.
 function groupBody(summary){
   const rows=summary.rows.filter(row=>row.group===activeGroup);
   const missing=summary.unavailable.filter(entry=>entry.asset.group===activeGroup);
@@ -143,15 +168,10 @@ function groupBody(summary){
   const profitBasis=physical?"입력하신 추정가 기준":"매입 정보가 있는 자산 기준";
 
   const table=`<table class="data">
-    <thead><tr><th>자산명</th><th class="right">평가금액</th><th class="right">${profitLabel}</th><th class="right">자산군 내 비중</th><th class="right">전체 대비 비중</th></tr></thead>
-    <tbody>${rows.map(row=>`<tr data-asset="${escapeHtml(row.id||"")}">
-      <td class="name">${escapeHtml(row.name)}</td>
-      <td class="right num">${won(row.krw)}</td>
-      <td class="right">${row.profit===null?`<span class="pill">매입 정보 없음</span>`
-        :`<span class="num ${row.profit>0?"pos":row.profit<0?"neg":""}">${row.profit>0?"+":row.profit<0?"−":""}${won(Math.abs(row.profit))}</span>`}</td>
-      <td class="right num">${total?pct(row.krw/total):"–"}</td>
-      <td class="right num">${summary.total?pct(row.krw/summary.total):"–"}</td>
-    </tr>`).join("")}</tbody></table>`;
+    <thead><tr>${columnsFor(activeGroup,profitLabel).map(col=>`<th class="${col.align||""}">${escapeHtml(col.head)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(row=>`<tr data-asset="${escapeHtml(row.id||"")}">${
+      columnsFor(activeGroup,profitLabel).map(col=>`<td class="${col.align||""} ${col.cls||""}">${col.cell(row,total)}</td>`).join("")
+    }</tr>`).join("")}</tbody></table>`;
 
   // 시세를 못 받은 자산은 합계에서 빠진다 — 조용히 사라지지 않게 건수를 밝힌다.
   const missingNote=missing.length

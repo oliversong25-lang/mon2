@@ -142,7 +142,11 @@ DART 기업개황의 `induty_code`는 한국표준산업분류(KSIC) 코드를 3
 
 ## 국내 시세 배치 (data/quotes.json)
 
-국내 주식·ETF·ETN 시세, 금·환율(및 있으면 은)을 매일 1회 받아 `data/quotes.json`을 굽습니다. `.github/workflows/quotes.yml`이 매일 06:00 KST에 자동 실행하고, 변경분이 있을 때만 커밋합니다. 앱은 이 정적 파일을 fetch만 할 뿐 API 키를 전혀 갖고 있지 않습니다.
+국내 주식·ETF·ETN 시세, 금·환율(및 있으면 은)을 매일 1회 받아 `data/quotes.json`을 굽습니다. `.github/workflows/quotes.yml`이 매일 **14:00 KST**에 자동 실행하고, 변경분이 있을 때만 커밋합니다. 앱은 이 정적 파일을 fetch만 할 뿐 API 키를 전혀 갖고 있지 않습니다.
+
+**14:00인 이유**: 금융위원회_주식시세정보는 기준일 *다음 영업일 13시 이후*에 갱신됩니다. 06:00에 돌리면 전일 데이터가 아직 없어 소급 조회가 그 전 영업일로 내려가고, 결과적으로 **항상 2영업일 전 종가**를 쓰게 됩니다(실측: 8/11 06:38 실행이 8/10 대신 8/7 종가를 가져옴). 제공 시각보다 1시간 뒤에 돌려 전일 종가를 잡습니다.
+
+배치는 데이터가 있는 날짜를 찾을 때까지 소급 조회하므로 제공이 밀려도 실패하지 않고 조용히 하루 뒤처진 값을 씁니다. 그래서 기준일이 직전 영업일보다 이르면 **경고**를 남깁니다 — 공휴일이면 정상이지만 매일 반복되면 배치 시각을 다시 봐야 한다는 신호입니다. 공휴일을 알 수 없으므로 실패로 처리하지는 않습니다.
 
 ```powershell
 $env:DATA_GO_KR_KEY="..."; $env:KOREAEXIM_AUTH_KEY="..."; node scripts/build-quotes.mjs
@@ -162,7 +166,7 @@ GitHub Actions에서 쓰려면 위 값들을 저장소 Settings → Secrets and 
 
 | 워크플로 | 주기 | 쓰는 Secret |
 |---|---|---|
-| `quotes.yml` (시세) | 매일 06:00 KST | `DATA_GO_KR_KEY`, `KOREAEXIM_AUTH_KEY`, `COINGECKO_API_KEY`, `ECOS_AUTH_KEY`, `ECOS_SILVER_STAT_CODE` |
+| `quotes.yml` (시세) | 매일 14:00 KST | `DATA_GO_KR_KEY`, `KOREAEXIM_AUTH_KEY`, `COINGECKO_API_KEY`, `ECOS_AUTH_KEY`, `ECOS_SILVER_STAT_CODE` |
 | `tickers.yml` (종목 목록·업종) | 매주 일요일 05:00 KST | `DATA_GO_KR_KEY`, `DART_API_KEY` |
 
 `quotes.json` 형식:
