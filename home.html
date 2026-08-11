@@ -30,6 +30,11 @@
     .total-change.flat { color:var(--muted); font-weight:600; }
     .pos { color:var(--pos); } .neg { color:var(--neg); }
     .excluded { margin-top:var(--space-3); padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm); background:var(--soft); color:var(--muted); font-size:var(--font-xs); line-height:1.5; }
+    .split { margin-top:var(--space-4); padding-top:var(--space-3); border-top:var(--border) solid var(--line); }
+    .split-row { display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-2); font-size:var(--font-sm); }
+    .split-row + .split-row { margin-top:var(--space-2); }
+    .split-row .k { color:var(--muted); } .split-row .v { font-weight:700; font-variant-numeric:tabular-nums; }
+    .split-row .s { min-width:3.25rem; color:var(--muted); font-size:var(--font-xs); text-align:right; font-variant-numeric:tabular-nums; }
     details.fold { margin:0 var(--space-5) var(--space-3); border-radius:var(--radius-lg); background:var(--paper); }
     details.fold > summary { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-4) var(--space-5); font-size:var(--font-sm); font-weight:700; list-style:none; cursor:pointer; }
     details.fold > summary::-webkit-details-marker { display:none; }
@@ -44,14 +49,21 @@
     .tabs { display:flex; gap:var(--space-2); margin-bottom:var(--space-4); }
     .tab { flex:1; padding:var(--space-2) 0; border:var(--border) solid var(--line); border-radius:var(--radius-round); background:var(--paper); color:var(--muted); font-size:var(--font-xs); font-weight:700; }
     .tab.active { border-color:var(--brand); background:var(--brand-soft); color:var(--brand); }
-    .donut-wrap { display:flex; align-items:center; gap:var(--space-4); }
-    .donut { flex:none; }
-    .donut-center { font-size:var(--font-xs); fill:var(--muted); }
-    .legend { flex:1; min-width:0; }
+    /* 가로 누적 막대. 도넛은 조각끼리 구분이 안 되는 데다, 2%짜리 조각은 모바일에서
+       폭이 몇 픽셀이라 진입점으로 기능하지 못했다. 막대는 모바일 폭을 다 쓰고,
+       진입은 터치 타겟이 충분한 범례 행이 맡는다. */
+    .stack { display:flex; width:100%; height:1.5rem; overflow:hidden; border-radius:var(--radius-sm); background:var(--soft); }
+    /* 인접한 색 사이에 표면색 간격을 둬 색이 서로 번지지 않게 한다. */
+    .stack-seg { min-width:.1875rem; border-right:.125rem solid var(--paper); }
+    .stack-seg:last-child { border-right:0; }
+    .stack-note { margin-top:var(--space-2); color:var(--muted); font-size:var(--font-xs); }
+    .legend { margin-top:var(--space-3); }
     /* 자산명·비율·금액을 한 줄에 다 넣으면 좁은 폭에서 이름이 먼저 잘려나간다
        ("가상자산"이 통째로 사라졌었다). 이름+비율을 윗줄, 금액을 아랫줄로 나눈다. */
-    .legend-row { display:grid; width:100%; grid-template-columns:auto 1fr auto; align-items:center; gap:0 var(--space-2); padding:var(--space-2); border:0; border-radius:var(--radius-sm); background:transparent; text-align:left; font-size:var(--font-sm); }
+    /* 범례가 진입점이므로 터치 타겟을 충분히 준다(행 높이 44px 이상). */
+    .legend-row { display:grid; width:100%; min-height:2.75rem; grid-template-columns:auto 1fr auto; align-items:center; gap:0 var(--space-2); padding:var(--space-2) var(--space-2); border:0; border-radius:var(--radius-sm); background:transparent; text-align:left; font-size:var(--font-sm); }
     .legend-row:hover { background:var(--soft); }
+    .legend-row:active { background:var(--soft); }
     .swatch { flex:none; width:.625rem; height:.625rem; border-radius:.1875rem; }
     .legend-row .name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .legend-row .share { font-weight:700; font-variant-numeric:tabular-nums; }
@@ -60,10 +72,12 @@
     .meter + .meter { margin-top:var(--space-4); }
     .meter-head { display:flex; justify-content:space-between; margin-bottom:var(--space-1); font-size:var(--font-sm); }
     .meter-head .val { color:var(--muted); font-variant-numeric:tabular-nums; }
-    /* 중앙 기준선에서 좌우로 벌어진다. 0에서 차오르는 막대가 아니다 — 완성도가 아니라 위치를 나타낸다. */
-    .meter-track { position:relative; height:.5rem; border-radius:var(--radius-round); background:var(--soft); }
-    .meter-track::before { content:""; position:absolute; top:-.125rem; bottom:-.125rem; left:50%; width:var(--border); background:var(--line); }
-    .meter-fill { position:absolute; top:0; bottom:0; border-radius:var(--radius-round); background:#9aa3a8; }
+    /* 위치만 찍는다. 채워진 막대는 아무리 중앙 기준으로 그려도 "많이 채울수록 좋다"로
+       읽힌다 — 집중도 95%가 오른쪽으로 꽉 차 있으면 성취처럼 보이는데 사실이 아니다.
+       눈금 하나만 두면 "어디에 있는가"만 남는다. */
+    .meter-track { position:relative; height:.375rem; border-radius:var(--radius-round); background:var(--soft); }
+    .meter-track::before { content:""; position:absolute; top:-.1875rem; bottom:-.1875rem; left:50%; width:var(--border); background:var(--line); }
+    .meter-mark { position:absolute; top:50%; width:.75rem; height:.75rem; margin:-.375rem 0 0 -.375rem; border:.125rem solid var(--paper); border-radius:50%; background:#5c6569; }
     .meter-scale { display:flex; justify-content:space-between; margin-top:var(--space-1); color:var(--muted); font-size:var(--font-xs); }
     .chart { width:100%; height:8.75rem; }
     .chart-note { margin-top:var(--space-2); color:var(--muted); font-size:var(--font-xs); }
@@ -91,28 +105,31 @@
 </head>
 <body>
 <main id="app" class="app"></main>
+<script src="lib/session.js"></script>
 <script src="lib/valuation.js"></script>
 <script src="lib/portfolio.js"></script>
 <script>
-// 홈 화면. 금액 계산은 lib/valuation.js, 집계·분류는 lib/portfolio.js가 담당한다.
-// 이 파일은 그 결과를 그리기만 한다 — 여기서 평가금액을 다시 계산하지 말 것.
-const STORAGE_KEY="assetInput.session";
-const SESSION_SCHEMA=7;
+// 홈 화면. 금액 계산은 lib/valuation.js, 집계·분류는 lib/portfolio.js,
+// 세션 읽기는 lib/session.js가 담당한다. 이 파일은 그 결과를 그리기만 한다 —
+// 여기서 평가금액을 다시 계산하지 말 것.
 const INPUT_URL="asset-input.html";
 
-let session=loadSession();
+let sessionState=SessionStore.read();
+let session=toSession(sessionState);
 let axis="group";
+let assetClass="financial"; // 구성 카드 전환: financial | physical
 
-function loadSession(){
-  try{
-    const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
-    if(stored.schema!==SESSION_SCHEMA)return {schema:SESSION_SCHEMA,assets:[],snapshots:[],skippedGroups:[]};
-    stored.assets=(stored.assets||[]).filter(asset=>asset&&asset.group&&asset.fields);
-    stored.snapshots=stored.snapshots||[];
-    return stored;
-  }catch{return {schema:SESSION_SCHEMA,assets:[],snapshots:[],skippedGroups:[]};}
+function toSession(state){
+  const raw=SessionStore.readRaw()||{};
+  return {schema:SessionStore.SCHEMA,assets:state.assets,snapshots:Array.isArray(raw.snapshots)?raw.snapshots:[],skippedGroups:Array.isArray(raw.skippedGroups)?raw.skippedGroups:[]};
 }
-function saveSession(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(session));}catch(error){console.error("[홈] 저장 실패:",error);}}
+// 예전 형식(스키마 불일치)에서 읽어온 세션은 절대 덮어쓰지 않는다 — 저장하는 순간
+// 원본이 현재 스키마로 대체돼 되돌릴 수 없다. 스냅샷 몇 건보다 원본 보존이 우선이다.
+function saveSession(){
+  if(sessionState.status!=="ok")return;
+  try{localStorage.setItem(SessionStore.KEY,JSON.stringify(Object.assign({},SessionStore.readRaw(),session)));}
+  catch(error){console.error("[홈] 저장 실패:",error);}
+}
 
 // 스냅샷은 asOf(시세 기준일)가 바뀐 걸 감지한 첫 실행에만 쌓는다. 앱을 연 시각을
 // 기준으로 하면 하루에 여러 번 열 때 중복되고 며칠 안 열면 구멍이 생긴다.
@@ -138,28 +155,29 @@ function pct(value,digits=1){return `${(value*100).toFixed(digits)}%`;}
 function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
 function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
 
-// 구성 축의 색은 범주를 구분하기 위한 것이지 좋고 나쁨을 뜻하지 않는다.
-// 단일 색상의 명도 사다리를 써서 어느 조각도 "경고"로 읽히지 않게 한다.
-const SLICE_COLORS=["#176b5a","#3e8f7c","#68ac9b","#93c5b8","#b9dcd2","#8d99a3","#b3bcc3","#d5dade"];
+// 범주를 구분하기 위한 색이지 좋고 나쁨을 뜻하지 않는다. 빨강·초록을 뺀 이유가 그것이다
+// (손익에만 색을 쓰기로 했는데, 구성 그래프에 빨강·초록이 있으면 그 의미가 번진다).
+// 이 순서는 색각 이상 시뮬레이션을 포함한 검증을 통과했다 — 인접쌍 최저 CVD ΔE 9.1,
+// 일반 시야 최저 ΔE 19.6 (흰 배경 기준). 순서를 바꾸면 다시 검증해야 한다.
+// 세 색(aqua·yellow·magenta)은 흰 배경 대비 3:1 미만이라, 범례에 이름·비율·금액을
+// 항상 함께 적어 색만으로 식별하지 않게 한다.
+const SERIES_COLORS=["#2a78d6","#eb6834","#1baf7a","#eda100","#e87ba4","#4a3aa7"];
 
-function donut(parts){
-  const size=132,stroke=22,radius=(size-stroke)/2,circumference=2*Math.PI*radius;
+// 비중이 0.5%인 항목도 화면에 자국은 남아야 한다(min-width). 그만큼 큰 항목이 조금씩
+// 줄어들므로 막대는 정확한 축척이 아니라 분포를 보여주는 그림이고, 정확한 값은 범례의
+// 숫자가 담당한다.
+function stackedBar(parts){
   if(!parts.length)return"";
-  let offset=0;
-  const rings=parts.map((part,index)=>{
-    const length=circumference*part.share;
-    const dash=`${length} ${circumference-length}`;
-    const ring=`<circle r="${radius}" cx="${size/2}" cy="${size/2}" fill="none" stroke="${SLICE_COLORS[index%SLICE_COLORS.length]}" stroke-width="${stroke}" stroke-dasharray="${dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${size/2} ${size/2})" data-slice="${escapeHtml(part.label)}" style="cursor:pointer"><title>${escapeHtml(part.label)} ${pct(part.share)}</title></circle>`;
-    offset+=length;
-    return ring;
-  }).join("");
-  return `<svg class="donut" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="자산 구성 도넛">${rings}<text class="donut-center" x="${size/2}" y="${size/2+4}" text-anchor="middle">${parts.length}개 항목</text></svg>`;
+  const segments=parts.map((part,index)=>
+    `<span class="stack-seg" style="flex:${Math.max(part.share,0.0001)} 1 0; background:${SERIES_COLORS[index%SERIES_COLORS.length]}" title="${escapeHtml(part.label)} ${pct(part.share)}"></span>`
+  ).join("");
+  return `<div class="stack" role="img" aria-label="${escapeHtml(parts.map(part=>`${part.label} ${pct(part.share)}`).join(", "))}">${segments}</div>`;
 }
 
 function legend(parts){
   return `<div class="legend">${parts.map((part,index)=>`
     <button type="button" class="legend-row" data-slice="${escapeHtml(part.label)}">
-      <span class="swatch" style="background:${SLICE_COLORS[index%SLICE_COLORS.length]}"></span>
+      <span class="swatch" style="background:${SERIES_COLORS[index%SERIES_COLORS.length]}"></span>
       <span class="name">${escapeHtml(part.label)}</span>
       <span class="share">${pct(part.share)}</span>
       <span class="amount">${won(part.krw)}</span>
@@ -167,12 +185,10 @@ function legend(parts){
 }
 
 function meterRow(meter){
-  // 중앙(50%)을 기준으로 좌우 폭이 결정된다. value가 .5면 눈금이 중앙에 붙는다.
   const value=Math.max(0,Math.min(1,meter.value));
-  const left=Math.min(value,0.5)*100,width=Math.abs(value-0.5)*100;
   return `<div class="meter">
     <div class="meter-head"><span>${meter.label}</span><span class="val">${pct(value,0)}</span></div>
-    <div class="meter-track"><span class="meter-fill" style="left:${left}%; width:${width}%"></span></div>
+    <div class="meter-track"><span class="meter-mark" style="left:${value*100}%"></span></div>
     <div class="meter-scale"><span>낮음</span><span>높음</span></div>
   </div>`;
 }
@@ -229,7 +245,8 @@ function summarySentence(summary){
   const guaranteed=summary.meters.find(meter=>meter.key==="guaranteed");
   const concentration=summary.meters.find(meter=>meter.key==="concentration");
   if(!guaranteed||!concentration)return"";
-  return `원금 보장 자산이 ${pct(guaranteed.value,0)}이고, 상위 ${Math.min(3,summary.rows.length)}개 자산이 전체의 ${pct(concentration.value,0)}예요.`;
+  const count=Math.min(3,summary.financial.rows.length);
+  return `금융자산 중 원금 보장 자산이 ${pct(guaranteed.value,0)}이고, 상위 ${count}개 자산이 금융자산의 ${pct(concentration.value,0)}예요.`;
 }
 
 function sourcesLine(){
@@ -243,6 +260,18 @@ function sourcesLine(){
 function render(){
   const app=document.getElementById("app");
   const assets=session.assets||[];
+
+  // 자산이 0건인 것과, 예전 형식이라 못 읽는 것은 전혀 다른 사건이다. 같은 화면으로
+  // 뭉뚱그리면 자산 20건을 입력해 둔 사용자가 "자산이 없어요"를 보게 된다.
+  if(sessionState.status==="legacy-empty"){
+    app.innerHTML=`<div class="empty">
+      <h1>예전 형식으로 저장된 기록이 있어요</h1>
+      <p>지금 앱이 쓰는 형식(v${SessionStore.SCHEMA})과 달라서 불러오지 못했어요.<br>
+      저장된 기록은 지우지 않고 그대로 두었습니다.</p>
+      <a class="cta" href="${INPUT_URL}">자산 입력하러 가기</a>
+    </div>`;
+    return;
+  }
 
   if(!assets.length){
     app.innerHTML=`<div class="empty">
@@ -266,6 +295,7 @@ function render(){
 
   app.innerHTML=[
     header(),
+    legacyBanner(),
     totalCard(summary),
     checkCard(summary),
     scheduleCard(),
@@ -287,6 +317,13 @@ function header(){
   </div>`;
 }
 
+// 예전 형식에서 자산을 살려낸 경우. 화면은 정상적으로 보여주되, 지금 보고 있는 것이
+// 마이그레이션된 결과이고 원본은 보존돼 있다는 사실을 숨기지 않는다.
+function legacyBanner(){
+  if(sessionState.status!=="migrated")return"";
+  return `<div class="banner">예전 형식(v${escapeHtml(String(sessionState.schema ?? "?"))})으로 저장된 기록에서 자산 ${sessionState.assets.length}건을 불러왔어요. 원본은 지우지 않고 그대로 두었고, 이 화면에서는 새 기록(추이 등)을 저장하지 않습니다.</div>`;
+}
+
 function totalCard(summary){
   const snapshots=session.snapshots||[];
   const previous=snapshots.length>1?snapshots[snapshots.length-2]:null;
@@ -301,11 +338,18 @@ function totalCard(summary){
   const excluded=summary.unavailable.length
     ?`<div class="excluded">시세를 확인하지 못한 자산 ${summary.unavailable.length}건은 총자산에서 제외했어요 · ${escapeHtml(summary.unavailable.map(entry=>entry.name).join(", "))}</div>`
     :"";
+  // 금융자산과 실물자산을 나눠 보여준다. 부동산 하나가 90%를 넘으면 총액만으로는
+  // 나머지가 얼마인지 감이 오지 않는다.
+  const split=summary.total?`<div class="split">
+    <div class="split-row"><span class="k">금융자산</span><span class="v">${won(summary.financial.total)}</span><span class="s">${pct(summary.financial.share,0)}</span></div>
+    <div class="split-row"><span class="k">실물자산</span><span class="v">${won(summary.physical.total)}</span><span class="s">${pct(summary.physical.share,0)}</span></div>
+  </div>`:"";
   return `<div class="card">
     <h2>총자산</h2>
     <div class="total-amount">${won(summary.total)}</div>
     ${change}
     ${excluded}
+    ${split}
   </div>`;
 }
 
@@ -335,23 +379,47 @@ const AXIS_NOTES={
 };
 
 function compositionCard(summary){
-  const parts=summary.axes[axis]||[];
+  const hasPhysical=summary.physical.total>0;
+  const hasFinancial=summary.financial.total>0;
+  // 한쪽만 있으면 전환 버튼이 의미가 없다.
+  const showToggle=hasPhysical&&hasFinancial;
+  const active=!hasFinancial?"physical":!hasPhysical?"financial":assetClass;
+  const side=active==="physical"?summary.physical:summary.financial;
+  // 실물자산은 전부 시가 변동이고 전부 원화라 원금 보장·통화 축이 의미가 없다.
+  const parts=(active==="physical"?side.axes.group:side.axes[axis])||[];
+  const toggle=showToggle?`<div class="tabs">${[["financial","금융자산"],["physical","실물자산"]].map(([key,label])=>
+    `<button type="button" class="tab ${active===key?"active":""}" data-class="${key}">${label}</button>`).join("")}</div>`:"";
+  const axisTabs=active==="financial"?`<div class="tabs">${AXES.map(([key,label])=>
+    `<button type="button" class="tab ${axis===key?"active":""}" data-axis="${key}">${label}</button>`).join("")}</div>`:"";
+  const note=active==="physical"
+    ?"실물자산은 전부 시가 변동이고 전부 원화라 원금 보장·통화 축을 두지 않았습니다."
+    :AXIS_NOTES[axis];
   return `<div class="card">
     <h2>자산 구성</h2>
-    <div class="tabs">${AXES.map(([key,label])=>`<button type="button" class="tab ${axis===key?"active":""}" data-axis="${key}">${label}</button>`).join("")}</div>
-    <div class="donut-wrap">${donut(parts)}${legend(parts)}</div>
-    <div class="card-note">${escapeHtml(AXIS_NOTES[axis])}</div>
+    ${toggle}${axisTabs}
+    ${stackedBar(parts)}
+    <div class="stack-note">${won(side.total)} · ${parts.length}개 항목</div>
+    ${legend(parts)}
+    <div class="card-note">${escapeHtml(note)}</div>
   </div>`;
 }
 
+// 요약 축은 금융자산 기준으로 고정한다(구성 카드의 전환과 연동하지 않는다).
+// 원금 보장·현금화·집중도는 투자 판단과 연결된 지표인데, 실거주 아파트를 팔아
+// 집중도를 낮출 수는 없다 — 부동산이 91%면 세 축이 전부 부동산 하나에 끌려간다.
 function portfolioCard(summary){
-  if(!summary.total)return"";
+  if(!summary.meters.length){
+    if(!summary.total)return"";
+    return `<div class="card"><h2>포트폴리오 요약</h2>
+      <div class="summary-text tag" style="color:var(--muted)">금융자산이 없어 요약 축을 계산하지 않았어요. 이 축들은 금융자산 기준입니다.</div></div>`;
+  }
   return `<div class="card">
-    <h2>포트폴리오 요약</h2>
+    <h2>포트폴리오 요약 <span class="tag" style="color:var(--muted); font-weight:600">금융자산 기준</span></h2>
     <div class="summary-text">${escapeHtml(summarySentence(summary))}</div>
     ${summary.meters.map(meterRow).join("")}
     <div class="card-note">축은 위치를 나타냅니다. 점수나 등급이 아니며, 높다고 좋거나 낮다고 나쁜 것이 아닙니다.<br>
-    분류 기준: 원금 보장 = 원화 현금·예적금 / 현금화 즉시 = 현금·주식·ETF·가상자산 / 성장 가능성은 자산군과 입력하신 세부 정보로 3단계(낮음·중간·높음)를 매겨 금액으로 가중평균합니다. 부동산은 지역과 무관하게 '중간'으로 고정합니다.</div>
+    부동산·원자재는 이 축에서 제외했습니다 — 실거주 주택을 팔아 집중도를 낮출 수는 없으므로, 투자 판단과 연결된 축에 넣으면 숫자가 그쪽으로 끌려갑니다.<br>
+    분류 기준: 원금 보장 = 원화 현금·예적금 / 현금화 즉시 = 현금·주식·ETF·가상자산 / 집중도 = 상위 3개 자산 비중 합.</div>
   </div>`;
 }
 
@@ -398,13 +466,17 @@ function comingCard(){
     <div class="strip">${items.map(([title,note])=>`<button type="button" data-coming="${escapeHtml(title)}"><b>${escapeHtml(title)}</b><span>${escapeHtml(note)}</span></button>`).join("")}</div>`;
 }
 
-// 진입점은 시각화 자체다 — 기능 진입 전용 버튼을 두지 않는다. 도넛 조각·범례·목록 행·
-// 일정 항목을 누르면 이동한다. 개별 자산 상세 화면은 P0 범위 밖이라 지금은 입력 화면으로 간다.
+// 진입점은 시각화 자체다 — 기능 진입 전용 버튼을 두지 않는다. 다만 누적 막대의 조각은
+// 진입점으로 쓰지 않는다: 비중 2%짜리는 모바일에서 폭이 몇 픽셀이라 누를 수가 없다.
+// 대신 금액·비율이 함께 적힌 범례 행이 진입점이고, 터치 타겟도 충분하다(44px 이상).
 function bind(){
+  document.querySelectorAll("button[data-class]").forEach(button=>{
+    button.addEventListener("click",()=>{assetClass=button.dataset.class;render();});
+  });
   document.querySelectorAll("button[data-axis]").forEach(button=>{
     button.addEventListener("click",()=>{axis=button.dataset.axis;render();});
   });
-  document.querySelectorAll("[data-slice]").forEach(node=>{
+  document.querySelectorAll("button[data-slice]").forEach(node=>{
     node.addEventListener("click",()=>{location.href=`${INPUT_URL}#composition=${encodeURIComponent(node.dataset.slice)}`;});
   });
   document.querySelectorAll("button[data-go]").forEach(button=>{

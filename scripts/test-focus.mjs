@@ -347,8 +347,10 @@ async function run() {
     const opens = (html.match(/<script/g) || []).length;
     const closes = (html.match(/<\/script>/g) || []).length;
     if (opens !== closes) return { ok: false, reason: `opens=${opens} closes=${closes}` };
-    if (opens !== 2) return { ok: false, reason: `expected 2 script tags (valuation.js + inline app), got ${opens}` };
-    if (!/<script src="lib\/valuation\.js"><\/script>/.test(html)) return { ok: false, reason: "lib/valuation.js script tag not found" };
+    if (opens !== 3) return { ok: false, reason: `expected 3 script tags (session.js + valuation.js + inline app), got ${opens}` };
+    for (const src of ["lib/session.js", "lib/valuation.js"]) {
+      if (!html.includes(`<script src="${src}"></script>`)) return { ok: false, reason: `${src} script tag not found` };
+    }
     // 평가 로직이 홈 화면과 공유되는 단일 출처인지 — 전역이 실제로 노출됐는지 확인한다.
     // liveQuotes는 const 선언이라 window 프로퍼티가 아니다(전역 렉시컬 바인딩) — 이름으로 참조한다.
     const hasApi = await page.evaluate(() => typeof window.Valuation?.valuate === "function" && liveQuotes === window.Valuation.state);

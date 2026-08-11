@@ -42,6 +42,19 @@ const EXPECT = {
   btc: 0.5 * 91000000, //     45,500,000
 };
 EXPECT.total = EXPECT.samsung + EXPECT.kakao + EXPECT.savings + EXPECT.realestate + EXPECT.btc;
+const EXPECT_PHYSICAL = EXPECT.realestate; // 실물자산 = 부동산만 (원자재 미등록)
+
+// 자산군 8개가 모두 있는 포트폴리오. 색 구분과 성장 가능성 축 확인용이다.
+const SAMPLE_ASSETS = [
+  { id: "s1", group: "cash", fields: { currency: "KRW", amount: 3000000 }, autoFields: {} },
+  { id: "s2", group: "savings", fields: { productType: "예금", balance: 12000000 }, autoFields: {} },
+  { id: "s3", group: "equity", fields: { productName: "삼성전자", productCode: "005930", quantity: 100, averagePrice: 60000 }, autoFields: { currency: "KRW" } },
+  { id: "s4", group: "crypto", fields: { productName: "비트코인", productCode: "BTC", quantity: 0.1, averagePrice: 80000000 }, autoFields: { currency: "KRW" } },
+  { id: "s5", group: "fund", fields: { valuation: 8000000 }, autoFields: { fundType: "주식형", currency: "KRW" } },
+  { id: "s6", group: "bond", fields: { valuation: 6000000 }, autoFields: { bondType: "국채", currency: "KRW" } },
+  { id: "s7", group: "commodity", fields: { assetKind: "금", holdingMethod: "KRX 금시장", quantity: 60 }, autoFields: {} },
+  { id: "s8", group: "realestate", fields: { propertyType: "아파트", valuation: 1200000000, joint: true, ownershipRate: 50 }, autoFields: {} },
+];
 
 async function startServer() {
   const server = spawn(process.platform === "win32" ? "python" : "python3", ["-m", "http.server", String(PORT), "--bind", "127.0.0.1"], {
@@ -198,7 +211,7 @@ try {
     return {
       total: summary.total,
       rows: summary.rows.map((row) => ({ name: row.name, krw: row.krw, group: row.group, profit: row.profit })),
-      axes: Object.fromEntries(Object.entries(summary.axes).map(([key, parts]) => [key, parts.map((p) => ({ label: p.label, share: p.share }))])),
+      axes: Object.fromEntries(Object.entries(summary.financial.axes).map(([key, parts]) => [key, parts.map((p) => ({ label: p.label, share: p.share }))])),
       profitCount: summary.profit.count,
       rowCount: summary.rows.length,
       text: document.getElementById("app").textContent,
@@ -225,12 +238,83 @@ try {
     return btc.krw === EXPECT.btc ? { ok: true } : { ok: false, reason: `${btc.krw} (기대 ${EXPECT.btc})` };
   });
 
-  await record("구성 축 3개의 비중 합이 각각 100%다", async () => {
+  await record("금융자산 구성 축 3개의 비중 합이 각각 100%다", async () => {
     for (const key of ["group", "guaranteed", "currency"]) {
       const sum = home.axes[key].reduce((acc, part) => acc + part.share, 0);
       if (Math.abs(sum - 1) > 1e-9) return { ok: false, reason: `${key} 축 합계 ${sum}` };
     }
     return { ok: true };
+  });
+
+  await record("총자산이 금융자산 + 실물자산으로 분해된다", async () => {
+    const split = await page.evaluate(() => {
+      const summary = Portfolio.summarize(session.assets);
+      return { financial: summary.financial.total, physical: summary.physical.total, total: summary.total };
+    });
+    // 실물자산 = 부동산 4억 (원자재 없음), 금융자산 = 나머지 전부
+    if (split.physical !== EXPECT_PHYSICAL) return { ok: false, reason: `실물자산 ${split.physical} (기대 ${EXPECT_PHYSICAL})` };
+    if (split.financial + split.physical !== split.total) return { ok: false, reason: `분해 합 ${split.financial + split.physical} ≠ 총자산 ${split.total}` };
+    const text = await page.locator(".split").textContent();
+    if (!text.includes("금융자산") || !text.includes("실물자산")) return { ok: false, reason: `분해 표시 없음: ${text}` };
+    return { ok: true };
+  });
+
+  await record("구성 카드가 금융자산/실물자산으로 전환된다", async () => {
+    const financialLabels = await page.locator(".legend-row .name").allTextContents();
+    if (financialLabels.includes("부동산")) return { ok: false, reason: `금융자산 쪽에 부동산이 있음: ${financialLabels.join(",")}` };
+    await page.locator('button[data-class="physical"]').click();
+    const physicalLabels = await page.locator(".legend-row .name").allTextContents();
+    if (!physicalLabels.includes("부동산")) return { ok: false, reason: `실물자산 쪽에 부동산이 없음: ${physicalLabels.join(",")}` };
+    // 실물자산은 전부 시가 변동·전부 원화라 두 축이 의미가 없다 — 축 탭을 두지 않는다.
+    const axisTabs = await page.locator("button[data-axis]").count();
+    if (axisTabs) return { ok: false, reason: `실물자산에 축 탭이 ${axisTabs}개 남아 있음` };
+    await page.locator('button[data-class="financial"]').click();
+    return { ok: true };
+  });
+
+  await record("구성 그래프가 도넛이 아니라 가로 누적 막대다", async () => {
+    if (await page.locator("svg.donut").count()) return { ok: false, reason: "도넛이 아직 있음" };
+    const segments = await page.locator(".stack .stack-seg").count();
+    const legends = await page.locator(".legend-row").count();
+    return segments === legends && segments > 0 ? { ok: true } : { ok: false, reason: `막대 조각 ${segments}개 / 범례 ${legends}개` };
+  });
+
+  await record("범례 행의 터치 타겟이 충분하다 (44px 이상)", async () => {
+    const boxes = await page.locator(".legend-row").evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().height));
+    const small = boxes.filter((height) => height < 44);
+    return small.length ? { ok: false, reason: `44px 미만 행 ${small.length}개: ${small.map((h) => h.toFixed(1)).join(",")}` } : { ok: true };
+  });
+
+  await record("요약 축이 금융자산 기준이고 카드에 명시된다", async () => {
+    const meters = await page.evaluate(() => {
+      const summary = Portfolio.summarize(session.assets);
+      return Object.fromEntries(summary.meters.map((meter) => [meter.key, meter.value]));
+    });
+    // 부동산(4억)이 빠지면 집중도는 금융자산 5,674만원 기준이라 100%를 향하지 않는다.
+    const heading = await page.locator(".card h2").allTextContents();
+    if (!heading.some((text) => text.includes("금융자산 기준"))) return { ok: false, reason: `카드 제목에 기준 표기 없음: ${heading.join(" | ")}` };
+    const withRealestate = await page.evaluate(() => {
+      const summary = Portfolio.summarize(session.assets);
+      const top3 = summary.rows.slice(0, 3).reduce((sum, row) => sum + row.krw, 0);
+      return top3 / summary.total;
+    });
+    if (Math.abs(meters.concentration - withRealestate) < 1e-9) return { ok: false, reason: "집중도가 여전히 전체 자산 기준" };
+    return { ok: true };
+  });
+
+  await record("요약 축이 채움 막대가 아니라 위치 마커다", async () => {
+    if (await page.locator(".meter-fill").count()) return { ok: false, reason: "채움 막대가 남아 있음" };
+    const marks = await page.locator(".meter-mark").count();
+    // 축은 3개다 — 성장 가능성 축은 위험자산 비중과 같은 값이 나와서 내렸다.
+    return marks === 3 ? { ok: true } : { ok: false, reason: `마커 ${marks}개 (3개 기대)` };
+  });
+
+  await record("성장 가능성 축은 노출하지 않는다 (위험자산 비중과 같은 값)", async () => {
+    const keys = await page.evaluate(() => Portfolio.summarize(session.assets).meters.map((meter) => meter.key));
+    if (keys.includes("growth")) return { ok: false, reason: `축에 growth가 남아 있음: ${keys.join(",")}` };
+    // 분류 자체는 남아 있어야 한다 — 업종 데이터로 주식 내부를 세분화할 때 다시 쓴다.
+    const stillClassified = await page.evaluate(() => Portfolio.summarize(session.assets).rows.every((row) => Boolean(row.growth)));
+    return stillClassified ? { ok: true } : { ok: false, reason: "growth 분류 자체가 사라짐" };
   });
 
   await record("평가손익 모집단과 총자산 모집단이 다르다는 것이 화면에 드러난다", async () => {
@@ -255,28 +339,23 @@ try {
   await record("모바일 폭 첫 화면에 총자산과 자산 구성이 함께 보인다", async () => {
     const viewport = page.viewportSize().height;
     const totalBox = await page.locator(".total-amount").boundingBox();
-    const donutBox = await page.locator("svg.donut").boundingBox();
-    if (!donutBox) return { ok: false, reason: "도넛이 렌더되지 않음" };
+    const stackBox = await page.locator(".stack").boundingBox();
+    if (!stackBox) return { ok: false, reason: "구성 막대가 렌더되지 않음" };
     if (totalBox.y < 0 || totalBox.y > viewport) return { ok: false, reason: `총자산이 첫 화면 밖 (y=${totalBox.y})` };
-    if (donutBox.y + donutBox.height > viewport) return { ok: false, reason: `자산 구성이 첫 화면(${viewport}px) 밖 — 도넛 하단 y=${Math.round(donutBox.y + donutBox.height)}` };
+    if (stackBox.y + stackBox.height > viewport) return { ok: false, reason: `자산 구성이 첫 화면(${viewport}px) 밖 — 막대 하단 y=${Math.round(stackBox.y + stackBox.height)}` };
     return { ok: true };
   });
 
-  await record("도넛 조각 클릭이 실제로 이동한다", async () => {
-    // 도넛은 fill="none"이라 원 중앙(구멍)은 클릭 대상이 아니고 칠해진 호만 반응한다.
-    // 12시 방향은 마지막 조각이 끝나는 지점이라 첫 조각의 시작과 정확히 겹치므로
-    // (나중에 그려진 마지막 조각이 위에 놓인다) 피한다. 최대 조각의 한가운데인
-    // 3시 방향을 누른다 — 링 반지름 55, 요소 박스 132px 기준.
-    const ring = page.locator("svg.donut circle[data-slice]").first();
-    const label = await ring.getAttribute("data-slice");
-    const box = await ring.boundingBox();
-    await ring.click({ position: { x: box.width * (121 / 132), y: box.height / 2 } });
+  await record("범례 행 클릭이 실제로 이동한다 (막대 조각이 아니라 범례가 진입점)", async () => {
+    const row = page.locator(".legend-row").first();
+    const label = await row.locator(".name").textContent();
+    await row.click();
     await page.waitForURL(/asset-input\.html/, { timeout: 5000 });
     const url = page.url();
     await page.goBack();
     await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 5000 });
-    // 누른 조각이 무엇인지까지 URL로 전달돼야 한다 — 단순 이동만으로는 부족하다.
-    return url.includes(`composition=${encodeURIComponent(label)}`) ? { ok: true } : { ok: false, reason: `"${label}" 조각을 눌렀는데 이동한 URL: ${url}` };
+    // 누른 항목이 무엇인지까지 URL로 전달돼야 한다 — 단순 이동만으로는 부족하다.
+    return url.includes(`composition=${encodeURIComponent(label)}`) ? { ok: true } : { ok: false, reason: `"${label}" 범례를 눌렀는데 이동한 URL: ${url}` };
   });
 
   await record("보유 자산 행 클릭이 실제로 이동한다", async () => {
@@ -335,19 +414,121 @@ try {
     return note.includes("4일치 기록이 비어 있어요") ? { ok: true } : { ok: false, reason: `안내 문구: "${note}"` };
   });
 
-  // ===== 6. 성장 가능성 축이 독립적인 정보를 주는가 =====
-  await record("[보고용] 성장 가능성 축과 자산 유형 축의 관계", async () => {
-    const report = await page.evaluate(() => {
+  // ===== 5a. 자산군이 전부 있을 때 색이 서로 구분되는가 =====
+  await record("자산군 8개가 모두 있어도 구성 색이 서로 겹치지 않는다", async () => {
+    await page.goto(HOME_URL);
+    await page.evaluate((assets) => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, assets, snapshots: [] }));
+    }, SAMPLE_ASSETS);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".stack"), { timeout: 5000 });
+    const colorsOf = () => page.locator(".legend-row .swatch").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).backgroundColor));
+    const financial = await colorsOf();
+    if (financial.length !== 6) return { ok: false, reason: `금융자산 항목 ${financial.length}개 (6개 기대)` };
+    if (new Set(financial).size !== financial.length) return { ok: false, reason: `색 중복: ${financial.join(", ")}` };
+    await page.locator('button[data-class="physical"]').click();
+    const physical = await colorsOf();
+    if (new Set(physical).size !== physical.length) return { ok: false, reason: `실물자산 색 중복: ${physical.join(", ")}` };
+    await page.locator('button[data-class="financial"]').click();
+    return { ok: true };
+  });
+
+  await record("부동산이 큰 포트폴리오에서도 금융자산 구성이 읽힌다", async () => {
+    // 부동산 6억 vs 금융자산 ~5천만. 한 그래프에 넣으면 나머지가 실 가닥이 된다.
+    const shares = await page.evaluate(() => {
       const summary = Portfolio.summarize(session.assets);
-      const risky = summary.rows.reduce((sum, row) => sum + (row.growth === "높음" ? row.krw : 0), 0);
-      const guaranteed = summary.meters.find((m) => m.key === "guaranteed").value;
-      const growth = summary.meters.find((m) => m.key === "growth").value;
-      return { riskyShare: risky / summary.total, guaranteed, growth };
+      return {
+        physicalShareOfTotal: summary.physical.share,
+        smallestFinancial: Math.min(...summary.financial.axes.group.map((part) => part.share)),
+      };
+    });
+    if (shares.physicalShareOfTotal < 0.8) return { ok: false, reason: `실물 비중 ${shares.physicalShareOfTotal} — 검증 전제가 성립하지 않음` };
+    // 금융자산만 따로 보면 가장 작은 항목도 1% 이상으로 올라온다(전체 기준이면 0.3%대).
+    return shares.smallestFinancial > 0.01 ? { ok: true } : { ok: false, reason: `가장 작은 금융자산 항목 비중 ${shares.smallestFinancial}` };
+  });
+
+  // ===== 5b. 스키마 불일치: 데이터를 조용히 버리지 않는다 =====
+  // 앱을 업데이트해 SESSION_SCHEMA가 올라가면, 자산을 입력해 둔 사용자가 홈에서
+  // "자산이 없어요"를 보게 됐다. 데이터는 살아 있는데 사라진 것처럼 보이는 상태다.
+  await record("스키마가 달라도 살릴 수 있는 자산은 불러오고 원본을 지우지 않는다", async () => {
+    await page.goto(HOME_URL);
+    await page.evaluate(() => {
+      localStorage.clear();
+      localStorage.setItem("assetInput.session", JSON.stringify({
+        schema: 99, // 미래(또는 과거) 스키마
+        assets: [
+          { id: "x1", group: "savings", fields: { productType: "예금", balance: 3000000 }, autoFields: {} },
+          { id: "x2", group: "cash", fields: { currency: "KRW", amount: 1000000 }, autoFields: {} },
+        ],
+      }));
+    });
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".total-amount, .empty"), { timeout: 5000 });
+    const text = await page.locator("#app").textContent();
+    if (text.includes("아직 등록된 자산이 없어요")) return { ok: false, reason: "자산이 있는데 빈 상태로 표시됨" };
+    if (!text.includes("400만원")) return { ok: false, reason: `총자산이 계산되지 않음: ${text.slice(0, 160)}` };
+    if (!text.includes("예전 형식")) return { ok: false, reason: "예전 형식 안내가 없음" };
+    const preserved = await page.evaluate(() => JSON.parse(localStorage.getItem("assetInput.session")).schema);
+    return preserved === 99 ? { ok: true } : { ok: false, reason: `원본이 덮어써짐 (schema=${preserved})` };
+  });
+
+  await record("살릴 자산이 없는 예전 형식은 '자산 0건'과 구분해 안내한다", async () => {
+    await page.evaluate(() => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 99, foo: "bar" }));
+    });
+    await page.reload();
+    await page.waitForSelector(".empty", { timeout: 5000 });
+    const text = await page.locator("#app").textContent();
+    if (text.includes("아직 등록된 자산이 없어요")) return { ok: false, reason: "자산 0건 화면과 구분되지 않음" };
+    if (!text.includes("예전 형식으로 저장된 기록이 있어요")) return { ok: false, reason: `안내 문구 없음: ${text.slice(0, 160)}` };
+    const preserved = await page.evaluate(() => JSON.parse(localStorage.getItem("assetInput.session")).schema);
+    return preserved === 99 ? { ok: true } : { ok: false, reason: `원본이 덮어써짐 (schema=${preserved})` };
+  });
+
+  await record("입력 화면도 스키마 불일치에서 원본을 지우지 않고 백업한다", async () => {
+    await page.goto(INPUT_URL);
+    await page.evaluate(() => {
+      localStorage.clear();
+      localStorage.setItem("assetInput.session", JSON.stringify({
+        schema: 99,
+        assets: [{ id: "x1", group: "savings", fields: { productType: "예금", balance: 3000000 }, autoFields: {} }],
+      }));
+    });
+    await page.reload();
+    const state = await page.evaluate(() => ({
+      recovered: session.assets.length,
+      backup: JSON.parse(localStorage.getItem("assetInput.session.backup.v99") || "null"),
+    }));
+    if (state.recovered !== 1) return { ok: false, reason: `살려낸 자산 ${state.recovered}건 (1건 기대)` };
+    if (!state.backup || state.backup.schema !== 99) return { ok: false, reason: "원본 백업이 없음" };
+    return { ok: true };
+  });
+
+  // ===== 6. 성장 가능성 축이 독립적인 정보를 주는가 =====
+  // 축을 내린 근거를 코드로 고정해 둔다. 나중에 누가 되살리려 할 때 왜 뺐는지가
+  // 문장이 아니라 실행되는 검사로 남아 있어야 한다.
+  await record("성장 가능성을 금융자산 기준으로 계산하면 위험자산 비중과 같은 값이 된다", async () => {
+    await page.goto(HOME_URL);
+    await page.evaluate((assets) => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, assets, snapshots: [] }));
+    }, SAMPLE_ASSETS);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 5000 });
+    const report = await page.evaluate(() => {
+      const SCORE = { 낮음: 0, 중간: 0.5, 높음: 1 };
+      const summary = Portfolio.summarize(session.assets);
+      const total = summary.financial.total;
+      const growth = summary.financial.rows.reduce((sum, row) => sum + SCORE[row.growth] * row.krw, 0) / total;
+      const risky = summary.financial.rows.reduce((sum, row) => sum + (row.growth === "높음" ? row.krw : 0), 0) / total;
+      return { growth, risky, mid: summary.financial.rows.filter((row) => row.growth === "중간").length };
     });
     console.log(
-      `      성장 가능성 축 = ${(report.growth * 100).toFixed(1)}% · 위험자산(성장 '높음') 비중 = ${(report.riskyShare * 100).toFixed(1)}% · 원금 보장 비중 = ${(report.guaranteed * 100).toFixed(1)}%`
+      `      금융자산 기준 성장 가능성 = ${(report.growth * 100).toFixed(1)}% · 위험자산('높음') 비중 = ${(report.risky * 100).toFixed(1)}% · '중간' 등급 자산 ${report.mid}건`
     );
-    return { ok: true };
+    if (report.mid) return { ok: false, reason: "표본에 '중간' 자산이 있어 동일성 검증이 성립하지 않음 — 표본을 확인하세요" };
+    return Math.abs(report.growth - report.risky) < 1e-9
+      ? { ok: true }
+      : { ok: false, reason: `두 값이 다름: ${report.growth} vs ${report.risky}` };
   });
 } finally {
   if (browser) await browser.close();
