@@ -431,6 +431,8 @@ function holdingsCard(summary){
     return `<tr data-asset="${escapeHtml(row.id||"")}">
       <td class="name">${escapeHtml(row.name)}</td>
       <td><span class="pill">${escapeHtml(row.groupName)}</span></td>
+      <td class="right num">${unitPriceCell(row)}</td>
+      <td class="right num">${quantityCell(row)}</td>
       <td class="right num">${won(row.krw)}</td>
       <td class="right">${pl}</td>
       <td class="right num">${pct(share)}</td>
@@ -446,13 +448,28 @@ function holdingsCard(summary){
     ${plStrip(summary)}
     <table class="data">
       <thead><tr>
-        <th>자산명</th><th>자산 유형</th><th class="right">평가금액</th>
-        <th class="right">평가손익</th><th class="right">전체 대비 비중</th><th class="right">최근 업데이트</th>
+        <th>자산명</th><th>자산 유형</th><th class="right">현재가</th><th class="right">보유 수량</th>
+        <th class="right">평가금액</th><th class="right">평가손익</th>
+        <th class="right">전체 대비 비중</th><th class="right">최근 업데이트</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
     ${hasPhysicalProfit?`<div class="card-note">* 실물자산의 값은 시장이 매긴 손익이 아니라 입력하신 추정가와 매입가의 차이(평가차액)입니다.</div>`:""}
   </div>`;
+}
+
+// 단가 개념이 없는 자산군(현금·예적금·펀드·채권·부동산)은 억지로 채우지 않고 –로 둔다.
+// 없는 숫자를 만들어 넣으면 있는 숫자와 구별되지 않는다.
+function unitPriceCell(row){
+  if(row.unitPrice===null||row.unitPrice===undefined)return `<span style="color:var(--dim)">–</span>`;
+  const suffix=row.unitLabel==="g"?"원/g":"원";
+  return `${Math.round(row.unitPrice).toLocaleString("ko-KR")}${suffix}`;
+}
+function quantityCell(row){
+  if(row.quantity===null||row.quantity===undefined)return `<span style="color:var(--dim)">–</span>`;
+  // 가상자산은 소수점이 의미가 있어 자릿수를 살린다(0.05 BTC가 0으로 보이면 안 된다).
+  const text=row.quantity.toLocaleString("ko-KR",{maximumFractionDigits:8});
+  return `${text}${row.unitLabel?` ${row.unitLabel}`:""}`;
 }
 
 function updatedLabel(asset){

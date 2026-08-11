@@ -15,7 +15,7 @@
 import { mkdir, writeFile, readFile, rename } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import { fetchAll, kstToday, shiftDate, resolveLatestBasDt, normalizeKrCode, setupUtf8Console } from "./lib/data-go-kr.mjs";
+import { fetchAll, kstToday, shiftDate, resolveLatestBasDt, normalizeKrCode, setupUtf8Console, previousBusinessDay } from "./lib/data-go-kr.mjs";
 import { fetchCryptoQuotes, COINGECKO_IDS } from "./lib/crypto.mjs";
 
 setupUtf8Console();
@@ -208,7 +208,7 @@ async function loadPreviousQuoteCount() {
 // 실패(exit 1) 조건은 임계값 미만이면 절대 게시하면 안 되는 것들 — 인증이 죽었거나
 // 코드 조인이 깨졌는데도 "성공"으로 끝나는 걸 막는다(이번에 실제로 두 번 겪었다).
 // 경고는 게시는 하되 사람이 확인해야 하는 이상 신호다.
-function validateQuotes({ quoteCount, matches, rateCount, goldPerGram, asOfIso, previousQuoteCount, unlistedQuoteCount, crypto }) {
+function validateQuotes({ quoteCount, matches, rateCount, goldPerGram, asOfIso, previousQuoteCount, unlistedQuoteCount, crypto, basDt, expectedBasDt }) {
   const failures = [];
   const warnings = [];
 
@@ -236,6 +236,13 @@ function validateQuotes({ quoteCount, matches, rateCount, goldPerGram, asOfIso, 
   if (!goldPerGram) failures.push("금 시세 확보 실패");
   const asOfAgeDays = Math.floor((Date.now() - new Date(asOfIso).getTime()) / 86400000);
   if (asOfAgeDays > 7) failures.push(`asOf가 ${asOfAgeDays}일 전 — 7일 초과`);
+
+  // 배치는 데이터가 있는 날짜를 찾을 때까지 소급 조회하므로, 제공이 밀려도 실패하지
+  // 않고 조용히 하루 뒤처진 값을 쓴다. 그게 정상인지(공휴일) 아닌지(제공 지연) 여기서는
+  // 알 수 없으므로 실패가 아니라 경고로 남긴다 — 매일 뜨면 배치 시각을 다시 봐야 한다.
+  if (basDt && expectedBasDt && basDt < expectedBasDt) {
+    warnings.push(`시세 기준일이 ${basDt} — 직전 영업일(${expectedBasDt})보다 이릅니다. 공휴일이면 정상이지만, 매일 반복되면 제공 시각(다음 영업일 13시 이후)보다 배치가 이른지 확인하세요`);
+  }
   if (quoteCount < 3000) failures.push(`전체 시세 건수 ${quoteCount}건 — 3,000건 미만`);
 
   if (previousQuoteCount) {
@@ -321,6 +328,8 @@ async function main() {
     previousQuoteCount,
     unlistedQuoteCount,
     crypto,
+    basDt: stockBasDt,
+    expectedBasDt: previousBusinessDay(kstToday()),
   });
 
   console.log(`asOf: ${payload.asOf}`);

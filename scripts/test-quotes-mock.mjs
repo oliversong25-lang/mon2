@@ -245,6 +245,21 @@ try {
   // 주식 200건(4,200 - 4,000) + 부분 목록에 없는 ETF 1건 = 201건
   record("목록에 없는 시세 코드 건수가 별도로 보고됨", logLines.some((line) => line.includes("종목 목록에 없는 코드 201건")), logLines.filter((l) => l.includes("시세 확보")).join(" | "));
 
+  // ===== 4b. 기준일이 직전 영업일보다 이르면 경고 =====
+  // 배치는 데이터가 있는 날짜를 찾을 때까지 소급 조회하므로, 제공이 밀려도 실패하지 않고
+  // 조용히 하루 뒤처진 값을 쓴다. 06:00 배치가 늘 2영업일 전 데이터를 받고 있던 것도
+  // 아무도 몰랐던 이유가 이것이다 — 이제는 로그에 남는다.
+  // 이 픽스처의 TRADING_DAY는 오늘부터 2일 전이라 항상 직전 영업일보다 이르다.
+  await rm(QUOTES_PATH, { force: true });
+  await writeFile(TICKERS_KR_PATH, JSON.stringify(tickerFixture), "utf8");
+  const staleWarnings = [];
+  const originalWarn2 = console.warn;
+  console.warn = (...args) => { staleWarnings.push(args.join(" ")); originalWarn2(...args); };
+  const stale = await runBatch();
+  console.warn = originalWarn2;
+  record("기준일이 직전 영업일보다 이르면 경고를 남긴다", staleWarnings.some((line) => line.includes("직전 영업일")), staleWarnings.join(" | ") || "(경고 없음)");
+  record("기준일이 이르다고 배치를 실패시키지는 않는다 (공휴일일 수 있음)", stale.exitCode !== 1, `exitCode=${stale.exitCode}`);
+
   // ===== 5. 가상자산 실패 경로 =====
   // 하드코딩된 BTC 158,200,000원을 지운 이유가 여기 있다. 시세를 못 받았는데 배치가
   // 성공하면 앱이 옛 값이나 0으로 총자산을 계산해 버린다. 못 받으면 죽어야 한다.

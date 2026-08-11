@@ -2,9 +2,13 @@ name: Daily domestic quotes batch
 
 on:
   schedule:
-    # 06:00 KST daily. cron is UTC — KST is UTC+9, so 06:00 KST == 21:00 UTC the
-    # previous day.
-    - cron: "0 21 * * *"
+    # 14:00 KST daily (cron is UTC; KST = UTC+9).
+    #
+    # 06:00이 아닌 이유: 금융위원회_주식시세정보는 기준일 "다음 영업일 13시 이후"에
+    # 갱신된다. 06:00에 돌면 전일 데이터가 아직 없어 소급 조회가 그 전 영업일로
+    # 내려가고, 결과적으로 항상 2영업일 전 종가를 쓰게 된다(실측: 8/11 06:38 실행이
+    # 8/10 대신 8/7 종가를 가져옴). 제공 시각보다 1시간 뒤에 돌려 전일 종가를 잡는다.
+    - cron: "0 5 * * *"
   workflow_dispatch: {}
 
 permissions:

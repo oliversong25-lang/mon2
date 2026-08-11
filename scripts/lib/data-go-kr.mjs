@@ -100,6 +100,19 @@ export async function resolveLatestBasDt(baseUrl, extraParams, serviceKey, { max
   throw new Error(`${baseUrl}: 최근 ${maxLookback}일 내 데이터를 찾지 못했습니다 (마지막 시도: ${probe})`);
 }
 
+// 직전 영업일(주말 제외). 공휴일은 알 수 없으므로 여기서 나온 날짜와 실제 기준일이
+// 다르다고 해서 실패로 보지 않는다 — 경고의 근거로만 쓴다.
+export function previousBusinessDay(yyyymmdd) {
+  let probe = shiftDate(yyyymmdd, -1);
+  for (let attempt = 0; attempt < 7; attempt += 1) {
+    const date = new Date(Date.UTC(Number(probe.slice(0, 4)), Number(probe.slice(4, 6)) - 1, Number(probe.slice(6, 8))));
+    const day = date.getUTCDay();
+    if (day !== 0 && day !== 6) return probe;
+    probe = shiftDate(probe, -1);
+  }
+  return probe;
+}
+
 // 금융위원회_KRX상장종목정보(15094775)의 srtnCd는 "A005930"처럼 접두어가 붙지만
 // 주식시세정보(15094808)의 srtnCd는 "005930"처럼 붙지 않는다 — 같은 종목인데 두
 // 엔드포인트의 코드 형식이 다르다(실제 라이브 응답으로 확인됨). 접두어를 무조건
