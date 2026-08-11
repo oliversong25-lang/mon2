@@ -8,7 +8,14 @@ export async function installTestAuth(page) {
     window.fetch = (input, options) => {
       const url = String(input);
       if (url.startsWith("https://test.supabase.co/rest/v1/user_asset_sessions")) {
-        return Promise.resolve(new Response((options?.method || "GET") === "GET" ? "[]" : "", { status: (options?.method || "GET") === "GET" ? 200 : 201, headers: { "Content-Type": "application/json" } }));
+        const method=options?.method||"GET";
+        if(method==="GET"){
+          const saved=sessionStorage.getItem("assetflow.test.remote");
+          const rows=saved?[{schema_version:JSON.parse(saved).schema||7,payload:JSON.parse(saved),updated_at:new Date().toISOString()}]:[];
+          return Promise.resolve(new Response(JSON.stringify(rows),{status:200,headers:{"Content-Type":"application/json"}}));
+        }
+        if(options?.body){const row=JSON.parse(options.body);sessionStorage.setItem("assetflow.test.remote",JSON.stringify(row.payload));}
+        return Promise.resolve(new Response("",{status:201,headers:{"Content-Type":"application/json"}}));
       }
       return originalFetch(input, options);
     };
