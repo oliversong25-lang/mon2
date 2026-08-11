@@ -2,122 +2,100 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>내 자산</title>
+  <link rel="stylesheet" href="lib/app.css">
   <style>
-    :root {
-      color-scheme:light;
-      --content-max:26.25rem; --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem; --space-6:1.5rem; --space-7:1.75rem; --space-8:2rem;
-      --font-xs:.75rem; --font-sm:.875rem; --font-md:1rem; --font-lg:1.125rem; --font-xl:1.5625rem; --font-total:2.125rem;
-      --radius-sm:.625rem; --radius-md:.8125rem; --radius-lg:1rem; --radius-round:62.4375rem; --border:.0625rem;
-      --ink:#17191c; --muted:#70757b; --line:#e4e6e8; --soft:#f4f5f6; --brand:#176b5a; --brand-soft:#e9f4f1; --paper:#fff; --page:#f0f2f3;
-      /* 손익에만 색을 쓴다. 구성·집중도 같은 축에는 좋고 나쁨을 암시하는 색을 쓰지 않는다. */
-      --pos:#c4553f; --neg:#3b6ea8;
-      --ease:cubic-bezier(.22,1,.36,1);
-    }
-    html,body { margin:0; min-height:100%; background:var(--page); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif; }
-    button,input,select { font:inherit; } button { cursor:pointer; } p { margin:0; }
-    .app { width:100%; max-width:var(--content-max); min-height:100vh; margin:0 auto; padding-bottom:var(--space-8); background:var(--page); }
-    .head { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-3); padding:var(--space-6) var(--space-5) var(--space-4); }
-    .head h1 { margin:0 0 var(--space-1); font-size:var(--font-xl); letter-spacing:-.04rem; }
-    .head .sub { color:var(--muted); font-size:var(--font-xs); }
-    .add { flex:none; padding:var(--space-2) var(--space-3); border:var(--border) solid var(--line); border-radius:var(--radius-round); background:var(--paper); color:var(--brand); font-size:var(--font-sm); font-weight:800; }
-    .card { margin:0 var(--space-5) var(--space-3); padding:var(--space-5); border-radius:var(--radius-lg); background:var(--paper); }
-    .card h2 { margin:0 0 var(--space-3); font-size:var(--font-md); }
-    .card-note { margin-top:var(--space-3); padding-top:var(--space-3); border-top:var(--border) solid var(--line); color:var(--muted); font-size:var(--font-xs); line-height:1.6; }
-    .total-amount { font-size:var(--font-total); font-weight:800; letter-spacing:-.05rem; line-height:1.2; }
+    /* 홈 화면 전용. 공통 토큰·셸·표는 lib/app.css에 있다. */
+    .total-amount { font-size:var(--font-total); font-weight:800; letter-spacing:-.035em; line-height:1.15; }
     .total-change { margin-top:var(--space-2); font-size:var(--font-sm); font-weight:700; }
     .total-change.flat { color:var(--muted); font-weight:600; }
-    .pos { color:var(--pos); } .neg { color:var(--neg); }
-    .excluded { margin-top:var(--space-3); padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm); background:var(--soft); color:var(--muted); font-size:var(--font-xs); line-height:1.5; }
-    .split { margin-top:var(--space-4); padding-top:var(--space-3); border-top:var(--border) solid var(--line); }
+    .split { margin-top:var(--space-5); padding-top:var(--space-4); border-top:var(--border) solid var(--line); }
     .split-row { display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-2); font-size:var(--font-sm); }
     .split-row + .split-row { margin-top:var(--space-2); }
-    .split-row .k { color:var(--muted); } .split-row .v { font-weight:700; font-variant-numeric:tabular-nums; }
-    .split-row .s { min-width:3.25rem; color:var(--muted); font-size:var(--font-xs); text-align:right; font-variant-numeric:tabular-nums; }
-    details.fold { margin:0 var(--space-5) var(--space-3); border-radius:var(--radius-lg); background:var(--paper); }
-    details.fold > summary { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-4) var(--space-5); font-size:var(--font-sm); font-weight:700; list-style:none; cursor:pointer; }
-    details.fold > summary::-webkit-details-marker { display:none; }
-    details.fold > summary .count { margin-left:auto; color:var(--muted); font-weight:600; }
-    details.fold > summary::after { content:"⌄"; color:var(--muted); transition:transform .2s var(--ease); }
-    details.fold[open] > summary::after { transform:rotate(180deg); }
-    .fold-body { padding:0 var(--space-5) var(--space-4); }
-    .line-item { display:flex; width:100%; align-items:center; gap:var(--space-3); padding:var(--space-3); border:0; border-radius:var(--radius-sm); background:var(--soft); text-align:left; font-size:var(--font-sm); }
-    .line-item + .line-item { margin-top:var(--space-2); }
-    .line-item .grow { flex:1; min-width:0; }
-    .line-item .meta { color:var(--muted); font-size:var(--font-xs); }
-    .tabs { display:flex; gap:var(--space-2); margin-bottom:var(--space-4); }
-    .tab { flex:1; padding:var(--space-2) 0; border:var(--border) solid var(--line); border-radius:var(--radius-round); background:var(--paper); color:var(--muted); font-size:var(--font-xs); font-weight:700; }
-    .tab.active { border-color:var(--brand); background:var(--brand-soft); color:var(--brand); }
-    /* 가로 누적 막대. 도넛은 조각끼리 구분이 안 되는 데다, 2%짜리 조각은 모바일에서
-       폭이 몇 픽셀이라 진입점으로 기능하지 못했다. 막대는 모바일 폭을 다 쓰고,
-       진입은 터치 타겟이 충분한 범례 행이 맡는다. */
-    .stack { display:flex; width:100%; height:1.5rem; overflow:hidden; border-radius:var(--radius-sm); background:var(--soft); }
-    /* 인접한 색 사이에 표면색 간격을 둬 색이 서로 번지지 않게 한다. */
-    .stack-seg { min-width:.1875rem; border-right:.125rem solid var(--paper); }
-    .stack-seg:last-child { border-right:0; }
-    .stack-note { margin-top:var(--space-2); color:var(--muted); font-size:var(--font-xs); }
+    .split-row .k { color:var(--muted); } .split-row .v { font-weight:700; }
+    .split-row .s { min-width:3rem; color:var(--dim); font-size:var(--font-xs); text-align:right; }
+    .excluded { margin-top:var(--space-4); padding:var(--space-3); border-radius:var(--radius-sm);
+      background:var(--surface-2); color:var(--muted); font-size:var(--font-xs); line-height:1.6; }
+
+    .list-item { display:flex; width:100%; align-items:flex-start; gap:var(--space-3); padding:var(--space-3);
+      border:0; border-radius:var(--radius-sm); background:transparent; color:inherit; text-align:left; font-size:var(--font-sm); }
+    .list-item:hover { background:var(--surface-2); }
+    .list-item + .list-item { margin-top:var(--space-1); }
+    .list-item .idx { display:grid; width:1.25rem; height:1.25rem; flex:none; border-radius:50%;
+      background:var(--surface-2); color:var(--muted); font-size:var(--font-xs); place-items:center; }
+    .list-item .grow { flex:1; min-width:0; }
+    .list-item .meta { display:block; margin-top:var(--space-1); color:var(--dim); font-size:var(--font-xs); line-height:1.5; }
+    .list-item .when { flex:none; color:var(--brand-ink); font-size:var(--font-xs); font-weight:700; }
+
+    .chart-head { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-4); margin-bottom:var(--space-4); }
+    .chart-head > div:first-child { min-width:0; }
+    .chart-head .toolbar { flex:none; }
+    .toolbar { display:flex; align-items:center; gap:var(--space-2); }
+
+    /* 가로 누적 막대 — PC로 넓어졌다고 도넛으로 돌아가지 않는다. 부동산 편중은 공간
+       부족이 아니라 분포 문제였고, 넓은 화면에서도 조각 구분과 진입 문제는 그대로다. */
+    .stackbar { display:flex; width:100%; height:1.75rem; overflow:hidden; border-radius:var(--radius-sm); background:var(--surface-2); }
+    .stackbar-seg { min-width:.1875rem; border-right:.125rem solid var(--surface); }
+    .stackbar-seg:last-child { border-right:0; }
+    .stackbar-note { margin-top:var(--space-2); color:var(--dim); font-size:var(--font-xs); }
     .legend { margin-top:var(--space-3); }
-    /* 자산명·비율·금액을 한 줄에 다 넣으면 좁은 폭에서 이름이 먼저 잘려나간다
-       ("가상자산"이 통째로 사라졌었다). 이름+비율을 윗줄, 금액을 아랫줄로 나눈다. */
-    /* 범례가 진입점이므로 터치 타겟을 충분히 준다(행 높이 44px 이상). */
-    .legend-row { display:grid; width:100%; min-height:2.75rem; grid-template-columns:auto 1fr auto; align-items:center; gap:0 var(--space-2); padding:var(--space-2) var(--space-2); border:0; border-radius:var(--radius-sm); background:transparent; text-align:left; font-size:var(--font-sm); }
-    .legend-row:hover { background:var(--soft); }
-    .legend-row:active { background:var(--soft); }
-    .swatch { flex:none; width:.625rem; height:.625rem; border-radius:.1875rem; }
+    /* 범례가 진입점이므로 터치·클릭 타겟을 충분히 준다(44px 이상). */
+    .legend-row { display:grid; width:100%; min-height:2.75rem; grid-template-columns:auto 1fr auto auto;
+      align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-3); border:0;
+      border-radius:var(--radius-sm); background:transparent; color:inherit; text-align:left; font-size:var(--font-sm); }
+    .legend-row:hover { background:var(--surface-2); }
+    .swatch { width:.625rem; height:.625rem; flex:none; border-radius:.1875rem; }
     .legend-row .name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .legend-row .share { font-weight:700; font-variant-numeric:tabular-nums; }
-    .legend-row .amount { grid-column:2 / -1; color:var(--muted); font-size:var(--font-xs); font-variant-numeric:tabular-nums; white-space:nowrap; }
-    .summary-text { margin-bottom:var(--space-4); font-size:var(--font-sm); line-height:1.6; }
-    .meter + .meter { margin-top:var(--space-4); }
-    .meter-head { display:flex; justify-content:space-between; margin-bottom:var(--space-1); font-size:var(--font-sm); }
-    .meter-head .val { color:var(--muted); font-variant-numeric:tabular-nums; }
-    /* 위치만 찍는다. 채워진 막대는 아무리 중앙 기준으로 그려도 "많이 채울수록 좋다"로
-       읽힌다 — 집중도 95%가 오른쪽으로 꽉 차 있으면 성취처럼 보이는데 사실이 아니다.
-       눈금 하나만 두면 "어디에 있는가"만 남는다. */
-    .meter-track { position:relative; height:.375rem; border-radius:var(--radius-round); background:var(--soft); }
+    .legend-row .share { min-width:3.25rem; font-weight:700; text-align:right; }
+    .legend-row .amount { min-width:7.5rem; color:var(--muted); text-align:right; }
+
+    .meter + .meter { margin-top:var(--space-5); }
+    .meter-head { display:flex; justify-content:space-between; margin-bottom:var(--space-2); font-size:var(--font-sm); }
+    .meter-head .val { color:var(--muted); }
+    /* 위치만 찍는다 — 채운 막대는 "많이 채울수록 좋다"로 읽힌다. */
+    .meter-track { position:relative; height:.375rem; border-radius:var(--radius-round); background:var(--surface-2); }
     .meter-track::before { content:""; position:absolute; top:-.1875rem; bottom:-.1875rem; left:50%; width:var(--border); background:var(--line); }
-    .meter-mark { position:absolute; top:50%; width:.75rem; height:.75rem; margin:-.375rem 0 0 -.375rem; border:.125rem solid var(--paper); border-radius:50%; background:#5c6569; }
-    .meter-scale { display:flex; justify-content:space-between; margin-top:var(--space-1); color:var(--muted); font-size:var(--font-xs); }
-    .chart { width:100%; height:8.75rem; }
-    .chart-note { margin-top:var(--space-2); color:var(--muted); font-size:var(--font-xs); }
-    .holding { display:flex; width:100%; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-2); border:0; border-bottom:var(--border) solid var(--line); background:transparent; text-align:left; }
-    .holding:last-child { border-bottom:0; }
-    .holding .grow { flex:1; min-width:0; }
-    .holding .nm { display:block; overflow:hidden; font-size:var(--font-sm); font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
-    .holding .tag { color:var(--muted); font-size:var(--font-xs); }
-    .holding .right { flex:none; text-align:right; }
-    .holding .amt { display:block; font-size:var(--font-sm); font-weight:700; font-variant-numeric:tabular-nums; }
-    .holding .pl { display:block; font-size:var(--font-xs); font-variant-numeric:tabular-nums; }
-    .strip { display:flex; gap:var(--space-2); overflow-x:auto; padding:0 var(--space-5) var(--space-2); scrollbar-width:none; }
-    .strip::-webkit-scrollbar { display:none; }
-    .strip button { flex:none; width:8.75rem; padding:var(--space-4); border:var(--border) dashed var(--line); border-radius:var(--radius-md); background:var(--paper); text-align:left; }
-    .strip b { display:block; font-size:var(--font-sm); } .strip span { display:block; margin-top:var(--space-1); color:var(--muted); font-size:var(--font-xs); }
-    .empty { padding:var(--space-8) var(--space-5); text-align:center; }
-    .empty h1 { margin:0 0 var(--space-3); font-size:var(--font-xl); }
-    .empty p { margin-bottom:var(--space-6); color:var(--muted); font-size:var(--font-sm); line-height:1.6; }
-    .cta { display:inline-block; padding:var(--space-4) var(--space-6); border:0; border-radius:var(--radius-md); background:var(--brand); color:#fff; font-weight:800; text-decoration:none; }
-    .sources { padding:var(--space-4) var(--space-5) var(--space-6); color:var(--muted); font-size:var(--font-xs); line-height:1.7; }
-    .banner { margin:0 var(--space-5) var(--space-3); padding:var(--space-4); border:var(--border) solid var(--line); border-radius:var(--radius-lg); background:var(--paper); color:var(--muted); font-size:var(--font-sm); line-height:1.6; }
-    @media (min-width:37.5rem) { body { padding:var(--space-7) 0; } .app { min-height:calc(100vh - 3.5rem); border-radius:1.5rem; box-shadow:0 .75rem 2.5rem rgba(0,0,0,.09); } }
-    @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+    .meter-mark { position:absolute; top:50%; width:.75rem; height:.75rem; margin:-.375rem 0 0 -.375rem;
+      border:.125rem solid var(--surface); border-radius:50%; background:#94a1bd; }
+    .meter-scale { display:flex; justify-content:space-between; margin-top:var(--space-1); color:var(--dim); font-size:var(--font-xs); }
+    .summary-text { margin-bottom:var(--space-5); font-size:var(--font-sm); line-height:1.7; }
+
+    .chart { display:block; width:100%; height:13rem; }
+    .chart-note { margin-top:var(--space-2); color:var(--dim); font-size:var(--font-xs); }
+
+    .pl-strip { display:flex; flex-wrap:wrap; gap:var(--space-6); margin-bottom:var(--space-4);
+      padding:var(--space-4); border-radius:var(--radius-md); background:var(--surface-2); }
+    .pl-block .pl-label { color:var(--muted); font-size:var(--font-xs); }
+    .pl-block .pl-value { margin:var(--space-1) 0; font-size:var(--font-lg); font-weight:800; }
+    .pl-block .pl-basis { color:var(--dim); font-size:var(--font-xs); line-height:1.5; }
+
+    .soon-card { padding:var(--space-5); border:var(--border) dashed var(--line);
+      border-radius:var(--radius-lg); background:var(--surface); }
+    .soon-card b { display:block; margin:var(--space-2) 0 var(--space-1); font-size:var(--font-md); }
+    .soon-card span { color:var(--dim); font-size:var(--font-xs); }
+    .sources { margin-top:var(--space-6); color:var(--dim); font-size:var(--font-xs); line-height:1.8; }
   </style>
 </head>
 <body>
-<main id="app" class="app"></main>
+<div id="app"></div>
 <script src="lib/session.js"></script>
 <script src="lib/valuation.js"></script>
 <script src="lib/portfolio.js"></script>
+<script src="lib/shell.js"></script>
+<script src="lib/format.js"></script>
 <script>
-// 홈 화면. 금액 계산은 lib/valuation.js, 집계·분류는 lib/portfolio.js,
-// 세션 읽기는 lib/session.js가 담당한다. 이 파일은 그 결과를 그리기만 한다 —
-// 여기서 평가금액을 다시 계산하지 말 것.
+// 홈 화면. 금액 계산은 lib/valuation.js, 집계·분류는 lib/portfolio.js, 세션 읽기는
+// lib/session.js가 담당한다. 이 파일은 그 결과를 그리기만 한다 — 여기서 평가금액을
+// 다시 계산하지 말 것.
 const INPUT_URL="asset-input.html";
+const ASSETS_URL="assets.html";
+const { won, pct, escapeHtml, daysBetween } = Format;
 
 let sessionState=SessionStore.read();
 let session=toSession(sessionState);
 let axis="group";
-let assetClass="financial"; // 구성 카드 전환: financial | physical
+let assetClass="financial";
 
 function toSession(state){
   const raw=SessionStore.readRaw()||{};
@@ -133,7 +111,6 @@ function saveSession(){
 
 // 스냅샷은 asOf(시세 기준일)가 바뀐 걸 감지한 첫 실행에만 쌓는다. 앱을 연 시각을
 // 기준으로 하면 하루에 여러 번 열 때 중복되고 며칠 안 열면 구멍이 생긴다.
-// 형식을 {date,total}로 단순하게 유지한다 — 서버가 도입되면 그대로 옮긴다.
 function recordSnapshot(total){
   const date=Valuation.asOfDate();
   if(!date||!Number.isFinite(total))return;
@@ -143,35 +120,17 @@ function recordSnapshot(total){
   saveSession();
 }
 
-function won(value){
-  if(!Number.isFinite(value))return"–";
-  const sign=value<0?"-":"";
-  const n=Math.abs(Math.round(value));
-  if(n>=100000000){const eok=Math.floor(n/100000000),man=Math.floor((n%100000000)/10000);return `${sign}${eok.toLocaleString("ko-KR")}억${man?` ${man.toLocaleString("ko-KR")}만`:""}원`;}
-  if(n>=10000){const man=Math.floor(n/10000),rest=n%10000;return `${sign}${man.toLocaleString("ko-KR")}만${rest?` ${rest.toLocaleString("ko-KR")}`:""}원`;}
-  return `${sign}${n.toLocaleString("ko-KR")}원`;
-}
-function pct(value,digits=1){return `${(value*100).toFixed(digits)}%`;}
-function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
-function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
-
 // 범주를 구분하기 위한 색이지 좋고 나쁨을 뜻하지 않는다. 빨강·초록을 뺀 이유가 그것이다
 // (손익에만 색을 쓰기로 했는데, 구성 그래프에 빨강·초록이 있으면 그 의미가 번진다).
-// 이 순서는 색각 이상 시뮬레이션을 포함한 검증을 통과했다 — 인접쌍 최저 CVD ΔE 9.1,
-// 일반 시야 최저 ΔE 19.6 (흰 배경 기준). 순서를 바꾸면 다시 검증해야 한다.
-// 세 색(aqua·yellow·magenta)은 흰 배경 대비 3:1 미만이라, 범례에 이름·비율·금액을
-// 항상 함께 적어 색만으로 식별하지 않게 한다.
-const SERIES_COLORS=["#2a78d6","#eb6834","#1baf7a","#eda100","#e87ba4","#4a3aa7"];
+// 이 순서는 색각 이상 시뮬레이션을 포함한 검증을 통과했다. 순서를 바꾸면 다시 검증할 것.
+const SERIES_COLORS=["#5b8dee","#eb8a4b","#2ec39a","#e0b13c","#e58cb4","#8e7ae8"];
 
-// 비중이 0.5%인 항목도 화면에 자국은 남아야 한다(min-width). 그만큼 큰 항목이 조금씩
-// 줄어들므로 막대는 정확한 축척이 아니라 분포를 보여주는 그림이고, 정확한 값은 범례의
-// 숫자가 담당한다.
 function stackedBar(parts){
   if(!parts.length)return"";
   const segments=parts.map((part,index)=>
-    `<span class="stack-seg" style="flex:${Math.max(part.share,0.0001)} 1 0; background:${SERIES_COLORS[index%SERIES_COLORS.length]}" title="${escapeHtml(part.label)} ${pct(part.share)}"></span>`
+    `<span class="stackbar-seg" style="flex:${Math.max(part.share,0.0001)} 1 0; background:${SERIES_COLORS[index%SERIES_COLORS.length]}" title="${escapeHtml(part.label)} ${pct(part.share)}"></span>`
   ).join("");
-  return `<div class="stack" role="img" aria-label="${escapeHtml(parts.map(part=>`${part.label} ${pct(part.share)}`).join(", "))}">${segments}</div>`;
+  return `<div class="stackbar" role="img" aria-label="${escapeHtml(parts.map(part=>`${part.label} ${pct(part.share)}`).join(", "))}">${segments}</div>`;
 }
 
 function legend(parts){
@@ -179,15 +138,15 @@ function legend(parts){
     <button type="button" class="legend-row" data-slice="${escapeHtml(part.label)}">
       <span class="swatch" style="background:${SERIES_COLORS[index%SERIES_COLORS.length]}"></span>
       <span class="name">${escapeHtml(part.label)}</span>
-      <span class="share">${pct(part.share)}</span>
-      <span class="amount">${won(part.krw)}</span>
+      <span class="share num">${pct(part.share)}</span>
+      <span class="amount num">${won(part.krw)}</span>
     </button>`).join("")}</div>`;
 }
 
 function meterRow(meter){
   const value=Math.max(0,Math.min(1,meter.value));
   return `<div class="meter">
-    <div class="meter-head"><span>${meter.label}</span><span class="val">${pct(value,0)}</span></div>
+    <div class="meter-head"><span>${meter.label}</span><span class="val num">${pct(value,0)}</span></div>
     <div class="meter-track"><span class="meter-mark" style="left:${value*100}%"></span></div>
     <div class="meter-scale"><span>낮음</span><span>높음</span></div>
   </div>`;
@@ -195,11 +154,11 @@ function meterRow(meter){
 
 function trendChart(snapshots){
   if(snapshots.length<2)return"";
-  const width=320,height=120,padding=8;
+  const width=1000,height=200,padding=16;
   const totals=snapshots.map(point=>point.total);
   const min=Math.min(...totals),max=Math.max(...totals),span=max-min||1;
-  const start=new Date(snapshots[0].date),end=new Date(snapshots[snapshots.length-1].date);
-  const spanDays=Math.max(1,daysBetween(start,end));
+  const start=new Date(snapshots[0].date);
+  const spanDays=Math.max(1,daysBetween(start,new Date(snapshots[snapshots.length-1].date)));
   const at=point=>({
     x:padding+(daysBetween(start,new Date(point.date))/spanDays)*(width-padding*2),
     y:padding+(1-(point.total-min)/span)*(height-padding*2),
@@ -211,21 +170,21 @@ function trendChart(snapshots){
     const previous=snapshots[index],gap=daysBetween(previous.date,point.date);
     if(gap>1)gapDays+=gap-1;
     const from=at(previous),to=at(point);
-    return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="var(--brand)" stroke-width="2" stroke-linecap="round"${gap>1?' stroke-dasharray="3 3" opacity=".55"':""} />`;
+    return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="var(--brand)" stroke-width="2" stroke-linecap="round"${gap>1?' stroke-dasharray="4 4" opacity=".55"':""} />`;
   }).join("");
-  const dots=snapshots.map(point=>{const spot=at(point);return `<circle cx="${spot.x}" cy="${spot.y}" r="2.5" fill="var(--brand)"><title>${point.date} ${won(point.total)}</title></circle>`;}).join("");
-  return `<svg class="chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="자산 추이">${segments}${dots}</svg>
+  const dots=snapshots.map(point=>{const spot=at(point);return `<circle cx="${spot.x}" cy="${spot.y}" r="3" fill="var(--brand)"><title>${point.date} ${won(point.total)}</title></circle>`;}).join("");
+  return `<svg class="chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="자산 추이">${segments}${dots}</svg>
     ${gapDays?`<div class="chart-note">${gapDays}일치 기록이 비어 있어요 · 그 구간은 점선입니다</div>`:""}`;
 }
 
 function checkItems(summary){
   const items=[];
-  if(summary.unavailable.length)items.push({text:`시세를 확인하지 못한 자산 ${summary.unavailable.length}건`,meta:summary.unavailable.map(entry=>entry.name).join(", "),go:"input"});
-  if(summary.noPurchaseCount)items.push({text:`매입 정보가 없어 손익 계산에서 빠진 자산 ${summary.noPurchaseCount}건`,meta:"매입금액을 입력하면 평가손익에 포함됩니다",go:"input"});
+  if(summary.unavailable.length)items.push({text:`시세를 확인하지 못한 자산 ${summary.unavailable.length}건`,meta:summary.unavailable.map(entry=>entry.name).join(", ")});
+  if(summary.noPurchaseCount)items.push({text:`매입 정보가 없어 손익 계산에서 빠진 자산 ${summary.noPurchaseCount}건`,meta:"매입금액을 입력하면 평가손익에 포함됩니다"});
   const soon=maturingSoon(90);
-  if(soon.length)items.push({text:`만기가 90일 이내인 자산 ${soon.length}건`,meta:soon.map(entry=>entry.name).join(", "),go:"input"});
+  if(soon.length)items.push({text:`만기가 90일 이내인 자산 ${soon.length}건`,meta:soon.map(entry=>entry.name).join(", ")});
   const skipped=(session.skippedGroups||[]).length;
-  if(skipped)items.push({text:`아직 입력하지 않은 자산군 ${skipped}개`,meta:(session.skippedGroups||[]).map(id=>Portfolio.GROUP_NAMES[id]||id).join(", "),go:"input"});
+  if(skipped)items.push({text:`아직 입력하지 않은 자산군 ${skipped}개`,meta:(session.skippedGroups||[]).map(id=>Portfolio.GROUP_NAMES[id]||id).join(", ")});
   return items;
 }
 
@@ -241,14 +200,6 @@ function maturingSoon(days){
   }).filter(Boolean).sort((a,b)=>a.left-b.left);
 }
 
-function summarySentence(summary){
-  const guaranteed=summary.meters.find(meter=>meter.key==="guaranteed");
-  const concentration=summary.meters.find(meter=>meter.key==="concentration");
-  if(!guaranteed||!concentration)return"";
-  const count=Math.min(3,summary.financial.rows.length);
-  return `금융자산 중 원금 보장 자산이 ${pct(guaranteed.value,0)}이고, 상위 ${count}개 자산이 금융자산의 ${pct(concentration.value,0)}예요.`;
-}
-
 function sourcesLine(){
   const sources=Valuation.state.sources||{};
   const names=[...new Set(Object.values(sources).filter(Boolean))];
@@ -258,67 +209,54 @@ function sourcesLine(){
 }
 
 function render(){
-  const app=document.getElementById("app");
   const assets=session.assets||[];
 
   // 자산이 0건인 것과, 예전 형식이라 못 읽는 것은 전혀 다른 사건이다. 같은 화면으로
   // 뭉뚱그리면 자산 20건을 입력해 둔 사용자가 "자산이 없어요"를 보게 된다.
   if(sessionState.status==="legacy-empty"){
-    app.innerHTML=`<div class="empty">
+    Shell.mount("app","home",`<div class="empty-state">
       <h1>예전 형식으로 저장된 기록이 있어요</h1>
-      <p>지금 앱이 쓰는 형식(v${SessionStore.SCHEMA})과 달라서 불러오지 못했어요.<br>
-      저장된 기록은 지우지 않고 그대로 두었습니다.</p>
-      <a class="cta" href="${INPUT_URL}">자산 입력하러 가기</a>
-    </div>`;
+      <p>지금 앱이 쓰는 형식(v${SessionStore.SCHEMA})과 달라서 불러오지 못했어요.<br>저장된 기록은 지우지 않고 그대로 두었습니다.</p>
+      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`);
     return;
   }
-
   if(!assets.length){
-    app.innerHTML=`<div class="empty">
+    Shell.mount("app","home",`<div class="empty-state">
       <h1>아직 등록된 자산이 없어요</h1>
-      <p>자산을 입력하면 총자산과 구성을<br>한 화면에서 볼 수 있어요.</p>
-      <a class="cta" href="${INPUT_URL}">자산 입력하러 가기</a>
-    </div>`;
+      <p>자산을 입력하면 총자산과 구성을 한 화면에서 볼 수 있어요.</p>
+      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`);
     return;
   }
-
   if(Valuation.state.status==="error"){
-    app.innerHTML=`${header()}
-      <div class="banner">시세를 불러오지 못해 총자산을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>
-      ${holdingsCard(null)}`;
-    bind();
+    Shell.mount("app","home",`${pageHead()}
+      <div class="banner">시세를 불러오지 못해 총자산을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>`);
     return;
   }
 
   const summary=Portfolio.summarize(assets);
   recordSnapshot(summary.total);
 
-  app.innerHTML=[
-    header(),
+  // 목업 1페이지의 배치: 3열 → 2열 → 전체 폭 → 전체 폭 → 3열
+  Shell.mount("app","home",[
+    pageHead(),
     legacyBanner(),
-    totalCard(summary),
-    checkCard(summary),
-    scheduleCard(),
-    compositionCard(summary),
-    portfolioCard(summary),
-    trendCard(),
-    holdingsCard(summary),
-    comingCard(),
+    `<div class="grid grid-top">${totalCard(summary)}${checkCard(summary)}${scheduleCard()}</div>`,
+    `<div class="grid grid-half" style="margin-top:var(--space-4)">${compositionCard(summary)}${portfolioCard(summary)}</div>`,
+    `<div class="stack-rows" style="margin-top:var(--space-4)">${trendCard()}${holdingsCard(summary)}</div>`,
+    comingCards(),
     sourcesLine(),
-  ].join("");
+  ].join(""));
   bind();
 }
 
-function header(){
+function pageHead(){
   const asOf=Valuation.asOfLabel();
-  return `<div class="head">
+  return `<div class="page-head">
     <div><h1>내 자산</h1><div class="sub">${asOf?escapeHtml(asOf):"시세 기준일 확인 중"}</div></div>
-    <a class="add" href="${INPUT_URL}#add">+ 자산 추가</a>
+    <div class="head-actions"><a class="btn primary" href="${INPUT_URL}#add">＋ 자산 추가</a></div>
   </div>`;
 }
 
-// 예전 형식에서 자산을 살려낸 경우. 화면은 정상적으로 보여주되, 지금 보고 있는 것이
-// 마이그레이션된 결과이고 원본은 보존돼 있다는 사실을 숨기지 않는다.
 function legacyBanner(){
   if(sessionState.status!=="migrated")return"";
   return `<div class="banner">예전 형식(v${escapeHtml(String(sessionState.schema ?? "?"))})으로 저장된 기록에서 자산 ${sessionState.assets.length}건을 불러왔어요. 원본은 지우지 않고 그대로 두었고, 이 화면에서는 새 기록(추이 등)을 저장하지 않습니다.</div>`;
@@ -333,42 +271,43 @@ function totalCard(summary){
     const rate=previous.total?delta/previous.total:0;
     const tone=delta>0?"pos":delta<0?"neg":"flat";
     const mark=delta>0?"+":delta<0?"−":"";
-    change=`<div class="total-change ${tone}">${mark}${won(Math.abs(delta)).replace("-","")} (${mark}${pct(Math.abs(rate))}) · ${previous.date} 대비</div>`;
+    change=`<div class="total-change ${tone} num">${mark}${won(Math.abs(delta))} (${mark}${pct(Math.abs(rate))}) · ${previous.date} 대비</div>`;
   }
   const excluded=summary.unavailable.length
-    ?`<div class="excluded">시세를 확인하지 못한 자산 ${summary.unavailable.length}건은 총자산에서 제외했어요 · ${escapeHtml(summary.unavailable.map(entry=>entry.name).join(", "))}</div>`
-    :"";
-  // 금융자산과 실물자산을 나눠 보여준다. 부동산 하나가 90%를 넘으면 총액만으로는
-  // 나머지가 얼마인지 감이 오지 않는다.
+    ?`<div class="excluded">시세를 확인하지 못한 자산 ${summary.unavailable.length}건은 총자산에서 제외했어요 · ${escapeHtml(summary.unavailable.map(entry=>entry.name).join(", "))}</div>`:"";
+  // 부동산 하나가 90%를 넘으면 총액만으로는 나머지가 얼마인지 감이 오지 않는다.
   const split=summary.total?`<div class="split">
-    <div class="split-row"><span class="k">금융자산</span><span class="v">${won(summary.financial.total)}</span><span class="s">${pct(summary.financial.share,0)}</span></div>
-    <div class="split-row"><span class="k">실물자산</span><span class="v">${won(summary.physical.total)}</span><span class="s">${pct(summary.physical.share,0)}</span></div>
+    <div class="split-row"><span class="k">금융자산</span><span class="v num">${won(summary.financial.total)}</span><span class="s num">${pct(summary.financial.share,0)}</span></div>
+    <div class="split-row"><span class="k">실물자산</span><span class="v num">${won(summary.physical.total)}</span><span class="s num">${pct(summary.physical.share,0)}</span></div>
   </div>`:"";
   return `<div class="card">
     <h2>총자산</h2>
-    <div class="total-amount">${won(summary.total)}</div>
-    ${change}
-    ${excluded}
-    ${split}
+    <div class="total-amount num">${won(summary.total)}</div>
+    ${change}${excluded}${split}
   </div>`;
 }
 
+// 모바일에서 접어뒀던 두 카드는 PC에서 펼친다.
 function checkCard(summary){
   const items=checkItems(summary);
-  if(!items.length)return"";
-  return `<details class="fold"><summary>확인이 필요한 항목<span class="count">${items.length}</span></summary>
-    <div class="fold-body">${items.map(item=>`<button type="button" class="line-item" data-go="${item.go}">
-      <span class="grow"><span>${escapeHtml(item.text)}</span><span class="meta" style="display:block">${escapeHtml(item.meta)}</span></span><span>›</span>
-    </button>`).join("")}</div></details>`;
+  const body=items.length
+    ?items.map((item,index)=>`<button type="button" class="list-item" data-go="input">
+        <span class="idx">${index+1}</span>
+        <span class="grow">${escapeHtml(item.text)}<span class="meta">${escapeHtml(item.meta)}</span></span>
+      </button>`).join("")
+    :`<p class="card-sub" style="margin:0">확인이 필요한 항목이 없어요.</p>`;
+  return `<div class="card"><h2>확인이 필요한 항목 ${items.length?`<span class="pill">${items.length}</span>`:""}</h2><div style="margin-top:var(--space-3)">${body}</div></div>`;
 }
 
 function scheduleCard(){
   const soon=maturingSoon(365);
-  if(!soon.length)return""; // 일정이 없으면 카드를 숨긴다
-  return `<details class="fold"><summary>다가오는 일정<span class="count">${soon.length}</span></summary>
-    <div class="fold-body">${soon.map(entry=>`<button type="button" class="line-item" data-go="input">
-      <span class="grow"><span>${escapeHtml(entry.name)}</span><span class="meta" style="display:block">${escapeHtml(entry.date)} 만기 · ${entry.left}일 남음</span></span><span>›</span>
-    </button>`).join("")}</div></details>`;
+  const body=soon.length
+    ?soon.slice(0,4).map(entry=>`<button type="button" class="list-item" data-go="input">
+        <span class="when">${escapeHtml(entry.date.slice(5).replace("-","월 "))}일</span>
+        <span class="grow">${escapeHtml(entry.name)}<span class="meta">만기 · ${entry.left}일 남음</span></span>
+      </button>`).join("")
+    :`<p class="card-sub" style="margin:0">등록된 자산에 예정된 일정이 없어요. 만기일을 입력하면 여기에 표시됩니다.</p>`;
+  return `<div class="card"><h2>다가오는 일정 ${soon.length?`<span class="pill">${soon.length}</span>`:""}</h2><div style="margin-top:var(--space-3)">${body}</div></div>`;
 }
 
 const AXES=[["group","자산 유형"],["guaranteed","원금 보장"],["currency","통화"]];
@@ -379,26 +318,25 @@ const AXIS_NOTES={
 };
 
 function compositionCard(summary){
-  const hasPhysical=summary.physical.total>0;
-  const hasFinancial=summary.financial.total>0;
-  // 한쪽만 있으면 전환 버튼이 의미가 없다.
-  const showToggle=hasPhysical&&hasFinancial;
+  const hasPhysical=summary.physical.total>0,hasFinancial=summary.financial.total>0;
   const active=!hasFinancial?"physical":!hasPhysical?"financial":assetClass;
   const side=active==="physical"?summary.physical:summary.financial;
-  // 실물자산은 전부 시가 변동이고 전부 원화라 원금 보장·통화 축이 의미가 없다.
   const parts=(active==="physical"?side.axes.group:side.axes[axis])||[];
-  const toggle=showToggle?`<div class="tabs">${[["financial","금융자산"],["physical","실물자산"]].map(([key,label])=>
+  const classToggle=hasPhysical&&hasFinancial?`<div class="tabs">${[["financial","금융자산"],["physical","실물자산"]].map(([key,label])=>
     `<button type="button" class="tab ${active===key?"active":""}" data-class="${key}">${label}</button>`).join("")}</div>`:"";
+  // 실물자산은 전부 시가 변동이고 전부 원화라 원금 보장·통화 축이 의미가 없다.
   const axisTabs=active==="financial"?`<div class="tabs">${AXES.map(([key,label])=>
     `<button type="button" class="tab ${axis===key?"active":""}" data-axis="${key}">${label}</button>`).join("")}</div>`:"";
   const note=active==="physical"
     ?"실물자산은 전부 시가 변동이고 전부 원화라 원금 보장·통화 축을 두지 않았습니다."
     :AXIS_NOTES[axis];
   return `<div class="card">
-    <h2>자산 구성</h2>
-    ${toggle}${axisTabs}
+    <div class="chart-head">
+      <div><h2>자산 구성</h2><div class="card-sub" style="margin:0">카테고리별 평가금액과 비중</div></div>
+      <div class="toolbar">${classToggle}${axisTabs}</div>
+    </div>
     ${stackedBar(parts)}
-    <div class="stack-note">${won(side.total)} · ${parts.length}개 항목</div>
+    <div class="stackbar-note num">${won(side.total)} · ${parts.length}개 항목</div>
     ${legend(parts)}
     <div class="card-note">${escapeHtml(note)}</div>
   </div>`;
@@ -411,11 +349,15 @@ function portfolioCard(summary){
   if(!summary.meters.length){
     if(!summary.total)return"";
     return `<div class="card"><h2>포트폴리오 요약</h2>
-      <div class="summary-text tag" style="color:var(--muted)">금융자산이 없어 요약 축을 계산하지 않았어요. 이 축들은 금융자산 기준입니다.</div></div>`;
+      <p class="card-sub">금융자산이 없어 요약 축을 계산하지 않았어요. 이 축들은 금융자산 기준입니다.</p></div>`;
   }
+  const guaranteed=summary.meters.find(meter=>meter.key==="guaranteed");
+  const concentration=summary.meters.find(meter=>meter.key==="concentration");
+  const count=Math.min(3,summary.financial.rows.length);
   return `<div class="card">
-    <h2>포트폴리오 요약 <span class="tag" style="color:var(--muted); font-weight:600">금융자산 기준</span></h2>
-    <div class="summary-text">${escapeHtml(summarySentence(summary))}</div>
+    <h2>포트폴리오 요약 <span class="pill">금융자산 기준</span></h2>
+    <div class="card-sub">현재 배분 기준 요약</div>
+    <div class="summary-text">금융자산 중 원금 보장 자산이 ${pct(guaranteed.value,0)}이고, 상위 ${count}개 자산이 금융자산의 ${pct(concentration.value,0)}예요.</div>
     ${summary.meters.map(meterRow).join("")}
     <div class="card-note">축은 위치를 나타냅니다. 점수나 등급이 아니며, 높다고 좋거나 낮다고 나쁜 것이 아닙니다.<br>
     부동산·원자재는 이 축에서 제외했습니다 — 실거주 주택을 팔아 집중도를 낮출 수는 없으므로, 투자 판단과 연결된 축에 넣으면 숫자가 그쪽으로 끌려갑니다.<br>
@@ -426,49 +368,83 @@ function portfolioCard(summary){
 function trendCard(){
   const snapshots=session.snapshots||[];
   return `<div class="card">
-    <h2>자산 추이</h2>
-    ${snapshots.length<2
-      ?`<div class="chart-note">기록이 하루치예요. 내일부터 변화를 볼 수 있어요.</div>`
-      :trendChart(snapshots)}
+    <div class="chart-head"><div><h2>자산 추이</h2><div class="card-sub" style="margin:0">기록된 기준일의 총자산 변동</div></div></div>
+    ${snapshots.length<2?`<div class="chart-note">기록이 하루치예요. 내일부터 변화를 볼 수 있어요.</div>`:trendChart(snapshots)}
   </div>`;
 }
 
-function holdingsCard(summary){
-  const assets=session.assets||[];
-  if(!summary){
-    return `<div class="card"><h2>보유 자산</h2>${assets.map(asset=>`<button type="button" class="holding" data-go="input">
-      <span class="grow"><span class="nm">${escapeHtml(Portfolio.assetName(asset))}</span><span class="tag">${escapeHtml(Portfolio.GROUP_NAMES[asset.group]||asset.group)}</span></span>
-      <span class="right"><span class="amt">–</span><span class="pl tag">시세 없음</span></span>
-    </button>`).join("")}</div>`;
-  }
-  const rows=summary.rows.map(row=>{
-    const share=summary.total?row.krw/summary.total:0;
-    const pl=row.profit===null
-      ?`<span class="pl tag">매입 정보 없음</span>`
-      :`<span class="pl ${row.profit>0?"pos":row.profit<0?"neg":""}">${row.profit>0?"+":row.profit<0?"−":""}${won(Math.abs(row.profit)).replace("-","")}</span>`;
-    return `<button type="button" class="holding" data-asset="${escapeHtml(row.id||"")}" data-go="input">
-      <span class="grow"><span class="nm">${escapeHtml(row.name)}</span><span class="tag">${escapeHtml(row.groupName)} · 전체의 ${pct(share)}</span></span>
-      <span class="right"><span class="amt">${won(row.krw)}</span>${pl}</span>
-    </button>`;
-  }).join("");
-  const profit=summary.profit;
-  const head=profit.count
-    ?`<div class="summary-text">평가손익 <b class="${profit.sum>0?"pos":profit.sum<0?"neg":""}">${profit.sum>0?"+":profit.sum<0?"−":""}${won(Math.abs(profit.sum)).replace("-","")}</b>
-       ${profit.rate===null?"":`(${profit.sum>0?"+":profit.sum<0?"−":""}${pct(Math.abs(profit.rate))})`}
-       <span class="tag" style="display:block; color:var(--muted)">매입 정보가 있는 ${profit.count}개 자산 기준 · 총자산은 ${summary.rows.length}개 자산 기준</span></div>`
-    :`<div class="summary-text tag" style="color:var(--muted)">매입 정보가 있는 자산이 없어 평가손익을 계산하지 않았어요.</div>`;
-  return `<div class="card"><h2>보유 자산</h2>${head}${rows}</div>`;
+function plStrip(summary){
+  const financial=summary.financial.profit,physical=summary.physical.gap;
+  const money=(value)=>`${value>0?"+":value<0?"−":""}${won(Math.abs(value))}`;
+  const tone=(value)=>value>0?"pos":value<0?"neg":"";
+  const blocks=[];
+  blocks.push(financial.count
+    ?`<div class="pl-block"><div class="pl-label">평가손익</div>
+       <div class="pl-value num ${tone(financial.sum)}">${money(financial.sum)}${financial.rate===null?"":` (${financial.sum>0?"+":financial.sum<0?"−":""}${pct(Math.abs(financial.rate))})`}</div>
+       <div class="pl-basis">매입 정보가 있는 ${financial.count}개 금융자산 기준</div></div>`
+    :`<div class="pl-block"><div class="pl-label">평가손익</div><div class="pl-value">–</div>
+       <div class="pl-basis">매입 정보가 있는 금융자산이 없어요</div></div>`);
+  // 실물자산은 시장이 매긴 값이 아니라 사용자가 적어 넣은 추정가와 매입가의 차이라
+  // 용어를 나눈다. 같은 줄에 더하면 숫자의 성격이 섞인다.
+  if(physical.count)blocks.push(`<div class="pl-block"><div class="pl-label">실물자산 평가차액</div>
+    <div class="pl-value num ${tone(physical.sum)}">${money(physical.sum)}${physical.rate===null?"":` (${physical.sum>0?"+":physical.sum<0?"−":""}${pct(Math.abs(physical.rate))})`}</div>
+    <div class="pl-basis">사용자가 입력한 추정가 기준 · ${physical.count}개 자산</div></div>`);
+  return `<div class="pl-strip">${blocks.join("")}</div>`;
 }
 
-function comingCard(){
+function holdingsCard(summary){
+  const rows=summary.rows.map(row=>{
+    const share=summary.total?row.krw/summary.total:0;
+    const physical=row.klass==="physical";
+    const pl=row.profit===null
+      ?`<span class="pill">매입 정보 없음</span>`
+      :`<span class="num ${row.profit>0?"pos":row.profit<0?"neg":""}">${row.profit>0?"+":row.profit<0?"−":""}${won(Math.abs(row.profit))}${physical?" *":""}</span>`;
+    return `<tr data-asset="${escapeHtml(row.id||"")}">
+      <td class="name">${escapeHtml(row.name)}</td>
+      <td><span class="pill">${escapeHtml(row.groupName)}</span></td>
+      <td class="right num">${won(row.krw)}</td>
+      <td class="right">${pl}</td>
+      <td class="right num">${pct(share)}</td>
+      <td class="right" style="color:var(--dim)">${escapeHtml(updatedLabel(row.asset))}</td>
+    </tr>`;
+  }).join("");
+  const hasPhysicalProfit=summary.physical.gap.count>0;
+  return `<div class="card">
+    <div class="chart-head">
+      <div><h2>보유 자산</h2><div class="card-sub" style="margin:0">평가금액 높은순 · ${summary.rows.length}개</div></div>
+      <div class="toolbar"><a class="btn" href="${ASSETS_URL}">자산군별로 보기</a></div>
+    </div>
+    ${plStrip(summary)}
+    <table class="data">
+      <thead><tr>
+        <th>자산명</th><th>자산 유형</th><th class="right">평가금액</th>
+        <th class="right">평가손익</th><th class="right">전체 대비 비중</th><th class="right">최근 업데이트</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${hasPhysicalProfit?`<div class="card-note">* 실물자산의 값은 시장이 매긴 손익이 아니라 입력하신 추정가와 매입가의 차이(평가차액)입니다.</div>`:""}
+  </div>`;
+}
+
+function updatedLabel(asset){
+  const raw=asset&&(asset.updatedAt||asset.createdAt);
+  if(!raw)return"–";
+  const days=daysBetween(String(raw).slice(0,10),new Date().toISOString().slice(0,10));
+  if(!Number.isFinite(days))return"–";
+  if(days<=0)return"오늘";
+  if(days===1)return"어제";
+  return `${days}일 전`;
+}
+
+function comingCards(){
   const items=[["목표 자산","목표를 정하고 진행률을 봅니다"],["월간 현금흐름","들어오고 나간 돈을 봅니다"],["보유자산 주요 이슈","내 자산과 연결된 소식만"]];
-  return `<h2 style="margin:var(--space-6) var(--space-5) var(--space-3); font-size:var(--font-md)">준비 중인 기능</h2>
-    <div class="strip">${items.map(([title,note])=>`<button type="button" data-coming="${escapeHtml(title)}"><b>${escapeHtml(title)}</b><span>${escapeHtml(note)}</span></button>`).join("")}</div>`;
+  return `<div class="grid grid-third" style="margin-top:var(--space-4)">${items.map(([title,note])=>
+    `<div class="soon-card"><span class="pill">준비 중인 기능</span><b>${escapeHtml(title)}</b><span>${escapeHtml(note)}</span></div>`).join("")}</div>`;
 }
 
 // 진입점은 시각화 자체다 — 기능 진입 전용 버튼을 두지 않는다. 다만 누적 막대의 조각은
-// 진입점으로 쓰지 않는다: 비중 2%짜리는 모바일에서 폭이 몇 픽셀이라 누를 수가 없다.
-// 대신 금액·비율이 함께 적힌 범례 행이 진입점이고, 터치 타겟도 충분하다(44px 이상).
+// 진입점으로 쓰지 않는다: 비중 2%짜리는 폭이 몇 픽셀이라 누를 수가 없다. 금액·비율이
+// 함께 적힌 범례 행과 표의 행이 진입점이다.
 function bind(){
   document.querySelectorAll("button[data-class]").forEach(button=>{
     button.addEventListener("click",()=>{assetClass=button.dataset.class;render();});
@@ -476,17 +452,14 @@ function bind(){
   document.querySelectorAll("button[data-axis]").forEach(button=>{
     button.addEventListener("click",()=>{axis=button.dataset.axis;render();});
   });
-  document.querySelectorAll("button[data-slice]").forEach(node=>{
-    node.addEventListener("click",()=>{location.href=`${INPUT_URL}#composition=${encodeURIComponent(node.dataset.slice)}`;});
+  document.querySelectorAll("button[data-slice]").forEach(button=>{
+    button.addEventListener("click",()=>{location.href=`${ASSETS_URL}#composition=${encodeURIComponent(button.dataset.slice)}`;});
   });
   document.querySelectorAll("button[data-go]").forEach(button=>{
-    button.addEventListener("click",()=>{
-      const id=button.dataset.asset;
-      location.href=id?`${INPUT_URL}#asset=${encodeURIComponent(id)}`:`${INPUT_URL}#add`;
-    });
+    button.addEventListener("click",()=>{location.href=`${INPUT_URL}#add`;});
   });
-  document.querySelectorAll("button[data-coming]").forEach(button=>{
-    button.addEventListener("click",()=>{alert(`${button.dataset.coming}은 준비 중이에요.`);});
+  document.querySelectorAll("tr[data-asset]").forEach(row=>{
+    row.addEventListener("click",()=>{location.href=`${INPUT_URL}#asset=${encodeURIComponent(row.dataset.asset)}`;});
   });
 }
 

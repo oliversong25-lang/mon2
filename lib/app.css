@@ -1,0 +1,151 @@
+/* lib/app.css
+   PC 우선 셸과 다크 네이비 테마. 목업(4안 1페이지 · 7안)의 배치·색·타이포를 기준으로 삼는다.
+   홈·자산·자산 입력 세 화면이 같은 토큰을 쓰므로, 색을 바꾸려면 여기 한 곳만 고친다.
+
+   모바일 대응은 이번 범위가 아니다 — 좁은 폭에서 깨지지만 않으면 된다(맨 아래 폴백). */
+
+:root {
+  color-scheme: dark;
+
+  --nav-w: 15.5rem;
+  --page-max: 78rem;      /* 1440px 화면에서 좌우 여백이 남도록 */
+  --form-max: 34rem;      /* 입력 필드가 과도하게 늘어지지 않게 하는 상한 */
+
+  --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem; --space-7: 1.75rem; --space-8: 2rem; --space-10: 2.5rem;
+
+  --font-xs: .75rem; --font-sm: .8125rem; --font-md: .9375rem; --font-lg: 1.125rem;
+  --font-xl: 1.75rem; --font-total: 2.25rem;
+
+  --radius-sm: .5rem; --radius-md: .75rem; --radius-lg: 1rem; --radius-round: 62.4375rem;
+  --border: .0625rem;
+
+  /* 다크 네이비 */
+  --page: #0b0f1a;
+  --surface: #141b2b;
+  --surface-2: #1b2337;
+  --line: #253048;
+  --ink: #e9edf5;
+  --muted: #8b95ad;
+  --dim: #6c7794;
+
+  --brand: #5b7cfa;
+  --brand-soft: #1e2a4d;
+  --brand-ink: #aebeff;
+
+  /* 손익에만 색을 쓴다. 국내 관례대로 상승이 붉은색이다. */
+  --pos: #ff6b6b;
+  --neg: #5b8dee;
+
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: var(--page); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+p { margin: 0; }
+a { color: var(--brand-ink); }
+
+/* ---- 셸 ---- */
+.shell { display: grid; grid-template-columns: var(--nav-w) 1fr; min-height: 100vh; }
+
+.nav { position: sticky; top: 0; display: flex; height: 100vh; flex-direction: column;
+  padding: var(--space-6) var(--space-4); border-right: var(--border) solid var(--line); background: var(--surface); }
+.nav-brand { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-2) var(--space-6); }
+.nav-mark { display: grid; width: 2rem; height: 2rem; flex: none; border-radius: var(--radius-sm);
+  background: var(--brand-soft); color: var(--brand-ink); font-weight: 800; place-items: center; }
+.nav-brand b { font-size: var(--font-lg); letter-spacing: -.02em; }
+.nav-list { display: grid; gap: var(--space-1); }
+.nav-item { display: flex; width: 100%; align-items: center; gap: var(--space-3); padding: var(--space-3);
+  border: 0; border-left: .1875rem solid transparent; border-radius: var(--radius-sm); background: transparent;
+  color: var(--muted); font-size: var(--font-md); text-align: left; text-decoration: none; }
+.nav-item:hover { background: var(--surface-2); color: var(--ink); }
+.nav-item.active { border-left-color: var(--brand); background: var(--brand-soft); color: var(--ink); font-weight: 700; }
+.nav-item[aria-disabled="true"] { cursor: default; opacity: .55; }
+.nav-item[aria-disabled="true"]:hover { background: transparent; color: var(--muted); }
+.nav-icon { width: 1.125rem; flex: none; text-align: center; opacity: .9; }
+.nav-badge { margin-left: auto; padding: .125rem var(--space-2); border-radius: var(--radius-round);
+  background: var(--surface-2); color: var(--dim); font-size: var(--font-xs); }
+.nav-foot { display: flex; align-items: center; gap: var(--space-3); margin-top: auto;
+  padding-top: var(--space-4); border-top: var(--border) solid var(--line); color: var(--muted); font-size: var(--font-sm); }
+.nav-foot .nav-mark { background: var(--surface-2); color: var(--ink); border-radius: 50%; }
+
+.main { min-width: 0; padding: var(--space-8) var(--space-10) var(--space-10); }
+.main-inner { max-width: var(--page-max); margin: 0 auto; }
+
+.page-head { display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-4); margin-bottom: var(--space-6); }
+.page-head h1 { margin: 0 0 var(--space-1); font-size: var(--font-xl); letter-spacing: -.03em; }
+.page-head .sub { color: var(--muted); font-size: var(--font-sm); }
+.head-actions { display: flex; flex: none; align-items: center; gap: var(--space-2); }
+
+/* ---- 공통 부품 ---- */
+.card { padding: var(--space-5); border: var(--border) solid var(--line);
+  border-radius: var(--radius-lg); background: var(--surface); }
+/* 직계(>)로 잡으면 .chart-head 안에 든 제목이 브라우저 기본 크기로 튄다. */
+.card h2 { display: flex; align-items: baseline; gap: var(--space-2);
+  margin: 0 0 var(--space-1); font-size: var(--font-md); }
+.card .card-sub { margin-bottom: var(--space-4); color: var(--muted); font-size: var(--font-xs); }
+.card-note { margin-top: var(--space-4); padding-top: var(--space-3);
+  border-top: var(--border) solid var(--line); color: var(--dim); font-size: var(--font-xs); line-height: 1.65; }
+
+.grid { display: grid; gap: var(--space-4); }
+/* 목업 1행: 총자산이 넓고 나머지 둘이 같은 폭 */
+.grid-top { grid-template-columns: 1.35fr 1fr 1fr; }
+.grid-half { grid-template-columns: 1fr 1fr; }
+.grid-third { grid-template-columns: repeat(3, 1fr); }
+.stack-rows { display: grid; gap: var(--space-4); }
+
+.btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4);
+  border: var(--border) solid var(--line); border-radius: var(--radius-md); background: var(--surface-2);
+  color: var(--ink); font-size: var(--font-sm); font-weight: 700; text-decoration: none; }
+.btn:hover { border-color: var(--brand); }
+.btn.primary { border-color: transparent; background: var(--brand); color: #fff; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn:disabled, .btn[aria-disabled="true"] { cursor: default; filter: none; opacity: .4; }
+
+.tabs { display: flex; gap: var(--space-1); padding: var(--space-1);
+  border-radius: var(--radius-md); background: var(--surface-2); }
+.tab { padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--muted); font-size: var(--font-xs); font-weight: 700; white-space: nowrap; }
+.tab:hover { color: var(--ink); }
+.tab.active { background: var(--surface); color: var(--ink); box-shadow: 0 .0625rem .1875rem rgba(0, 0, 0, .35); }
+
+.pos { color: var(--pos); } .neg { color: var(--neg); }
+.pill { padding: .125rem var(--space-2); border-radius: var(--radius-round);
+  background: var(--surface-2); color: var(--muted); font-size: var(--font-xs); font-weight: 600; white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+
+table.data { width: 100%; border-collapse: collapse; font-size: var(--font-sm); }
+table.data th { padding: var(--space-3) var(--space-3); border-bottom: var(--border) solid var(--line);
+  color: var(--muted); font-size: var(--font-xs); font-weight: 600; text-align: left; white-space: nowrap; }
+table.data td { padding: var(--space-4) var(--space-3); border-bottom: var(--border) solid var(--line); }
+table.data tr:last-child td { border-bottom: 0; }
+table.data tbody tr { cursor: pointer; }
+table.data tbody tr:hover { background: var(--surface-2); }
+table.data .right { text-align: right; }
+table.data .name { font-weight: 700; }
+
+.empty-state { max-width: 30rem; margin: 6rem auto; text-align: center; }
+.empty-state h1 { margin: 0 0 var(--space-3); font-size: var(--font-xl); }
+.empty-state p { margin-bottom: var(--space-6); color: var(--muted); font-size: var(--font-md); line-height: 1.7; }
+
+.banner { margin-bottom: var(--space-4); padding: var(--space-4); border: var(--border) solid var(--line);
+  border-radius: var(--radius-lg); background: var(--surface); color: var(--muted);
+  font-size: var(--font-sm); line-height: 1.65; }
+
+/* 좁은 폭에서 깨지지만 않게 하는 폴백. 모바일 대응은 이번 범위가 아니다. */
+@media (max-width: 60rem) {
+  .shell { grid-template-columns: 1fr; }
+  .nav { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center;
+    border-right: 0; border-bottom: var(--border) solid var(--line); }
+  .nav-brand { padding: 0 var(--space-3) 0 0; }
+  .nav-list { display: flex; flex-wrap: wrap; }
+  .nav-item { border-left: 0; border-bottom: .1875rem solid transparent; }
+  .nav-item.active { border-left: 0; border-bottom-color: var(--brand); }
+  .nav-foot { display: none; }
+  .main { padding: var(--space-5); }
+  .grid-top, .grid-half, .grid-third { grid-template-columns: 1fr; }
+}

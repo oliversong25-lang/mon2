@@ -113,7 +113,7 @@ try {
   await writeFile(QUOTES_PATH, JSON.stringify(QUOTES_FIXTURE), "utf8");
   server = await startServer();
   browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } }); // 모바일 폭
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } }); // PC 폭
 
   // ===== 1. 자산 0건 =====
   await page.goto(HOME_URL);
@@ -122,7 +122,7 @@ try {
   await record("자산 0건이면 홈 대신 자산 입력을 유도한다", async () => {
     const text = await page.locator("#app").textContent();
     if (!text.includes("아직 등록된 자산이 없어요")) return { ok: false, reason: `빈 상태 문구 없음: ${text.slice(0, 120)}` };
-    const href = await page.locator("a.cta").getAttribute("href");
+    const href = await page.locator("a.btn.primary").getAttribute("href");
     if (!href.includes("asset-input.html")) return { ok: false, reason: `입력 화면 링크가 아님: ${href}` };
     return { ok: true };
   });
@@ -164,6 +164,10 @@ try {
   await page.locator("#field-realestate-priceDate").fill("2026-08-01");
   await page.click('[data-toggle="joint"][data-group="realestate"]');
   await type(page, "#field-realestate-ownershipRate", "50");
+  // 매입가격은 선택 정보라 접힌 섹션 안에 있다. 실물자산 '평가차액'을 검증하려면
+  // 매입 정보가 있어야 하므로 실제로 펼쳐서 입력한다.
+  await page.locator('details[data-details="optional-realestate"] > summary').click();
+  await type(page, "#field-realestate-purchasePrice", "700000000");
   await page.click("[data-next]");
 
   const registered = await page.evaluate(() => session.assets.length);
@@ -193,7 +197,7 @@ try {
   });
 
   await record("홈의 '+ 자산 추가'가 완료 화면에 갇히지 않고 검토 화면으로 연다", async () => {
-    await page.locator("a.add").click();
+    await page.locator(".page-head a.btn.primary").click();
     await page.waitForURL(/asset-input\.html#add/, { timeout: 5000 });
     await page.waitForFunction(() => document.querySelector(".review-list, .done"), { timeout: 5000 });
     const stuck = await page.locator(".done").count();
@@ -274,7 +278,7 @@ try {
 
   await record("구성 그래프가 도넛이 아니라 가로 누적 막대다", async () => {
     if (await page.locator("svg.donut").count()) return { ok: false, reason: "도넛이 아직 있음" };
-    const segments = await page.locator(".stack .stack-seg").count();
+    const segments = await page.locator(".stackbar .stackbar-seg").count();
     const legends = await page.locator(".legend-row").count();
     return segments === legends && segments > 0 ? { ok: true } : { ok: false, reason: `막대 조각 ${segments}개 / 범례 ${legends}개` };
   });
@@ -318,15 +322,34 @@ try {
   });
 
   await record("평가손익 모집단과 총자산 모집단이 다르다는 것이 화면에 드러난다", async () => {
-    if (home.profitCount >= home.rowCount) return { ok: false, reason: `손익 ${home.profitCount}건 / 전체 ${home.rowCount}건 — 모집단이 같아 검증이 성립하지 않음` };
-    const needle = `매입 정보가 있는 ${home.profitCount}개 자산 기준`;
+    const financialProfitCount = await page.evaluate(() => Portfolio.summarize(session.assets).financial.profit.count);
+    if (financialProfitCount >= home.rowCount) return { ok: false, reason: `손익 ${financialProfitCount}건 / 전체 ${home.rowCount}건 — 모집단이 같아 검증이 성립하지 않음` };
+    const needle = `매입 정보가 있는 ${financialProfitCount}개 금융자산 기준`;
     if (!home.text.includes(needle)) return { ok: false, reason: `"${needle}" 문구가 화면에 없음` };
-    if (!home.text.includes(`총자산은 ${home.rowCount}개 자산 기준`)) return { ok: false, reason: "총자산 모집단 표기가 없음" };
     return { ok: true };
   });
 
+  // 4①: 평가손익을 금융자산 기준으로 분리하고, 실물자산은 '평가차액'으로 따로 낸다.
+  // 부동산의 차액은 시장이 매긴 값이 아니라 사용자가 적어 넣은 추정가와 매입가의 차이라
+  // 같은 줄에 더하면 숫자의 성격이 섞인다(실측: 합산 손익의 98.7%가 부동산이었다).
+  await record("평가손익은 금융자산 기준이고, 실물자산은 평가차액으로 분리된다", async () => {
+    const split = await page.evaluate(() => {
+      const summary = Portfolio.summarize(session.assets);
+      return { financial: summary.financial.profit, physical: summary.physical.gap };
+    });
+    if (!split.physical.count) return { ok: false, reason: "실물자산 매입 정보가 없어 검증 전제가 성립하지 않음" };
+    if (split.financial.sum === split.financial.sum + split.physical.sum) return { ok: false, reason: "두 값이 합쳐져 있음" };
+    const text = await page.locator(".pl-strip").textContent();
+    if (!text.includes("평가손익")) return { ok: false, reason: "평가손익 표기 없음" };
+    if (!text.includes("실물자산 평가차액")) return { ok: false, reason: "실물자산 평가차액 표기 없음" };
+    if (!text.includes("사용자가 입력한 추정가 기준")) return { ok: false, reason: "평가차액의 근거 표기가 없음" };
+    // 금융 손익에 부동산 차액이 섞이지 않아야 한다.
+    const financialRows = await page.evaluate(() => Portfolio.summarize(session.assets).financial.rows.filter((row) => row.profit !== null).reduce((sum, row) => sum + row.profit, 0));
+    return split.financial.sum === financialRows ? { ok: true } : { ok: false, reason: `금융 손익 ${split.financial.sum} ≠ 금융자산 행 합 ${financialRows}` };
+  });
+
   await record("기준일 표기가 quotes.json의 asOf와 일치한다", async () => {
-    const sub = await page.locator(".head .sub").textContent();
+    const sub = await page.locator(".page-head .sub").textContent();
     return sub.includes("8월 7일 종가 기준") ? { ok: true } : { ok: false, reason: `헤더 기준일: "${sub}"` };
   });
 
@@ -336,30 +359,57 @@ try {
     return { ok: true };
   });
 
-  await record("모바일 폭 첫 화면에 총자산과 자산 구성이 함께 보인다", async () => {
-    const viewport = page.viewportSize().height;
-    const totalBox = await page.locator(".total-amount").boundingBox();
-    const stackBox = await page.locator(".stack").boundingBox();
-    if (!stackBox) return { ok: false, reason: "구성 막대가 렌더되지 않음" };
-    if (totalBox.y < 0 || totalBox.y > viewport) return { ok: false, reason: `총자산이 첫 화면 밖 (y=${totalBox.y})` };
-    if (stackBox.y + stackBox.height > viewport) return { ok: false, reason: `자산 구성이 첫 화면(${viewport}px) 밖 — 막대 하단 y=${Math.round(stackBox.y + stackBox.height)}` };
+  // PC 1440px에서 목업 1페이지의 배치가 재현되는지. 세로 단일 스택으로 돌아가면
+  // 이 검사가 깨진다.
+  await record("PC 1440px에서 상단이 3열, 그 아래가 2열로 배치된다", async () => {
+    const boxes = await page.evaluate(() => {
+      const pick = (selector) => [...document.querySelectorAll(selector)].map((node) => {
+        const rect = node.getBoundingClientRect();
+        return { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.width) };
+      });
+      return { top: pick(".grid-top > .card"), half: pick(".grid-half > .card"), nav: pick(".nav")[0] };
+    });
+    if (!boxes.nav) return { ok: false, reason: "좌측 내비가 없음" };
+    if (boxes.top.length !== 3) return { ok: false, reason: `상단 카드 ${boxes.top.length}개 (3개 기대)` };
+    if (new Set(boxes.top.map((box) => box.y)).size !== 1) return { ok: false, reason: `상단 3열이 같은 행에 있지 않음: ${JSON.stringify(boxes.top)}` };
+    if (boxes.half.length !== 2) return { ok: false, reason: `2열 카드 ${boxes.half.length}개` };
+    if (new Set(boxes.half.map((box) => box.y)).size !== 1) return { ok: false, reason: "자산 구성과 포트폴리오 요약이 같은 행에 있지 않음" };
+    if (boxes.half[0].y <= boxes.top[0].y) return { ok: false, reason: "2열 행이 상단 행보다 위에 있음" };
     return { ok: true };
   });
 
-  await record("범례 행 클릭이 실제로 이동한다 (막대 조각이 아니라 범례가 진입점)", async () => {
+  await record("보유 자산 표에 여섯 개 열이 모두 있다", async () => {
+    const headers = await page.locator("table.data thead th").allTextContents();
+    const want = ["자산명", "자산 유형", "평가금액", "평가손익", "전체 대비 비중", "최근 업데이트"];
+    const missing = want.filter((label) => !headers.includes(label));
+    return missing.length ? { ok: false, reason: `빠진 열: ${missing.join(", ")} · 실제: ${headers.join(", ")}` } : { ok: true };
+  });
+
+  // 모바일에서 접어뒀던 두 카드는 PC에서 펼친다.
+  await record("확인이 필요한 항목과 다가오는 일정이 접히지 않고 펼쳐져 있다", async () => {
+    if (await page.locator("details").count()) return { ok: false, reason: "접힌 카드(details)가 남아 있음" };
+    const text = await page.locator(".grid-top").textContent();
+    if (!text.includes("확인이 필요한 항목")) return { ok: false, reason: "확인이 필요한 항목 카드가 상단에 없음" };
+    if (!text.includes("다가오는 일정")) return { ok: false, reason: "다가오는 일정 카드가 상단에 없음" };
+    return { ok: true };
+  });
+
+  await record("범례 행 클릭이 해당 자산군 탭으로 이동한다", async () => {
     const row = page.locator(".legend-row").first();
     const label = await row.locator(".name").textContent();
     await row.click();
-    await page.waitForURL(/asset-input\.html/, { timeout: 5000 });
+    await page.waitForURL(/assets\.html/, { timeout: 5000 });
     const url = page.url();
+    // 누른 항목의 탭이 실제로 열려야 한다 — 단순 이동만으로는 부족하다.
+    const activeTab = await page.locator(".group-tab.active").textContent();
     await page.goBack();
     await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 5000 });
-    // 누른 항목이 무엇인지까지 URL로 전달돼야 한다 — 단순 이동만으로는 부족하다.
-    return url.includes(`composition=${encodeURIComponent(label)}`) ? { ok: true } : { ok: false, reason: `"${label}" 범례를 눌렀는데 이동한 URL: ${url}` };
+    if (!url.includes(`composition=${encodeURIComponent(label)}`)) return { ok: false, reason: `"${label}" 범례를 눌렀는데 이동한 URL: ${url}` };
+    return activeTab.includes(label) ? { ok: true } : { ok: false, reason: `"${label}"을 눌렀는데 열린 탭: "${activeTab}"` };
   });
 
   await record("보유 자산 행 클릭이 실제로 이동한다", async () => {
-    await page.locator("button.holding").first().click();
+    await page.locator("tr[data-asset]").first().click();
     await page.waitForURL(/asset-input\.html/, { timeout: 5000 });
     const url = page.url();
     await page.goBack();
@@ -421,7 +471,7 @@ try {
       localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, assets, snapshots: [] }));
     }, SAMPLE_ASSETS);
     await page.reload();
-    await page.waitForFunction(() => document.querySelector(".stack"), { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector(".stackbar"), { timeout: 5000 });
     const colorsOf = () => page.locator(".legend-row .swatch").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).backgroundColor));
     const financial = await colorsOf();
     if (financial.length !== 6) return { ok: false, reason: `금융자산 항목 ${financial.length}개 (6개 기대)` };
@@ -447,6 +497,50 @@ try {
     return shares.smallestFinancial > 0.01 ? { ok: true } : { ok: false, reason: `가장 작은 금융자산 항목 비중 ${shares.smallestFinancial}` };
   });
 
+  // ===== 5a-2. 자산군 탭 =====
+  await record("자산군 탭 8개가 모두 열리고 해당 자산만 나온다", async () => {
+    await page.goto(`http://127.0.0.1:${PORT}/assets.html`);
+    await page.waitForSelector(".group-tabs", { timeout: 5000 });
+    const tabs = await page.locator(".group-tab").allTextContents();
+    if (tabs.length !== 8) return { ok: false, reason: `탭 ${tabs.length}개 (8개 기대): ${tabs.join(", ")}` };
+    const expected = await page.evaluate(() => {
+      const summary = Portfolio.summarize(session ? session.assets : SessionStore.read().assets);
+      return summary.rows.reduce((acc, row) => { acc[row.groupName] = (acc[row.groupName] || 0) + 1; return acc; }, {});
+    }).catch(() => null);
+    for (let index = 0; index < 8; index += 1) {
+      await page.locator(".group-tab").nth(index).click();
+      const label = (await page.locator(".group-tab.active").textContent()).replace(/\d+$/, "").trim();
+      const names = await page.locator("table.data tbody tr .name").allTextContents();
+      const empty = await page.locator(".card").filter({ hasText: "등록된" }).count();
+      if (!names.length && !empty) return { ok: false, reason: `"${label}" 탭에 표도 빈 상태 안내도 없음` };
+      if (expected && names.length && names.length !== (expected[label] || 0)) {
+        return { ok: false, reason: `"${label}" 탭 ${names.length}건, 기대 ${expected[label] || 0}건` };
+      }
+    }
+    return { ok: true };
+  });
+
+  await record("자산군 탭이 해당 자산군 자산만 보여준다 (다른 자산군 혼입 없음)", async () => {
+    await page.goto(`http://127.0.0.1:${PORT}/assets.html`);
+    await page.waitForSelector(".group-tabs", { timeout: 5000 });
+    await page.locator(".group-tab").filter({ hasText: "부동산" }).click();
+    const rows = await page.evaluate(() => {
+      const names = [...document.querySelectorAll("table.data tbody tr .name")].map((node) => node.textContent);
+      const summary = Portfolio.summarize(SessionStore.read().assets);
+      return { names, realestate: summary.rows.filter((row) => row.group === "realestate").map((row) => row.name) };
+    });
+    if (rows.names.length !== rows.realestate.length) return { ok: false, reason: `부동산 탭 ${rows.names.length}건 / 실제 부동산 ${rows.realestate.length}건` };
+    return { ok: true };
+  });
+
+  await record("실물자산 탭은 손익을 '평가차액'으로 부른다", async () => {
+    const headers = await page.locator("table.data thead th").allTextContents();
+    if (!headers.includes("평가차액")) return { ok: false, reason: `열 이름: ${headers.join(", ")}` };
+    await page.locator(".group-tab").filter({ hasText: "주식·ETF" }).click();
+    const financialHeaders = await page.locator("table.data thead th").allTextContents();
+    return financialHeaders.includes("평가손익") ? { ok: true } : { ok: false, reason: `금융자산 탭 열 이름: ${financialHeaders.join(", ")}` };
+  });
+
   // ===== 5b. 스키마 불일치: 데이터를 조용히 버리지 않는다 =====
   // 앱을 업데이트해 SESSION_SCHEMA가 올라가면, 자산을 입력해 둔 사용자가 홈에서
   // "자산이 없어요"를 보게 됐다. 데이터는 살아 있는데 사라진 것처럼 보이는 상태다.
@@ -463,7 +557,7 @@ try {
       }));
     });
     await page.reload();
-    await page.waitForFunction(() => document.querySelector(".total-amount, .empty"), { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector(".total-amount, .empty-state"), { timeout: 5000 });
     const text = await page.locator("#app").textContent();
     if (text.includes("아직 등록된 자산이 없어요")) return { ok: false, reason: "자산이 있는데 빈 상태로 표시됨" };
     if (!text.includes("400만원")) return { ok: false, reason: `총자산이 계산되지 않음: ${text.slice(0, 160)}` };
@@ -477,7 +571,7 @@ try {
       localStorage.setItem("assetInput.session", JSON.stringify({ schema: 99, foo: "bar" }));
     });
     await page.reload();
-    await page.waitForSelector(".empty", { timeout: 5000 });
+    await page.waitForSelector(".empty-state", { timeout: 5000 });
     const text = await page.locator("#app").textContent();
     if (text.includes("아직 등록된 자산이 없어요")) return { ok: false, reason: "자산 0건 화면과 구분되지 않음" };
     if (!text.includes("예전 형식으로 저장된 기록이 있어요")) return { ok: false, reason: `안내 문구 없음: ${text.slice(0, 160)}` };

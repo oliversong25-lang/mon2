@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>전체 자산</title>
+  <link rel="stylesheet" href="lib/app.css">
+  <style>
+    /* 자산군 탭. 이번 단계는 껍데기다 — 탭 전환과 각 자산군의 보유 목록·평가금액·비중까지.
+       자산군마다 내용이 크게 달라질 예정이라, 탭 정의(GROUP_TABS)와 본문 렌더(groupBody)를
+       분리해 두었다. 자산군별 화면을 채울 때는 groupBody에 분기를 더하면 된다. */
+    .group-tabs { display:flex; overflow-x:auto; gap:var(--space-1); margin-bottom:var(--space-5);
+      padding-bottom:var(--space-1); border-bottom:var(--border) solid var(--line); scrollbar-width:thin; }
+    .group-tab { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3) var(--space-4);
+      border:0; border-bottom:.125rem solid transparent; background:transparent; color:var(--muted);
+      font-size:var(--font-sm); font-weight:700; white-space:nowrap; }
+    .group-tab:hover { color:var(--ink); }
+    .group-tab.active { border-bottom-color:var(--brand); color:var(--ink); }
+    .group-tab .count { padding:0 var(--space-2); border-radius:var(--radius-round);
+      background:var(--surface-2); color:var(--dim); font-size:var(--font-xs); font-weight:600; }
+    .group-tab.active .count { background:var(--brand-soft); color:var(--brand-ink); }
+    .kpis { display:grid; gap:var(--space-4); grid-template-columns:repeat(3,1fr); margin-bottom:var(--space-4); }
+    .kpi { padding:var(--space-5); border:var(--border) solid var(--line); border-radius:var(--radius-lg); background:var(--surface); }
+    .kpi .k { color:var(--muted); font-size:var(--font-xs); }
+    .kpi .v { margin-top:var(--space-2); font-size:var(--font-lg); font-weight:800; }
+    .kpi .m { margin-top:var(--space-1); color:var(--dim); font-size:var(--font-xs); }
+    .sources { margin-top:var(--space-6); color:var(--dim); font-size:var(--font-xs); line-height:1.8; }
+    @media (max-width:60rem) { .kpis { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script src="lib/session.js"></script>
+<script src="lib/valuation.js"></script>
+<script src="lib/portfolio.js"></script>
+<script src="lib/shell.js"></script>
+<script src="lib/format.js"></script>
+<script>
+const INPUT_URL="asset-input.html";
+const { won, pct, escapeHtml } = Format;
+
+// 자산군 정의는 lib/portfolio.js의 GROUP_NAMES가 단일 출처다. 여기서 순서만 정한다.
+const GROUP_TABS=["cash","savings","equity","fund","bond","crypto","commodity","realestate"];
+
+let sessionState=SessionStore.read();
+let assets=sessionState.assets;
+let activeGroup=initialGroup();
+
+// 홈의 범례에서 자산군 이름을 달고 넘어온다(#composition=주식·ETF).
+function initialGroup(){
+  const match=/^#composition=(.+)$/.exec(location.hash);
+  if(match){
+    const label=decodeURIComponent(match[1]);
+    const found=GROUP_TABS.find(id=>Portfolio.GROUP_NAMES[id]===label);
+    if(found)return found;
+  }
+  return GROUP_TABS[0];
+}
+
+function render(){
+  if(sessionState.status==="legacy-empty"){
+    Shell.mount("app","assets",`<div class="empty-state">
+      <h1>예전 형식으로 저장된 기록이 있어요</h1>
+      <p>지금 앱이 쓰는 형식(v${SessionStore.SCHEMA})과 달라서 불러오지 못했어요.<br>저장된 기록은 지우지 않고 그대로 두었습니다.</p>
+      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`);
+    return;
+  }
+  if(!assets.length){
+    Shell.mount("app","assets",`<div class="empty-state">
+      <h1>아직 등록된 자산이 없어요</h1>
+      <p>자산을 입력하면 자산군별로 나눠 볼 수 있어요.</p>
+      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`);
+    return;
+  }
+
+  const summary=Portfolio.summarize(assets);
+  const asOf=Valuation.asOfLabel();
+  Shell.mount("app","assets",[
+    `<div class="page-head">
+      <div><h1>전체 자산</h1><div class="sub">${asOf?escapeHtml(asOf):"시세 기준일 확인 중"} · 보유 자산을 자산군별로 나눠 봅니다</div></div>
+      <div class="head-actions"><a class="btn primary" href="${INPUT_URL}#add">＋ 자산 추가</a></div>
+    </div>`,
+    tabs(summary),
+    groupBody(summary),
+    sourcesLine(),
+  ].join(""));
+  bind();
+}
+
+function tabs(summary){
+  return `<div class="group-tabs" role="tablist">${GROUP_TABS.map(id=>{
+    const count=summary.rows.filter(row=>row.group===id).length;
+    const missing=summary.unavailable.filter(entry=>entry.asset.group===id).length;
+    return `<button type="button" role="tab" aria-selected="${activeGroup===id}" class="group-tab ${activeGroup===id?"active":""}" data-group="${id}">
+      ${escapeHtml(Portfolio.GROUP_NAMES[id])}<span class="count">${count+missing}</span></button>`;
+  }).join("")}</div>`;
+}
+
+// 자산군별 본문. 지금은 모든 자산군이 같은 형태(요약 3칸 + 보유 목록)를 쓴다.
+// 자산군마다 내용이 달라지면 여기서 분기한다.
+function groupBody(summary){
+  const rows=summary.rows.filter(row=>row.group===activeGroup);
+  const missing=summary.unavailable.filter(entry=>entry.asset.group===activeGroup);
+  const name=Portfolio.GROUP_NAMES[activeGroup];
+  if(!rows.length&&!missing.length){
+    return `<div class="card"><h2>${escapeHtml(name)}</h2>
+      <p class="card-sub" style="margin:var(--space-3) 0 var(--space-4)">등록된 ${escapeHtml(name)} 자산이 없어요.</p>
+      <a class="btn" href="${INPUT_URL}#add">${escapeHtml(name)} 추가하기</a></div>`;
+  }
+
+  const total=rows.reduce((sum,row)=>sum+row.krw,0);
+  const share=summary.total?total/summary.total:0;
+  const withPurchase=rows.filter(row=>row.profit!==null);
+  const profitSum=withPurchase.reduce((sum,row)=>sum+row.profit,0);
+  const basis=withPurchase.reduce((sum,row)=>sum+(row.purchaseKrw||0),0);
+  const physical=Portfolio.ASSET_CLASS[activeGroup]==="physical";
+  // 실물자산의 차액은 시장이 매긴 손익이 아니라 사용자가 입력한 추정가와 매입가의 차이다.
+  const profitLabel=physical?"평가차액":"평가손익";
+  const profitBasis=physical?"입력하신 추정가 기준":"매입 정보가 있는 자산 기준";
+
+  const table=`<table class="data">
+    <thead><tr><th>자산명</th><th class="right">평가금액</th><th class="right">${profitLabel}</th><th class="right">자산군 내 비중</th><th class="right">전체 대비 비중</th></tr></thead>
+    <tbody>${rows.map(row=>`<tr data-asset="${escapeHtml(row.id||"")}">
+      <td class="name">${escapeHtml(row.name)}</td>
+      <td class="right num">${won(row.krw)}</td>
+      <td class="right">${row.profit===null?`<span class="pill">매입 정보 없음</span>`
+        :`<span class="num ${row.profit>0?"pos":row.profit<0?"neg":""}">${row.profit>0?"+":row.profit<0?"−":""}${won(Math.abs(row.profit))}</span>`}</td>
+      <td class="right num">${total?pct(row.krw/total):"–"}</td>
+      <td class="right num">${summary.total?pct(row.krw/summary.total):"–"}</td>
+    </tr>`).join("")}</tbody></table>`;
+
+  // 시세를 못 받은 자산은 합계에서 빠진다 — 조용히 사라지지 않게 건수를 밝힌다.
+  const missingNote=missing.length
+    ?`<div class="card-note">시세를 확인하지 못한 ${missing.length}건은 합계에서 제외했어요 · ${escapeHtml(missing.map(entry=>entry.name).join(", "))}</div>`:"";
+
+  return `<div class="kpis">
+      <div class="kpi"><div class="k">${escapeHtml(name)} 평가금액</div><div class="v num">${won(total)}</div><div class="m">${rows.length}개 자산</div></div>
+      <div class="kpi"><div class="k">전체 자산 대비 비중</div><div class="v num">${pct(share)}</div><div class="m">총자산 ${won(summary.total)}</div></div>
+      <div class="kpi"><div class="k">${profitLabel}</div>
+        <div class="v num ${profitSum>0?"pos":profitSum<0?"neg":""}">${withPurchase.length?`${profitSum>0?"+":profitSum<0?"−":""}${won(Math.abs(profitSum))}`:"–"}</div>
+        <div class="m">${withPurchase.length?`${profitBasis} · ${withPurchase.length}개${basis?` · ${profitSum>0?"+":profitSum<0?"−":""}${pct(Math.abs(profitSum/basis))}`:""}`:"매입 정보가 있는 자산이 없어요"}</div></div>
+    </div>
+    <div class="card">
+      <div class="chart-head" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3)">
+        <div><h2>보유 ${escapeHtml(name)}</h2><div class="card-sub" style="margin:0">평가금액 높은순</div></div>
+        <div class="toolbar"><a class="btn" href="${INPUT_URL}#add">＋ ${escapeHtml(name)} 추가</a></div>
+      </div>
+      ${table}${missingNote}
+    </div>`;
+}
+
+function sourcesLine(){
+  const sources=Valuation.state.sources||{};
+  const names=[...new Set(Object.values(sources).filter(Boolean))];
+  if(!names.length)return"";
+  return `<div class="sources">출처: ${escapeHtml(names.join(" · "))}
+    ${sources.crypto?"<br>Data provided by CoinGecko · 가상자산은 국제 시세 기준이라 국내 거래소 체결가와 다를 수 있어요":""}</div>`;
+}
+
+function bind(){
+  document.querySelectorAll("button[data-group]").forEach(button=>{
+    button.addEventListener("click",()=>{activeGroup=button.dataset.group;render();});
+  });
+  document.querySelectorAll("tr[data-asset]").forEach(row=>{
+    row.addEventListener("click",()=>{location.href=`${INPUT_URL}#asset=${encodeURIComponent(row.dataset.asset)}`;});
+  });
+}
+
+render();
+Valuation.load().then(render);
+</script>
+</body>
+</html>
