@@ -1,0 +1,83 @@
+name: Daily OECD indicators batch
+
+# 시세 배치와 같은 일 단위 주기로 돈다. 다만 워크플로는 분리했다 — OECD는 키가 필요
+# 없는 별개 출처이고, 여기가 실패한다고 그날 시세 갱신까지 막을 이유가 없다.
+#
+# 대부분의 지표는 월간·분기라 매일 돌려도 바뀌는 게 없다. 그건 정상이고 오류가 아니라서,
+# 배치가 "변경 없음"과 "실패"를 나눠 찍는다.
+on:
+  schedule:
+    # 15:00 KST (= 06:00 UTC). 시세 배치(14:00 KST) 뒤에 둬서 커밋이 겹치지 않게 한다.
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: indicators-batch
+  cancel-in-progress: false
+
+jobs:
+  build-indicators:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # OECD SDMX는 공개 엔드포인트라 키가 없다. 시크릿을 넘기지 않는다.
+      - name: Run indicators batch
+        run: node scripts/build-indicators.mjs
+
+      - name: Commit refreshed indicators
+        run: |
+          if git diff --quiet -- data/indicators; then
+            echo "지표에 변경 없음 — 월간·분기 지표라 대부분의 날에는 정상입니다."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/indicators
+            git commit -m "data: refresh OECD indicators ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            git pull --rebase origin main
+            git push
+          fi
+
+      # 예약 워크플로가 실패해도 GitHub은 아무에게도 알리지 않는다. 지표가 굳어도
+      # 화면은 멀쩡해 보이므로(값이 그대로 남아 있으므로) 신호가 없으면 아무도 모른다.
+      - name: Open a tracking issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "indicators-batch-failure";
+            const title = "지표 배치 실패: data/indicators 갱신 안 됨";
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: "open", labels: label,
+            });
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `${new Date().toISOString()} 실행에서 OECD 지표 배치가 실패했습니다.\n\n실행 로그: ${runUrl}\n\n기존 data/indicators/*.json은 그대로 남아 있어 화면은 계속 동작합니다. 다만 계속 실패하면 관측 기간이 낡아지고, 홈 카드와 경제지표 탭이 "오래됨"으로 경고하기 시작합니다.`;
+            if (existing.length) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing[0].number, body });
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: [label] });
+            }
+
+      - name: Close the tracking issue on recovery
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "indicators-batch-failure";
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: "open", labels: label,
+            });
+            for (const issue of existing) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number,
+                body: `${new Date().toISOString()} 실행에서 지표 배치가 다시 성공했습니다. 이슈를 닫습니다.` });
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, state: "closed" });
+            }

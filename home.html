@@ -124,6 +124,12 @@
     .overlay-body { min-height:0; flex:1; overflow-y:auto; }
     .overlay-body .sched-when { white-space:normal; }
 
+    .ind-rows { display:grid; gap:var(--space-2); }
+    .ind-row { display:grid; grid-template-columns:1fr auto; align-items:baseline; gap:var(--space-2) var(--space-3); }
+    .ind-row-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:var(--font-sm); }
+    .ind-row-value { font-weight:800; font-variant-numeric:tabular-nums; }
+    /* 관측 기간은 값과 반드시 함께 나간다 — 몇 달 전 값도 그 시점의 정상 데이터다. */
+    .ind-row-period { grid-column:1 / -1; margin-top:-.125rem; color:var(--dim); font-size:var(--font-xs); }
     .soon-card { padding:var(--space-5); border:var(--border) dashed var(--line);
       border-radius:var(--radius-lg); background:var(--surface); }
     .soon-card b { display:block; margin:var(--space-2) 0 var(--space-1); font-size:var(--font-md); }
@@ -138,12 +144,14 @@
 <script src="lib/portfolio.js"></script>
 <script src="lib/shell.js?v=20260813-1"></script>
 <script src="lib/format.js"></script>
+<script src="lib/indicators-view.js"></script>
 <script>
 // 홈 화면. 금액 계산은 lib/valuation.js, 집계·분류는 lib/portfolio.js, 세션 읽기는
 // lib/session.js가 담당한다. 이 파일은 그 결과를 그리기만 한다 — 여기서 평가금액을
 // 다시 계산하지 말 것.
 const INPUT_URL="asset-input.html";
 const ASSETS_URL="assets.html";
+const INDICATORS_URL="indicators.html";
 const { won, pct, escapeHtml, daysBetween } = Format;
 
 let sessionState=SessionStore.read();
@@ -297,7 +305,8 @@ function sourcesLine(){
   const sources=Valuation.state.sources||{};
   const names=[...new Set(Object.values(sources).filter(Boolean))];
   if(!names.length)return"";
-  return `<div class="sources">출처: ${escapeHtml(names.join(" · "))}
+  const oecd=Indicators.state.status==="ready"?`<br>${escapeHtml(Indicators.attribution())}`:"";
+  return `<div class="sources">출처: ${escapeHtml(names.join(" · "))}${oecd}
     ${sources.crypto?"<br>Data provided by CoinGecko · 가상자산은 국제 시세 기준이라 국내 거래소 체결가와 다를 수 있어요":""}</div>`;
 }
 
@@ -612,10 +621,54 @@ function newsCard(){
     "삼성전자를 보유하면 삼성전자 소식, 달러 자산이 있으면 환율 소식처럼<br>내 자산에 영향을 주는 것만 보여드릴 예정이에요.");
 }
 
-// 기준금리·장단기 금리차·소비자심리 같은 핵심 지표 몇 개가 들어갈 자리.
+// 핵심 지표 몇 개만 올린다. 카드 높이가 상단·중간 행을 끌어올리면 안 되므로
+// 의도적으로 적게 두고, 나머지는 더보기로 경제지표 탭에 넘긴다.
+const HOME_INDICATORS=[
+  {indicator:"cli",country:"KOR"},
+  {indicator:"cpi",country:"KOR"},
+  {indicator:"unemployment",country:"KOR"},
+  {indicator:"cli",country:"USA"},
+];
+
 function indicatorCard(){
-  return soonCard("주요 경제지표","기준금리 · 장단기 금리차 · 소비자심리",
-    "내 자산에 영향을 주는 지표 몇 개만 골라 보여드릴 예정이에요.");
+  const state=Indicators.state;
+  const head=(badge)=>`<div class="chart-head" style="margin-bottom:var(--space-3)">
+      <div><h2>주요 경제지표${badge?` <span class="pill warn">${badge}</span>`:""}</h2>
+        <div class="card-sub" style="margin:0">OECD · 국가별 주요 지표</div></div>
+      <div class="toolbar"><a class="btn" href="${INDICATORS_URL}">더보기</a></div>
+    </div>`;
+
+  if(state.status==="loading"){
+    const bar=(w)=>`<span class="skel" style="width:${w}"></span>`;
+    return `<div class="card">${head("")}${bar("80%")}${bar("60%")}</div>`;
+  }
+  // 없거나 비었으면 0이나 빈 칸으로 때우지 않고 무엇이 없는지 말한다.
+  if(state.status==="error"||state.status==="empty"){
+    const detail=state.status==="error"
+      ?`data/indicators/catalog.json을 읽지 못했어요 (${escapeHtml(state.error||"원인 미상")}).`
+      :"catalog.json은 있지만 계열이 하나도 없어요.";
+    return `<div class="card">${head("확인 필요")}<p class="soon-body">${detail}<br>지표 배치가 한 번이라도 성공했는지 확인하세요.</p></div>`;
+  }
+
+  const stale=Indicators.staleness();
+  if(stale&&stale.stale){
+    return `<div class="card">${head("오래됨")}
+      <p class="soon-body">가장 최신 관측이 ${escapeHtml(stale.newest)}로 ${stale.monthsBehind}개월 전이에요(기준 ${Indicators.STALE_MONTHS}개월).<br>지표 배치가 멈췄는지 확인하세요.</p></div>`;
+  }
+
+  const rows=HOME_INDICATORS.map(pick=>Indicators.find(pick.indicator,pick.country)).filter(Boolean);
+  if(!rows.length){
+    return `<div class="card">${head("확인 필요")}
+      <p class="soon-body">홈에 올릴 지표(${escapeHtml(HOME_INDICATORS.map(p=>`${p.indicator}/${p.country}`).join(", "))})를 카탈로그에서 찾지 못했어요.</p></div>`;
+  }
+
+  return `<div class="card">${head("")}
+    <div class="ind-rows">${rows.map(row=>`<div class="ind-row">
+      <span class="ind-row-name">${escapeHtml(row.countryKo)} ${escapeHtml(row.indicatorKo)}</span>
+      <span class="ind-row-value num">${escapeHtml(Indicators.formatValue(row))}</span>
+      <span class="ind-row-period">${escapeHtml(row.periodKo)}</span>
+    </div>`).join("")}</div>
+  </div>`;
 }
 
 // 요약 축은 금융자산 기준으로 고정한다(구성 카드의 전환과 연동하지 않는다).
@@ -784,6 +837,8 @@ render();
 Valuation.load().then(render);
 // 경제 일정은 시세와 무관한 정적 파일이라 따로 받는다 — 한쪽이 늦어도 다른 쪽을 막지 않는다.
 loadMacroCalendar().then(render);
+// 경제지표 카탈로그도 독립적으로 받는다 — 한쪽이 늦어도 다른 카드를 막지 않는다.
+Indicators.load().then(render);
 </script>
 </body>
 </html>

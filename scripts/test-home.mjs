@@ -489,7 +489,7 @@ try {
   });
 
   // 5번: 자리만 잡아둔 칸들
-  await record("오늘의 주요 뉴스·주요 경제지표는 준비 중이고, 다가오는 일정은 실제로 동작한다", async () => {
+  await record("오늘의 주요 뉴스만 준비 중이고, 다가오는 일정·주요 경제지표는 실제로 동작한다", async () => {
     await page.goto(HOME_URL);
     await page.evaluate((assets) => {
       localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], assets }));
@@ -497,15 +497,15 @@ try {
     await page.reload();
     await page.waitForFunction(() => document.querySelector("svg.donut"), { timeout: 8000 });
     const headings = await page.locator(".card h2").allTextContents();
-    for (const title of ["오늘의 주요 뉴스", "주요 경제지표"]) {
+    const news = headings.find((text) => text.includes("오늘의 주요 뉴스"));
+    if (!news) return { ok: false, reason: `오늘의 주요 뉴스 칸이 없음: ${headings.join(" | ")}` };
+    if (!news.includes("준비 중")) return { ok: false, reason: "오늘의 주요 뉴스에 준비 중 표시가 없음" };
+    // 다가오는 일정과 주요 경제지표는 이제 자리표시가 아니라 실제 기능이다.
+    for (const title of ["다가오는 일정", "주요 경제지표"]) {
       const found = headings.find((text) => text.includes(title));
       if (!found) return { ok: false, reason: `"${title}" 칸이 없음: ${headings.join(" | ")}` };
-      if (!found.includes("준비 중")) return { ok: false, reason: `"${title}"에 준비 중 표시가 없음` };
+      if (found.includes("준비 중")) return { ok: false, reason: `"${title}"이 아직 준비 중 표시로 남아 있음` };
     }
-    // 다가오는 일정은 이제 자리표시가 아니라 실제 기능이다.
-    const schedule = headings.find((text) => text.includes("다가오는 일정"));
-    if (!schedule) return { ok: false, reason: `다가오는 일정 칸이 없음: ${headings.join(" | ")}` };
-    if (schedule.includes("준비 중")) return { ok: false, reason: "다가오는 일정이 아직 준비 중 표시로 남아 있음" };
     // 이 카드는 자산 만기가 아니라 거시 경제 일정을 가리킨다 — 그 경계를 지켜야 한다.
     const body = await page.locator(".card").filter({ hasText: "다가오는 일정" }).textContent();
     if (/만기/.test(body)) return { ok: false, reason: "다가오는 일정이 자산 만기를 가리킨다" };
@@ -968,6 +968,117 @@ try {
     } finally {
       await context.close();
     }
+  });
+
+  // ===== 5a-1f. 경제지표 (OECD) =====
+  await record("경제지표 카드가 값과 관측 기간을 함께 보여주고 행을 늘리지 않는다", async () => {
+    await page.goto(HOME_URL);
+    await seedSession(page, AXIS_ASSETS.slice(0, 2));
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".ind-rows"), { timeout: 12000 });
+    const box = await page.evaluate(() => {
+      const row = document.querySelector(".grid-mid");
+      const card = document.querySelector(".ind-rows").closest(".card");
+      const style = getComputedStyle(card);
+      // 카드는 그리드에서 늘어나므로 실제 높이가 아니라 내용 높이로 비교해야 한다.
+      const content = [...card.children].reduce((sum, el) => sum + el.getBoundingClientRect().height, 0)
+        + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      return {
+        rowH: Math.round(row.getBoundingClientRect().height),
+        content: Math.round(content),
+        rows: document.querySelectorAll(".ind-row").length,
+        periods: [...document.querySelectorAll(".ind-row-period")].map((node) => node.textContent.trim()),
+      };
+    });
+    if (!box.rows) return { ok: false, reason: "지표 행이 없음" };
+    // 값마다 관측 기간이 반드시 붙어야 한다 — 몇 달 전 값도 그 시점의 정상 데이터다.
+    if (box.periods.length !== box.rows) return { ok: false, reason: `기간 표기 ${box.periods.length} / 행 ${box.rows}` };
+    if (box.periods.some((text) => !/\d{4}년/.test(text))) return { ok: false, reason: `기간 형식 이상: ${box.periods.join(", ")}` };
+    return box.content <= box.rowH ? { ok: true } : { ok: false, reason: `지표 카드 내용 ${box.content} > 행 ${box.rowH}` };
+  });
+
+  await record("더보기가 경제지표 탭으로 가고, 한국·미국이 같은 계열에서 값을 받는다", async () => {
+    await page.locator(".card").filter({ hasText: "주요 경제지표" }).locator("a.btn").click();
+    await page.waitForURL(/indicators\.html/, { timeout: 8000 });
+    await page.waitForSelector(".country-card", { timeout: 12000 });
+    const countries = await page.locator(".country-card").count();
+    if (countries < 2) return { ok: false, reason: `국가 카드 ${countries}개` };
+    // 이 출처를 고른 이유가 국가 간 비교 가능성이다 — 둘이 같은 계열에서 나와야 한다.
+    const both = await page.evaluate(() => {
+      const kor = Indicators.find("cli", "KOR");
+      const usa = Indicators.find("cli", "USA");
+      return { kor: kor && kor.value, usa: usa && usa.value };
+    });
+    return Number.isFinite(both.kor) && Number.isFinite(both.usa)
+      ? { ok: true } : { ok: false, reason: `KOR/USA 값 없음: ${JSON.stringify(both)}` };
+  });
+
+  await record("검색이 한글·영문, 지표명·국가명 모두에 걸린다", async () => {
+    for (const needle of ["실업", "Unemployment", "대한민국", "Korea"]) {
+      const hits = await page.evaluate((query) => Indicators.search(query).length, needle);
+      if (!hits) return { ok: false, reason: `"${needle}" 검색 결과 0건` };
+    }
+    await page.locator("[data-search]").fill("Korea");
+    await page.waitForFunction(() => document.querySelectorAll(".country-card").length === 1, { timeout: 5000 });
+    const head = await page.locator(".country-head").first().innerText();
+    await page.locator("[data-search]").fill("");
+    return /대한민국/.test(head) ? { ok: true } : { ok: false, reason: `필터 결과: ${head}` };
+  });
+
+  await record("모든 값에 관측 기간과 주기가 함께 표시된다", async () => {
+    await page.waitForSelector(".ind-cell", { timeout: 8000 });
+    const bad = await page.evaluate(() => [...document.querySelectorAll(".ind-cell")]
+      .filter((cell) => !/\d{4}년/.test(cell.innerText) || !/(월간|분기|연간)/.test(cell.innerText)).length);
+    return bad === 0 ? { ok: true } : { ok: false, reason: `기간·주기 누락 셀 ${bad}개` };
+  });
+
+  await record("OECD 출처 표기가 지표 화면에 있다", async () => {
+    const text = await page.locator(".sources").innerText();
+    return /OECD/.test(text) ? { ok: true } : { ok: false, reason: `출처 표기: ${text.slice(0, 120)}` };
+  });
+
+  // 3.8: 없거나 낡으면 빈 화면이 아니라 무엇이 없는지 말한다.
+  await record("카탈로그가 없으면 무엇이 없는지 명시한다", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    try {
+      const fresh = await context.newPage();
+      await installTestAuth(fresh);
+      await fresh.route("**/data/indicators/catalog.json", (route) => route.fulfill({ status: 404, body: "" }));
+      await fresh.goto(`http://127.0.0.1:${PORT}/indicators.html`);
+      await fresh.waitForSelector(".card", { timeout: 9000 });
+      const text = await fresh.locator("#page").innerText();
+      if (!/catalog\.json/.test(text)) return { ok: false, reason: `무엇이 없는지 밝히지 않음: ${text.slice(0, 140)}` };
+      if (!/불러오지 못했|확인 필요/.test(text)) return { ok: false, reason: "실패 표기가 없음" };
+      return { ok: true };
+    } finally { await context.close(); }
+  });
+
+  await record("카탈로그가 오래되면 홈 카드가 그 사실을 말한다", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    try {
+      const fresh = await context.newPage();
+      await installTestAuth(fresh);
+      await fresh.route("**/data/indicators/catalog.json", (route) => route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          newestPeriod: "2019-01", updatedAt: "2019-02-01T00:00:00Z", attribution: "OECD",
+          countries: { KOR: { ko: "대한민국", en: "Korea" } },
+          indicators: [{ id: "cli", nameKo: "경기선행지수", nameEn: "CLI", unitKo: "지수", freq: "M" }],
+          failures: [],
+          series: [{ id: "oecd:cli:KOR", indicator: "cli", country: "KOR", freq: "M", period: "2019-01", value: 100 }],
+        }),
+      }));
+      await fresh.goto(HOME_URL);
+      await seedSession(fresh, AXIS_ASSETS.slice(0, 2));
+      await fresh.reload();
+      await fresh.waitForFunction(() => {
+        const host = document.getElementById("page");
+        return host && host.innerText.includes("주요 경제지표");
+      }, { timeout: 12000 });
+      const card = await fresh.locator(".card").filter({ hasText: "주요 경제지표" }).innerText();
+      return /오래됨|2019-01/.test(card) ? { ok: true } : { ok: false, reason: `홈 카드에 경고 없음: ${card.slice(0, 140)}` };
+    } finally { await context.close(); }
   });
 
   // 위 검사들이 세션을 바꿨으므로 자산군 탭 검사 전에 되돌린다.
