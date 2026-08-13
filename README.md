@@ -1,5 +1,48 @@
 # 자산 입력 · 홈 화면
 
+개인 자산관리 웹앱(AssetFlow)입니다. `oliversong25-lang/mon2` · 배포 `https://oliversong25-lang.github.io/mon2/` (커스텀 도메인 `monasset.kr`).
+
+## 이 저장소에서 작업하기 전에
+
+여러 도구(Claude Code · Codex)가 번갈아 이 저장소를 만집니다. **이 README가 도구 사이의 인수인계 문서입니다** — 구조를 바꾸거나 판단이 필요한 결정을 내렸으면 그 변경과 함께 여기에 적습니다. 특히 "왜 이렇게 했는지"를 적습니다. 코드만 보면 되돌리기 쉬운 결정들이 대부분이고, 실제로 여기 적힌 내용의 상당수는 한 번 잘못 만들었다가 고친 것들입니다.
+
+### 깨면 안 되는 제약
+
+- **빌드 스텝이 없습니다.** 순수 정적 HTML/CSS/JS입니다. 번들러·프레임워크·트랜스파일러·런타임 백엔드를 들이지 않습니다. GitHub Pages가 저장소 루트를 그대로 서빙합니다.
+- **`lib/*.js`는 클래식 스크립트이고 전역으로 노출합니다** (`window.Valuation`·`Portfolio`·`SessionStore`·`Shell`·`Format`·`Indicators`). ES 모듈로 바꾸면 `asset-input.html`이 의존하는 전역 스코프와 회귀 테스트의 `page.evaluate` 경로가 함께 깨집니다. 반대로 `scripts/*.mjs`(배치)는 ESM입니다.
+- **경로는 전부 상대 경로**입니다. 절대 경로(`/data/...`)를 쓰면 하위 경로 배포(`/mon2/`)에서만 깨져 로컬에서는 안 보입니다.
+- **줄바꿈은 LF**입니다(`.gitattributes`의 `* text=auto eol=lf`). Windows에서 작업해도 커밋에는 LF로 들어갑니다.
+- **`lib/valuation.js`가 평가금액의 유일한 출처**입니다. 화면마다 평가 로직을 따로 두면 한쪽만 고쳐지는 순간 같은 자산이 다른 금액으로 보입니다.
+
+### 관통하는 원칙: 실패가 성공처럼 보이면 안 된다
+
+이 저장소의 설계 판단 대부분이 여기서 나옵니다.
+
+- 조용한 0, 빈 화면, 뭉뚱그린 "없습니다" 금지. **모르면 `null`을 반환하고 화면이 이유를 말합니다.**
+- 환율을 모를 때 `|| 1`로 넘기지 않습니다(USD 2,000이 2,000원이 됩니다).
+- 데이터가 없어도 200을 주는 API가 여럿입니다(CoinGecko·OECD SDMX·DART). **0건을 성공으로 넘기지 않습니다.**
+- 검증할 수 없는 값은 **지어내지 않고 제품 안에서 공백을 드러냅니다**(KSIC 세분류명·금통위 2027 일정이 그 예입니다).
+- 배치 산출물은 임시 파일에 쓰고 검증을 통과해야 원자적으로 교체합니다. 실패하면 기존 파일을 보존합니다.
+
+### 구조 한눈에
+
+```
+*.html              화면 (index · login · asset-input · home · assets · indicators · settings)
+lib/*.js            브라우저 런타임 (클래식 스크립트 · 전역 노출)
+scripts/*.mjs       배치와 회귀 테스트 (ESM · Node 20)
+scripts/lib/*.mjs   배치가 쓰는 외부 API 클라이언트
+data/*.json         배치 산출물. 앱은 이걸 fetch만 합니다
+supabase/schema.sql 계정·RLS
+.github/workflows/  배치 4개 (quotes · tickers · indicators · pages)
+```
+
+| 배치 | 주기 | 산출물 |
+|---|---|---|
+| `quotes.yml` | 매일 14:00 KST | `data/quotes.json` |
+| `indicators.yml` | 매일 15:00 KST | `data/indicators/**` |
+| `tickers.yml` | 매주 일요일 05:00 KST | `data/tickers-*.json` |
+| `pages.yml` | 위 셋 완료 시 + push | 배포 |
+
 브라우저 보안 정책 때문에 HTML을 `file://`로 직접 열면 `data/*.json` 로드가 차단될 수 있습니다. 저장소 루트에서 로컬 서버를 실행한 뒤 접속하세요.
 
 ```powershell
@@ -125,22 +168,38 @@ npm run test:rls
 
 ```
 홈 (home.html)          전체 자산 현황
-└ 자산 (assets.html)     현금 · 예적금 · 주식·ETF · 펀드 · 채권 · 가상자산 · 원자재 · 부동산
+├ 자산 (assets.html)     현금 · 예적금 · 주식·ETF · 펀드 · 채권 · 가상자산 · 원자재 · 부동산
+└ 경제지표 (indicators.html)  OECD 43개국 × 7지표
 ```
 
 | 파일 | 역할 |
 |---|---|
 | `home.html` | 홈 — 총자산·구성·요약·추이·보유 자산 |
 | `assets.html` | 자산군 탭 8개. 이번 단계는 껍데기(보유 목록·평가금액·비중)까지 |
+| `indicators.html` | 경제지표 탭 (국가 우선 · 한/영 검색) |
 | `asset-input.html` | 자산 입력 (8개 자산군) |
 | `lib/app.css` | **다크 네이비 테마와 셸의 단일 출처**. 색·간격·카드·표 |
-| `lib/shell.js` | 좌측 내비게이션 (홈/자산/분석·목표 관리·알림·설정) |
+| `lib/shell.js` | 좌측 내비게이션 (홈/자산/경제지표/분석·목표 관리·알림·설정) |
 | `lib/session.js` | **세션 읽기·로컬 우선 저장의 단일 출처**. 저장 키·스키마 번호·마이그레이션 |
 | `lib/account-store.js` | Supabase 인증·계정 세션 조회·오프라인 대기열·원격 저장 |
+| `lib/auth-guard.js` / `lib/supabase-config.js` | 로그인 가드 / 프로젝트 URL·anon key |
 | `login.html` / `settings.html` | 이메일 로그인·회원가입 / 로그아웃 |
 | `lib/valuation.js` | **평가금액의 단일 출처**. 시세 로딩·환율 환산·자산별 원화 평가 |
 | `lib/portfolio.js` | 집계와 분류(금융/실물 · 원금 보장 · 현금화 · 성장 가능성) |
+| `lib/indicators-view.js` | `catalog.json` 로딩·검색·시계열 조회. 홈 카드와 경제지표 탭이 공유 |
 | `lib/format.js` | 금액·비율 표기. 같은 금액이 화면마다 다르게 반올림되면 안 됩니다 |
+
+배치 쪽은 이렇게 나뉩니다.
+
+| 파일 | 역할 |
+|---|---|
+| `scripts/lib/http.mjs` | **모든 외부 호출이 지나는 곳**. 재시도·백오프·엔드포인트 이름·키 마스킹 |
+| `scripts/lib/data-go-kr.mjs` | 공공데이터포털 (주식·ETF·ETN·금 시세, 상장종목) · 종목코드 정규화 |
+| `scripts/lib/dart.mjs` | OPEN DART 기업개황(업종) · 분당 유량 제한 |
+| `scripts/lib/ksic.mjs` | 한국표준산업분류 중분류 표 |
+| `scripts/lib/crypto.mjs` | CoinGecko · 심볼→코인 ID 매핑 표 |
+| `scripts/lib/oecd.mjs` | OECD SDMX 클라이언트 · 관측 디코딩 |
+| `scripts/lib/indicators.mjs` | dataflow·지표 선택자·국가 한글명 표 |
 
 `assets.html`은 자산군마다 내용이 크게 달라질 예정이라, 탭 정의(`GROUP_TABS`)와 본문 렌더(`groupBody`)·열 정의(`COL`·`columnsFor`)를 분리해 뒀습니다. 자산군별 화면을 채울 때는 `groupBody`에 분기를, 열이 달라지면 `columnsFor`에 줄을 더하면 됩니다. 내비의 설정은 로그아웃만 제공하며, `분석`·`목표 관리`·`알림`은 아직 "준비 중"입니다.
 
@@ -320,4 +379,40 @@ npm test
 - `npm run test:groups` — 펀드·채권·원자재·부동산 4개 자산군의 실클릭 E2E. 필드별 클릭·타이핑·삭제·재입력, 복수 등록·중복 방지, 통화 전환, 원자재 종류 전환, 시·도 연동, 건너뛰기/이전/이어하기, 새로고침 보존, 최종 검토 화면, 모바일 뷰포트.
 - `npm run test:quotes-integration` — `data/quotes.json`이 실제로 화면에 반영되는지. MOCK에 한 번도 없던 종목(카카오)을 실제 검색·등록해 평가금액이 정상 계산되는지, 시세 없는 종목(현대차)은 "확인 불가"로 명시되고 조용히 사라지지 않는지, 기준일 표기가 `asOf` 기반인지, `quotes.json` 자체가 없어도(배치 실패/최초 상태) 앱이 죽지 않는지 확인합니다. 실제 커밋된 `data/tickers-kr.json`을 그대로 쓰고 테스트용 `quotes.json`만 임시로 얹었다 지웁니다.
 - `npm run test:home` — 홈 화면과 자산군 탭. 자산을 JS로 주입하지 않고 입력 화면에서 실제로 클릭·타이핑해 5건(예적금·삼성전자·카카오·BTC·공동명의 부동산)을 등록한 뒤 홈으로 이동해, 총자산이 손으로 계산한 값과 일치하는지, 부동산 지분율 50%가 반영되는지, 구성 축 3개의 비중 합이 각각 100%인지, 손익 모집단과 총자산 모집단이 다르다는 것이 화면에 드러나는지, 도넛 조각·목록 행 클릭이 실제로 이동하는지, 모바일 폭 첫 화면에 총자산과 자산 구성이 함께 보이는지, 자산 0건·첫날·시세 로드 실패·기록 끊긴 구간이 정상 동작하는지 확인합니다.
-- `npm run test:quotes-mock` / `npm run test:tickers-mock` — `build-quotes.mjs`/`build-tickers.mjs`의 페이징·기준일 탐색·필드 매핑·DART corpCode zip 파싱 로직을 실제 API 키 없이 mock fetch로 검증합니다. **실제 공공데이터 API 응답 필드명 자체를 검증하지는 않습니다** — 그건 실제 키로 첫 배치를 돌려봐야 확인됩니다(`build-quotes.mjs`/`build-tickers.mjs`는 `[raw-sample]`로 각 응답의 원본 첫 행을 콘솔에 출력합니다).
+- `npm run test:quotes-mock` / `npm run test:tickers-mock` / `npm run test:indicators-mock` — `build-quotes.mjs`/`build-tickers.mjs`/`build-indicators.mjs`의 페이징·기준일 탐색·필드 매핑·DART corpCode zip 파싱·SDMX 관측 디코딩·실패 격리 로직을 실제 API 키 없이 mock fetch로 검증합니다. **실제 공공데이터 API 응답 필드명 자체를 검증하지는 않습니다** — 그건 실제 키로 첫 배치를 돌려봐야 확인됩니다(각 배치는 `[raw-sample]`로 응답의 원본 첫 행을 콘솔에 출력합니다).
+- `npm run test:auth` — 로그인·회원가입·로그아웃, 계정별 세션 격리, 오프라인 대기열과 재연결 재시도.
+- `npm run test:rls` — 실제 Supabase 두 계정으로 행 격리 검증(위 "로그인과 계정별 저장" 참고). 환경 변수가 없으면 성공으로 가장하지 않고 실패합니다.
+
+### 배치 회귀 테스트를 건드릴 때 조심할 것
+
+여기서 실제로 데이터를 잃은 적이 있어 적어 둡니다.
+
+- **테스트는 커밋된 실데이터 위에서 돕니다.** Playwright route 핸들러에서 던진 미포착 예외가 `finally`보다 먼저 프로세스를 죽여, 4,402건짜리 `data/quotes.json`이 2건짜리 픽스처인 채로 남았습니다. 지금은 `process.on("exit")`·`uncaughtException`·`unhandledRejection`에 동기 복원 훅이 달려 있습니다 — 새 배치 테스트를 쓸 때도 같은 훅을 답니다.
+- **배치 완료를 고정 시간으로 기다리지 않습니다.** 재시도가 붙은 실패 경로는 테스트 정리 코드보다 늦게 끝나면서 산출물을 덮어쓰고 종료 코드를 뒤집습니다. `globalThis.__quotesBatchRuns`·`__indicatorsBatchRuns` 완료 카운터가 올라가는 것을 폴링합니다.
+- **`localStorage.clear()`는 더 이상 깨끗한 시작이 아닙니다.** Supabase 인증이 붙은 뒤로 mock remote가 `sessionStorage`에 남습니다. `scripts/lib/test-auth.mjs`의 `seedSession()`·`restoreRegistered()`와 clear 오버라이드를 씁니다.
+- **도넛 조각 클릭은 3시 방향에서 합니다.** `fill="none"`이라 칠해진 호만 히트되고, 12시 방향은 마지막 조각이 첫 조각을 덮습니다.
+
+## 작업 이력
+
+새 트랙을 끝낼 때마다 한 줄 추가합니다. 상세한 배경은 위 각 절에 있습니다.
+
+| 시점 | 내용 |
+|---|---|
+| 트랙 1~2 | 자산 입력 8개 자산군, 국내 시세 배치. 매칭률 검증을 교집합 기반으로 교체(예전 로직은 코드 조인이 완전히 깨져도 100%로 보고). DART 업종 36.6% 원인은 분당 유량 제한이었고 `020` 상태가 뭉개지고 있었음 → 자체 스로틀 + 상태별 처리 + 80% 미만 실패 |
+| 트랙 3 | 홈 화면. CoinGecko 실시세 연결(하드코딩 BTC 158,200,000원 제거). 자산 입력 완료 → 홈 이동 연결 |
+| 홈 검증 5건 | 금융/실물 자산 분리, 도넛 색 팔레트 검증, 요약 축을 금융자산 기준으로 고정, 스키마 불일치 시 세션 파괴 경로 제거, 채운 막대 → 중앙 기준 마커 |
+| 트랙 5 | 모바일 우선 → **PC 우선** 전환(확정 목업 4안 1페이지·7안 기준). 자산군 탭, 평가손익/평가차액 분리, 현재가·보유 수량 열 추가, 시세 배치 06:00 → 14:00 KST |
+| 트랙 8 | 배치 결과 자동 배포(`workflow_run`), 가상자산 단독 실패 허용, 오류에 엔드포인트 이름, 재시도, 보유 카드 상위 4개 + 내부 스크롤 |
+| 줄바꿈 정리 | `.gitattributes` 추가 후 전체 renormalize (내용 변경 없음, 단독 커밋) |
+| 거시 일정 | `다가오는 일정` 카드. FOMC·금통위 + 기관별 커버리지 + 시나리오 문구 경계 |
+| 경제지표 | OECD SDMX 파이프라인, 국가 우선 경제지표 탭, 홈 지표 카드 |
+| Supabase | 이메일 인증, 계정별 자산 저장, RLS 검증 |
+
+## 남은 일
+
+1. **`docs/home-screen-spec.md`가 저장소에 추적되지 않고 있습니다.** 로컬에만 있습니다 — 추적할지 결정이 필요합니다.
+2. **금통위 2027년 일정 미공표.** 한국은행 페이지가 빈 표를 돌려줍니다. 공표되면 `data/macro-calendar.json`의 일정과 `coverage.BOK`를 갱신합니다.
+3. **KSIC 세분류(3~5자리) 한글명 없음.** 통계청 분류표를 받아 `scripts/lib/ksic.mjs`에 추가하면 됩니다.
+4. **`workflow_run` 배포 경로가 아직 end-to-end로 관측되지 않았습니다.** `push` 경로만 확인됐습니다. 다음 예약 배치 커밋이 최종 확인입니다.
+5. **`오늘의 주요 뉴스` 카드는 골격만 있습니다.** 보유 자산과 연결된 뉴스만 담는다는 경계가 정해져 있습니다.
+6. **경제지표 해설 문구, ECOS·FRED 출처는 미구현.** 계열에 `source` 개념과 `<source>/<dataflow>.json` 파일 분리는 미리 해뒀습니다.
