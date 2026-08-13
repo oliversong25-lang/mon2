@@ -2,12 +2,22 @@ name: Deploy to GitHub Pages
 
 # 정적 파일만 올리는 배포다. 서버는 없다 — 앱은 data/*.json을 fetch만 한다.
 #
-# main에 푸시될 때마다 돈다. 시세 배치(quotes.yml)와 종목 배치(tickers.yml)도 main에
-# 커밋을 밀어넣으므로, 배치가 data/quotes.json을 갱신하면 이 워크플로가 자동으로 이어
-# 돌아 배포도 함께 갱신된다 — 따로 연결할 필요가 없다.
+# push만으로는 배치 결과가 배포되지 않는다. 기본 GITHUB_TOKEN으로 만든 커밋은 다른
+# 워크플로를 트리거하지 않기 때문이다(GitHub이 무한 루프를 막으려고 걸어 둔 제약).
+# 그래서 배치는 매일 성공적으로 커밋했는데 사이트는 6일 전 시세를 계속 서빙했다:
+#   저장소 HEAD  data/quotes.json → asOf 2026-08-12
+#   monasset.kr/data/quotes.json → asOf 2026-08-07  (마지막 사람 커밋 시점)
+#
+# workflow_run은 커밋 이벤트가 아니라 "워크플로가 끝났다"는 이벤트라 그 제약을 받지
+# 않는다. 배치에서 workflow_dispatch를 부르는 방식은 같은 제약에 걸려 별도 PAT가
+# 필요하므로 쓰지 않는다. Pages 소스를 브랜치 배포로 바꾸는 것도 하지 않는다 —
+# 유료로 붙여 둔 커스텀 도메인(monasset.kr)이 걸려 있다.
 on:
   push:
     branches: [main]
+  workflow_run:
+    workflows: ["Daily domestic quotes batch", "Weekly ticker universe refresh"]
+    types: [completed]
   workflow_dispatch: {}
 
 # 배치 워크플로와 권한이 겹치지 않게 여기서는 읽기만 한다(배포에 필요한 pages·id-token만 추가).
@@ -16,8 +26,9 @@ permissions:
   pages: write
   id-token: write
 
-# 배치가 연달아 커밋해도 마지막 것만 배포되면 되므로 진행 중인 배포는 취소한다.
-# 배치 쪽 concurrency 그룹(quotes-batch·tickers-batch)과는 이름이 달라 서로 막지 않는다.
+# 두 배치가 비슷한 시각에 끝나면 배포가 겹칠 수 있다. 마지막 것만 올라가면 되므로
+# 진행 중인 배포는 취소한다. 배치 쪽 그룹(quotes-batch·tickers-batch)과는 이름이 달라
+# 서로 막지 않는다.
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -25,11 +36,20 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # 실패한 배치의 결과를 배포하지 않는다. workflow_run은 성공·실패를 가리지 않고
+    # 발화하므로 여기서 걸러야 한다. push·수동 실행은 그대로 통과시킨다.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
+      # workflow_run은 트리거한 워크플로의 커밋이 아니라 기본 브랜치의 최신 상태를
+      # 체크아웃한다. 배치가 방금 main에 커밋했으므로 그 커밋을 명시적으로 집는다.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }}
 
       # 한 번만 사람이 해야 하는 설정이 있다: 저장소 Settings → Pages →
       # "Build and deployment" → Source를 "GitHub Actions"로 바꿔야 한다.

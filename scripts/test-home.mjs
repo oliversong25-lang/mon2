@@ -119,6 +119,16 @@ async function type(page, selector, text) {
   await page.keyboard.type(text, { delay: 15 });
 }
 
+// 계정 저장이 붙은 뒤로는 localStorage만 심어서는 안 된다. 앱이 원격 사본을 내려받아
+// 로컬을 덮어쓰므로, 목 원격(sessionStorage)에도 같은 값을 넣어야 그 세션이 살아남는다.
+async function seedSession(page, assets, extra = {}) {
+  await page.evaluate(({ assets: seeded, extra: rest }) => {
+    const session = Object.assign({ schema: 7, snapshots: [], assets: seeded }, rest);
+    localStorage.setItem("assetInput.session", JSON.stringify(session));
+    sessionStorage.setItem("assetflow.test.remote", JSON.stringify(session));
+  }, { assets, extra });
+}
+
 const originalQuotes = await readFile(QUOTES_PATH, "utf8").catch(() => null);
 
 // finally만으로는 부족하다. 이 테스트는 브라우저 라우트 핸들러 안에서 비동기로 도는
@@ -152,6 +162,8 @@ try {
   server = await startServer();
   browser = await launchTestBrowser(chromium);
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } }); // PC 폭
+  // 페이지가 조용히 죽으면 단언 실패 이유가 "문구가 없음"으로만 보여 원인을 못 찾는다.
+  page.on("pageerror", (error) => console.error("  [pageerror]", error.message));
   await installTestAuth(page);
 
   // ===== 1. 자산 0건 =====
@@ -754,6 +766,80 @@ try {
     }
     return { ok: true };
   });
+
+  // ===== 5a-1d. 보유 자산 카드는 자산이 많아도 높이가 늘지 않는다 =====
+  await record("자산 11건에서도 보유 자산 카드 높이가 고정되고 건수는 정확하다", async () => {
+    const many = Array.from({ length: 11 }, (_, index) => ({
+      id: `m${index}`,
+      group: "equity",
+      fields: { productName: `종목${index}`, productCode: "005930", quantity: index + 1, averagePrice: 60000 },
+      autoFields: { currency: "KRW" },
+    }));
+    await page.goto(HOME_URL);
+    await page.evaluate((assets) => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], assets }));
+    }, many);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector("table.data tbody tr"), { timeout: 8000 });
+
+    const rowCount = await page.locator("table.data tbody tr").count();
+    if (rowCount !== 11) return { ok: false, reason: `표에 ${rowCount}행 (11행 기대 — 나머지는 스크롤로 가려질 뿐 빠지면 안 된다)` };
+
+    // 머리말이 전체 건수를 말해야 한다 — 4개만 보인다고 4개라고 적으면 안 된다.
+    const sub = await page.locator(".card").filter({ hasText: "보유 자산" }).locator(".card-sub").first().textContent();
+    if (!sub.includes("전체 11개")) return { ok: false, reason: `머리말에 전체 건수가 없음: "${sub}"` };
+
+    const box = await page.evaluate(() => {
+      const scroller = document.querySelector(".holdings-scroll");
+      if (!scroller) return null;
+      return { clientHeight: scroller.clientHeight, scrollHeight: scroller.scrollHeight, capped: scroller.classList.contains("capped") };
+    });
+    if (!box) return { ok: false, reason: "스크롤 영역이 없음" };
+    if (!box.capped) return { ok: false, reason: "높이 제한이 걸리지 않음" };
+    if (box.scrollHeight <= box.clientHeight) return { ok: false, reason: `내용이 잘리지 않아 스크롤이 생기지 않음 (${box.scrollHeight} <= ${box.clientHeight})` };
+
+    // 자산이 4건일 때는 스크롤이 걸리지 않아야 한다 — 굳이 가둘 이유가 없다.
+    await page.evaluate((assets) => {
+      localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], assets: assets.slice(0, 4) }));
+    }, many);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector("table.data tbody tr"), { timeout: 8000 });
+    const cappedWithFew = await page.locator(".holdings-scroll.capped").count();
+    return cappedWithFew === 0 ? { ok: true } : { ok: false, reason: "4건뿐인데도 높이가 제한됨" };
+  });
+
+  // 날짜가 섞인 데이터를 한 시점의 스냅샷처럼 보여주면 안 된다.
+  // 이 검사만 새 컨텍스트에서 돈다 — 앞선 검사들이 남긴 저장 대기(디바운스)와 원격
+  // 사본이 같은 페이지에서 계속 되살아나 세션이 엎치락뒤치락했다.
+  await record("가상자산 기준일이 이르면 화면이 그 사실을 밝힌다", async () => {
+    const fixture = { ...QUOTES_FIXTURE, cryptoAsOf: "2026-08-04" };
+    await writeFile(QUOTES_PATH, JSON.stringify(fixture), "utf8");
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    try {
+      const fresh = await context.newPage();
+      await installTestAuth(fresh);
+      await fresh.goto(HOME_URL);
+      await seedSession(fresh, [
+        { id: "k1", group: "crypto", fields: { productName: "비트코인", productCode: "BTC", quantity: 0.1, averagePrice: 80000000 }, autoFields: { currency: "KRW" } },
+      ]);
+      await fresh.reload();
+      await fresh.waitForFunction(() => {
+        const host = document.getElementById("page");
+        return host && host.innerText.includes("총자산");
+      }, { timeout: 10000 });
+      const text = await fresh.locator("#page").innerText();
+      if (!text.includes("2026-08-04")) return { ok: false, reason: `가상자산 기준일이 화면에 없음: ${text.slice(0, 200)}` };
+      if (!text.includes("가상자산 시세가")) return { ok: false, reason: "안내 문구가 없음" };
+      return { ok: true };
+    } finally {
+      await context.close();
+      await writeFile(QUOTES_PATH, JSON.stringify(QUOTES_FIXTURE), "utf8");
+    }
+  });
+
+  // 위 검사들이 세션을 바꿨으므로 자산군 탭 검사 전에 되돌린다.
+  await page.goto(HOME_URL);
+  await seedSession(page, AXIS_ASSETS);
 
   // ===== 5a-2. 자산군 탭 =====
   await record("자산군 탭 8개가 모두 열리고 해당 자산만 나온다", async () => {

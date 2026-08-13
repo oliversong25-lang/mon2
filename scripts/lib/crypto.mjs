@@ -22,6 +22,8 @@ export const COINGECKO_IDS = Object.freeze({
   USDT: "tether",
 });
 
+import { fetchWithRetry } from "./http.mjs";
+
 const DEMO_BASE = "https://api.coingecko.com/api/v3";
 const PRO_BASE = "https://pro-api.coingecko.com/api/v3";
 
@@ -54,8 +56,8 @@ export async function fetchCryptoQuotes(symbols, apiKey, { plan = "demo", fetchI
   url.searchParams.set("ids", ids.join(","));
   url.searchParams.set("vs_currencies", "krw"); // 원화를 직접 받는다 — 환율 재환산을 거치지 않는다.
 
-  const response = await fetchImpl(url, { headers: apiKey ? { [header]: apiKey } : {} });
-  if (!response.ok) throw new CoinGeckoError(`CoinGecko HTTP ${response.status}`);
+  // 어느 API가 끊겼는지 로그에 남기고, 일시적인 네트워크 오류는 몇 번 다시 시도한다.
+  const response = await fetchWithRetry("CoinGecko", url, { headers: apiKey ? { [header]: apiKey } : {} }, { fetchImpl });
   const json = await response.json();
 
   // 코인게코는 잘못된 ID를 줘도 HTTP 200에 빈 객체 {}를 돌려준다(실측 확인). 오류를

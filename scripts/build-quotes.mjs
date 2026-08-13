@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { fetchAll, kstToday, shiftDate, resolveLatestBasDt, normalizeKrCode, setupUtf8Console, previousBusinessDay } from "./lib/data-go-kr.mjs";
 import { fetchCryptoQuotes, COINGECKO_IDS } from "./lib/crypto.mjs";
+import { fetchWithRetry } from "./lib/http.mjs";
 
 setupUtf8Console();
 
@@ -99,8 +100,7 @@ async function fetchFxRates(startDate) {
     url.searchParams.set("authkey", KOREAEXIM_AUTH_KEY);
     url.searchParams.set("searchdate", probe);
     url.searchParams.set("data", "AP01");
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`환율 API HTTP ${response.status}`);
+    const response = await fetchWithRetry("한국수출입은행 환율", url);
     const rows = await response.json();
     const validRows = Array.isArray(rows) ? rows.filter((row) => row.result === 1) : [];
     if (validRows.length) {
@@ -132,8 +132,7 @@ async function fetchSilverPerGram(krwPerUsd) {
   try {
     const today = kstToday();
     const url = `${ECOS_URL_BASE}/StatisticSearch/${ECOS_AUTH_KEY}/json/kr/1/10/${ECOS_SILVER_STAT_CODE}/D/${shiftDate(today, -14)}/${today}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`ECOS HTTP ${response.status}`);
+    const response = await fetchWithRetry("한국은행 ECOS(은)", url);
     const json = await response.json();
     const rows = json?.StatisticSearch?.row;
     if (!Array.isArray(rows) || !rows.length) return null;
@@ -195,11 +194,10 @@ function formatMatch(label, match) {
   return `${label} 시세 매칭: ${match.matched.toLocaleString("ko-KR")} / ${match.total.toLocaleString("ko-KR")} (${(match.rate * 100).toFixed(1)}%)`;
 }
 
-async function loadPreviousQuoteCount() {
+async function loadPrevious() {
   try {
     const raw = await readFile(resolve(DATA_DIR, "quotes.json"), "utf8");
-    const previous = JSON.parse(raw);
-    return Object.keys(previous.quotes || {}).length;
+    return JSON.parse(raw);
   } catch {
     return null;
   }
@@ -226,12 +224,15 @@ function validateQuotes({ quoteCount, matches, rateCount, goldPerGram, asOfIso, 
   }
   if (rateCount < 10) failures.push(`환율 통화 수 ${rateCount}개 — 10개 미만`);
 
-  // 전부 실패면 배치 실패(가상자산이 통째로 빠진 총자산을 게시하지 않는다).
-  // 일부만 실패면 경고 — 그 종목만 앱에서 "시세 확인 불가"로 표시된다.
+  // 가상자산은 국내 시세를 막지 않는다. 코인게코 한 곳이 흔들린다고 그날 국내 시세
+  // 전체를 버리는 건 손실이 더 크다 — 직전 값을 그대로 들고 가고 경고만 남긴다.
+  // 대신 그 값이 언제 것인지를 산출물에 적어 앱이 "며칠 전 값"이라고 말할 수 있게 한다.
   if (crypto) {
-    if (!Object.keys(crypto.quotes).length) failures.push(`가상자산 시세 0건 (요청 ${crypto.requested.length}종목)`);
+    if (crypto.stale) warnings.push(`가상자산 시세 갱신 실패 — 직전 값(${crypto.asOfDate || "날짜 미상"})을 유지합니다. 국내 시세는 정상 갱신했습니다`);
     else if (crypto.missing.length) warnings.push(`가상자산 시세 미확보 ${crypto.missing.length}종목: ${crypto.missing.join(", ")} — 해당 자산은 앱에서 "시세 확인 불가"로 표시됩니다`);
     if (crypto.unmapped.length) warnings.push(`코인게코 ID 매핑이 없는 심볼 ${crypto.unmapped.length}건: ${crypto.unmapped.join(", ")} — lib/crypto.mjs의 COINGECKO_IDS에 추가하세요`);
+    // 직전 값조차 없으면 보여줄 게 없다. 그때만 실패로 본다.
+    if (!Object.keys(crypto.quotes).length) failures.push(`가상자산 시세 0건 (요청 ${crypto.requested.length}종목, 보존할 직전 값도 없음)`);
   }
   if (!goldPerGram) failures.push("금 시세 확보 실패");
   const asOfAgeDays = Math.floor((Date.now() - new Date(asOfIso).getTime()) / 86400000);
@@ -260,19 +261,27 @@ async function main() {
   await mkdir(DATA_DIR, { recursive: true });
 
   const stockBasDt = await resolveLatestBasDt(STOCK_URL, {}, DATA_GO_KR_KEY);
-  const [stockQuotes, etfEtnQuotes, goldPerGram, fx, tickerCodes, previousQuoteCount, crypto] = await Promise.all([
+  const previous = await loadPrevious();
+  const previousQuoteCount = previous ? Object.keys(previous.quotes || {}).length : null;
+  const [stockQuotes, etfEtnQuotes, goldPerGram, fx, tickerCodes, crypto] = await Promise.all([
     fetchStockQuotes(stockBasDt),
     fetchEtfEtnQuotes(stockBasDt),
     fetchGoldPerGram(stockBasDt),
     fetchFxRates(stockBasDt),
     loadKrTickerCodes(),
-    loadPreviousQuoteCount(),
-    // 코인게코가 죽어도 여기서 예외를 밖으로 던지지 않고 빈 결과로 내려보낸 뒤
-    // validateQuotes가 "가상자산 시세 0건"으로 실패시킨다 — 실패 이유가 다른 검증
-    // 결과와 같은 형식으로 한 자리에 모여야 원인을 찾기 쉽다.
+    // 코인게코가 죽어도 국내 시세까지 버리지 않는다. 직전 산출물의 가상자산 값을
+    // 그대로 들고 가고, 그게 언제 값인지(asOfDate)를 함께 남긴다.
     fetchCrypto().catch((error) => {
-      console.warn(`가상자산 시세 조회 실패: ${error.message}`);
-      return { requested: Object.keys(COINGECKO_IDS), quotes: {}, unmapped: [], missing: Object.keys(COINGECKO_IDS) };
+      console.warn(`가상자산 시세 조회 실패, 직전 값 유지: ${error.message}`);
+      const kept = previous?.crypto || {};
+      return {
+        requested: Object.keys(COINGECKO_IDS),
+        quotes: kept,
+        unmapped: [],
+        missing: Object.keys(COINGECKO_IDS),
+        stale: true,
+        asOfDate: previous?.cryptoAsOf || (previous?.asOf ? String(previous.asOf).slice(0, 10) : null),
+      };
     }),
   ]);
   const silverPerGram = await fetchSilverPerGram(fx.rates.USD);
@@ -311,6 +320,10 @@ async function main() {
     // 국내 종목 코드와 섞지 않고 따로 둔다 — 심볼 체계가 다르고, 섞으면 종목 목록
     // 교집합 검증에서 "목록에 없는 코드"로 잡혀 지표가 흐려진다.
     crypto: crypto.quotes,
+    // 가상자산만 날짜가 다를 수 있다(코인게코 실패 시 직전 값 유지). 날짜가 섞인 데이터를
+    // 한 시점의 스냅샷인 것처럼 내보내면 안 되므로 그룹별 기준일을 따로 적는다.
+    // 앱은 이 값이 asOf보다 이르면 화면에 "며칠 전 값"이라고 밝힌다.
+    cryptoAsOf: crypto.stale ? crypto.asOfDate : kstToday().replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
     rates: fx.rates,
     commodities: {
       ...(goldPerGram ? { goldPerGram } : {}),
@@ -342,6 +355,7 @@ async function main() {
   console.log(`환율: ${rateCount}개 통화`);
   console.log(
     `가상자산: ${Object.keys(crypto.quotes).length} / ${crypto.requested.length}종목` +
+      `${crypto.stale ? ` · 갱신 실패, ${crypto.asOfDate || "날짜 미상"} 값 유지` : ""}` +
       `${crypto.missing.length ? ` · 시세 미확보 ${crypto.missing.join(", ")}` : ""}` +
       `${crypto.unmapped.length ? ` · ID 매핑 없음 ${crypto.unmapped.join(", ")}` : ""}`
   );
@@ -361,7 +375,15 @@ async function main() {
   await rename(tmpPath, outPath);
 }
 
-main().catch((error) => {
-  console.error(`[시세 배치 실패] ${error.message}`);
-  process.exitCode = 1;
-});
+// 실행이 끝났다는 신호. 이 스크립트는 import 시점에 main()을 띄우고 바로 반환하므로,
+// 회귀 테스트가 "언제 끝났는지"를 알 방법이 이것밖에 없다. 고정 시간만 기다리게 하면
+// 재시도가 붙은 실패 경로가 다음 실행과 겹쳐 exitCode와 콘솔이 뒤섞인다(실제로 겪었다).
+// 운영에서는 아무 일도 하지 않는 카운터다.
+main()
+  .catch((error) => {
+    console.error(`[시세 배치 실패] ${error.message}`);
+    process.exitCode = 1;
+  })
+  .finally(() => {
+    globalThis.__quotesBatchRuns = (globalThis.__quotesBatchRuns || 0) + 1;
+  });

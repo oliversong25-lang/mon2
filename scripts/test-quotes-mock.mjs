@@ -75,6 +75,12 @@ function cryptoResponseFor(mode) {
   if (mode === "error-envelope") return jsonResponse({ status: { error_code: 429, error_message: "rate limited" } });
   if (mode === "partial") return jsonResponse({ bitcoin: CRYPTO_BODY.bitcoin, ethereum: CRYPTO_BODY.ethereum });
   if (mode === "http-500") return { ok: false, status: 500, json: async () => ({}), text: async () => "" };
+  // undici가 실제로 던지는 형태 — 메시지에 URL이 없고 원인은 cause에만 있다.
+  if (mode === "network") {
+    const error = new TypeError("fetch failed");
+    error.cause = Object.assign(new Error("getaddrinfo ENOTFOUND api.coingecko.com"), { code: "ENOTFOUND" });
+    throw error;
+  }
   return jsonResponse(CRYPTO_BODY);
 }
 
@@ -133,8 +139,15 @@ async function runBatch({ stockRows, cryptoMode } = {}) {
   const { fn, fetchCallLog } = makeFetchMock({ stockRows, cryptoMode });
   global.fetch = fn;
   process.exitCode = undefined;
+  // 배치는 import 시점에 main()을 띄우고 바로 반환한다. 고정 시간만 기다리면 재시도가
+  // 붙은 실패 경로가 다음 실행과 겹쳐 exitCode와 콘솔이 뒤섞인다 — 실행이 실제로
+  // 끝났다는 신호(카운터)를 기다린다.
+  const before = globalThis.__quotesBatchRuns || 0;
   await import(`./build-quotes.mjs?t=${Date.now()}-${Math.random()}`);
-  await new Promise((r) => setTimeout(r, 300));
+  const deadline = Date.now() + 20000;
+  while ((globalThis.__quotesBatchRuns || 0) === before && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 50));
+  }
   const exitCode = process.exitCode;
   process.exitCode = undefined;
   return { fetchCallLog, exitCode };
@@ -261,19 +274,41 @@ try {
   record("기준일이 이르다고 배치를 실패시키지는 않는다 (공휴일일 수 있음)", stale.exitCode !== 1, `exitCode=${stale.exitCode}`);
 
   // ===== 5. 가상자산 실패 경로 =====
-  // 하드코딩된 BTC 158,200,000원을 지운 이유가 여기 있다. 시세를 못 받았는데 배치가
-  // 성공하면 앱이 옛 값이나 0으로 총자산을 계산해 버린다. 못 받으면 죽어야 한다.
+  // 코인게코 한 곳이 흔들린다고 그날 국내 시세 전체를 버리지 않는다. 직전 코인 값을
+  // 그대로 들고 가고, 그게 언제 값인지(cryptoAsOf)를 남겨 앱이 밝힐 수 있게 한다.
   await writeFile(TICKERS_KR_PATH, JSON.stringify(tickerFixture), "utf8");
+  const withCrypto = JSON.stringify({
+    asOf: "2020-01-01T00:00:00+09:00",
+    sources: {},
+    quotes: { MARKER: { price: 1, currency: "KRW" } },
+    crypto: { BTC: { price: 12345678, currency: "KRW" } },
+    cryptoAsOf: "2020-01-01",
+    rates: { KRW: 1 },
+    commodities: {},
+  });
   for (const [mode, label] of [
     ["empty", "빈 객체 {} (HTTP 200이지만 실패)"],
     ["error-envelope", "status.error_code 응답"],
     ["http-500", "HTTP 500"],
   ]) {
-    await writeFile(QUOTES_PATH, seededQuotes, "utf8");
-    const failed = await runBatch({ cryptoMode: mode });
-    record(`가상자산 ${label} -> 배치 실패(exit 1)`, failed.exitCode === 1, `exitCode=${failed.exitCode}`);
-    record(`가상자산 ${label} -> 기존 quotes.json 보존`, (await readFile(QUOTES_PATH, "utf8")) === seededQuotes, "quotes.json이 덮어써짐");
+    await writeFile(QUOTES_PATH, withCrypto, "utf8");
+    const partialLogs = [];
+    const restoreWarn = console.warn;
+    console.warn = (...args) => { partialLogs.push(args.join(" ")); restoreWarn(...args); };
+    const run = await runBatch({ cryptoMode: mode });
+    console.warn = restoreWarn;
+    record(`가상자산 ${label} -> 국내 시세는 그대로 게시된다`, run.exitCode !== 1, `exitCode=${run.exitCode}`);
+    const published = JSON.parse(await readFile(QUOTES_PATH, "utf8"));
+    record(`가상자산 ${label} -> 직전 코인 값이 보존된다`, published.crypto?.BTC?.price === 12345678, JSON.stringify(published.crypto));
+    record(`가상자산 ${label} -> 코인 기준일이 국내 기준일보다 이르게 남는다`, published.cryptoAsOf === "2020-01-01" && published.cryptoAsOf < published.asOf.slice(0, 10), `cryptoAsOf=${published.cryptoAsOf} asOf=${published.asOf}`);
+    record(`가상자산 ${label} -> 경고로 보고된다`, partialLogs.some((line) => line.includes("가상자산 시세 갱신 실패")), partialLogs.join(" | ").slice(0, 200));
   }
+
+  // 직전 값조차 없으면 보여줄 게 없다 — 그때만 실패다.
+  await writeFile(QUOTES_PATH, seededQuotes, "utf8");
+  const noFallback = await runBatch({ cryptoMode: "empty" });
+  record("가상자산 실패 + 보존할 직전 값도 없음 -> 배치 실패(exit 1)", noFallback.exitCode === 1, `exitCode=${noFallback.exitCode}`);
+  record("그 경우 기존 quotes.json 보존", (await readFile(QUOTES_PATH, "utf8")) === seededQuotes, "quotes.json이 덮어써짐");
 
   // 일부만 실패하면 배치는 진행하고 그 종목만 빠진다 — 해당 자산은 앱에서 "시세 확인 불가".
   await rm(QUOTES_PATH, { force: true });
@@ -286,6 +321,28 @@ try {
   record("가상자산 일부 실패 -> 배치는 성공", partial.exitCode !== 1, `exitCode=${partial.exitCode}`);
   record("가상자산 일부 실패 -> 받은 종목만 저장됨 (USDT 제외)", Object.keys(partialQuotes.crypto).sort().join(",") === "BTC,ETH", JSON.stringify(partialQuotes.crypto));
   record("가상자산 일부 실패 -> 미확보 종목이 경고로 보고됨", partialLog.some((line) => line.includes("가상자산 시세 미확보") && line.includes("USDT")), partialLog.join(" | "));
+
+  // ===== 6. 네트워크 오류는 어느 API였는지 말해야 한다 =====
+  // 2026-08-12 실행이 `[시세 배치 실패] fetch failed` 한 줄만 남기고 죽었다. undici의
+  // 이 메시지에는 URL이 없어 어디가 끊긴 건지 로그만으로는 알 수 없었다.
+  // 직전 코인 값이 있어야 "국내는 게시하고 코인은 유지" 경로를 볼 수 있다.
+  await writeFile(QUOTES_PATH, withCrypto, "utf8");
+  const netLog = [];
+  const restoreWarn2 = console.warn;
+  const restoreError = console.error;
+  console.warn = (...args) => { netLog.push(args.join(" ")); };
+  console.error = (...args) => { netLog.push(args.join(" ")); restoreError(...args); };
+  const netFail = await runBatch({ cryptoMode: "network" });
+  console.warn = restoreWarn2;
+  console.error = restoreError;
+  const joined = netLog.join(" | ");
+  record("네트워크 오류 메시지가 어느 API인지 밝힌다", joined.includes("CoinGecko"), joined.slice(0, 240));
+  record("네트워크 오류 메시지가 URL을 담는다", /api\.coingecko\.com/.test(joined), joined.slice(0, 240));
+  record("네트워크 오류는 재시도된다", netLog.some((line) => /차 시도 실패/.test(line)), joined.slice(0, 240));
+  record("가상자산 네트워크 오류에도 국내 시세는 게시된다", netFail.exitCode !== 1, `exitCode=${netFail.exitCode}`);
+
+  // 인증키는 로그에 남으면 안 된다 — 공개 저장소의 Actions 로그로 새어 나간다.
+  record("오류 메시지에 인증키가 노출되지 않는다", !/serviceKey=test-key|authkey=test-key/.test(joined), joined.slice(0, 240));
 } finally {
   if (originalTickersKr !== null) await writeFile(TICKERS_KR_PATH, originalTickersKr, "utf8");
   else await rm(TICKERS_KR_PATH, { force: true });

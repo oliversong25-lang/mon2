@@ -80,6 +80,11 @@
     .chart { display:block; width:100%; height:13rem; }
     .chart-note { margin-top:var(--space-2); color:var(--dim); font-size:var(--font-xs); }
 
+    /* 상위 4행 높이로 고정한다. 헤더(약 2.4rem) + 행 4개(약 3.4rem) 기준.
+       카드 높이가 자산 수에 따라 늘어나면 홈 전체가 끝없이 길어진다. */
+    .holdings-scroll.capped { max-height:16rem; overflow-y:auto; overscroll-behavior:contain; }
+    /* 스크롤해도 어떤 열인지 보이도록 머리글을 붙여 둔다. */
+    .holdings-scroll.capped thead th { position:sticky; top:0; z-index:1; background:var(--surface); }
     .pl-strip { display:flex; flex-wrap:wrap; gap:var(--space-6); margin-bottom:var(--space-4);
       padding:var(--space-4); border-radius:var(--radius-md); background:var(--surface-2); }
     .pl-block .pl-label { color:var(--muted); font-size:var(--font-xs); }
@@ -112,6 +117,8 @@ let sessionState=SessionStore.read();
 let session=toSession(sessionState);
 let axis="group";
 let assetClass="financial";
+// 보유 자산 카드에 한 번에 보일 행 수. 나머지는 카드 안에서 스크롤한다.
+const VISIBLE_HOLDINGS=4;
 
 // 내비의 자산군 건수는 어떤 화면 상태에서도 같아야 한다 — 로딩 중이나 빈 상태에서
 // 0으로 보이면 자산이 사라진 것처럼 읽힌다.
@@ -224,6 +231,14 @@ function trendChart(snapshots){
 
 function checkItems(summary){
   const items=[];
+  // 날짜가 섞인 데이터를 한 시점의 스냅샷인 것처럼 보여주지 않는다. 코인게코가 실패한
+  // 날 배치는 국내 시세만 갱신하고 코인 값은 직전 것을 들고 가는데, 그 사실을 밝히지
+  // 않으면 화면의 모든 숫자가 같은 날 기준인 것처럼 읽힌다.
+  const staleCrypto=Valuation.staleCryptoDate&&Valuation.staleCryptoDate();
+  if(staleCrypto&&(session.assets||[]).some(asset=>asset.group==="crypto")){
+    const days=daysBetween(staleCrypto,Valuation.asOfDate());
+    items.push({text:`가상자산 시세가 ${staleCrypto} 기준이에요 (나머지보다 ${days}일 이전)`,meta:"코인게코 갱신에 실패해 직전 값을 그대로 쓰고 있어요. 국내 시세는 정상 갱신됐습니다"});
+  }
   if(summary.unavailable.length)items.push({text:`시세를 확인하지 못한 자산 ${summary.unavailable.length}건`,meta:summary.unavailable.map(entry=>entry.name).join(", ")});
   if(summary.noPurchaseCount)items.push({text:`매입 정보가 없어 손익 계산에서 빠진 자산 ${summary.noPurchaseCount}건`,meta:"매입금액을 입력하면 평가손익에 포함됩니다"});
   const soon=maturingSoon(90);
@@ -514,20 +529,25 @@ function holdingsCard(summary){
     </tr>`;
   }).join("");
   const hasPhysicalProfit=summary.physical.gap.count>0;
+  // 자산이 많으면 이 카드 하나가 화면을 끝없이 늘린다. 상위 4행만 보이는 높이로 고정하고
+  // 나머지는 카드 안에서 스크롤한다 — 건수는 머리말에 그대로 적어 무엇이 가려졌는지 알린다.
+  const scrolls=summary.rows.length>VISIBLE_HOLDINGS;
   return `<div class="card">
     <div class="chart-head">
-      <div><h2>보유 자산</h2><div class="card-sub" style="margin:0">평가금액 높은순 · ${summary.rows.length}개</div></div>
+      <div><h2>보유 자산</h2><div class="card-sub" style="margin:0">평가금액 높은순 · 전체 ${summary.rows.length}개${scrolls?` (상위 ${VISIBLE_HOLDINGS}개 표시, 스크롤하면 나머지)`:""}</div></div>
       <div class="toolbar"><a class="btn" href="${ASSETS_URL}">자산군별로 보기</a></div>
     </div>
     ${plStrip(summary)}
-    <table class="data">
-      <thead><tr>
-        <th>자산명</th><th>자산 유형</th><th class="right">현재가</th><th class="right">보유 수량</th>
-        <th class="right">평가금액</th><th class="right">평가손익</th>
-        <th class="right">전체 대비 비중</th><th class="right">최근 업데이트</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
+    <div class="holdings-scroll${scrolls?" capped":""}">
+      <table class="data">
+        <thead><tr>
+          <th>자산명</th><th>자산 유형</th><th class="right">현재가</th><th class="right">보유 수량</th>
+          <th class="right">평가금액</th><th class="right">평가손익</th>
+          <th class="right">전체 대비 비중</th><th class="right">최근 업데이트</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
     ${hasPhysicalProfit?`<div class="card-note">* 실물자산의 값은 시장이 매긴 손익이 아니라 입력하신 추정가와 매입가의 차이(평가차액)입니다.</div>`:""}
   </div>`;
 }

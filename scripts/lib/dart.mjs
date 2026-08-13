@@ -7,6 +7,8 @@
 // 조회할 수 있다. zip 해제는 Node 표준 라이브러리에 없어 이미 JPX 엑셀 파싱에
 // 쓰고 있는 것과 같은 방식(Python subprocess, stdlib zipfile/xml만 사용)으로 처리한다.
 
+import { fetchWithRetry } from "./http.mjs";
+
 const USER_AGENT = "AssetInputBeta ticker-builder contact: oliversong25-lang@users.noreply.github.com";
 const CORP_CODE_URL = "https://opendart.fss.or.kr/api/corpCode.xml";
 const COMPANY_URL = "https://opendart.fss.or.kr/api/company.json";
@@ -14,8 +16,7 @@ const COMPANY_URL = "https://opendart.fss.or.kr/api/company.json";
 export async function fetchDartCorpCodeMap(dartKey, runPython) {
   const url = new URL(CORP_CODE_URL);
   url.searchParams.set("crtfc_key", dartKey);
-  const response = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  if (!response.ok) throw new Error(`DART corpCode.xml: HTTP ${response.status}`);
+  const response = await fetchWithRetry("OPEN DART corpCode.xml", url, { headers: { "User-Agent": USER_AGENT } });
   const zipBuffer = Buffer.from(await response.arrayBuffer());
   const code = `
 import sys, io, zipfile, json
@@ -65,8 +66,9 @@ async function fetchInduty(corpCode, dartKey) {
   const url = new URL(COMPANY_URL);
   url.searchParams.set("crtfc_key", dartKey);
   url.searchParams.set("corp_code", corpCode);
-  const response = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  if (!response.ok) throw new DartError(`DART company.json: HTTP ${response.status}`, `http_${response.status}`);
+  // 종목마다 부르는 호출이라 재시도를 1회로 줄인다 — 2,700건에 3회씩 붙이면
+  // 분당 한도를 다시 건드린다.
+  const response = await fetchWithRetry("OPEN DART company.json", url, { headers: { "User-Agent": USER_AGENT } }, { attempts: 2, baseDelayMs: 400 });
   const json = await response.json();
   if (json.status === DART_NO_DATA) return null;
   if (json.status !== "000") {

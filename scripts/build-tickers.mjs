@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fetchAll, resolveLatestBasDt, normalizeKrCode, setupUtf8Console } from "./lib/data-go-kr.mjs";
 import { fetchDartCorpCodeMap, attachSectors } from "./lib/dart.mjs";
+import { fetchWithRetry } from "./lib/http.mjs";
 import { resolveSector } from "./lib/ksic.mjs";
 
 setupUtf8Console();
@@ -45,12 +46,15 @@ const GLOBAL_STATIC=[
   {c:"VNM",n:"Vinamilk",m:"HOSE",cur:"VND",t:"stock"}
 ];
 
+// 오류 메시지가 호스트만이라도 말하게 한다 — "fetch failed"만으로는 어디가 끊겼는지 모른다.
+function labelFor(url){const host=(()=>{try{return new URL(String(url)).hostname;}catch{return String(url);}})();
+  return {"www.nasdaqtrader.com":"나스닥 종목목록","www.jpx.co.jp":"JPX 종목목록","kind.krx.co.kr":"KIND"}[host]||host;}
 function decodeEntities(value){return value.replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/&quot;/gi,'"').replace(/&#39;/gi,"'").trim();}
 function cells(row){return [...row.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)].map(match=>decodeEntities(match[1].replace(/<[^>]+>/g," ").replace(/\s+/g," ")));}
-async function fetchText(url,headers={}){const response=await fetch(url,{headers:{"User-Agent":USER_AGENT,...headers}});if(!response.ok)throw new Error(`${url}: ${response.status}`);return response.text();}
-async function fetchBuffer(url,headers={}){const response=await fetch(url,{headers:{"User-Agent":USER_AGENT,...headers}});if(!response.ok)throw new Error(`${url}: ${response.status}`);return Buffer.from(await response.arrayBuffer());}
+async function fetchText(url,headers={}){const response=await fetchWithRetry(labelFor(url),url,{headers:{"User-Agent":USER_AGENT,...headers}});return response.text();}
+async function fetchBuffer(url,headers={}){const response=await fetchWithRetry(labelFor(url),url,{headers:{"User-Agent":USER_AGENT,...headers}});return Buffer.from(await response.arrayBuffer());}
 
-async function fetchKrxStocks(marketType,market){const url=new URL(KIND_URL);url.searchParams.set("method","download");url.searchParams.set("searchType","13");url.searchParams.set("marketType",marketType);const response=await fetch(url,{headers:{"User-Agent":USER_AGENT,Referer:"https://kind.krx.co.kr/"}});if(!response.ok)throw new Error(`KIND ${market}: ${response.status}`);const html=new TextDecoder("euc-kr").decode(await response.arrayBuffer());return [...html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].map(match=>cells(match[1])).filter(row=>/^\d{6}$/.test(row[1]||"")).map((row,r)=>({c:row[1],n:row[0],m:market,cur:"KRW",t:"stock",r:r+1}));}
+async function fetchKrxStocks(marketType,market){const url=new URL(KIND_URL);url.searchParams.set("method","download");url.searchParams.set("searchType","13");url.searchParams.set("marketType",marketType);const response=await fetchWithRetry(`KIND ${market}`,url,{headers:{"User-Agent":USER_AGENT,Referer:"https://kind.krx.co.kr/"}});const html=new TextDecoder("euc-kr").decode(await response.arrayBuffer());return [...html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].map(match=>cells(match[1])).filter(row=>/^\d{6}$/.test(row[1]||"")).map((row,r)=>({c:row[1],n:row[0],m:market,cur:"KRW",t:"stock",r:r+1}));}
 
 // KIND가 부족하면 공식 API(금융위원회_KRX상장종목정보)로 재시도한다. 시장구분값이
 // "유가증권시장"/"코스닥"/"코넥스"처럼 한글일 수 있어 매핑해준다.

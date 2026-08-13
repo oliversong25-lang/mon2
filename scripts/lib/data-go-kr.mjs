@@ -5,8 +5,22 @@
 // build-quotes.mjs both page through them with this one helper.
 
 import { execSync } from "node:child_process";
+import { fetchWithRetry, redactUrl } from "./http.mjs";
 
 const USER_AGENT = "AssetInputBeta data.go.kr client contact: oliversong25-lang@users.noreply.github.com";
+
+// 오류 메시지가 어느 서비스인지 말하게 한다. URL만으로는 사람이 못 알아본다.
+const SERVICE_LABELS = [
+  ["GetStockSecuritiesInfoService", "금융위원회_주식시세정보"],
+  ["getETFPriceInfo", "금융위원회_증권상품시세정보(ETF)"],
+  ["getETNPriceInfo", "금융위원회_증권상품시세정보(ETN)"],
+  ["GetGeneralProductInfoService", "금융위원회_일반상품시세정보(금)"],
+  ["GetKrxListedInfoService", "금융위원회_KRX상장종목정보"],
+];
+export function serviceLabel(baseUrl) {
+  const hit = SERVICE_LABELS.find(([needle]) => String(baseUrl).includes(needle));
+  return hit ? hit[1] : `data.go.kr(${String(baseUrl).split("/").pop()})`;
+}
 
 export class DataGoKrError extends Error {
   constructor(message, { resultCode, resultMsg, url } = {}) {
@@ -25,8 +39,11 @@ async function fetchPage(baseUrl, params, serviceKey) {
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
   });
-  const response = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  if (!response.ok) throw new DataGoKrError(`HTTP ${response.status} for ${baseUrl}`, { url: url.toString() });
+  const label = serviceLabel(baseUrl);
+  const safeUrl = redactUrl(url);
+  // 네트워크 오류·5xx는 fetchWithRetry가 몇 번 다시 시도하고, 그래도 안 되면
+  // 어느 API였는지가 메시지에 담겨 올라온다.
+  const response = await fetchWithRetry(label, url, { headers: { "User-Agent": USER_AGENT } });
   const text = await response.text();
   let json;
   try {
@@ -34,14 +51,14 @@ async function fetchPage(baseUrl, params, serviceKey) {
   } catch {
     // data.go.kr returns an XML error envelope (not JSON) for auth/quota failures
     // even when resultType=json is requested — surface the raw body for diagnosis.
-    throw new DataGoKrError(`non-JSON response (likely an auth/quota error): ${text.slice(0, 300)}`, { url: url.toString() });
+    throw new DataGoKrError(`[${label}] non-JSON response (likely an auth/quota error) (${safeUrl}): ${text.slice(0, 300)}`, { url: safeUrl });
   }
   const header = json?.response?.header;
   if (header && header.resultCode !== "00" && header.resultCode !== undefined) {
-    throw new DataGoKrError(`${header.resultMsg || "unknown error"} (resultCode=${header.resultCode})`, {
+    throw new DataGoKrError(`[${label}] ${header.resultMsg || "unknown error"} (resultCode=${header.resultCode}) (${safeUrl})`, {
       resultCode: header.resultCode,
       resultMsg: header.resultMsg,
-      url: url.toString(),
+      url: safeUrl,
     });
   }
   const body = json?.response?.body;
