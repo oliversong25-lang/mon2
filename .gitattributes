@@ -1,0 +1,26 @@
+# 줄바꿈을 저장소에서 LF로 고정한다.
+#
+# 왜: 이 저장소에는 .gitattributes가 없어서 줄바꿈 처리가 각 기기의 core.autocrlf에
+# 달려 있었다. 설정이 다른 곳에서 파일을 만지면 내용은 그대로인데 전 파일이 통째로
+# 바뀐 것처럼 보인다 — 실제로 36개 파일에 6,761줄 추가 / 6,761줄 삭제가 잡혔다.
+# 삽입과 삭제 수가 정확히 같다는 것이 내용 변경이 아니라 줄바꿈 변환이라는 증거다.
+# 그 상태에서 기능 커밋을 얹으면 진짜 변경이 그 안에 파묻힌다.
+#
+# eol=lf까지 두는 이유: text=auto만 두면 저장은 LF로 되지만 워킹 트리는 여전히
+# 기기 설정에 따라 CRLF가 될 수 있다. 그러면 "왜 내 쪽에서만 diff가 뜨지"가 반복된다.
+# 여기서는 저장소와 워킹 트리를 모두 LF로 못 박아 기기 설정과 무관하게 만든다.
+# (Windows에서 실행하는 것은 python·node뿐이고 LF를 그대로 읽는다. .bat/.cmd 없음.)
+* text=auto eol=lf
+
+# 바이너리는 변환 대상이 아니다 — 손대면 파일이 깨진다.
+*.zip binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.xls binary
+*.xlsx binary
