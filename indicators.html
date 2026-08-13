@@ -103,17 +103,7 @@ function render(){
     ?`<div class="banner">지난 수집에서 ${failures.length}건이 실패했어요 · ${escapeHtml(failures.map(f=>`${f.dataflow||f.indicator}: ${f.message}`).join(" / ").slice(0,220))}</div>`
     :"";
 
-  const groups=Indicators.byCountry(query);
-  const total=Indicators.all().length;
-  const shown=groups.reduce((sum,group)=>sum+group.rows.length,0);
-
-  const body=groups.length
-    ?groups.map(group=>`<div class="card country-card">
-        <div class="country-head"><h2>${escapeHtml(group.countryKo)}</h2><span class="en">${escapeHtml(group.countryEn)}</span></div>
-        <div class="ind-grid">${group.rows.map(cell).join("")}</div>
-      </div>`).join("")
-    :`<div class="card"><p class="empty-search">"${escapeHtml(query)}"에 해당하는 지표가 없어요.<br>
-        지표명이나 국가명을 한글·영문 어느 쪽으로 입력해도 찾을 수 있습니다.</p></div>`;
+  const view=searchView(query);
 
   Shell.mount("app","indicators",[
     head(),
@@ -121,12 +111,37 @@ function render(){
     failureNote,
     `<div class="search-row">
       <input class="search-box" type="search" placeholder="지표명 · 국가명 검색 (한글/영문)" value="${escapeHtml(query)}" data-search aria-label="지표 검색">
-      <span class="search-count">${shown.toLocaleString("ko-KR")} / ${total.toLocaleString("ko-KR")}건</span>
+      <span class="search-count" data-search-count>${view.shown.toLocaleString("ko-KR")} / ${view.total.toLocaleString("ko-KR")}건</span>
     </div>`,
-    body,
+    `<div data-search-results>${view.body}</div>`,
     sourcesLine(),
   ].join(""),navOptions());
   bind();
+}
+
+// 검색할 때 입력칸까지 다시 만들면 한글 IME가 조합 중인 글자를 잃는다.
+// 검색 결과와 건수만 교체해 입력 DOM·포커스·커서를 그대로 보존한다.
+function searchView(value){
+  const groups=Indicators.byCountry(value);
+  const total=Indicators.all().length;
+  const shown=groups.reduce((sum,group)=>sum+group.rows.length,0);
+  const body=groups.length
+    ?groups.map(group=>`<div class="card country-card">
+        <div class="country-head"><h2>${escapeHtml(group.countryKo)}</h2><span class="en">${escapeHtml(group.countryEn)}</span></div>
+        <div class="ind-grid">${group.rows.map(cell).join("")}</div>
+      </div>`).join("")
+    :`<div class="card"><p class="empty-search">"${escapeHtml(value)}"에 해당하는 지표가 없어요.<br>
+        지표명이나 국가명을 한글·영문 어느 쪽으로 입력해도 찾을 수 있습니다.</p></div>`;
+  return {body,total,shown};
+}
+
+function updateSearchResults(){
+  const results=document.querySelector("[data-search-results]");
+  const count=document.querySelector("[data-search-count]");
+  if(!results||!count)return;
+  const view=searchView(query);
+  results.innerHTML=view.body;
+  count.textContent=`${view.shown.toLocaleString("ko-KR")} / ${view.total.toLocaleString("ko-KR")}건`;
 }
 
 function cell(row){
@@ -146,10 +161,7 @@ function bind(){
   if(!box)return;
   box.addEventListener("input",event=>{
     query=event.target.value;
-    render();
-    // 다시 그리면 포커스가 날아간다 — 검색은 계속 칠 수 있어야 한다.
-    const next=document.querySelector("[data-search]");
-    if(next){next.focus();next.setSelectionRange(next.value.length,next.value.length);}
+    updateSearchResults();
   });
 }
 

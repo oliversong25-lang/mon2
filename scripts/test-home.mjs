@@ -1025,6 +1025,30 @@ try {
     return /대한민국/.test(head) ? { ok: true } : { ok: false, reason: `필터 결과: ${head}` };
   });
 
+  await record("경제지표 검색 중 한글 IME 조합과 입력 DOM이 유지된다", async () => {
+    const result = await page.evaluate(() => {
+      const box = document.querySelector("[data-search]");
+      box.dataset.imeProbe = "same-node";
+      box.focus();
+      box.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true, data: "" }));
+      for (const value of ["ㅇ", "일", "일ㅂ", "일보", "일보ㄴ", "일본"]) {
+        box.value = value;
+        box.dispatchEvent(new InputEvent("input", { bubbles: true, data: value.at(-1), isComposing: true, inputType: "insertCompositionText" }));
+      }
+      box.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "일본" }));
+      const current = document.querySelector("[data-search]");
+      return {
+        value: current.value,
+        sameNode: current === box && current.dataset.imeProbe === "same-node",
+        countries: [...document.querySelectorAll(".country-head h2")].map(node => node.textContent.trim()),
+      };
+    });
+    await page.locator("[data-search]").fill("");
+    return result.value === "일본" && result.sameNode && result.countries.includes("일본")
+      ? { ok: true }
+      : { ok: false, reason: JSON.stringify(result) };
+  });
+
   await record("모든 값에 관측 기간과 주기가 함께 표시된다", async () => {
     await page.waitForSelector(".ind-cell", { timeout: 8000 });
     const bad = await page.evaluate(() => [...document.querySelectorAll(".ind-cell")]
