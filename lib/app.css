@@ -113,6 +113,12 @@ a { color: var(--brand-ink); }
 .nav-foot { display: flex; align-items: center; gap: var(--space-3); margin-top: auto;
   padding-top: var(--space-4); border-top: var(--border) solid var(--line); color: var(--muted); font-size: var(--font-sm); }
 .nav-foot .nav-mark { background: var(--surface-2); color: var(--ink); border-radius: 50%; }
+.nav-profile-label { min-width: 0; flex: 1; }
+.nav-logout { display: grid; width: 2rem; height: 2rem; flex: none; padding: 0; border: var(--border) solid transparent;
+  border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--font-lg); place-items: center; }
+.nav-logout:hover { border-color: var(--line); background: var(--surface-2); color: var(--ink); }
+.nav-logout:focus-visible { outline: .1875rem solid var(--brand-soft); color: var(--ink); }
+.nav-logout:disabled { cursor: wait; opacity: .5; }
 
 .main { min-width: 0; padding: var(--space-8) var(--space-10) var(--space-10); }
 .main-inner { max-width: var(--page-max); margin: 0 auto; }
