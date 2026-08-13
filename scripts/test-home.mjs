@@ -489,7 +489,7 @@ try {
   });
 
   // 5번: 자리만 잡아둔 칸들
-  await record("오늘의 주요 뉴스·주요 경제지표·다가오는 일정이 준비 중으로 자리를 잡는다", async () => {
+  await record("오늘의 주요 뉴스·주요 경제지표는 준비 중이고, 다가오는 일정은 실제로 동작한다", async () => {
     await page.goto(HOME_URL);
     await page.evaluate((assets) => {
       localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], assets }));
@@ -497,14 +497,18 @@ try {
     await page.reload();
     await page.waitForFunction(() => document.querySelector("svg.donut"), { timeout: 8000 });
     const headings = await page.locator(".card h2").allTextContents();
-    for (const title of ["오늘의 주요 뉴스", "주요 경제지표", "다가오는 일정"]) {
+    for (const title of ["오늘의 주요 뉴스", "주요 경제지표"]) {
       const found = headings.find((text) => text.includes(title));
       if (!found) return { ok: false, reason: `"${title}" 칸이 없음: ${headings.join(" | ")}` };
       if (!found.includes("준비 중")) return { ok: false, reason: `"${title}"에 준비 중 표시가 없음` };
     }
-    // 다가오는 일정은 자산 만기가 아니라 거시 경제 일정 칸이다.
-    const schedule = await page.locator(".card").filter({ hasText: "다가오는 일정" }).textContent();
-    if (/만기/.test(schedule)) return { ok: false, reason: "다가오는 일정이 아직 자산 만기를 가리킨다" };
+    // 다가오는 일정은 이제 자리표시가 아니라 실제 기능이다.
+    const schedule = headings.find((text) => text.includes("다가오는 일정"));
+    if (!schedule) return { ok: false, reason: `다가오는 일정 칸이 없음: ${headings.join(" | ")}` };
+    if (schedule.includes("준비 중")) return { ok: false, reason: "다가오는 일정이 아직 준비 중 표시로 남아 있음" };
+    // 이 카드는 자산 만기가 아니라 거시 경제 일정을 가리킨다 — 그 경계를 지켜야 한다.
+    const body = await page.locator(".card").filter({ hasText: "다가오는 일정" }).textContent();
+    if (/만기/.test(body)) return { ok: false, reason: "다가오는 일정이 자산 만기를 가리킨다" };
     return { ok: true };
   });
 
@@ -834,6 +838,135 @@ try {
     } finally {
       await context.close();
       await writeFile(QUOTES_PATH, JSON.stringify(QUOTES_FIXTURE), "utf8");
+    }
+  });
+
+  // ===== 5a-1e. 다가오는 일정 (거시 경제 일정) =====
+  await record("일정 카드가 상단 행 높이를 늘리지 않는다", async () => {
+    await page.goto(HOME_URL);
+    await seedSession(page, AXIS_ASSETS.slice(0, 2));
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".schedule-scroll"), { timeout: 9000 });
+    const box = await page.evaluate(() => {
+      const row = document.querySelector(".grid-top");
+      const card = document.querySelector(".schedule-scroll").closest(".card");
+      return { rowH: Math.round(row.getBoundingClientRect().height), cardNatural: Math.round(card.scrollHeight) };
+    });
+    // 카드 자연 높이가 행 높이를 넘으면 이 카드가 행을 끌어올린다.
+    return box.cardNatural <= box.rowH
+      ? { ok: true }
+      : { ok: false, reason: `일정 카드 자연 높이 ${box.cardNatural} > 행 높이 ${box.rowH}` };
+  });
+
+  await record("일정이 카드 안에서 스크롤된다 (접기 토글 없이)", async () => {
+    const box = await page.evaluate(() => {
+      const scroller = document.querySelector(".schedule-scroll");
+      return { client: scroller.clientHeight, scroll: scroller.scrollHeight, items: document.querySelectorAll(".sched-item").length };
+    });
+    if (box.items < 2) return { ok: false, reason: `일정 ${box.items}건 — 스크롤 검증 전제가 성립하지 않음` };
+    if (box.scroll <= box.client) return { ok: false, reason: `내용이 넘치지 않아 스크롤이 없음 (${box.scroll} <= ${box.client})` };
+    const details = await page.locator(".schedule-scroll details").count();
+    return details === 0 ? { ok: true } : { ok: false, reason: "목록 안에 접기 토글이 있음" };
+  });
+
+  await record("미래 일정만 가까운 순으로 나오고 D-day가 KST 기준이다", async () => {
+    const info = await page.evaluate(() => {
+      const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+      return {
+        today,
+        ddays: [...document.querySelectorAll(".sched-dday")].map((node) => node.textContent.trim()),
+        all: (macro.data.events || []).map((event) => event.datetimeKst.slice(0, 10)),
+      };
+    });
+    const past = info.all.filter((date) => date < info.today);
+    if (!past.length) return { ok: false, reason: "달력에 과거 일정이 없어 필터 검증이 성립하지 않음" };
+    const future = info.all.filter((date) => date >= info.today).length;
+    if (info.ddays.length !== future) return { ok: false, reason: `표시 ${info.ddays.length}건 / 미래 ${future}건` };
+    const nums = info.ddays.map((text) => (text === "D-DAY" ? 0 : Number(text.replace("D-", ""))));
+    const sorted = nums.every((value, index) => index === 0 || nums[index - 1] <= value);
+    return sorted ? { ok: true } : { ok: false, reason: `가까운 순이 아님: ${info.ddays.slice(0, 6).join(", ")}` };
+  });
+
+  await record("일정을 누르면 시나리오 두 개가 펼쳐진다 (컴팩트 보기)", async () => {
+    await page.locator("button[data-event]").first().click();
+    await page.waitForSelector(".sched-body", { timeout: 5000 });
+    const labels = await page.locator(".sched-body .scenario b").allTextContents();
+    if (labels.length !== 2) return { ok: false, reason: `시나리오 ${labels.length}개 (2개 기대)` };
+    const text = await page.locator(".sched-body").innerText();
+    // 어느 쪽이 될지 모른다는 것과, 투자 권유가 아니라는 것을 함께 밝혀야 한다.
+    return text.includes("어느 쪽이 될지는 알 수 없습니다") ? { ok: true } : { ok: false, reason: "예측이 아니라는 표기가 없음" };
+  });
+
+  await record("더보기가 확대 보기를 열고 거기서도 시나리오가 펼쳐진다", async () => {
+    await page.locator("[data-schedule-more]").click();
+    await page.waitForSelector(".overlay-panel", { timeout: 5000 });
+    const inOverlay = await page.locator(".overlay-body .sched-item").count();
+    if (inOverlay < 2) return { ok: false, reason: `확대 보기 항목 ${inOverlay}건` };
+    await page.locator(".overlay-body button[data-event]").nth(1).click();
+    const scenarios = await page.locator(".overlay-body .sched-body .scenario").count();
+    if (scenarios !== 2) return { ok: false, reason: `확대 보기 시나리오 ${scenarios}개` };
+    await page.locator(".overlay").click({ position: { x: 5, y: 5 } });
+    await page.waitForFunction(() => !document.querySelector(".overlay-panel"), { timeout: 5000 });
+    return { ok: true };
+  });
+
+  await record("시나리오 문구에 매매 지시·보유 자산 언급·예측이 없다", async () => {
+    const events = await page.evaluate(() => macro.data.events);
+    const forbidden = /(매수|매도|사세요|파세요|줄이세요|늘리세요|비중을 조정|리밸런싱|보유하신|귀하의|확률|가능성이 높|전망합니다|예상됩니다)/;
+    const hits = [];
+    events.forEach((event) => (event.scenarios || []).forEach((scenario) => {
+      if (forbidden.test(scenario.text) || forbidden.test(scenario.label)) hits.push(`${event.id}/${scenario.label}`);
+    }));
+    if (hits.length) return { ok: false, reason: `금지 표현: ${hits.slice(0, 3).join(", ")}` };
+    const bad = events.filter((event) => !Array.isArray(event.scenarios) || event.scenarios.length !== 2);
+    return bad.length ? { ok: false, reason: `시나리오가 2개가 아닌 일정 ${bad.length}건` } : { ok: true };
+  });
+
+  await record("FOMC 시각이 미국 날짜가 아니라 KST 다음 날 새벽으로 저장돼 있다", async () => {
+    const fomc = await page.evaluate(() => macro.data.events.filter((event) => event.org === "FOMC").slice(0, 6));
+    for (const event of fomc) {
+      const hour = Number(event.datetimeKst.slice(11, 13));
+      // 14:00 ET는 서머타임이면 03:00, 아니면 04:00 KST — 어느 쪽이든 다음 날 새벽이다.
+      if (hour !== 3 && hour !== 4) return { ok: false, reason: `${event.id} 시각 ${event.datetimeKst}` };
+      const usDate = /(\d{4}-\d{2}-\d{2})/.exec(event.note || "")?.[1];
+      if (usDate && event.datetimeKst.slice(0, 10) <= usDate) {
+        return { ok: false, reason: `${event.id}: KST 날짜(${event.datetimeKst.slice(0, 10)})가 미국 날짜(${usDate})보다 뒤가 아님` };
+      }
+    }
+    return { ok: true };
+  });
+
+  // 만료는 반드시 시끄럽게. 빈 카드나 "일정이 없습니다"로 넘어가면 안 된다.
+  await record("coverageUntil을 지나면 갱신이 필요하다고 명시한다", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    try {
+      const fresh = await context.newPage();
+      await installTestAuth(fresh);
+      await fresh.route("**/data/macro-calendar.json", (route) => route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          coverageUntil: "2020-12-31",
+          coverage: { FOMC: "2020-12-31", BOK: "2020-12-31" },
+          sources: {},
+          events: [{ id: "fomc-2020-12-16", datetimeKst: "2020-12-17T04:00:00+09:00", org: "FOMC", title: "미국 FOMC 정책금리 결정", scenarios: [{ label: "a", text: "a" }, { label: "b", text: "b" }] }],
+        }),
+      }));
+      await fresh.goto(HOME_URL);
+      await seedSession(fresh, AXIS_ASSETS.slice(0, 2));
+      await fresh.reload();
+      await fresh.waitForFunction(() => {
+        const host = document.getElementById("page");
+        return host && host.innerText.includes("다가오는 일정");
+      }, { timeout: 9000 });
+      const card = await fresh.locator(".card").filter({ hasText: "다가오는 일정" }).innerText();
+      if (!/갱신|업데이트/.test(card)) return { ok: false, reason: `갱신 필요 표기가 없음: ${card.slice(0, 160)}` };
+      if (!card.includes("2020-12-31")) return { ok: false, reason: `coverageUntil 날짜가 없음: ${card.slice(0, 160)}` };
+      if (/일정이 없습니다|예정된 일정이 없어요/.test(card)) return { ok: false, reason: "일반 문구로 대체됨" };
+      if (await fresh.locator(".schedule-scroll").count()) return { ok: false, reason: "만료 상태인데 목록이 그려짐" };
+      return { ok: true };
+    } finally {
+      await context.close();
     }
   });
 
