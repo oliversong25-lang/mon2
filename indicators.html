@@ -11,32 +11,56 @@
     href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
   <link rel="stylesheet" media="print" onload="this.media='all'"
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-  <link rel="stylesheet" href="lib/app.css?v=20260813-1">
+  <link rel="stylesheet" href="lib/app.css?v=20260814-1">
   <script src="lib/supabase-config.js?v=20260811-1"></script>
   <script src="lib/account-store.js"></script>
   <script src="lib/auth-guard.js"></script>
   <style>
-    /* 1차 묶음은 국가다 — 들어오면 나라가 먼저 보이고 그 안에 지표가 있다. */
-    .search-row { display:flex; align-items:center; gap:var(--space-3); margin-bottom:var(--space-5); }
-    .search-box { flex:1; min-width:0; min-height:2.75rem; padding:0 var(--space-4);
+    /* 1차 축은 주제다 — 들어오면 갈래가 먼저 보이고, 그 안에 지표, 그 안에 국가가 있다.
+       국가는 어느 단계에서나 거는 필터이고, 한 나라의 전체 그림을 보고 싶은 사람을 위해
+       국가 우선 피벗도 남겨 둔다. */
+    .controls { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-3); margin-bottom:var(--space-5); }
+    .search-box { flex:1; min-width:14rem; min-height:2.75rem; padding:0 var(--space-4);
       border:var(--border) solid var(--line); border-radius:var(--radius-md);
       background:var(--surface); color:var(--ink); font-size:var(--font-md); }
-    .search-box:focus { border-color:var(--brand); outline:.1875rem solid var(--brand-soft); }
+    .search-box:focus { border-color:var(--edge); outline:.125rem solid var(--action); outline-offset:.125rem; }
+    .country-select { min-height:2.75rem; padding:0 var(--space-3); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface); color:var(--ink); font-size:var(--font-sm); }
     .search-count { flex:none; color:var(--muted); font-size:var(--font-sm); }
-    .country-card { margin-bottom:var(--space-4); }
-    .country-head { display:flex; align-items:baseline; gap:var(--space-2); margin-bottom:var(--space-3); }
-    .country-head h2 { margin:0; }
-    .country-head .en { color:var(--dim); font-size:var(--font-xs); }
-    .ind-grid { display:grid; gap:var(--space-3); grid-template-columns:repeat(auto-fill,minmax(15rem,1fr)); }
-    .ind-cell { padding:var(--space-4); border:var(--border) solid var(--line); border-radius:var(--radius-md); background:var(--surface-2); }
+
+    .topic-tabs { display:flex; flex-wrap:wrap; gap:var(--space-1); margin-bottom:var(--space-4);
+      border-bottom:var(--border) solid var(--line); }
+    .topic-tab { padding:var(--space-3) var(--space-4); border:0; border-bottom:.125rem solid transparent;
+      background:transparent; color:var(--muted); font-size:var(--font-sm); font-weight:700; }
+    .topic-tab:hover { color:var(--ink); }
+    .topic-tab.on { border-bottom-color:var(--action); color:var(--ink); }
+    .topic-tab .n { margin-left:var(--space-2); color:var(--dim); font-weight:400; font-size:var(--font-xs); }
+
+    .ind-card { margin-bottom:var(--space-3); }
+    .ind-head { display:flex; width:100%; align-items:baseline; gap:var(--space-3); padding:var(--space-4);
+      border:0; border-radius:var(--radius-md); background:transparent; color:inherit; text-align:left; }
+    .ind-head:hover { background:var(--surface-2); }
+    .ind-title { flex:1; min-width:0; font-size:var(--font-md); font-weight:700; }
+    .ind-title .en { display:block; margin-top:.125rem; color:var(--dim); font-size:var(--font-xs); font-weight:400; }
+    .ind-meta { flex:none; color:var(--muted); font-size:var(--font-xs); }
+    .ind-caret { flex:none; color:var(--muted); }
+
+    .ind-grid { display:grid; gap:var(--space-3); padding:0 var(--space-4) var(--space-4);
+      grid-template-columns:repeat(auto-fill,minmax(13rem,1fr)); }
+    .ind-cell { padding:var(--space-4); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface-2); }
     .ind-name { color:var(--muted); font-size:var(--font-xs); }
-    .ind-value { margin:var(--space-2) 0 var(--space-1); font-size:var(--font-lg); font-weight:800; font-variant-numeric:tabular-nums; }
+    .ind-value { margin:var(--space-2) 0 var(--space-1); font-family:var(--font-display);
+      font-size:var(--font-lg); font-weight:600; font-variant-numeric:tabular-nums; }
     .ind-unit { color:var(--dim); font-size:var(--font-xs); }
     /* 관측 기간은 값과 반드시 함께 나간다. 3개월 전 값은 낡은 게 아니라 그 시점의 값이고,
-       기간을 안 적으면 사용자가 언제 값인지 추측해야 한다. */
-    .ind-period { display:flex; align-items:center; gap:var(--space-2); margin-top:var(--space-2); }
+       기간을 안 적으면 사용자가 언제 값인지 추측해야 한다. 주기도 함께 적는다. */
+    .ind-period { display:flex; flex-wrap:wrap; gap:var(--space-2); margin-top:var(--space-2); }
     .ind-period .pill { background:var(--surface); }
-    .empty-search { padding:var(--space-8); color:var(--muted); font-size:var(--font-md); text-align:center; }
+
+    .pivot-topic { margin-bottom:var(--space-5); }
+    .pivot-topic h3 { margin:0 0 var(--space-3); font-family:var(--font-display); font-size:var(--font-md); }
+    .empty-search { padding:var(--space-8); color:var(--muted); font-size:var(--font-md); text-align:center; line-height:1.8; }
     .sources { margin-top:var(--space-6); color:var(--dim); font-size:var(--font-xs); line-height:1.8; }
   </style>
 </head>
@@ -48,7 +72,15 @@
 <script src="lib/indicators-view.js"></script>
 <script>
 const { escapeHtml } = Format;
+
+// 보기 상태. 주제가 1차 축이고 국가는 필터다.
+let mode="topic";        // topic | country
+let activeTopic=null;    // 주제 우선 보기에서 열린 갈래
+let pivotCountry="KOR";  // 국가 우선 보기에서 보는 나라
+let filterCountry="";    // 국가 필터 (빈 값 = 전체)
+let openIndicator=null;  // 펼쳐 둔 지표
 let query="";
+let dataToken=0;      // 늦게 온 응답이 새 화면을 덮어쓰지 않게 하는 표식
 
 function navOptions(){
   const state=SessionStore.read();
@@ -60,13 +92,16 @@ function problemPanel(title,detail){
   return `<div class="card">
     <h2>${escapeHtml(title)} <span class="pill warn">확인 필요</span></h2>
     <p class="soon-body" style="margin-top:var(--space-3)">${detail}</p>
-    <div class="card-note">배치: <code>node scripts/build-indicators.mjs</code> · 산출물: data/indicators/catalog.json</div>
+    <div class="card-note">배치: <code>node scripts/build-indicators.mjs</code> · 산출물: data/indicators/index.json · latest/ · oecd/</div>
   </div>`;
 }
 
 function head(){
+  const count=Indicators.state.status==="ready"
+    ?`지표 ${Indicators.indicatorList().length}개 · ${Indicators.countryList().length}개국`
+    :"OECD 주요 지표";
   return `<div class="page-head">
-    <div><h1>경제지표</h1><div class="sub">OECD 회원국 주요 지표 · 국가별로 모아 봅니다</div></div>
+    <div><p class="eyebrow">OECD</p><h1>경제지표</h1><div class="sub">${escapeHtml(count)} · 갈래로 묶어 보고 나라로 걸러 봅니다</div></div>
   </div>`;
 }
 
@@ -74,7 +109,7 @@ function sourcesLine(){
   const stale=Indicators.staleness();
   const updated=Indicators.state.data?.updatedAt;
   return `<div class="sources">출처: ${escapeHtml(Indicators.attribution())}
-    ${updated?`<br>수집 시각 ${escapeHtml(String(updated).slice(0,10))} · 가장 최신 관측 ${escapeHtml(stale?stale.newest:"–")}`:""}</div>`;
+    ${updated?`<br>수집 시각 <span class="stamp">${escapeHtml(String(updated).slice(0,10))}</span> · 가장 최신 관측 <span class="stamp">${escapeHtml(stale?stale.newest:"–")}</span>`:""}</div>`;
 }
 
 function render(){
@@ -87,16 +122,18 @@ function render(){
   }
   if(state.status==="error"){
     Shell.mount("app","indicators",`${head()}${problemPanel("경제지표를 불러오지 못했어요",
-      `<b>data/indicators/catalog.json</b>을 읽지 못했습니다 (${escapeHtml(state.error||"원인 미상")}).<br>
+      `<b>data/indicators/index.json</b>을 읽지 못했습니다 (${escapeHtml(state.error||"원인 미상")}).<br>
        파일이 배포에 포함됐는지, 배치가 한 번이라도 성공했는지 확인하세요.`)}`,navOptions());
     return;
   }
   if(state.status==="empty"){
     Shell.mount("app","indicators",`${head()}${problemPanel("경제지표 데이터가 비어 있어요",
-      `<b>catalog.json</b>은 있지만 계열이 하나도 없습니다.<br>
+      `<b>index.json</b>은 있지만 지표가 하나도 없습니다.<br>
        배치가 실패한 채로 파일만 남았을 수 있습니다.`)}`,navOptions());
     return;
   }
+
+  if(!activeTopic)activeTopic=Indicators.topicList()[0]?.id||null;
 
   const stale=Indicators.staleness();
   const staleBanner=stale&&stale.stale
@@ -110,66 +147,196 @@ function render(){
     ?`<div class="banner">지난 수집에서 ${failures.length}건이 실패했어요 · ${escapeHtml(failures.map(f=>`${f.dataflow||f.indicator}: ${f.message}`).join(" / ").slice(0,220))}</div>`
     :"";
 
-  const view=searchView(query);
-
   Shell.mount("app","indicators",[
     head(),
     staleBanner,
     failureNote,
-    `<div class="search-row">
-      <input class="search-box" type="search" placeholder="지표명 · 국가명 검색 (한글/영문)" value="${escapeHtml(query)}" data-search aria-label="지표 검색">
-      <span class="search-count" data-search-count>${view.shown.toLocaleString("ko-KR")} / ${view.total.toLocaleString("ko-KR")}건</span>
-    </div>`,
-    `<div data-search-results>${view.body}</div>`,
+    controls(),
+    `<div data-results>${body()}</div>`,
     sourcesLine(),
   ].join(""),navOptions());
   bind();
+  ensureData();
 }
 
-// 검색할 때 입력칸까지 다시 만들면 한글 IME가 조합 중인 글자를 잃는다.
-// 검색 결과와 건수만 교체해 입력 DOM·포커스·커서를 그대로 보존한다.
-function searchView(value){
-  const groups=Indicators.byCountry(value);
-  const total=Indicators.all().length;
-  const shown=groups.reduce((sum,group)=>sum+group.rows.length,0);
-  const body=groups.length
-    ?groups.map(group=>`<div class="card country-card">
-        <div class="country-head"><h2>${escapeHtml(group.countryKo)}</h2><span class="en">${escapeHtml(group.countryEn)}</span></div>
-        <div class="ind-grid">${group.rows.map(cell).join("")}</div>
-      </div>`).join("")
-    :`<div class="card"><p class="empty-search">"${escapeHtml(value)}"에 해당하는 지표가 없어요.<br>
-        지표명이나 국가명을 한글·영문 어느 쪽으로 입력해도 찾을 수 있습니다.</p></div>`;
-  return {body,total,shown};
-}
-
-function updateSearchResults(){
-  const results=document.querySelector("[data-search-results]");
-  const count=document.querySelector("[data-search-count]");
-  if(!results||!count)return;
-  const view=searchView(query);
-  results.innerHTML=view.body;
-  count.textContent=`${view.shown.toLocaleString("ko-KR")} / ${view.total.toLocaleString("ko-KR")}건`;
-}
-
-function cell(row){
-  return `<div class="ind-cell">
-    <div class="ind-name">${escapeHtml(row.indicatorKo)}</div>
-    <div class="ind-value">${escapeHtml(Indicators.formatValue(row))}</div>
-    <div class="ind-unit">${escapeHtml(row.unitKo)}</div>
-    <div class="ind-period">
-      <span class="pill">${escapeHtml(row.periodKo)} 기준</span>
-      <span class="pill">${escapeHtml(row.freqKo)}</span>
+function controls(){
+  const countries=Indicators.countryList();
+  const options=[`<option value="">국가 전체</option>`].concat(
+    countries.map(c=>`<option value="${escapeHtml(c.code)}"${filterCountry===c.code?" selected":""}>${escapeHtml(c.ko)}</option>`)
+  ).join("");
+  const pivotOptions=countries.map(c=>`<option value="${escapeHtml(c.code)}"${pivotCountry===c.code?" selected":""}>${escapeHtml(c.ko)}</option>`).join("");
+  return `<div class="controls">
+    <input class="search-box" type="search" placeholder="지표명 · 국가명 검색 (한글/영문)" value="${escapeHtml(query)}" data-search aria-label="지표 검색">
+    <div class="seg" role="group" aria-label="보기 방식">
+      <button type="button" class="seg-btn${mode==="topic"?" on":""}" data-mode="topic" aria-pressed="${mode==="topic"}">갈래별</button>
+      <button type="button" class="seg-btn${mode==="country"?" on":""}" data-mode="country" aria-pressed="${mode==="country"}">국가별</button>
     </div>
+    ${mode==="topic"
+      ?`<select class="country-select" data-filter-country aria-label="국가 필터">${options}</select>`
+      :`<select class="country-select" data-pivot-country aria-label="볼 국가">${pivotOptions}</select>`}
+    <span class="search-count" data-count></span>
   </div>`;
+}
+
+// 검색어가 있으면 검색 결과가 브라우즈 트리를 대신한다.
+function body(){
+  if(query.trim())return searchBody();
+  return mode==="topic"?topicBody():pivotBody();
+}
+
+function topicBody(){
+  const topics=Indicators.byTopic(filterCountry||null);
+  if(!topics.length){
+    return `<div class="card"><p class="empty-search">${escapeHtml(countryName(filterCountry))}에 해당하는 지표가 없어요.<br>
+      국가 필터를 <b>국가 전체</b>로 되돌리면 다시 보입니다.</p></div>`;
+  }
+  const tabs=`<div class="topic-tabs">${topics.map(topic=>
+    `<button type="button" class="topic-tab${activeTopic===topic.id?" on":""}" data-topic="${escapeHtml(topic.id)}" aria-pressed="${activeTopic===topic.id}">
+      ${escapeHtml(topic.nameKo)}<span class="n">${topic.indicators.length}</span></button>`).join("")}</div>`;
+  const current=topics.find(topic=>topic.id===activeTopic)||topics[0];
+  const list=current.indicators.map(indicatorCard).join("");
+  return tabs+list;
+}
+
+function indicatorCard(indicator){
+  const open=openIndicator===indicator.id;
+  return `<div class="card ind-card" style="padding:0">
+    <button type="button" class="ind-head" data-indicator="${escapeHtml(indicator.id)}" aria-expanded="${open}">
+      <span class="ind-title">${escapeHtml(indicator.nameKo)}<span class="en">${escapeHtml(indicator.nameEn)}</span></span>
+      <span class="ind-meta">${escapeHtml(indicator.freqKo)} · ${indicator.countryCount}개국</span>
+      <span class="ind-caret">${open?"▾":"▸"}</span>
+    </button>
+    ${open?`<div class="ind-grid">${indicator.rows.map(row=>cell(row)).join("")}</div>`:""}
+  </div>`;
+}
+
+// 국가 우선 피벗. 한 나라의 전체 그림을 갈래 순서대로 본다.
+function pivotBody(){
+  const groups=Indicators.byCountry(pivotCountry);
+  if(!groups.length){
+    return `<div class="card"><p class="empty-search">${escapeHtml(countryName(pivotCountry))}에 수집된 지표가 없어요.</p></div>`;
+  }
+  return groups.map(group=>`<div class="pivot-topic">
+    <h3>${escapeHtml(group.nameKo)} <span class="pill">${group.rows.length}</span></h3>
+    <div class="card" style="padding:var(--space-4)"><div class="ind-grid" style="padding:0">${group.rows.map(row=>cell(row,true)).join("")}</div></div>
+  </div>`).join("");
+}
+
+function searchBody(){
+  let rows=Indicators.search(query);
+  if(filterCountry)rows=rows.filter(row=>row.country===filterCountry);
+  if(!rows.length){
+    return `<div class="card"><p class="empty-search">"${escapeHtml(query)}"에 해당하는 지표가 없어요.<br>
+      지표명이나 국가명을 한글·영문 어느 쪽으로 입력해도 찾을 수 있습니다.</p></div>`;
+  }
+  // 검색은 전체 카탈로그를 훑는다 — 갈래 화면에 안 열어 둔 지표도 여기서 나온다.
+  return `<div class="card" style="padding:var(--space-4)">
+    <div class="ind-grid" style="padding:0">${rows.slice(0,240).map(row=>cell(row,true)).join("")}</div>
+    ${rows.length>240?`<div class="card-note">앞의 240건만 보여드려요 · 검색어를 좁히면 전부 보입니다 (총 ${rows.length.toLocaleString("ko-KR")}건)</div>`:""}
+  </div>`;
+}
+
+function cell(row,withCountry){
+  // 값이 아직 안 온 상태와 값이 0인 상태는 다르다. 자리표시로 구분한다.
+  const value=row.loaded
+    ?`<div class="ind-value">${escapeHtml(Indicators.formatValue(row))}</div>`
+    :`<div class="ind-value"><span class="skel" style="width:60%"></span></div>`;
+  const period=row.loaded
+    ?`<span class="pill">${escapeHtml(row.periodKo)} 기준</span><span class="pill">${escapeHtml(row.freqKo)}</span>`
+    :`<span class="pill">${escapeHtml(row.freqKo)}</span>`;
+  const name=withCountry
+    ?`${escapeHtml(row.countryKo)} · ${escapeHtml(row.indicatorKo)}`
+    :escapeHtml(row.countryKo);
+  return `<div class="ind-cell">
+    <div class="ind-name">${name}</div>
+    ${value}
+    <div class="ind-unit">${escapeHtml(row.unitKo)}</div>
+    <div class="ind-period">${period}</div>
+  </div>`;
+}
+
+function countryName(code){
+  if(!code)return "선택한 국가";
+  return Indicators.countryMeta(code).ko;
+}
+
+function countLabel(){
+  if(query.trim()){
+    let rows=Indicators.search(query);
+    if(filterCountry)rows=rows.filter(row=>row.country===filterCountry);
+    return `${rows.length.toLocaleString("ko-KR")}건`;
+  }
+  if(mode==="country")return `${Indicators.byCountry(pivotCountry).reduce((sum,g)=>sum+g.rows.length,0)}건`;
+  const topics=Indicators.byTopic(filterCountry||null);
+  const current=topics.find(topic=>topic.id===activeTopic)||topics[0];
+  return current?`지표 ${current.indicators.length}개`:"";
+}
+
+// 지금 화면에 필요한 주제 파일만 받는다. index.json은 이름만 갖고 있어서
+// 값을 그리려면 그 주제의 latest 파일이 있어야 한다.
+function ensureData(){
+  let need=[];
+  if(query.trim())need=Indicators.topicsOf(Indicators.search(query));
+  else if(mode==="country")need=Indicators.byCountry(pivotCountry).map(group=>group.id);
+  else if(activeTopic)need=[activeTopic];
+  const missing=need.filter(id=>{
+    const cached=Indicators.topicCache[id];
+    return !cached||cached.status!=="ready";
+  });
+  if(!missing.length){updateCount();return;}
+  // 늦게 도착한 응답이 더 새 화면을 덮어쓰면 안 된다. 검색어를 지운 직후 앞선 검색의
+  // 주제 파일이 도착해 검색 결과가 다시 그려지는 일이 실제로 있었다.
+  const token=++dataToken;
+  Indicators.loadTopics(missing).then(()=>{ if(token===dataToken)updateResults(); });
+}
+
+// 결과만 교체한다. 입력칸까지 다시 만들면 한글 IME가 조합 중인 글자를 잃는다.
+function updateResults(){
+  const host=document.querySelector("[data-results]");
+  if(!host)return;
+  host.innerHTML=body();
+  bindResults();
+  updateCount();
+}
+
+function updateCount(){
+  const node=document.querySelector("[data-count]");
+  if(node)node.textContent=countLabel();
+}
+
+function bindResults(){
+  document.querySelectorAll("[data-topic]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      activeTopic=button.dataset.topic;openIndicator=null;
+      updateResults();ensureData();
+    });
+  });
+  document.querySelectorAll("[data-indicator]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      openIndicator=openIndicator===button.dataset.indicator?null:button.dataset.indicator;
+      updateResults();
+    });
+  });
 }
 
 function bind(){
   const box=document.querySelector("[data-search]");
-  if(!box)return;
-  box.addEventListener("input",event=>{
-    query=event.target.value;
-    updateSearchResults();
+  if(box){
+    box.addEventListener("input",event=>{
+      query=event.target.value;
+      updateResults();ensureData();
+    });
+  }
+  document.querySelectorAll("[data-mode]").forEach(button=>{
+    button.addEventListener("click",()=>{mode=button.dataset.mode;openIndicator=null;render();});
   });
+  document.querySelector("[data-filter-country]")?.addEventListener("change",event=>{
+    filterCountry=event.target.value;updateResults();ensureData();
+  });
+  document.querySelector("[data-pivot-country]")?.addEventListener("change",event=>{
+    pivotCountry=event.target.value;updateResults();ensureData();
+  });
+  bindResults();
 }
 
 render();

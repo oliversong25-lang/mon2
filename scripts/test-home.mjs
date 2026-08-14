@@ -1220,11 +1220,12 @@ try {
   await record("더보기가 경제지표 탭으로 가고, 한국·미국이 같은 계열에서 값을 받는다", async () => {
     await page.locator(".card").filter({ hasText: "주요 경제지표" }).locator("a.btn").click();
     await page.waitForURL(/indicators\.html/, { timeout: 8000 });
-    await page.waitForSelector(".country-card", { timeout: 12000 });
-    const countries = await page.locator(".country-card").count();
-    if (countries < 2) return { ok: false, reason: `국가 카드 ${countries}개` };
+    await page.waitForSelector(".topic-tab", { timeout: 12000 });
+    const tabs = await page.locator(".topic-tab").count();
+    if (tabs < 5) return { ok: false, reason: `갈래 탭 ${tabs}개 (5개 이상 기대)` };
     // 이 출처를 고른 이유가 국가 간 비교 가능성이다 — 둘이 같은 계열에서 나와야 한다.
-    const both = await page.evaluate(() => {
+    const both = await page.evaluate(async () => {
+      await Indicators.loadTopic("cycle");
       const kor = Indicators.find("cli", "KOR");
       const usa = Indicators.find("cli", "USA");
       return { kor: kor && kor.value, usa: usa && usa.value };
@@ -1239,10 +1240,29 @@ try {
       if (!hits) return { ok: false, reason: `"${needle}" 검색 결과 0건` };
     }
     await page.locator("[data-search]").fill("Korea");
-    await page.waitForFunction(() => document.querySelectorAll(".country-card").length === 1, { timeout: 5000 });
-    const head = await page.locator(".country-head").first().innerText();
+    await page.waitForFunction(() => document.querySelectorAll(".ind-cell").length > 0, { timeout: 8000 });
+    const names = await page.evaluate(() => [...document.querySelectorAll(".ind-cell .ind-name")].map((n) => n.textContent));
     await page.locator("[data-search]").fill("");
-    return /대한민국/.test(head) ? { ok: true } : { ok: false, reason: `필터 결과: ${head}` };
+    return names.length && names.every((name) => name.includes("대한민국"))
+      ? { ok: true } : { ok: false, reason: `한국 아닌 결과 섞임: ${[...new Set(names)].slice(0, 3).join(" / ")}` };
+  });
+
+  // 3.4: 검색은 전체 카탈로그를 훑는다. 기본 브라우즈 트리는 갈래마다 지표를 접어 두므로,
+  // 화면에 열려 있지 않은 지표가 검색으로 나오는지가 이 검사의 요점이다.
+  await record("기본 화면에 열려 있지 않은 지표도 검색으로 찾힌다", async () => {
+    const probe = await page.evaluate(() => {
+      const visible = [...document.querySelectorAll(".ind-cell .ind-name")].map((n) => n.textContent).join(" ");
+      const target = Indicators.indicatorList().find((entry) => entry.nameKo.includes("실질실효환율"));
+      return { target: target ? target.id : null, shown: visible.includes("실질실효환율") };
+    });
+    if (!probe.target) return { ok: false, reason: "실질실효환율 지표가 카탈로그에 없음" };
+    if (probe.shown) return { ok: false, reason: "이미 화면에 보이는 지표라 검증이 성립하지 않음" };
+    await page.locator("[data-search]").fill("실질실효환율");
+    await page.waitForFunction(() => document.querySelectorAll(".ind-cell").length > 0, { timeout: 8000 });
+    const found = await page.evaluate(() => [...document.querySelectorAll(".ind-cell .ind-name")]
+      .some((n) => n.textContent.includes("실질실효환율")));
+    await page.locator("[data-search]").fill("");
+    return found ? { ok: true } : { ok: false, reason: "검색 결과에 없음" };
   });
 
   await record("경제지표 검색 중 한글 IME 조합과 입력 DOM이 유지된다", async () => {
@@ -1260,16 +1280,51 @@ try {
       return {
         value: current.value,
         sameNode: current === box && current.dataset.imeProbe === "same-node",
-        countries: [...document.querySelectorAll(".country-head h2")].map(node => node.textContent.trim()),
+        names: [...document.querySelectorAll(".ind-cell .ind-name")].map((node) => node.textContent.trim()).slice(0, 3),
       };
     });
     await page.locator("[data-search]").fill("");
-    return result.value === "일본" && result.sameNode && result.countries.includes("일본")
+    return result.value === "일본" && result.sameNode && result.names.some((name) => name.includes("일본"))
       ? { ok: true }
       : { ok: false, reason: JSON.stringify(result) };
   });
 
+  // 3.4: 갈래 우선과 국가 우선이 같은 계열에 닿아야 한다. 두 경로에서 같은 값이 나오는지 본다.
+  await record("갈래 우선과 국가 우선이 같은 값에 닿는다", async () => {
+    await page.locator(".topic-tab").filter({ hasText: "경기" }).click();
+    // 갈래를 바꾸면 주제 파일을 새로 받아 다시 그린다. 그리기가 끝난 뒤에 눌러야
+    // 클릭이 옛 DOM에 떨어지지 않는다.
+    await page.waitForSelector("[data-indicator=cli]", { timeout: 8000 });
+    await page.locator("[data-indicator=cli]").click();
+    await page.waitForFunction(() => {
+      const cells = [...document.querySelectorAll(".ind-grid .ind-cell")];
+      return cells.length > 0 && cells.some((node) => !node.querySelector(".skel"));
+    }, { timeout: 10000 });
+    const viaTopic = await page.evaluate(() => {
+      const cell = [...document.querySelectorAll(".ind-grid .ind-cell")]
+        .find((node) => node.querySelector(".ind-name").textContent.trim() === "대한민국");
+      return cell ? cell.querySelector(".ind-value").textContent.trim() : null;
+    });
+    if (!viaTopic) {
+      const names = await page.evaluate(() => [...document.querySelectorAll(".ind-grid .ind-cell .ind-name")].map((n) => n.textContent.trim()).slice(0, 6));
+      return { ok: false, reason: `갈래 보기에서 대한민국 셀을 찾지 못함 · 보이는 이름: ${names.join(", ")}` };
+    }
+
+    await page.locator("[data-mode=country]").click();
+    await page.waitForFunction(() => document.querySelectorAll(".pivot-topic").length > 0, { timeout: 8000 });
+    const viaCountry = await page.evaluate(() => {
+      const cell = [...document.querySelectorAll(".ind-cell")]
+        .find((node) => node.querySelector(".ind-name").textContent.includes("경기선행지수"));
+      return cell ? cell.querySelector(".ind-value").textContent.trim() : null;
+    });
+    await page.locator("[data-mode=topic]").click();
+    return viaTopic === viaCountry
+      ? { ok: true } : { ok: false, reason: `갈래 ${viaTopic} ≠ 국가 ${viaCountry}` };
+  });
+
   await record("모든 값에 관측 기간과 주기가 함께 표시된다", async () => {
+    await page.locator(".topic-tab").first().click();
+    await page.locator(".ind-head").first().click();
     await page.waitForSelector(".ind-cell", { timeout: 8000 });
     const bad = await page.evaluate(() => [...document.querySelectorAll(".ind-cell")]
       .filter((cell) => !/\d{4}년/.test(cell.innerText) || !/(월간|분기|연간)/.test(cell.innerText)).length);
@@ -1281,17 +1336,17 @@ try {
     return /OECD/.test(text) ? { ok: true } : { ok: false, reason: `출처 표기: ${text.slice(0, 120)}` };
   });
 
-  // 3.8: 없거나 낡으면 빈 화면이 아니라 무엇이 없는지 말한다.
+  // 3.7: 없거나 낡으면 빈 화면이 아니라 무엇이 없는지 말한다.
   await record("카탈로그가 없으면 무엇이 없는지 명시한다", async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     try {
       const fresh = await context.newPage();
       await installTestAuth(fresh);
-      await fresh.route("**/data/indicators/catalog.json", (route) => route.fulfill({ status: 404, body: "" }));
+      await fresh.route("**/data/indicators/index.json", (route) => route.fulfill({ status: 404, body: "" }));
       await fresh.goto(`http://127.0.0.1:${PORT}/indicators.html`);
       await fresh.waitForSelector(".card", { timeout: 9000 });
       const text = await fresh.locator("#page").innerText();
-      if (!/catalog\.json/.test(text)) return { ok: false, reason: `무엇이 없는지 밝히지 않음: ${text.slice(0, 140)}` };
+      if (!/index\.json/.test(text)) return { ok: false, reason: `무엇이 없는지 밝히지 않음: ${text.slice(0, 140)}` };
       if (!/불러오지 못했|확인 필요/.test(text)) return { ok: false, reason: "실패 표기가 없음" };
       return { ok: true };
     } finally { await context.close(); }
@@ -1302,15 +1357,16 @@ try {
     try {
       const fresh = await context.newPage();
       await installTestAuth(fresh);
-      await fresh.route("**/data/indicators/catalog.json", (route) => route.fulfill({
+      await fresh.route("**/data/indicators/index.json", (route) => route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
           newestPeriod: "2019-01", updatedAt: "2019-02-01T00:00:00Z", attribution: "OECD",
           countries: { KOR: { ko: "대한민국", en: "Korea" } },
-          indicators: [{ id: "cli", nameKo: "경기선행지수", nameEn: "CLI", unitKo: "지수", freq: "M" }],
+          topics: [{ id: "cycle", nameKo: "경기", nameEn: "Cycle", file: "latest/cycle.json", count: 1 }],
+          indicators: [{ id: "cli", source: "OECD", topic: "cycle", nameKo: "경기선행지수", nameEn: "CLI", unitKo: "지수", freq: "M", headline: true, file: "oecd/DF_CLI.json", countries: ["KOR"] }],
+          headlineSeries: { "oecd:cli:KOR": { indicator: "cli", country: "KOR", period: "2019-01", value: 100 } },
           failures: [],
-          series: [{ id: "oecd:cli:KOR", indicator: "cli", country: "KOR", freq: "M", period: "2019-01", value: 100 }],
         }),
       }));
       await fresh.goto(HOME_URL);

@@ -37,13 +37,33 @@ export function buildKey(refAreas, keyLength) {
   return `${refAreas.join("+")}${".".repeat(Math.max(keyLength - 1, 0))}`;
 }
 
+// OECD는 분당 호출 한도가 있고 넘기면 429를 돌려준다. 지표를 7개에서 47개로 늘리며
+// dataflow 호출이 4번에서 13번이 됐는데, 몰아치니 다섯 번째부터 전부 429가 났다
+// (실측: 13개 중 8개 실패). 재시도로 뚫는 대신 스스로 간격을 벌린다 —
+// DART에서 같은 문제를 같은 방법으로 풀었다.
+//
+// 회귀 테스트는 mock fetch로 도므로 기다릴 이유가 없다. 환경변수로 0을 줄 수 있게 열어
+// 둔다 — 안 그러면 dataflow 13개에 스로틀·백오프가 그대로 걸려 테스트가 5분을 넘긴다.
+const MIN_GAP_MS = Number(process.env.OECD_MIN_GAP_MS ?? 8000);
+const RETRY_BASE_MS = Number(process.env.OECD_RETRY_BASE_MS ?? 15000);
+let lastCallAt = 0;
+async function throttle() {
+  if (!MIN_GAP_MS) return;
+  const wait = lastCallAt + MIN_GAP_MS - Date.now();
+  if (wait > 0) await new Promise((done) => setTimeout(done, wait));
+  lastCallAt = Date.now();
+}
+
 export async function fetchDataflow(label, dataflow, { refAreas, keyLength, startPeriod }) {
   const key = buildKey(refAreas, keyLength);
   const url = new URL(`${BASE}/${dataflow}/${key}`);
   url.searchParams.set("dimensionAtObservation", "AllDimensions");
   if (startPeriod) url.searchParams.set("startPeriod", startPeriod);
 
-  const response = await fetchWithRetry(label, url, { headers: HEADERS });
+  await throttle();
+  // 429는 "지금 너무 빠르다"는 뜻이라 0.8초 백오프로는 풀리지 않는다. 실측으로 20초쯤
+  // 물러서면 통과했다. 5xx·네트워크 오류와 같은 정책을 쓰면 여기서 통째로 실패한다.
+  const response = await fetchWithRetry(label, url, { headers: HEADERS }, { attempts: 4, baseDelayMs: RETRY_BASE_MS });
   const json = await response.json();
   if (json.errors && json.errors.length) {
     throw new OecdError(`[${label}] SDMX 오류: ${JSON.stringify(json.errors).slice(0, 200)}`);

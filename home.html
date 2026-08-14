@@ -789,18 +789,21 @@ function newsCard(){
 
 // 핵심 지표 몇 개만 올린다. 카드 높이가 상단·중간 행을 끌어올리면 안 되므로
 // 의도적으로 적게 두고, 나머지는 더보기로 경제지표 탭에 넘긴다.
+// 카드 높이를 지켜야 하므로 의도적으로 적게 둔다. 어느 지표를 올릴지는 카탈로그의
+// headline 플래그가 정하고(index.json의 headlineSeries에 값까지 실려 온다),
+// 여기서는 그중 네 줄과 나라를 고른다. 주제 파일을 받지 않아도 그려진다.
 const HOME_INDICATORS=[
   {indicator:"cli",country:"KOR"},
   {indicator:"cpi",country:"KOR"},
   {indicator:"unemployment",country:"KOR"},
-  {indicator:"cli",country:"USA"},
+  {indicator:"long-rate",country:"KOR"},
 ];
 
 function indicatorCard(){
   const state=Indicators.state;
   const head=(badge)=>`<div class="chart-head" style="margin-bottom:var(--space-3)">
       <div><h2>주요 경제지표${badge?` <span class="pill warn">${badge}</span>`:""}</h2>
-        <div class="card-sub" style="margin:0">OECD · 국가별 주요 지표</div></div>
+        <div class="card-sub" style="margin:0">OECD · 갈래별 주요 지표</div></div>
       <div class="toolbar"><a class="btn" href="${INDICATORS_URL}">더보기</a></div>
     </div>`;
 
@@ -811,8 +814,8 @@ function indicatorCard(){
   // 없거나 비었으면 0이나 빈 칸으로 때우지 않고 무엇이 없는지 말한다.
   if(state.status==="error"||state.status==="empty"){
     const detail=state.status==="error"
-      ?`data/indicators/catalog.json을 읽지 못했어요 (${escapeHtml(state.error||"원인 미상")}).`
-      :"catalog.json은 있지만 계열이 하나도 없어요.";
+      ?`data/indicators/index.json을 읽지 못했어요 (${escapeHtml(state.error||"원인 미상")}).`
+      :"index.json은 있지만 지표가 하나도 없어요.";
     return `<div class="card">${head("확인 필요")}<p class="soon-body">${detail}<br>지표 배치가 한 번이라도 성공했는지 확인하세요.</p></div>`;
   }
 

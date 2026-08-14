@@ -8,12 +8,20 @@ import { readFile, writeFile, rm, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import { decodeObservations, refAreaNames } from "./lib/oecd.mjs";
-import { INDICATORS, DATAFLOWS, matchesSelector } from "./lib/indicators.mjs";
+import { INDICATORS, DATAFLOWS, matchesSelector, TOPICS } from "./lib/indicators.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = resolve(ROOT, "data", "indicators");
-const CATALOG = resolve(OUT_DIR, "catalog.json");
+const INDEX = resolve(OUT_DIR, "index.json");
+const LATEST_DIR = resolve(OUT_DIR, "latest");
+
+// mock fetch로 도는 테스트가 실제 스로틀(8초)과 429 백오프(15초)를 기다릴
+// 이유가 없다. dataflow가 13개라 그대로 두면 한 번 도는 데 5분을 넘긴다.
+process.env.OECD_MIN_GAP_MS = "0";
+process.env.OECD_RETRY_BASE_MS = "0";
+
+// oecd.mjs는 import 시점에 스로틀 값을 읽으므로 env를 세운 뒤에 부른다.
+const { decodeObservations, refAreaNames } = await import("./lib/oecd.mjs");
 
 const results = [];
 const record = (label, ok, detail) => {
@@ -104,25 +112,27 @@ try {
 
 // --- 4. 실패 격리: 한 dataflow가 죽어도 나머지는 갱신된다 ---
 // 실제 배치를 mock fetch로 돌린다. DF_CLI만 살리고 나머지는 네트워크 오류로 만든다.
-const originalCatalog = existsSync(CATALOG) ? await readFile(CATALOG, "utf8") : null;
+const originalIndex = existsSync(INDEX) ? await readFile(INDEX, "utf8") : null;
 const originalFiles = new Map();
 for (const key of Object.keys(DATAFLOWS)) {
   const path = resolve(OUT_DIR, "oecd", `${DATAFLOWS[key].file}.json`);
   if (existsSync(path)) originalFiles.set(path, await readFile(path, "utf8"));
 }
+for (const topic of TOPICS) {
+  const path = resolve(LATEST_DIR, `${topic.id}.json`);
+  if (existsSync(path)) originalFiles.set(path, await readFile(path, "utf8"));
+}
 
 function restore() {
   const jobs = [];
-  jobs.push(originalCatalog === null ? rm(CATALOG, { force: true }) : writeFile(CATALOG, originalCatalog, "utf8"));
+  jobs.push(originalIndex === null ? rm(INDEX, { force: true }) : writeFile(INDEX, originalIndex, "utf8"));
   for (const [path, text] of originalFiles) jobs.push(writeFile(path, text, "utf8"));
   return Promise.all(jobs);
 }
-process.on("exit", () => {
-  // 동기 복원이 필요하지만 fs/promises라 여기서는 최선만 한다 — 정상 경로는 아래 finally다.
-});
 
 try {
   await mkdir(resolve(OUT_DIR, "oecd"), { recursive: true });
+  await mkdir(LATEST_DIR, { recursive: true });
   const logs = [];
   const originalError = console.error;
   const originalWarn = console.warn;
@@ -145,9 +155,9 @@ try {
   process.exitCode = undefined;
   const before = globalThis.__indicatorsBatchRuns || 0;
   await import(`./build-indicators.mjs?t=${Date.now()}`);
-  // 실패 경로는 재시도 때문에 몇 초 걸린다. 실행이 끝났다는 신호를 기다리지 않으면
-  // 아래 복원이 배치보다 먼저 돌아 산출물이 픽스처인 채로 남는다.
-  const deadline = Date.now() + 30000;
+  // 실행이 끝났다는 신호를 기다리지 않으면 아래 복원이 배치보다 먼저 돌아
+  // 산출물이 픽스처인 채로 남는다(실제로 그렇게 당했다).
+  const deadline = Date.now() + 60000;
   while ((globalThis.__indicatorsBatchRuns || 0) === before && Date.now() < deadline) {
     await new Promise((done) => setTimeout(done, 50));
   }
@@ -160,18 +170,77 @@ try {
 
   const joined = logs.join(" | ");
   record("한 계열이 실패해도 배치가 죽지 않는다", exitCode !== 1, `exitCode=${exitCode}`);
-  record("실패한 엔드포인트 이름이 로그에 남는다", /DF_PRICES_ALL|DF_INDSERV|DF_IALFS_UNE_M/.test(joined) && /OECD/.test(joined), joined.slice(0, 200));
+  record("실패한 엔드포인트 이름이 로그에 남는다",
+    /DF_PRICES_ALL|DF_FINMARK|DF_BOP/.test(joined) && /OECD\.SDD/.test(joined), joined.slice(0, 240));
 
-  const written = JSON.parse(await readFile(CATALOG, "utf8"));
-  const cliSeries = written.series.filter((entry) => entry.indicator === "cli");
+  const written = JSON.parse(await readFile(INDEX, "utf8"));
+  const cycle = JSON.parse(await readFile(resolve(LATEST_DIR, "cycle.json"), "utf8"));
+  const cliSeries = Object.values(cycle.series).filter((entry) => entry.indicator === "cli");
   record("살아남은 계열은 정상 기록된다 (CLI)", cliSeries.length === 2, `${cliSeries.length}건`);
-  record("실패가 catalog.failures에 남는다", written.failures.length > 0, JSON.stringify(written.failures.slice(0, 2)));
-  record("실패한 지표는 계열에 포함되지 않는다", !written.series.some((entry) => entry.indicator === "cpi"), "cpi가 남아 있음");
-  record("관측 기간이 값과 함께 저장된다", cliSeries.every((entry) => /^\d{4}-\d{2}$/.test(entry.period)), JSON.stringify(cliSeries.map((entry) => entry.period)));
+  record("실패가 index.failures에 남는다", written.failures.length > 0, JSON.stringify(written.failures.slice(0, 2)));
+  record("실패한 지표는 목록에서 빠진다", !written.indicators.some((entry) => entry.id === "cpi"), "cpi가 남아 있음");
+  record("관측 기간이 값과 함께 저장된다",
+    cliSeries.every((entry) => /^\d{4}-\d{2}$/.test(entry.period)), JSON.stringify(cliSeries.map((entry) => entry.period)));
+
+  // 3.2: 카탈로그는 인덱스와 상세로 나뉜다. 인덱스는 매 화면 로드라 가벼워야 한다.
+  const indexBytes = Buffer.byteLength(JSON.stringify(written), "utf8");
+  record("index.json이 화면마다 받아도 될 만큼 가볍다 (<64KB)", indexBytes < 64 * 1024, `${(indexBytes / 1024).toFixed(1)}KB`);
+  record("인덱스에는 값이 아니라 이름과 존재 여부만 담긴다",
+    written.indicators.every((entry) => Array.isArray(entry.countries) && entry.file),
+    JSON.stringify(written.indicators[0] || null).slice(0, 160));
 } catch (error) {
   record("실패 격리 경로", false, error.message);
 } finally {
   await restore();
+}
+
+// --- 5. 실제 산출물의 모양 (3.9 검증) ---
+// 위 실패 격리는 복원까지 끝났으므로 여기서는 커밋된 진짜 산출물을 본다.
+try {
+  const real = JSON.parse(await readFile(INDEX, "utf8"));
+  const topicIds = real.topics.map((topic) => topic.id);
+
+  record("주제가 지표의 1차 축이다", topicIds.length >= 5 && real.indicators.every((entry) => topicIds.includes(entry.topic)),
+    `주제 ${topicIds.join(",")}`);
+
+  // 3.4: 검색은 기본 브라우즈 트리에 없는 지표도 찾아야 한다. 화면은 갈래마다
+  // 지표를 접어 두므로, 첫 갈래의 첫 지표가 아닌 것을 하나 골라 이름으로 찾는다.
+  const hidden = real.indicators.filter((entry) => entry.topic !== real.topics[0].id && !entry.headline);
+  record("기본 화면에 안 열리는 지표가 카탈로그에 있다", hidden.length > 0, `${hidden.length}개`);
+  const target = hidden.find((entry) => entry.nameKo.includes("환율")) || hidden[0];
+  const needle = target.nameKo.slice(0, 3);
+  const matched = real.indicators.filter((entry) => entry.nameKo.includes(needle));
+  record(`검색어 "${needle}"로 기본 트리 밖의 지표가 찾힌다`, matched.some((entry) => entry.id === target.id),
+    matched.map((entry) => entry.id).join(",") || "0건");
+
+  // 3.4: 갈래 우선과 국가 우선이 같은 계열에 닿아야 한다.
+  const sample = real.indicators.find((entry) => entry.countries.includes("KOR"));
+  const viaTopic = real.indicators.filter((entry) => entry.topic === sample.topic && entry.countries.includes("KOR")).map((entry) => entry.id);
+  const viaCountry = real.indicators.filter((entry) => entry.countries.includes("KOR") && entry.topic === sample.topic).map((entry) => entry.id);
+  record("갈래 우선과 국가 우선이 같은 계열에 닿는다",
+    viaTopic.length > 0 && viaTopic.join() === viaCountry.join(), `${viaTopic.length}개 / ${viaCountry.length}개`);
+
+  // 3.4: 모든 값이 관측 기간과 주기를 갖는다.
+  const latest = JSON.parse(await readFile(resolve(LATEST_DIR, `${real.topics[0].id}.json`), "utf8"));
+  const entries = Object.values(latest.series);
+  record("모든 값이 관측 기간을 갖는다",
+    entries.length > 0 && entries.every((entry) => /^\d{4}(-\d{2}|-Q[1-4])?$/.test(String(entry.period))),
+    `${entries.length}건 중 ${entries.filter((entry) => !entry.period).length}건 누락`);
+  record("모든 지표가 주기를 갖는다",
+    real.indicators.every((entry) => ["M", "Q", "A"].includes(entry.freq)),
+    real.indicators.filter((entry) => !["M", "Q", "A"].includes(entry.freq)).map((entry) => entry.id).join(","));
+
+  // 3.5: 홈 카드가 주제 파일 없이 그려지려면 헤드라인 값이 인덱스에 있어야 한다.
+  record("헤드라인 값이 인덱스에 실려 있다",
+    Object.keys(real.headlineSeries || {}).length > 0 && real.indicators.some((entry) => entry.headline),
+    `${Object.keys(real.headlineSeries || {}).length}건`);
+
+  // 3.2: 한글 이름은 지어내지 않는다 — 있는 것만 담고, 영문명도 함께 남긴다.
+  record("국가는 한글·영문 이름을 함께 갖는다",
+    Object.values(real.countries).every((country) => country.ko && country.en),
+    JSON.stringify(Object.entries(real.countries)[0]));
+} catch (error) {
+  record("실제 산출물 검증", false, error.message);
 }
 
 const failed = results.filter((result) => !result.ok);
