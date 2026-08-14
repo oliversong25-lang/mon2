@@ -97,6 +97,27 @@
        한눈에 보이지 않는다. */
     .schedule-scroll { max-height:6.75rem; overflow-y:auto; overscroll-behavior:contain; }
     .sched-item + .sched-item { margin-top:var(--space-1); }
+
+    /* 보기 방식·필터 전환. 카드 안에서는 한 줄을 넘기면 안 되므로 아주 작게 둔다. */
+    .seg { display:inline-flex; overflow:hidden; border:var(--border) solid var(--line); border-radius:var(--radius-round); }
+    .seg-btn { padding:.125rem var(--space-2); border:0; background:transparent; color:var(--muted);
+      font-size:var(--font-xs); line-height:1.6; white-space:nowrap; }
+    .seg-btn:hover { background:var(--surface-2); color:var(--ink); }
+    .seg-btn.on { background:var(--brand-soft); color:var(--brand-ink); font-weight:700; }
+    .sched-modes { margin-bottom:var(--space-2); }
+    .sched-controls { display:flex; flex-wrap:wrap; gap:var(--space-2); margin-bottom:var(--space-4); }
+
+    /* 주·월 묶음 머리글. 스크롤해도 어느 묶음을 보고 있는지 보이도록 붙여 둔다. */
+    .sched-group + .sched-group { margin-top:var(--space-2); }
+    .sched-group-head { position:sticky; top:0; z-index:1; display:flex; justify-content:space-between;
+      padding:var(--space-1) var(--space-2); background:var(--surface); color:var(--muted);
+      font-size:var(--font-xs); font-weight:700; }
+    .sched-group-count { color:var(--dim); font-weight:400; }
+    /* 확정 공표일이 아니라 규칙으로 잡은 예정일 */
+    .sched-approx { margin-left:var(--space-1); padding:0 .25rem; border-radius:var(--radius-sm);
+      background:var(--surface-2); color:var(--dim); font-size:var(--font-xs); }
+    /* 중요도 높은 일정만 왼쪽에 표시를 준다. 색은 손익에만 쓰므로 여기서는 밝기로만 나눈다. */
+    .sched-item.high .sched-head { box-shadow:inset 2px 0 0 var(--brand); }
     .sched-head { display:flex; width:100%; align-items:center; gap:var(--space-3); padding:var(--space-2);
       border:0; border-radius:var(--radius-sm); background:transparent; color:inherit; text-align:left; font-size:var(--font-sm); }
     .sched-head:hover { background:var(--surface-2); }
@@ -446,6 +467,11 @@ const MACRO_URL="data/macro-calendar.json";
 let macro={status:"loading",data:null};
 let openEventId=null;   // 시나리오를 펼친 일정
 let scheduleExpanded=false; // 더보기로 연 확대 보기
+// 보기 방식과 필터는 모듈 스코프에 둔다. 확대 보기를 열고 닫거나 일정을 펼쳤다 접어도
+// 매번 render()가 다시 그리므로, 여기 없으면 고른 조건이 그때마다 초기화된다.
+let scheduleMode="near";       // near | week | month
+let scheduleCountry="all";     // all | KOR | USA
+let scheduleImportance="all";  // all | high | medium
 
 function loadMacroCalendar(){
   return fetch(new URL(MACRO_URL,document.baseURI))
@@ -474,26 +500,90 @@ function futureEvents(){
   return (macro.data?.events||[]).filter(event=>eventDate(event)>=today).sort((a,b)=>a.datetimeKst.localeCompare(b.datetimeKst));
 }
 
+// 필터는 확대 보기에서만 건다. 컴팩트 카드는 "다음에 무엇이 오는지"를 빠뜨리지 않고
+// 보여주는 것이 역할이라, 거기서 조용히 걸러지면 안 온다고 착각하게 된다.
+function scheduleEvents(applyFilters){
+  let list=futureEvents();
+  if(!applyFilters)return list;
+  if(scheduleCountry!=="all")list=list.filter(event=>event.country===scheduleCountry);
+  if(scheduleImportance!=="all")list=list.filter(event=>event.importance===scheduleImportance);
+  return list;
+}
+
+// 주·월 묶음은 전부 한국 날짜 기준이다. 지역 시간대가 끼어들면 자정 근처 일정이 옆
+// 주로 새므로 UTC 자정으로 고정한 정수 연산만 쓴다.
+function dayMs(date){const[y,m,d]=date.split("-").map(Number);return Date.UTC(y,m-1,d);}
+function dayStr(ms){const dt=new Date(ms);
+  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`;}
+// 주의 시작은 월요일. 일요일 시작으로 하면 주말 이틀이 갈려 "이번 주 일정"이 둘로 나뉜다.
+function weekStart(date){const ms=dayMs(date);const back=(new Date(ms).getUTCDay()+6)%7;return dayStr(ms-back*86400000);}
+function weekLabel(start){
+  const end=dayStr(dayMs(start)+6*86400000);
+  const[sy,sm,sd]=start.split("-").map(Number),[ey,em,ed]=end.split("-").map(Number);
+  // 달을 넘기는 주는 양쪽 달을 다 적는다 — "8월 31일~6일"은 어느 달의 6일인지 알 수 없다.
+  return (sy===ey&&sm===em)?`${sm}월 ${sd}일~${ed}일`:`${sm}월 ${sd}일~${em}월 ${ed}일`;
+}
+function monthLabel(key){const[y,m]=key.split("-");return `${y}년 ${Number(m)}월`;}
+
+function scheduleGroups(list){
+  if(scheduleMode==="near")return[{key:"near",label:null,items:list}];
+  const groups=new Map();
+  list.forEach(event=>{
+    const date=eventDate(event);
+    const key=scheduleMode==="week"?weekStart(date):date.slice(0,7);
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(event);
+  });
+  return[...groups.entries()].map(([key,items])=>({
+    key,label:scheduleMode==="week"?weekLabel(key):monthLabel(key),items,
+  }));
+}
+
+function scheduleList(list,today,roomy){
+  return scheduleGroups(list).map(group=>{
+    const rows=group.items.map(event=>eventRow(event,today,roomy)).join("");
+    if(!group.label)return rows;
+    return `<div class="sched-group">
+      <div class="sched-group-head"><span>${escapeHtml(group.label)}</span><span class="sched-group-count">${group.items.length}건</span></div>
+      ${rows}
+    </div>`;
+  }).join("");
+}
+
+const SCHEDULE_MODES=[["near","가까운 순"],["week","주별"],["month","월별"]];
+function modeSwitch(){
+  return `<div class="seg" role="group" aria-label="일정 보기 방식">${SCHEDULE_MODES.map(([value,label])=>
+    `<button type="button" class="seg-btn${scheduleMode===value?" on":""}" data-sched-mode="${value}" aria-pressed="${scheduleMode===value}">${label}</button>`
+  ).join("")}</div>`;
+}
+function filterSwitch(name,current,options){
+  return `<div class="seg" role="group" aria-label="${escapeHtml(name)}">${options.map(([value,label])=>
+    `<button type="button" class="seg-btn${current===value?" on":""}" data-sched-filter="${name}" data-value="${value}" aria-pressed="${current===value}">${label}</button>`
+  ).join("")}</div>`;
+}
+
 // 만료는 반드시 시끄럽게 알린다. 빈 카드나 "일정이 없습니다" 같은 일반적인 문구로
 // 넘기면, 데이터가 낡아서 비어 있는 것인지 원래 일정이 없는 것인지 구별할 수 없다.
+const SCHEDULE_SUB="한국·미국 금리 결정과 주요 지표 발표";
+
 function expiredCard(reason,coverageUntil){
   return `<div class="card">
     <h2>다가오는 일정 <span class="pill warn">갱신 필요</span></h2>
-    <div class="card-sub">FOMC · 금통위 금리 결정</div>
+    <div class="card-sub">${SCHEDULE_SUB}</div>
     <p class="soon-body">${escapeHtml(reason)}<br>
     이 달력은 <b>${escapeHtml(coverageUntil||"날짜 미상")}</b>까지만 들어 있어요. 새 일정을 넣어야 다시 표시됩니다.</p>
-    <div class="card-note">data/macro-calendar.json을 갱신하세요. FOMC는 federalreserve.gov, 금통위는 bok.or.kr에서 공표합니다.</div>
+    <div class="card-note">scripts/build-macro-calendar.mjs의 일정표에 새 날짜를 넣고 다시 생성하세요. 각 표 위에 기관별 공표 페이지 주소가 적혀 있습니다.</div>
   </div>`;
 }
 
 function scheduleCard(){
   if(macro.status==="loading"){
-    return `<div class="card"><h2>다가오는 일정</h2><div class="card-sub">FOMC · 금통위 금리 결정</div>
+    return `<div class="card"><h2>다가오는 일정</h2><div class="card-sub">${SCHEDULE_SUB}</div>
       <div style="margin-top:var(--space-4)"><span class="skel" style="width:80%"></span><span class="skel" style="width:60%"></span></div></div>`;
   }
   if(macro.status==="error"){
     return `<div class="card"><h2>다가오는 일정 <span class="pill warn">불러오기 실패</span></h2>
-      <div class="card-sub">FOMC · 금통위 금리 결정</div>
+      <div class="card-sub">${SCHEDULE_SUB}</div>
       <p class="soon-body">경제 일정 파일을 불러오지 못했어요. 새로고침해도 계속되면 data/macro-calendar.json을 확인하세요.</p></div>`;
   }
 
@@ -502,42 +592,54 @@ function scheduleCard(){
   if(coverageUntil&&today>coverageUntil){
     return expiredCard(`오늘(${today})은 등록된 일정 범위를 지났어요.`,coverageUntil);
   }
-  const upcoming=futureEvents();
+  const upcoming=scheduleEvents(false);
   if(!upcoming.length){
     return expiredCard("앞으로 남은 일정이 하나도 없어요.",coverageUntil);
   }
 
-  // 기관마다 공표 시점이 달라 한쪽 커버리지가 먼저 끝난다. 그 사실을 적어 두지 않으면
-  // "요즘 금통위 일정이 왜 안 보이지"를 알아챌 방법이 없다.
-  const coverage=macro.data?.coverage||{};
-  const runOut=Object.entries(coverage).filter(([,until])=>until&&until<today).map(([org])=>org);
-  const gapNote=runOut.length
-    ?`<div class="card-note">${escapeHtml(runOut.map(org=>`${orgLabel(org)} 일정은 ${coverage[org]}까지만 있어요`).join(" · "))} — 공표되면 추가해야 합니다.</div>`
-    :"";
-
   return `<div class="card">
-    <div class="chart-head" style="margin-bottom:var(--space-3)">
+    <div class="chart-head" style="margin-bottom:var(--space-2)">
       <div><h2>다가오는 일정 <span class="pill">${upcoming.length}</span></h2>
-        <div class="card-sub" style="margin:0">FOMC · 금통위 금리 결정</div></div>
+        <div class="card-sub" style="margin:0">${SCHEDULE_SUB}</div></div>
       <div class="toolbar"><button type="button" class="btn" data-schedule-more>더보기</button></div>
     </div>
-    <div class="schedule-scroll">${upcoming.map(event=>eventRow(event,today,false)).join("")}</div>
-    ${gapNote}
+    <div class="sched-modes">${modeSwitch()}</div>
+    <div class="schedule-scroll">${scheduleList(upcoming,today,false)}</div>
+    ${coverageNote(today)}
   </div>`;
 }
 
-function orgLabel(org){return org==="FOMC"?"FOMC":"금통위";}
+// 기관마다 공표 시점이 달라 한쪽 커버리지가 먼저 끝난다. 그 사실을 적어 두지 않으면
+// "요즘 금통위 일정이 왜 안 보이지"를 알아챌 방법이 없다.
+function coverageNote(today){
+  const coverage=macro.data?.coverage||{};
+  const labels=macro.data?.coverageLabels||{};
+  const runOut=Object.entries(coverage).filter(([,until])=>until&&until<today).map(([key])=>key);
+  if(!runOut.length)return"";
+  const lines=runOut.map(key=>`${labels[key]||key} 일정은 ${coverage[key]}까지만 있어요`).join(" · ");
+  return `<div class="card-note">${escapeHtml(lines)} — 공표되면 추가해야 합니다.</div>`;
+}
+
+const ORG_LABELS={FOMC:"FOMC",BOK:"한국은행",KOSTAT:"국가데이터처",MOTIE:"산업통상부",
+  BLS:"미 노동통계국",BEA:"미 경제분석국",CENSUS:"미 센서스국",ISM:"ISM"};
+function orgLabel(org){return ORG_LABELS[org]||org;}
+const COUNTRY_LABELS={KOR:"한국",USA:"미국"};
+function countryLabel(country){return COUNTRY_LABELS[country]||country||"";}
 
 function eventRow(event,today,roomy){
   const open=openEventId===event.id;
-  return `<div class="sched-item${open?" open":""}">
+  // 규칙으로 잡은 예정일은 공표된 날짜와 구별해서 표시한다. 같은 모양으로 보여주면
+  // 확정된 일정으로 읽히고, 실제로 하루씩 밀렸을 때 왜 틀렸는지 알 수 없다.
+  const approx=event.dateBasis==="rule"?`<span class="sched-approx" title="기관의 공표 규칙으로 잡은 예정일입니다">예정</span>`:"";
+  const badge=roomy?orgLabel(event.org):countryLabel(event.country);
+  return `<div class="sched-item${open?" open":""}${event.importance==="high"?" high":""}">
     <button type="button" class="sched-head" data-event="${escapeHtml(event.id)}" aria-expanded="${open}">
       <span class="sched-dday">${dday(event,today)}</span>
       <span class="sched-main">
         <span class="sched-title">${escapeHtml(event.title)}</span>
-        <span class="sched-when">${escapeHtml(eventTimeLabel(event))}${roomy&&event.note?` · ${escapeHtml(event.note)}`:""}</span>
+        <span class="sched-when">${escapeHtml(eventTimeLabel(event))}${approx}${roomy&&event.note?` · ${escapeHtml(event.note)}`:""}</span>
       </span>
-      <span class="sched-org">${escapeHtml(orgLabel(event.org))}</span>
+      <span class="sched-org">${escapeHtml(badge)}</span>
     </button>
     ${open?`<div class="sched-body">
       ${(event.scenarios||[]).map(scenario=>`<div class="scenario">
@@ -550,19 +652,33 @@ function eventRow(event,today,roomy){
 }
 
 // 더보기로 여는 확대 보기. 카드 안에서는 한 줄에 다 담기 어려운 설명(발표 시각의
-// 현지 기준, 시나리오 전문)을 여유 있게 보여준다.
+// 현지 기준, 시나리오 전문)을 여유 있게 보여주고, 나라·중요도로 걸러 볼 수 있다.
 function scheduleOverlay(){
   if(!scheduleExpanded||macro.status!=="ready")return"";
   const today=kstToday();
-  const upcoming=futureEvents();
+  const all=scheduleEvents(false);
+  const shown=scheduleEvents(true);
+  const filtered=shown.length!==all.length;
+  const sources=Object.entries(macro.data?.sources||{})
+    .map(([org,url])=>`<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(orgLabel(org))}</a>`).join(" · ");
+  // 필터로 0건이 된 것과 일정이 원래 없는 것은 다른 상황이다. 같은 문구로 뭉치지 않는다.
+  const body=shown.length
+    ?scheduleList(shown,today,true)
+    :`<p class="soon-body">고른 조건에 맞는 일정이 없어요. 남은 일정 ${all.length}건은 조건을 넓히면 다시 보입니다.</p>`;
   return `<div class="overlay" data-schedule-close>
     <div class="overlay-panel" role="dialog" aria-modal="true" aria-label="다가오는 경제 일정">
       <div class="overlay-head">
-        <div><h2>다가오는 일정</h2><div class="card-sub" style="margin:0">FOMC · 금통위 금리 결정 · ${upcoming.length}건</div></div>
+        <div><h2>다가오는 일정</h2>
+          <div class="card-sub" style="margin:0">${SCHEDULE_SUB} · ${shown.length}건${filtered?` (전체 ${all.length}건 중)`:""}</div></div>
         <button type="button" class="btn" data-schedule-close>닫기</button>
       </div>
-      <div class="overlay-body">${upcoming.map(event=>eventRow(event,today,true)).join("")}</div>
-      <div class="card-note">출처: ${escapeHtml(Object.values(macro.data?.sources||{}).join(" · "))}</div>
+      <div class="sched-controls">
+        ${modeSwitch()}
+        ${filterSwitch("국가",scheduleCountry,[["all","전체"],["KOR","한국"],["USA","미국"]])}
+        ${filterSwitch("중요도",scheduleImportance,[["all","전체"],["high","중요"],["medium","보통"]])}
+      </div>
+      <div class="overlay-body">${body}</div>
+      <div class="card-note">출처: ${sources}</div>
     </div>
   </div>`;
 }
@@ -820,6 +936,17 @@ function bind(){
   document.querySelectorAll("button[data-event]").forEach(button=>{
     button.addEventListener("click",()=>{
       openEventId=openEventId===button.dataset.event?null:button.dataset.event;
+      render();
+    });
+  });
+  // 보기 방식과 필터. 고른 값은 모듈 스코프에 남으므로 확대 보기를 열고 닫아도 유지된다.
+  document.querySelectorAll("button[data-sched-mode]").forEach(button=>{
+    button.addEventListener("click",()=>{scheduleMode=button.dataset.schedMode;render();});
+  });
+  document.querySelectorAll("button[data-sched-filter]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      if(button.dataset.schedFilter==="국가")scheduleCountry=button.dataset.value;
+      else scheduleImportance=button.dataset.value;
       render();
     });
   });

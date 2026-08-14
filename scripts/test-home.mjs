@@ -850,7 +850,13 @@ try {
     const box = await page.evaluate(() => {
       const row = document.querySelector(".grid-top");
       const card = document.querySelector(".schedule-scroll").closest(".card");
-      return { rowH: Math.round(row.getBoundingClientRect().height), cardNatural: Math.round(card.scrollHeight) };
+      // scrollHeight는 이미 늘어난 높이라 카드가 행을 밀었는지 알 수 없다(늘어난 값이
+      // 행 높이와 같아 언제나 통과한다). 잠깐 늘이기를 풀고 내용만의 높이를 잰다.
+      const previous = card.style.alignSelf;
+      card.style.alignSelf = "start";
+      const cardNatural = Math.round(card.getBoundingClientRect().height);
+      card.style.alignSelf = previous;
+      return { rowH: Math.round(row.getBoundingClientRect().height), cardNatural };
     });
     // 카드 자연 높이가 행 높이를 넘으면 이 카드가 행을 끌어올린다.
     return box.cardNatural <= box.rowH
@@ -968,6 +974,184 @@ try {
     } finally {
       await context.close();
     }
+  });
+
+  // ===== 5a-1e-2. 주별·월별 보기와 필터 =====
+  //
+  // 이 카드는 상단 3열 행의 높이를 정하지 않는다는 것이 원래 조건이다. 보기 전환
+  // 버튼 한 줄을 더했으니 행 높이를 값으로 못 박는다 — "카드 <= 행"만 보면 카드가
+  // 커지면서 행도 같이 커지는 경우를 잡지 못한다.
+  // 행 높이 327px은 총자산 카드가 정한다(실측: 총자산 327 · 뉴스 189 · 일정 236).
+  // 일정 카드는 보기 전환을 더하기 전 207, 더한 뒤 236으로 늘었지만 여전히 행보다 작다.
+  await record("보기 전환을 더해도 상단 행 높이가 그대로다 (327px)", async () => {
+    await page.goto(HOME_URL);
+    await seedSession(page, AXIS_ASSETS.slice(0, 2));
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".schedule-scroll"), { timeout: 9000 });
+    const box = await page.evaluate(() => {
+      const row = document.querySelector(".grid-top");
+      const card = document.querySelector(".schedule-scroll").closest(".card");
+      const previous = card.style.alignSelf;
+      card.style.alignSelf = "start";
+      const schedule = Math.round(card.getBoundingClientRect().height);
+      card.style.alignSelf = previous;
+      return { rowH: Math.round(row.getBoundingClientRect().height), schedule };
+    });
+    if (box.rowH !== 327) return { ok: false, reason: `상단 행 높이 ${box.rowH}px (327px 기대)` };
+    return box.schedule < box.rowH ? { ok: true } : { ok: false, reason: `일정 카드(${box.schedule}px)가 행을 밀고 있음` };
+  });
+
+  await record("주별·월별로 묶어서 볼 수 있다 (컴팩트 카드)", async () => {
+    const flat = await page.locator(".schedule-scroll .sched-group").count();
+    if (flat !== 0) return { ok: false, reason: "기본값이 가까운 순인데 묶음 머리글이 있음" };
+
+    await page.locator(".schedule-scroll").isVisible();
+    await page.locator("button[data-sched-mode='week']").first().click();
+    const weekHeads = await page.locator(".schedule-scroll .sched-group-head").allTextContents();
+    if (!weekHeads.length) return { ok: false, reason: "주별 묶음 머리글이 없음" };
+    // "8월 17일~23일" 또는 달을 넘는 "8월 31일~9월 6일"
+    if (!/^\d{1,2}월 \d{1,2}일~(\d{1,2}월 )?\d{1,2}일/.test(weekHeads[0])) {
+      return { ok: false, reason: `주 라벨 형식이 아님: ${weekHeads[0]}` };
+    }
+
+    await page.locator("button[data-sched-mode='month']").first().click();
+    const monthHeads = await page.locator(".schedule-scroll .sched-group-head").allTextContents();
+    if (!/^\d{4}년 \d{1,2}월/.test(monthHeads[0])) return { ok: false, reason: `월 라벨 형식이 아님: ${monthHeads[0]}` };
+    // 묶어도 일정이 사라지면 안 된다.
+    const grouped = await page.locator(".schedule-scroll .sched-item").count();
+    await page.locator("button[data-sched-mode='near']").first().click();
+    const flatCount = await page.locator(".schedule-scroll .sched-item").count();
+    return grouped === flatCount ? { ok: true } : { ok: false, reason: `월별 ${grouped}건 / 가까운 순 ${flatCount}건` };
+  });
+
+  await record("주 경계가 달을 넘어가도 같은 주로 묶인다", async () => {
+    // 화면의 묶음 로직을 그대로 불러 확인한다. 달 경계(8/31 월요일 ~ 9/6 일요일)에서
+    // 두 날짜가 같은 주로 가야 하고, 라벨은 양쪽 달을 다 적어야 한다.
+    const probe = await page.evaluate(() => ({
+      aug31: weekStart("2026-08-31"), sep06: weekStart("2026-09-06"), sep07: weekStart("2026-09-07"),
+      label: weekLabel(weekStart("2026-08-31")),
+      sameMonthLabel: weekLabel(weekStart("2026-09-08")),
+    }));
+    if (probe.aug31 !== probe.sep06) return { ok: false, reason: `8/31과 9/6이 다른 주: ${probe.aug31} / ${probe.sep06}` };
+    if (probe.sep07 === probe.aug31) return { ok: false, reason: "9/7(월)이 앞 주에 묶임" };
+    if (probe.aug31 !== "2026-08-31") return { ok: false, reason: `주 시작이 월요일이 아님: ${probe.aug31}` };
+    if (!probe.label.includes("9월")) return { ok: false, reason: `달을 넘는 주인데 라벨에 9월이 없음: ${probe.label}` };
+    if (/월.*월/.test(probe.sameMonthLabel)) return { ok: false, reason: `같은 달 안의 주인데 달을 두 번 적음: ${probe.sameMonthLabel}` };
+    return { ok: true };
+  });
+
+  await record("확대 보기에서 국가·중요도 필터가 묶음 방식과 함께 걸린다", async () => {
+    await page.locator("[data-schedule-more]").click();
+    await page.waitForSelector(".overlay-panel", { timeout: 5000 });
+    await page.locator(".overlay-panel button[data-sched-mode='month']").click();
+
+    const all = await page.locator(".overlay-body .sched-item").count();
+    await page.locator(".overlay-panel button[data-sched-filter='국가'][data-value='KOR']").click();
+    const korOnly = await page.evaluate(() => [...document.querySelectorAll(".overlay-body .sched-org")].map((node) => node.textContent.trim()));
+    if (!korOnly.length || korOnly.some((label) => /미 |ISM|FOMC|센서스/.test(label))) {
+      return { ok: false, reason: `한국 필터에 미국 기관이 섞임: ${[...new Set(korOnly)].join(",")}` };
+    }
+    // 묶음 방식은 필터를 걸어도 유지돼야 한다.
+    if (!(await page.locator(".overlay-body .sched-group-head").count())) return { ok: false, reason: "필터 후 월별 묶음이 풀림" };
+
+    await page.locator(".overlay-panel button[data-sched-filter='중요도'][data-value='high']").click();
+    const both = await page.evaluate(() => {
+      const ids = [...document.querySelectorAll(".overlay-body button[data-event]")].map((node) => node.dataset.event);
+      const byId = new Map(macro.data.events.map((event) => [event.id, event]));
+      return ids.map((id) => byId.get(id)).filter(Boolean).map((event) => `${event.country}/${event.importance}`);
+    });
+    if (!both.length) return { ok: false, reason: "한국+중요 조합이 0건" };
+    if (both.some((pair) => pair !== "KOR/high")) return { ok: false, reason: `조합이 안 걸림: ${[...new Set(both)].join(",")}` };
+    if (both.length >= all) return { ok: false, reason: `필터 후 ${both.length}건이 전체 ${all}건 이상` };
+    return { ok: true };
+  });
+
+  await record("필터로 0건이 되면 조건 때문이라고 밝힌다", async () => {
+    // 한국 + 보통 중요도가 0건이 되는 조합은 없으므로, 존재하지 않는 조합을 직접 만든다.
+    const emptied = await page.evaluate(() => {
+      scheduleCountry = "USA"; scheduleImportance = "none-such"; render();
+      return document.querySelector(".overlay-body").innerText;
+    });
+    if (/^\s*$/.test(emptied)) return { ok: false, reason: "빈 화면으로 남음" };
+    if (!/고른 조건/.test(emptied)) return { ok: false, reason: `조건 때문이라는 설명이 없음: ${emptied.slice(0, 120)}` };
+    if (!/\d+건/.test(emptied)) return { ok: false, reason: "남은 전체 건수를 적지 않음" };
+    // 만료 문구로 오해되면 안 된다 — 데이터가 낡은 것과 조건이 좁은 것은 다른 상황이다.
+    if (/갱신 필요|coverageUntil/.test(emptied)) return { ok: false, reason: "만료 안내로 잘못 표시됨" };
+    await page.evaluate(() => { scheduleCountry = "all"; scheduleImportance = "all"; render(); });
+    return { ok: true };
+  });
+
+  await record("고른 보기 방식이 확대 보기를 닫았다 열어도 남는다", async () => {
+    await page.locator(".overlay").click({ position: { x: 5, y: 5 } });
+    await page.waitForFunction(() => !document.querySelector(".overlay-panel"), { timeout: 5000 });
+    // 확대 보기에서 월별로 바꿨으니 컴팩트 카드도 월별이어야 한다(같은 상태를 본다).
+    const compact = await page.locator(".schedule-scroll .sched-group-head").first().textContent();
+    if (!/^\d{4}년/.test(compact || "")) return { ok: false, reason: `컴팩트가 월별이 아님: ${compact}` };
+    await page.locator("[data-schedule-more]").click();
+    await page.waitForSelector(".overlay-panel", { timeout: 5000 });
+    const pressed = await page.locator(".overlay-panel button[data-sched-mode='month']").getAttribute("aria-pressed");
+    await page.locator(".overlay-panel button[data-sched-mode='near']").click();
+    await page.locator(".overlay").click({ position: { x: 5, y: 5 } });
+    await page.waitForFunction(() => !document.querySelector(".overlay-panel"), { timeout: 5000 });
+    return pressed === "true" ? { ok: true } : { ok: false, reason: `다시 열었더니 월별이 아님 (aria-pressed=${pressed})` };
+  });
+
+  // 시간대 환산은 이 파일에서 가장 틀리기 쉬운 곳이다. 하나의 오프셋을 통째로 적용하면
+  // 08:30 ET와 14:00 ET 중 한쪽이 반드시 하루 어긋난다.
+  await record("08:30 ET는 같은 KST 날짜, 14:00 ET는 다음 KST 날짜로 저장된다", async () => {
+    const info = await page.evaluate(() => {
+      const rows = macro.data.events
+        .map((event) => ({ id: event.id, kst: event.datetimeKst, us: /현지 (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/.exec(event.note || "") }))
+        .filter((row) => row.us);
+      return rows.map((row) => ({ id: row.id, kstDate: row.kst.slice(0, 10), kstHour: row.kst.slice(11, 16), usDate: row.us[1], usTime: row.us[2] }));
+    });
+    const morning = info.filter((row) => row.usTime === "08:30");
+    const fomc = info.filter((row) => row.usTime === "14:00");
+    if (!morning.length || !fomc.length) return { ok: false, reason: `표본 부족: 08:30 ${morning.length}건 / 14:00 ${fomc.length}건` };
+
+    const badMorning = morning.filter((row) => row.kstDate !== row.usDate || !["21:30", "22:30"].includes(row.kstHour));
+    if (badMorning.length) return { ok: false, reason: `08:30 ET 환산 오류: ${badMorning[0].id} ${badMorning[0].usDate} -> ${badMorning[0].kstDate} ${badMorning[0].kstHour}` };
+    const badFomc = fomc.filter((row) => row.kstDate <= row.usDate || !["03:00", "04:00"].includes(row.kstHour));
+    if (badFomc.length) return { ok: false, reason: `14:00 ET 환산 오류: ${badFomc[0].id} ${badFomc[0].usDate} -> ${badFomc[0].kstDate} ${badFomc[0].kstHour}` };
+
+    // 서머타임 경계(2026-11-01)를 사이에 두고 실제로 값이 갈리는지 — 하나만 맞고
+    // 나머지가 우연히 맞는 경우를 배제한다.
+    const summer = morning.find((row) => row.usDate < "2026-11-01");
+    const winter = morning.find((row) => row.usDate > "2026-11-01");
+    if (!summer || !winter) return { ok: false, reason: "서머타임 경계 양쪽 표본이 없음" };
+    if (summer.kstHour === winter.kstHour) return { ok: false, reason: `서머타임 경계 양쪽이 같은 시각(${summer.kstHour}) — 고정 오프셋을 쓴 것` };
+    return { ok: true };
+  });
+
+  await record("규칙으로 잡은 예정일은 공표된 일정과 구별해 표시한다", async () => {
+    const counts = await page.evaluate(() => {
+      const rule = macro.data.events.filter((event) => event.dateBasis === "rule");
+      return { rule: rule.length, published: macro.data.events.filter((event) => event.dateBasis === "published").length };
+    });
+    if (!counts.rule || !counts.published) return { ok: false, reason: `표본 부족: 규칙 ${counts.rule}건 / 공표 ${counts.published}건` };
+    const marks = await page.locator(".schedule-scroll .sched-approx").count();
+    const items = await page.locator(".schedule-scroll .sched-item").count();
+    if (!marks) return { ok: false, reason: "예정 표시가 하나도 없음" };
+    return marks < items ? { ok: true } : { ok: false, reason: "모든 일정이 예정으로 표시됨 — 구별이 안 됨" };
+  });
+
+  await record("확대한 범위가 두 나라·다섯 종류를 실제로 담고 있다", async () => {
+    const shape = await page.evaluate(() => {
+      const events = macro.data.events;
+      return {
+        countries: [...new Set(events.map((event) => event.country))].sort(),
+        categories: [...new Set(events.map((event) => event.category))].sort(),
+        importances: [...new Set(events.map((event) => event.importance))].sort(),
+        missing: events.filter((event) => !event.country || !event.category || !event.importance).length,
+      };
+    });
+    if (shape.missing) return { ok: false, reason: `분류가 빠진 일정 ${shape.missing}건` };
+    if (shape.countries.join() !== "KOR,USA") return { ok: false, reason: `국가: ${shape.countries.join()}` };
+    for (const category of ["rate", "inflation", "employment", "growth", "trade"]) {
+      if (!shape.categories.includes(category)) return { ok: false, reason: `분류 누락: ${category}` };
+    }
+    if (shape.importances.join() !== "high,medium") return { ok: false, reason: `중요도: ${shape.importances.join()}` };
+    return { ok: true };
   });
 
   // ===== 5a-1f. 경제지표 (OECD) =====
