@@ -21,6 +21,17 @@ export async function installTestAuth(page) {
     };
     const auth = JSON.stringify({ access_token: "test-token", refresh_token: "test-refresh", expires_at: 4102444800, user: { id: "00000000-0000-0000-0000-000000000001", email: "test@example.com" } });
     const id = "00000000-0000-0000-0000-000000000001";
+    // 로컬에 쓴 세션은 목 원격에도 같이 반영한다. 실제 앱은 로컬 저장과 원격 저장을
+    // 함께 하는데, 테스트가 localStorage만 심어 두면 다음 로드에서 원격에 남아 있던
+    // 옛 값이 이겨 방금 심은 세션이 사라진다 — 화면에는 앞선 테스트의 자산이 그대로
+    // 남고, 실패는 엉뚱한 곳에서 뜬다(실제로 '확인이 필요한 항목' 검사가 그렇게 깨졌다).
+    const setItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      setItem.call(this, key, value);
+      if (this === localStorage && key === "assetInput.session") {
+        sessionStorage.setItem("assetflow.test.remote", value);
+      }
+    };
     const clear = Storage.prototype.clear;
     Storage.prototype.clear = function () {
       if (this !== localStorage) return clear.call(this);

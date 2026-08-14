@@ -2,7 +2,15 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>설정 · AssetFlow</title><link rel="stylesheet" href="lib/app.css?v=20260813-1">
+  <title>설정 · AssetFlow</title>
+  <!-- 폰트는 렌더를 막지 않게 받는다. 도착 전에는 폴백으로 읽히고 도착하면 바뀐다. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="lib/app.css?v=20260813-1">
   <script src="lib/supabase-config.js?v=20260811-1"></script><script src="lib/account-store.js"></script><script src="lib/auth-guard.js"></script>
 </head>
 <body>

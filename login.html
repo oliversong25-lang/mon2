@@ -4,6 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>로그인 · AssetFlow</title>
+  <!-- 폰트는 렌더를 막지 않게 받는다. 도착 전에는 폴백으로 읽히고 도착하면 바뀐다. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
   <link rel="stylesheet" href="lib/app.css">
 </head>
 <body>
@@ -52,7 +59,7 @@
   form.addEventListener("submit",async event=>{
     event.preventDefault();message("");
     if(!form.reportValidity())return;
-    submit.disabled=true;submit.textContent=mode==="login"?"불러오는 중…":"계정을 만드는 중…";
+    submit.disabled=true;submit.textContent=mode==="login"?"로그인 중…":"회원가입 중…";
     try{
       let remote;
       if(mode==="signup"){

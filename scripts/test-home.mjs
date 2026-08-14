@@ -172,10 +172,14 @@ try {
   await page.reload();
   await record("자산 0건이면 홈 대신 자산 입력을 유도한다", async () => {
     const text = await page.locator("#app").textContent();
-    if (!text.includes("아직 등록된 자산이 없어요")) return { ok: false, reason: `빈 상태 문구 없음: ${text.slice(0, 120)}` };
-    const href = await page.locator("a.btn.primary").getAttribute("href");
+    if (!text.includes("첫 자산을 추가하세요")) return { ok: false, reason: `빈 상태 문구 없음: ${text.slice(0, 120)}` };
+    const cta = await page.locator("a.btn.primary");
+    const href = await cta.getAttribute("href");
     if (!href.includes("asset-input.html")) return { ok: false, reason: `입력 화면 링크가 아님: ${href}` };
-    return { ok: true };
+    // 같은 일을 하는 버튼은 화면마다 같은 이름을 달아야 한다. 빈 화면의 버튼과 자산이
+    // 있을 때 머리말의 버튼이 다른 이름이면, 사용자는 매번 다시 읽어야 한다.
+    const label = (await cta.textContent()).trim();
+    return label === "자산 추가" ? { ok: true } : { ok: false, reason: `빈 화면 버튼 이름 "${label}" (머리말과 같은 "자산 추가" 기대)` };
   });
 
   // ===== 2. 실제 클릭으로 5개 자산 등록 =====
@@ -434,7 +438,11 @@ try {
     await page.reload();
     await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
     const count = await page.locator(".check-line").count();
-    return count === 0 ? { ok: true } : { ok: false, reason: "확인할 항목이 없는데도 줄이 보인다" };
+    if (!count) return { ok: true };
+    // 어떤 항목이 남았는지 적어야 원인을 바로 안다. "줄이 보인다"만으로는 추적이 안 된다.
+    const shown = (await page.locator(".check-line").innerText()).replace(/\n+/g, " · ");
+    const assets = await page.evaluate(() => (session.assets || []).map((asset) => asset.group));
+    return { ok: false, reason: `확인할 항목이 없는데도 줄이 보인다: ${shown} (자산 ${JSON.stringify(assets)})` };
   });
 
   await record("시세를 못 받은 자산이 있으면 그 안내가 실제로 뜬다", async () => {
@@ -551,8 +559,11 @@ try {
   });
 
   await record("기준일 표기가 quotes.json의 asOf와 일치한다", async () => {
-    const sub = await page.locator(".page-head .sub").textContent();
-    return sub.includes("8월 7일 종가 기준") ? { ok: true } : { ok: false, reason: `헤더 기준일: "${sub}"` };
+    // 기준일은 이제 제목 아래 부제가 아니라 기준일 레일이 들고 있다.
+    const anchor = await page.locator(".rail-anchor").textContent();
+    return anchor.includes(ASOF_DATE) && anchor.includes("종가 기준")
+      ? { ok: true }
+      : { ok: false, reason: `레일 기준일: "${anchor}" (${ASOF_DATE} 기대)` };
   });
 
   await record("CoinGecko 출처와 국제 시세 기준 표기가 뜬다", async () => {
@@ -642,8 +653,11 @@ try {
     await page.waitForFunction(() => document.querySelector(".banner"), { timeout: 5000 });
     const text = await page.locator("#app").textContent();
     await page.unroute("**/data/quotes.json");
-    if (!text.includes("총자산을 계산할 수 없어요")) return { ok: false, reason: "계산 불가 안내가 없음" };
-    if (!text.includes("5건은 그대로 남아 있습니다")) return { ok: false, reason: "입력 자산 건수 안내가 없음" };
+    // 오류는 무엇이 안 됐는지, 무엇이 무사한지, 다음에 무엇을 하면 되는지를 다 말해야 한다.
+    if (!text.includes("총자산을 계산하지 못했습니다")) return { ok: false, reason: "계산 불가 안내가 없음" };
+    if (!text.includes("data/quotes.json")) return { ok: false, reason: "무엇을 읽지 못했는지 밝히지 않음" };
+    if (!text.includes("자산 5건은 그대로 있습니다")) return { ok: false, reason: "입력 자산 건수 안내가 없음" };
+    if (!/새로고침|확인하세요/.test(text)) return { ok: false, reason: "다음에 무엇을 할지 알려주지 않음" };
     return { ok: true };
   });
 
@@ -981,24 +995,46 @@ try {
   // 이 카드는 상단 3열 행의 높이를 정하지 않는다는 것이 원래 조건이다. 보기 전환
   // 버튼 한 줄을 더했으니 행 높이를 값으로 못 박는다 — "카드 <= 행"만 보면 카드가
   // 커지면서 행도 같이 커지는 경우를 잡지 못한다.
-  // 행 높이 327px은 총자산 카드가 정한다(실측: 총자산 327 · 뉴스 189 · 일정 236).
-  // 일정 카드는 보기 전환을 더하기 전 207, 더한 뒤 236으로 늘었지만 여전히 행보다 작다.
-  await record("보기 전환을 더해도 상단 행 높이가 그대로다 (327px)", async () => {
+  // 상단 행이 지켜야 하는 것은 픽셀 값이 아니라 두 가지 구조다.
+  //   1) 열 비율이 선언한 1.35 : 1 : 1 그대로여야 한다. 격자 칸에 min-width:0이 없으면
+  //      열이 8개인 표나 긴 문구가 칸을 밀어내 비율이 무너진다(실측 404/299/377px로
+  //      찌그러져 있었다 → 435/322/322로 회복).
+  //   2) 일정 카드가 총자산 카드보다 커지면 이 카드가 행 높이를 정하게 된다.
+  // 높이를 숫자로 못 박았더니 세션에 어떤 자산이 들었는지에 따라 값이 흔들려서
+  // (확인이 필요한 항목 줄이 있고 없고에 따라 15px) 구조 자체를 검사하도록 바꿨다.
+  await record("상단 3열 구조가 유지된다 (열 비율 1.35:1:1 · 일정 카드가 행을 밀지 않음)", async () => {
     await page.goto(HOME_URL);
     await seedSession(page, AXIS_ASSETS.slice(0, 2));
     await page.reload();
     await page.waitForFunction(() => document.querySelector(".schedule-scroll"), { timeout: 9000 });
+    // 웹폰트가 늦게 도착하면 글자 폭·행간이 바뀌어 높이가 흔들린다. 교체가 끝난 뒤 잰다.
+    await page.evaluate(() => document.fonts.ready);
     const box = await page.evaluate(() => {
       const row = document.querySelector(".grid-top");
       const card = document.querySelector(".schedule-scroll").closest(".card");
+      // scrollHeight는 이미 늘어난 높이라 카드가 행을 밀었는지 알 수 없다(늘어난 값이
+      // 행 높이와 같아 언제나 통과한다). 잠깐 늘이기를 풀고 내용만의 높이를 잰다.
       const previous = card.style.alignSelf;
       card.style.alignSelf = "start";
       const schedule = Math.round(card.getBoundingClientRect().height);
       card.style.alignSelf = previous;
-      return { rowH: Math.round(row.getBoundingClientRect().height), schedule };
+      return {
+        rowH: Math.round(row.getBoundingClientRect().height),
+        schedule,
+        columns: getComputedStyle(row).gridTemplateColumns.split(" ").map(parseFloat),
+        scheduleCap: getComputedStyle(document.querySelector(".schedule-scroll")).maxHeight,
+      };
     });
-    if (box.rowH !== 327) return { ok: false, reason: `상단 행 높이 ${box.rowH}px (327px 기대)` };
-    return box.schedule < box.rowH ? { ok: true } : { ok: false, reason: `일정 카드(${box.schedule}px)가 행을 밀고 있음` };
+    const [wide, mid, right] = box.columns;
+    if (box.columns.length !== 3) return { ok: false, reason: `상단이 3열이 아님: ${box.columns.join(" / ")}` };
+    // 1fr짜리 두 열은 서로 같아야 하고, 첫 열은 그 1.35배여야 한다.
+    if (Math.abs(mid - right) > 1) return { ok: false, reason: `1fr 두 열이 다름: ${mid} / ${right}` };
+    const ratio = wide / mid;
+    if (Math.abs(ratio - 1.35) > 0.02) return { ok: false, reason: `첫 열 비율 ${ratio.toFixed(3)} (1.35 기대) — 내용이 열을 밀고 있음` };
+    if (box.scheduleCap !== "108px") return { ok: false, reason: `일정 목록 높이 상한 ${box.scheduleCap} (108px 기대)` };
+    return box.schedule < box.rowH
+      ? { ok: true }
+      : { ok: false, reason: `일정 카드(${box.schedule}px)가 행 높이(${box.rowH}px)를 정하고 있음` };
   });
 
   await record("주별·월별로 묶어서 볼 수 있다 (컴팩트 카드)", async () => {
@@ -1349,15 +1385,18 @@ try {
         // 지연 도중 페이지를 벗어나면 라우트가 이미 처리돼 있을 수 있다 — 그건 오류가 아니다.
         await route.continue().catch(() => {});
       });
-      await page.goto(url);
+      // commit까지만 기다린다. load를 기다리면 관찰 시작이 하위 리소스(웹폰트 등)만큼
+      // 밀려서, 1.1초 창이 시세 도착(1.2초) 뒤로 넘어가 로딩 구간을 놓친다.
+      await page.goto(url, { waitUntil: "commit" });
       // 로딩 구간 동안 화면을 반복 관찰한다.
       const seen = new Set();
       const deadline = Date.now() + 1100;
       let sawSkeleton = false;
       while (Date.now() < deadline) {
+        // commit 직후에는 body조차 없을 수 있다. 그 순간도 관찰 구간의 일부다.
         const snap = await page.evaluate(() => ({
           skeleton: Boolean(document.querySelector(".skel")),
-          text: (document.getElementById("page") || document.body).innerText,
+          text: (document.getElementById("page") || document.body || {}).innerText || "",
         }));
         if (snap.skeleton) sawSkeleton = true;
         // 금액 형태(…원)가 보이면 기록한다.

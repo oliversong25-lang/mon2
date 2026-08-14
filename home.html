@@ -4,13 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>내 자산</title>
-  <link rel="stylesheet" href="lib/app.css?v=20260813-1">
+  <!-- 폰트는 렌더를 막지 않게 받는다. 도착 전에는 폴백으로 읽히고 도착하면 바뀐다. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="lib/app.css?v=20260814-1">
   <script src="lib/supabase-config.js?v=20260811-1"></script>
   <script src="lib/account-store.js"></script>
   <script src="lib/auth-guard.js"></script>
   <style>
     /* 홈 화면 전용. 공통 토큰·셸·표는 lib/app.css에 있다. */
-    .total-amount { font-size:var(--font-total); font-weight:800; letter-spacing:-.035em; line-height:1.15; }
+
+    /* 총자산은 이 화면의 표제다. 숫자는 명조로 조판하고, 억·만·원 단위 글자는 한 단계
+       작게·흐리게 내려 앉힌다 — 자릿수를 세지 않아도 규모가 먼저 읽힌다.
+       이 조판은 한국어 금액 표기에만 있는 것이라, 이 앱의 서명이 된다. */
+    .total-amount { font-family:var(--font-display); font-size:var(--font-total); font-weight:600;
+      letter-spacing:-.02em; line-height:1.15; }
+    .total-amount .u { margin:0 .04em 0 .1em; color:var(--muted); font-size:.56em; font-style:normal;
+      font-weight:500; letter-spacing:0; vertical-align:.1em; }
     .total-change { margin-top:var(--space-2); font-size:var(--font-sm); font-weight:700; }
     .total-change.flat { color:var(--muted); font-weight:600; }
     .split { margin-top:var(--space-5); padding-top:var(--space-4); border-top:var(--border) solid var(--line); }
@@ -82,6 +96,8 @@
 
     /* 상위 4행 높이로 고정한다. 헤더(약 2.4rem) + 행 4개(약 3.4rem) 기준.
        카드 높이가 자산 수에 따라 늘어나면 홈 전체가 끝없이 길어진다. */
+    /* 열이 8개인 표는 페이지가 아니라 자기 안에서 가로로 스크롤한다. */
+    .holdings-scroll { overflow-x:auto; }
     .holdings-scroll.capped { max-height:16rem; overflow-y:auto; overscroll-behavior:contain; }
     /* 스크롤해도 어떤 열인지 보이도록 머리글을 붙여 둔다. */
     .holdings-scroll.capped thead th { position:sticky; top:0; z-index:1; background:var(--surface); }
@@ -343,16 +359,20 @@ function render(){
       <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`,navOptions());
     return;
   }
+  // 빈 화면은 분위기가 아니라 다음 행동을 가리킨다. 버튼 이름은 화면 위쪽 것과 같다 —
+  // 같은 일을 하는 버튼이 화면마다 다른 이름을 달면 그때마다 다시 읽어야 한다.
   if(!assets.length){
     Shell.mount("app","home",`<div class="empty-state">
-      <h1>아직 등록된 자산이 없어요</h1>
-      <p>자산을 입력하면 총자산과 구성을 한 화면에서 볼 수 있어요.</p>
-      <a class="btn primary" href="${INPUT_URL}">자산 입력하러 가기</a></div>`,navOptions());
+      <h1>첫 자산을 추가하세요</h1>
+      <p>하나만 넣어도 총자산과 구성이 바로 그려집니다. 현금이든 예금이든 시작점은 무엇이어도 됩니다.</p>
+      <a class="btn primary" href="${INPUT_URL}">자산 추가</a></div>`,navOptions());
     return;
   }
+  // 오류는 사과하지 않는다. 무엇이 안 됐고 무엇이 무사하며 다음에 무엇을 하면 되는지 적는다.
   if(Valuation.state.status==="error"){
     Shell.mount("app","home",`${pageHead()}
-      <div class="banner">시세를 불러오지 못해 총자산을 계산할 수 없어요. 입력하신 자산 ${assets.length}건은 그대로 남아 있습니다.</div>`,navOptions());
+      <div class="banner">시세 파일(data/quotes.json)을 읽지 못해 총자산을 계산하지 못했습니다.
+      입력한 자산 ${assets.length}건은 그대로 있습니다. 새로고침해도 같으면 시세 배치가 마지막으로 성공했는지 확인하세요.</div>`,navOptions());
     return;
   }
 
@@ -384,12 +404,42 @@ function render(){
 }
 
 function pageHead(){
-  const asOf=Valuation.asOfLabel();
-  const sub=Valuation.state.status==="loading"?"시세 불러오는 중":(asOf||"시세 기준일 확인 중");
   return `<div class="page-head">
-    <div><h1>내 자산</h1><div class="sub">${escapeHtml(sub)}</div></div>
-    <div class="head-actions"><a class="btn primary" href="${INPUT_URL}#add">＋ 자산 추가</a></div>
+    <div><h1>내 자산</h1></div>
+    <div class="head-actions"><a class="btn primary" href="${INPUT_URL}#add">자산 추가</a></div>
+  </div>${rail()}`;
+}
+
+// 기준일 레일. 이 화면을 지배하는 날짜를 왼쪽 끝에 두고, 기준일이 다른 값이 있으면
+// 눈금으로 찍는다. 앱은 이미 날짜가 섞인 데이터를 한 시점의 스냅샷처럼 보여주지 않는데,
+// 그 규칙을 문장이 아니라 구조로 드러내는 줄이다.
+//
+// 여기 찍히는 것은 경고가 아니다. 3개월 전 관측은 낡은 값이 아니라 그 시점의 값이고,
+// 그 사실을 읽을 수 있게 만드는 것이 이 줄의 일이다. 정말로 갱신이 필요한 상태는
+// 각 카드가 따로 말한다.
+function rail(){
+  const status=Valuation.state.status;
+  const date=Valuation.asOfDate();
+  const anchor=status==="loading"
+    ?`<b>기준일 확인 중</b>`
+    :date?`<b>${escapeHtml(date)}</b><span>종가 기준</span>`:`<b>기준일 없음</b><span>시세 파일을 확인하세요</span>`;
+
+  const marks=[];
+  const crypto=status==="ready"?Valuation.staleCryptoDate():null;
+  if(crypto)marks.push(["가상자산",crypto]);
+  const indicators=Indicators.staleness?.();
+  if(indicators?.newest)marks.push(["경제지표",indicators.newest]);
+
+  return `<div class="rail">
+    <div class="rail-anchor stamp">${anchor}</div>
+    <div class="rail-marks">${marks.map(([label,when])=>
+      `<span class="rail-mark"><b>${escapeHtml(label)}</b><span class="stamp">${escapeHtml(when)}</span></span>`).join("")}</div>
   </div>`;
+}
+
+// 억·만·원 단위 글자를 감싸 조판을 나눈다. 숫자는 명조, 단위는 한 단계 작게 내려앉는다.
+function amountHtml(value){
+  return escapeHtml(won(value)).replace(/[억만원]+/g,unit=>`<i class="u">${unit}</i>`);
 }
 
 // 카드 골격만 띄우고 금액 자리는 비워 둔다. 레이아웃이 튀지 않게 같은 격자를 쓴다.
@@ -420,7 +470,7 @@ function legacyBanner(){
 function totalCard(summary){
   const snapshots=session.snapshots||[];
   const previous=snapshots.length>1?snapshots[snapshots.length-2]:null;
-  let change=`<div class="total-change flat">내일부터 변화를 보여드려요</div>`;
+  let change=`<div class="total-change flat">오늘이 첫 기록이에요 · 내일부터 변화가 쌓입니다</div>`;
   if(previous){
     const delta=summary.total-previous.total;
     const rate=previous.total?delta/previous.total:0;
@@ -437,7 +487,7 @@ function totalCard(summary){
   </div>`:"";
   return `<div class="card">
     <h2>총자산</h2>
-    <div class="total-amount num">${won(summary.total)}</div>
+    <div class="total-amount num">${amountHtml(summary.total)}</div>
     ${change}${excluded}${split}${checkLine(summary)}
   </div>`;
 }
@@ -734,7 +784,7 @@ function soonCard(title,sub,body){
 // 보유와 무관한 뉴스를 채우면 그 순간 다른 종류의 앱이 된다.
 function newsCard(){
   return soonCard("오늘의 주요 뉴스","보유한 자산과 연결된 소식만 모읍니다",
-    "삼성전자를 보유하면 삼성전자 소식, 달러 자산이 있으면 환율 소식처럼<br>내 자산에 영향을 주는 것만 보여드릴 예정이에요.");
+    "삼성전자를 보유하면 삼성전자 소식, 달러 자산이 있으면 환율 소식.<br>보유와 무관한 뉴스는 넣지 않습니다.");
 }
 
 // 핵심 지표 몇 개만 올린다. 카드 높이가 상단·중간 행을 끌어올리면 안 되므로
@@ -904,7 +954,7 @@ function updatedLabel(asset){
 }
 
 function comingCards(){
-  const items=[["목표 자산","목표를 정하고 진행률을 봅니다"],["월간 현금흐름","들어오고 나간 돈을 봅니다"],["보유자산 주요 이슈","내 자산과 연결된 소식만"]];
+  const items=[["목표 자산","목표를 정하고 지금 어디까지 왔는지 봅니다"],["월간 현금흐름","한 달에 들어오고 나간 돈을 봅니다"],["보유자산 주요 이슈","보유한 종목에 생긴 일만 모읍니다"]];
   return `<div class="grid grid-third" style="margin-top:var(--space-4)">${items.map(([title,note])=>
     `<div class="soon-card"><span class="pill">준비 중인 기능</span><b>${escapeHtml(title)}</b><span>${escapeHtml(note)}</span></div>`).join("")}</div>`;
 }

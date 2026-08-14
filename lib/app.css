@@ -1,11 +1,26 @@
 /* lib/app.css
-   PC 우선 셸과 다크 네이비 테마. 목업(4안 1페이지 · 7안)의 배치·색·타이포를 기준으로 삼는다.
-   홈·자산·자산 입력 세 화면이 같은 토큰을 쓰므로, 색을 바꾸려면 여기 한 곳만 고친다.
+   PC 우선 셸과 잉크 테마. 모든 화면이 같은 토큰을 쓰므로 색·활자를 바꾸려면 여기 한 곳만 고친다.
 
-   모바일 대응은 이번 범위가 아니다 — 좁은 폭에서 깨지지만 않으면 된다(맨 아래 폴백). */
+   모바일 대응은 이번 범위가 아니다 — 좁은 폭에서 깨지지만 않으면 된다(맨 아래 폴백).
+
+   ── 활자 ──────────────────────────────────────────────────────────────────
+   Hahmlet(명조)을 표제·금액에 쓴다. 통장·결산서·한국은행 통계표가 명조로 조판되고,
+   이 앱은 "모든 값이 기준일을 달고 다니는 기록"이라는 규칙을 이미 코드에 박아 뒀다.
+   그 성격에 맞는 활자가 명조다.
+
+   폰트 자체는 여기서 @import하지 않는다. 처음엔 그렇게 했는데 @import가 렌더를 막아
+   첫 페인트가 폰트 왕복만큼 밀렸고, 그 지연이 로딩 회귀 테스트를 통과시켜 버렸다
+   ("시세 도착 전에는 금액을 내지 않는다"는 검사가, 폰트 대기 동안 로딩 구간을
+   놓쳐서 통과했다). 각 화면 <head>에서 media="print" 뒤바꾸기로 비차단 로드한다.
+   폴백 체인은 반드시 유지할 것 — CDN이 막혀도 시스템 폰트로 읽히기만 하면 된다. */
 
 :root {
   color-scheme: dark;
+
+  --font-display: "Hahmlet", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
+  --font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Noto Sans KR", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --nav-w: 15.5rem;
   --page-max: 78rem;      /* 1440px 화면에서 좌우 여백이 남도록 */
@@ -20,20 +35,33 @@
   --radius-sm: .5rem; --radius-md: .75rem; --radius-lg: 1rem; --radius-round: 62.4375rem;
   --border: .0625rem;
 
-  /* 다크 네이비 */
-  --page: #0b0f1a;
-  --surface: #141b2b;
-  --surface-2: #1b2337;
-  --line: #253048;
-  --ink: #e9edf5;
-  --muted: #8b95ad;
-  --dim: #6c7794;
+  /* 잉크 그라파이트. 근-검정(#0b0f1a)에서 한 단계 올리고 청색기를 뺐다.
+     도넛 6색 대비는 이 표면에서 최저 4.30:1 — 3:1 기준을 유지한다. */
+  --page: #12131a;
+  --surface: #1a1c26;
+  --surface-2: #232634;
+  --line: #2f3342;
+  --edge: #3a3f52;        /* 카드 윗면 헤어라인 */
+  --ink: #edeef3;
+  --muted: #9398a9;
+  --dim: #70758a;
 
-  --brand: #5b7cfa;
-  --brand-soft: #1e2a4d;
-  --brand-ink: #aebeff;
+  /* 강조색을 쓰지 않는다.
+     예전 --brand(#5b7cfa)는 하락색(#5b8dee)과 ΔE 6.1로 사실상 같은 색이었다 —
+     버튼·포커스·활성 내비가 "하락"과 구별되지 않았다. 그래서 조작 가능한 것은 전부
+     무채색 본지(bone)로 표시하고, 색을 가진 것은 상승·하락·구성 6색만 남긴다.
+     이 화면에서 색은 한 가지만 뜻한다. */
+  --action: #f0ede4;
+  --action-ink: #12131a;  /* 본지 위에 얹는 글자 */
+  --action-soft: #262a38; /* 활성 항목 배경 */
 
-  /* 손익에만 색을 쓴다. 국내 관례대로 상승이 붉은색이다. */
+  /* 예전 이름을 쓰는 곳이 아직 많아 별칭으로 남긴다. 값은 위 무채색을 가리킨다. */
+  --brand: var(--action);
+  --brand-soft: var(--action-soft);
+  --brand-ink: #dde0ea;
+
+  /* 손익에만 색을 쓴다. 국내 관례대로 상승이 붉은색이다.
+     두 색 사이 ΔE 일반 42.3 · 적색맹 42.8 · 녹색맹 57.5로 색각 이상에서도 갈린다. */
   --pos: #ff6b6b;
   --neg: #5b8dee;
 
@@ -72,11 +100,21 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; background: var(--page); color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; }
+  font-family: var(--font-body); }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 p { margin: 0; }
 a { color: var(--brand-ink); }
+
+/* 표제는 명조. 본문은 고딕. 이 두 줄이 화면 전체의 목소리를 정한다. */
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
+
+/* 포커스는 어디서나 보인다. 본지색이라 어떤 표면 위에서도 대비가 확보된다. */
+:focus-visible { outline: .125rem solid var(--action); outline-offset: .125rem; }
+
+/* 날짜·코드·기간처럼 "언제·무엇" 을 가리키는 값. 문장이 아니라 표식이라 폭을 고정한다. */
+.stamp { font-family: var(--font-mono); font-size: var(--font-xs); font-variant-numeric: tabular-nums;
+  letter-spacing: .01em; }
 
 /* ---- 셸 ---- */
 .shell { display: grid; grid-template-columns: var(--nav-w) 1fr; min-height: 100vh; }
@@ -124,14 +162,43 @@ a { color: var(--brand-ink); }
 .main-inner { max-width: var(--page-max); margin: 0 auto; }
 
 .page-head { display: flex; align-items: flex-start; justify-content: space-between;
-  gap: var(--space-4); margin-bottom: var(--space-6); }
-.page-head h1 { margin: 0 0 var(--space-1); font-size: var(--font-xl); letter-spacing: -.03em; }
+  gap: var(--space-4); margin-bottom: var(--space-4); }
+.page-head h1 { margin: 0 0 var(--space-1); font-size: var(--font-xl); letter-spacing: -.02em; }
 .page-head .sub { color: var(--muted); font-size: var(--font-sm); }
+/* 눈썹은 이 화면이 어느 갈래에 속하는지를 말한다. 장식이면 뺄 것 — 갈래가 없으면 쓰지 않는다. */
+.eyebrow { margin: 0 0 var(--space-1); color: var(--dim); font-family: var(--font-mono);
+  font-size: var(--font-xs); letter-spacing: .08em; text-transform: uppercase; }
 .head-actions { display: flex; flex: none; align-items: center; gap: var(--space-2); }
 
+/* ---- 기준일 레일 ----
+   이 화면을 지배하는 기준일을 왼쪽 끝에 두고, 화면 안에 기준일이 다른 값이 있으면
+   레일 위에 눈금으로 찍는다. 앱은 이미 "날짜가 섞인 데이터를 한 시점의 스냅샷인 것처럼
+   보여주지 않는다"는 규칙을 지키고 있는데, 그 규칙을 문장이 아니라 구조로 보여주는 줄이다.
+   3개월 전 관측은 낡은 값이 아니라 그 시점의 값이므로 경고가 아니라 눈금으로 적는다. */
+.rail { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6);
+  padding-top: var(--space-3); border-top: var(--border) solid var(--line); }
+.rail-anchor { flex: none; color: var(--ink); }
+.rail-anchor b { font-family: var(--font-mono); font-weight: 500; letter-spacing: .01em; }
+.rail-anchor span { margin-left: var(--space-2); color: var(--dim); font-size: var(--font-xs); }
+.rail-marks { display: flex; min-width: 0; flex: 1; flex-wrap: wrap; gap: var(--space-2) var(--space-5);
+  justify-content: flex-end; }
+.rail-mark { display: flex; align-items: baseline; gap: var(--space-2); color: var(--muted);
+  font-size: var(--font-xs); }
+.rail-mark::before { width: var(--border); height: .625rem; flex: none; background: var(--edge); content: ""; }
+.rail-mark b { color: var(--muted); font-weight: 400; }
+.rail-mark .stamp { color: var(--dim); }
+/* 시세가 도착해 숫자가 확정되면 레일이 한 번 그어진다. 숫자 자체는 절대 움직이지 않는다 —
+   확정 전 금액을 보여주지 않는다는 규칙과 충돌한다. */
+.rail { animation: rail-draw .2s var(--ease) both; }
+@keyframes rail-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@media (prefers-reduced-motion: reduce) { .rail { animation: none; } }
+
 /* ---- 공통 부품 ---- */
+/* 카드는 떠 있는 판이 아니라 놓인 면이다. 그림자를 걷고 윗면에만 헤어라인을 남겨
+   빛이 위에서 오는 것처럼 둔다 — 이 화면의 구조재는 그림자가 아니라 선이다. */
 .card { padding: var(--space-5); border: var(--border) solid var(--line);
-  border-radius: var(--radius-lg); background: var(--surface); }
+  border-radius: var(--radius-lg); background: var(--surface);
+  box-shadow: inset 0 var(--border) 0 var(--edge); }
 /* 직계(>)로 잡으면 .chart-head 안에 든 제목이 브라우저 기본 크기로 튄다. */
 .card h2 { display: flex; align-items: baseline; gap: var(--space-2);
   margin: 0 0 var(--space-1); font-size: var(--font-md); }
@@ -139,7 +206,10 @@ a { color: var(--brand-ink); }
 .card-note { margin-top: var(--space-4); padding-top: var(--space-3);
   border-top: var(--border) solid var(--line); color: var(--dim); font-size: var(--font-xs); line-height: 1.65; }
 
+/* 격자 칸은 내용이 넓다고 늘어나지 않는다. 이걸 안 걸면 열이 8개인 보유 자산 표가
+   칸을 밀어내고, 좁은 폭에서 페이지 전체가 가로로 밀린다(실측 390px에서 310px 넘침). */
 .grid { display: grid; gap: var(--space-4); }
+.grid > *, .stack-rows > * { min-width: 0; }
 /* 목업 1행: 총자산이 넓고 나머지 둘이 같은 폭 */
 .grid-top { grid-template-columns: 1.35fr 1fr 1fr; }
 .grid-half { grid-template-columns: 1fr 1fr; }
@@ -152,9 +222,9 @@ a { color: var(--brand-ink); }
 .btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4);
   border: var(--border) solid var(--line); border-radius: var(--radius-md); background: var(--surface-2);
   color: var(--ink); font-size: var(--font-sm); font-weight: 700; text-decoration: none; }
-.btn:hover { border-color: var(--brand); }
-.btn.primary { border-color: transparent; background: var(--brand); color: #fff; }
-.btn.primary:hover { filter: brightness(1.08); }
+.btn:hover { border-color: var(--edge); background: var(--action-soft); }
+.btn.primary { border-color: transparent; background: var(--action); color: var(--action-ink); }
+.btn.primary:hover { filter: brightness(1.04); }
 .btn:disabled, .btn[aria-disabled="true"] { cursor: default; filter: none; opacity: .4; }
 
 .tabs { display: flex; gap: var(--space-1); padding: var(--space-1);
