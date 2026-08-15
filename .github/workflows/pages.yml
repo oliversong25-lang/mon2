@@ -16,7 +16,7 @@ on:
   push:
     branches: [main]
   workflow_run:
-    workflows: ["Daily domestic quotes batch", "Weekly ticker universe refresh", "Daily OECD indicators batch"]
+    workflows: ["Daily domestic quotes batch", "Weekly ticker universe refresh", "Daily OECD indicators batch", "Daily market rates batch"]
     types: [completed]
   workflow_dispatch: {}
 

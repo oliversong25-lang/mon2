@@ -1,0 +1,106 @@
+name: Daily market rates batch
+
+# 매일 바뀌는 금리만 받는다. OECD 지표 배치(indicators.yml)와 **일부러 분리했다** —
+# OECD 계열은 원천이 월·분기라 매일 돌 이유가 없고, 한쪽이 죽어도 다른 쪽은 갱신돼야
+# 한다. 시세(quotes.yml)와 종목 목록(tickers.yml)을 이미 그렇게 나눠 둔 것과 같다.
+on:
+  schedule:
+    # 17:23 KST (= 08:23 UTC). 정각을 피한다 — 예약 이벤트는 정각 슬롯이 가장 붐비고,
+    # 실제로 "0 5" 슬롯이 75분 밀린 적이 있다.
+    #
+    # 17시인 이유: ECOS 시장금리는 장 마감 후 반영되고, 미 재무부 국채 수익률은
+    # 뉴욕 15:30 ET(한국 다음 날 새벽) 호가 기준이라 전날 것이 이미 올라와 있다.
+    - cron: "23 8 * * *"
+    # 두 번째 슬롯: 21:37 KST. 앞 슬롯이 밀리거나 버려져도 스스로 메운다.
+    # 이미 최신이면 아무것도 커밋하지 않는다.
+    - cron: "37 12 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: daily-rates-batch
+  cancel-in-progress: false
+
+jobs:
+  build-daily-rates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 미 재무부와 뉴욕 연준은 키가 없다. ECOS만 인증키를 쓴다.
+      - name: Run daily rates batch
+        env:
+          ECOS_AUTH_KEY: ${{ secrets.ECOS_AUTH_KEY }}
+        run: node scripts/build-daily-rates.mjs
+
+      # 결과는 셋이다. 이 셋을 뭉치면 "아무 일도 안 한 실행"이 성공으로 읽힌다.
+      #   updated         새 금리를 받아 커밋했다
+      #   already-current 배치는 정상이었고 데이터가 이미 최신이라 커밋할 게 없었다
+      #   failed          배치가 실패했다 (이 스텝까지 오지 못한다)
+      - name: Commit refreshed rates
+        id: commit
+        run: |
+          if git diff --quiet -- data/indicators; then
+            echo "outcome=already-current" >> "$GITHUB_OUTPUT"
+            echo "::notice title=already-current::일간 금리가 이미 최신입니다 (최신 관측 $(node -p "require('./data/indicators/index-daily.json').newestPeriod")). 커밋할 변경이 없습니다."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/indicators
+            git commit -m "data: refresh daily market rates ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            git pull --rebase origin main
+            git push
+            echo "outcome=updated" >> "$GITHUB_OUTPUT"
+            echo "::notice title=updated::일간 금리를 갱신해 커밋했습니다 (최신 관측 $(node -p "require('./data/indicators/index-daily.json').newestPeriod"))."
+          fi
+
+      - name: Record outcome
+        if: always()
+        run: |
+          OUTCOME="${{ steps.commit.outputs.outcome }}"
+          if [ "${{ job.status }}" != "success" ]; then OUTCOME="failed"; fi
+          if [ -z "$OUTCOME" ]; then OUTCOME="failed"; fi
+          echo "## 일간 금리 배치 결과: $OUTCOME" >> "$GITHUB_STEP_SUMMARY"
+
+      # 예약 워크플로가 실패해도 GitHub은 아무에게도 알리지 않는다. 금리가 굳어도
+      # 화면은 멀쩡해 보이므로(값이 그대로 남아 있으므로) 신호가 없으면 아무도 모른다.
+      - name: Open a tracking issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "daily-rates-failure";
+            const title = "일간 금리 배치 실패: data/indicators 갱신 안 됨";
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: "open", labels: label,
+            });
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `${new Date().toISOString()} 실행에서 일간 금리 배치가 실패했습니다.\n\n실행 로그: ${runUrl}\n\n기존 파일은 그대로 남아 있어 화면은 계속 동작합니다. 다만 계속 실패하면 금리가 굳고, 관측일이 낡아집니다.`;
+            if (existing.length) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing[0].number, body });
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: [label] });
+            }
+
+      - name: Close the tracking issue on recovery
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "daily-rates-failure";
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: "open", labels: label,
+            });
+            for (const issue of existing) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number,
+                body: `${new Date().toISOString()} 실행에서 배치가 다시 성공했습니다. 이슈를 닫습니다.` });
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, state: "closed" });
+            }

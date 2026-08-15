@@ -39,6 +39,26 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-15 — 일간 금리 수집 (ECOS · 미 재무부 · 뉴욕 연준)
+
+- 작업자: Claude Code
+- 변경: 매일 바뀌는 금리 26계열을 받는 배치(`build-daily-rates.mjs`)와 전용 워크플로(`daily-rates.yml`)를 추가했습니다. OECD 배치와 분리했습니다 — 원천 주기가 다르고 한쪽이 죽어도 다른 쪽은 갱신돼야 합니다. FRED는 쓰지 않습니다.
+- 이유: 앱에 매일 바뀌는 경제지표가 하나도 없었습니다. OECD 계열은 원천이 월·분기라 매일 돌 이유가 없고, 국채 금리와 정책금리는 매일 바뀌는데 아예 없었습니다.
+- 검증: ECOS 키 확인 완료(아래). 배치 실측 4.4초, 실패 0건. 연속 실행으로 `updated` → `already-current` 두 결과를 확인했습니다. 전체 회귀 테스트 283건 통과.
+- 남은 일: 경제지표 탭이 아직 `index-daily.json`을 읽지 않습니다(현재 `index.json`만 읽습니다). 다음 갱신 예정일 줄(Change B)도 남았습니다 — 특일정보 API가 아직 401입니다.
+- 관련 파일: `scripts/lib/daily-rates.mjs`, `scripts/build-daily-rates.mjs`, `.github/workflows/daily-rates.yml`, `.github/workflows/pages.yml`
+
+**ECOS 키 검증**
+
+`KeyStatisticList` HTTP 200, 101개 통계 정상 반환. 오류 코드 없음. 앞서 빈 응답이 나온 것은 키 대기가 아니라 **시크릿 이름 불일치**였을 가능성이 큽니다 — 저장소는 `ECOS_AUTH_KEY`를 쓰는데 `ECOS_API_KEY`로 등록돼 있으면 `undefined`가 넘어가고 ECOS는 그걸 빈 몸통으로 돌려줍니다. 배치는 두 이름을 모두 읽습니다.
+
+**일간(D) 주기 계열**: ECOS 통계표 834개 중 일간은 7개뿐이고 그중 금리는 `722Y001`(기준금리)·`817Y002`(시장금리 일별) 둘입니다. OECD 계열은 원천이 월·분기라 일간이 구조적으로 불가능합니다.
+
+**출처 선택**
+
+- 미 국채: 재무부 XML 피드 직접. 키 없음, 미국 정부 저작물. FRED는 이걸 재배포할 뿐이라 라이선스 판단을 하나 없앴습니다.
+- 연준 정책금리: **뉴욕 연준** `markets.newyorkfed.org/api/rates/all/latest.json`. EFFR을 산출·공표하는 주체이고, 같은 행에 FOMC 목표범위(`targetRateFrom`/`targetRateTo`)가 함께 옵니다.
+
 ### 2026-08-15 — 외화·가상자산의 전일 값과 변화 문구 정리
 
 - 작업자: Claude Code
