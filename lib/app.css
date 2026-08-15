@@ -177,8 +177,10 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
    3개월 전 관측은 낡은 값이 아니라 그 시점의 값이므로 경고가 아니라 눈금으로 적는다. */
 .rail { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6);
   padding-top: var(--space-3); border-top: var(--border) solid var(--line); }
+/* 이 줄이 화면에서 날짜를 대표한다. 총자산 카드의 변화 문구는 날짜를 떼고 "전일 대비"로만
+   적으므로(그래야 "이 데이터는 그 날짜 것"으로 오해되지 않는다), 기준일은 여기서 크게 읽혀야 한다. */
 .rail-anchor { flex: none; color: var(--ink); }
-.rail-anchor b { font-family: var(--font-mono); font-weight: 500; letter-spacing: .01em; }
+.rail-anchor b { font-family: var(--font-mono); font-size: var(--font-sm); font-weight: 500; letter-spacing: .01em; }
 .rail-anchor span { margin-left: var(--space-2); color: var(--dim); font-size: var(--font-xs); }
 .rail-marks { display: flex; min-width: 0; flex: 1; flex-wrap: wrap; gap: var(--space-2) var(--space-5);
   justify-content: flex-end; }

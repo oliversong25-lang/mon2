@@ -500,6 +500,31 @@ function legacyBanner(){
 // 전일 값이 없는 자산은 0으로 때우지 않고 빼고, 몇 건을 뺐는지 화면에 적는다.
 const PRICED_GROUPS=["equity","crypto","commodity"];
 
+// 비교 시점을 어떻게 적을지.
+//
+// 카드에 날짜가 이것 하나뿐이면 "8월 12일 대비"가 "이 데이터는 8월 12일 것"으로 읽힌다.
+// 실제로 그 오해가 파이프라인이 멈췄다는 신고로 여러 번 돌아왔다. 국내 증권사들은
+// 기준일을 크게 앞세우고 변화는 날짜 없이 "전일 대비"로만 적어 이 문제를 피한다.
+//
+// 그래서 기본은 날짜 없는 "전일 대비"다. 기준선이 **직전 거래일이 아닐 때만** 날짜를
+// 적는다 — 연휴 뒤처럼 그때는 날짜가 정보를 갖는다. 주말은 정상이므로 적지 않는다.
+function changeLabel(prevDate){
+  const asOf=Valuation.asOfDate();
+  if(!prevDate||!asOf)return "직전 거래일 대비";
+  // 두 날짜 사이에 낀 평일 수. 0이면 주말만 건너뛴 것이라 직전 거래일이 맞다.
+  let weekdays=0;
+  for(let probe=addDays(prevDate,1);probe<asOf;probe=addDays(probe,1)){
+    const day=new Date(`${probe}T00:00:00Z`).getUTCDay();
+    if(day!==0&&day!==6)weekdays+=1;
+  }
+  return weekdays?`${prevDate} 대비`:"전일 대비";
+}
+
+function addDays(date,delta){
+  const ms=Date.parse(`${date}T00:00:00Z`)+delta*86400000;
+  return new Date(ms).toISOString().slice(0,10);
+}
+
 function dayChange(assets){
   let current=0,previous=0,included=0,priced=0;
   const excluded=[];
@@ -530,13 +555,19 @@ function totalCard(summary){
     const rate=move.previous?move.delta/move.previous:0;
     const tone=move.delta>0?"pos":move.delta<0?"neg":"flat";
     const mark=move.delta>0?"+":move.delta<0?"−":"";
-    // 비교 날짜는 데이터에서 온 값이다. 배치가 확정하지 못했으면 지어내지 않는다.
-    const when=move.date?`${move.date} 종가 대비`:"직전 거래일 종가 대비";
+    const when=changeLabel(move.date);
     const skipped=move.excluded.length
       ?` · 전일 종가가 없는 ${move.excluded.length}건 제외`
       :"";
+    // 가상자산은 거래소 종가가 아니라 24시간 전과 비교한다. 기준 시점이 달라 밝혀 둔다.
+    const cryptoBasis=(session.assets||[]).some(asset=>asset.group==="crypto"&&!Valuation.valuatePrevious(asset).unavailable)
+      ?"가상자산은 24시간 전 대비"
+      :"";
     change=`<div class="total-change ${tone} num">${mark}${won(Math.abs(move.delta))} (${mark}${pct(Math.abs(rate))}) · ${escapeHtml(when)}</div>
-      ${skipped?`<div class="change-note">${escapeHtml(skipped.replace(/^ · /,""))} · ${escapeHtml(move.excluded.slice(0,3).map(entry=>entry.name).join(", "))}${move.excluded.length>3?" 외":""}</div>`:""}`;
+      ${skipped||cryptoBasis?`<div class="change-note">${[
+        skipped?`${escapeHtml(skipped.replace(/^ · /,""))} · ${escapeHtml(move.excluded.slice(0,3).map(entry=>entry.name).join(", "))}${move.excluded.length>3?" 외":""}`:"",
+        cryptoBasis,
+      ].filter(Boolean).join(" · ")}</div>`:""}`;
   }
   const excluded=summary.unavailable.length
     ?`<div class="excluded">시세를 확인하지 못한 자산 ${summary.unavailable.length}건은 총자산에서 제외했어요 · ${escapeHtml(summary.unavailable.map(entry=>entry.name).join(", "))}</div>`:"";

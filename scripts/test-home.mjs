@@ -639,11 +639,38 @@ try {
     if (snapshots.length !== 1) return { ok: false, reason: `스냅샷 ${snapshots.length}건 (1건 기대)` };
     if (snapshots[0].date !== ASOF_DATE) return { ok: false, reason: `스냅샷 날짜 ${snapshots[0].date}` };
     const change = await page.locator(".total-change").textContent();
-    // 픽스처: 삼성전자 10주 +1,000 = +10,000 · 카카오 20주 -500 = -10,000 → 합계 0
-    // 하지만 "0원"이 아니라 비교 날짜가 데이터에서 온 값인지가 요점이다.
-    if (!change.includes("2026-08-06")) return { ok: false, reason: `비교 날짜가 데이터에서 오지 않음: "${change}"` };
-    if (!/종가 대비/.test(change)) return { ok: false, reason: `변화 문구: "${change}"` };
+    if (!/전일 대비/.test(change)) return { ok: false, reason: `변화 문구: "${change}"` };
     if (/내일부터/.test(change)) return { ok: false, reason: "아직 방문 이력 기준 문구가 남아 있음" };
+    return { ok: true };
+  });
+
+  // 카드에 날짜가 변화 문구 하나뿐이면 "이 데이터는 그 날짜 것"으로 읽힌다. 실제로 그
+  // 오해가 파이프라인이 멈췄다는 신고로 여러 번 돌아왔다. 기준일은 레일이 앞세우고,
+  // 변화는 날짜 없이 "전일 대비"로만 적는다.
+  await record("기준일은 레일이 앞세우고 변화는 날짜 없이 적는다", async () => {
+    const rail = await page.locator(".rail-anchor").textContent();
+    const change = await page.locator(".total-change").textContent();
+    if (!rail.includes(ASOF_DATE)) return { ok: false, reason: `레일에 기준일이 없음: "${rail}"` };
+    // 정상적인 경우(직전 거래일이 기준선)에는 변화 문구에 날짜가 없어야 한다.
+    if (/\d{4}-\d{2}-\d{2}/.test(change)) return { ok: false, reason: `변화 문구에 날짜가 남아 있음: "${change}"` };
+    return { ok: true };
+  });
+
+  // 연휴 뒤처럼 기준선이 직전 거래일이 아닐 때만 날짜를 적는다 — 그때는 날짜가 정보다.
+  await record("연휴로 기준선이 벌어지면 그때는 날짜를 적는다", async () => {
+    const labels = await page.evaluate(() => {
+      const asOf = Valuation.asOfDate();
+      return {
+        asOf,
+        normal: changeLabel("2026-08-06"),   // 08-07의 직전 거래일 — 날짜 없음
+        weekend: changeLabel("2026-08-04"),  // 08-05(수)가 비어 있음 → 평일이 낀 경우
+      };
+    });
+    if (labels.asOf !== ASOF_DATE) return { ok: false, reason: `asOf ${labels.asOf}` };
+    if (labels.normal !== "전일 대비") return { ok: false, reason: `직전 거래일인데 "${labels.normal}"` };
+    if (!labels.weekend.includes("2026-08-04")) {
+      return { ok: false, reason: `평일이 낀 경우인데 날짜가 없음: "${labels.weekend}"` };
+    }
     return { ok: true };
   });
 
@@ -735,7 +762,10 @@ try {
     }, SAMPLE_ASSETS);
     await page.reload();
     await page.waitForFunction(() => document.querySelector("svg.donut"), { timeout: 5000 });
-    const colorsOf = () => page.locator(".legend-row .swatch").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).backgroundColor));
+    // 조회와 읽기를 한 틱 안에서 한다. locator를 먼저 잡아 두면 그 사이 비동기 재렌더
+    // (지표·거시 일정 로드)로 노드가 떨어져 나가 계산 스타일이 빈 문자열로 나온다.
+    const colorsOf = () => page.evaluate(() =>
+      [...document.querySelectorAll(".legend-row .swatch")].map((node) => getComputedStyle(node).backgroundColor));
     const financial = await colorsOf();
     if (financial.length !== 6) return { ok: false, reason: `금융자산 항목 ${financial.length}개 (6개 기대)` };
     if (new Set(financial).size !== financial.length) return { ok: false, reason: `색 중복: ${financial.join(", ")}` };

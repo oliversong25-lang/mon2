@@ -443,6 +443,17 @@ async function main() {
     ? `${prevBasDt.slice(0, 4)}-${prevBasDt.slice(4, 6)}-${prevBasDt.slice(6, 8)}`
     : null;
 
+  // 전일 환율. 수출입은행에는 전일 대비 필드가 없지만 searchdate로 그날 값을 직접 준다.
+  // 비영업일에는 아무것도 주지 않으므로 fetchFxRates가 데이터가 있는 날까지 거슬러
+  // 올라간다 — "어제"라고 가정하지 않는다.
+  const prevFx = await fetchFxRates(shiftDate(fx.asOfDate, -1)).catch((error) => {
+    console.warn(`전일 환율 조회 실패, 외화 자산은 변화 계산에서 빠집니다: ${error.message}`);
+    return null;
+  });
+  if (prevFx) {
+    console.log(`전일 환율 기준일: ${prevFx.asOfDate} (통화 ${Object.keys(prevFx.rates).length}종)`);
+  }
+
   const payload = {
     asOf: asOfIso,
     // 전일 종가가 가리키는 날짜. 못 확정하면 null — 화면은 그때 "직전 거래일 대비"로
@@ -465,7 +476,13 @@ async function main() {
     // 한 시점의 스냅샷인 것처럼 내보내면 안 되므로 그룹별 기준일을 따로 적는다.
     // 앱은 이 값이 asOf보다 이르면 화면에 "며칠 전 값"이라고 밝힌다.
     cryptoAsOf: crypto.stale ? crypto.asOfDate : kstToday().replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
+    // 가상자산의 비교 기준은 거래소 전일 종가가 아니라 **24시간 전**이다. 기준 시점이
+    // 국내 종가와 다르므로 그 사실을 값과 함께 남긴다 — 화면이 뭉뚱그리지 않도록.
+    ...(crypto.prevAt ? { cryptoPrevAt: crypto.prevAt, cryptoPrevBasis: "24h" } : {}),
     rates: fx.rates,
+    // 전일 환율과 그 날짜. 없으면 키 자체를 넣지 않는다 — 외화 자산은 변화 계산에서
+    // 빠지고 화면이 그 건수를 밝힌다.
+    ...(prevFx ? { prevRates: prevFx.rates, prevRatesDate: prevFx.asOfDate } : {}),
     commodities: {
       // 전일 종가도 함께 싣는다. 없으면 키 자체를 넣지 않는다 — 0은 "변동 없음"이 된다.
       ...(gold ? { goldPerGram: gold.price } : {}),

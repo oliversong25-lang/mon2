@@ -35,6 +35,9 @@ const TRADING_DAY = shift(TODAY, -2);
 // 직전 거래일. 배치는 전일 종가가 "어느 날" 것인지 확정하려고 이 날짜에도 데이터가
 // 있는지 물어본다(주말만 건너뛰는 계산으로는 공휴일에서 틀리기 때문이다).
 const PREV_TRADING_DAY = shift(TODAY, -3);
+// 전일 환율이 가리키는 날. FX_DAY 바로 전날이 아니라 사흘 전이라, 배치가 "어제"를
+// 가정하지 않고 데이터가 있는 날까지 거슬러 올라가야만 찾을 수 있다.
+const FX_PREV_DAY = shift(TODAY, -5);
 const FX_DAY = shift(TODAY, -3); // FX lags by one more day than equities, on purpose
 
 function envelope(items, totalCount) {
@@ -68,7 +71,10 @@ const GOLD_ROWS = [withChange({ basDt: TRADING_DAY, isuNm: "금99.99_1g", itmsNm
 
 // 실측: 데이터 없는 날짜에도 result:3 한 건짜리 배열이 온다 (빈 배열이 아니다).
 function fxEnvelopeForDate(date) {
-  if (date !== FX_DAY) return [{ result: 3, cur_unit: null, cur_nm: null, ttb: null, tts: null, deal_bas_r: null, bkpr: null, yy_efee_r: null, ten_dd_efee_r: null, kftc_bkpr: null, kftc_deal_bas_r: null }];
+  // 수출입은행은 비영업일에 데이터를 주지 않고 result:3 한 건만 돌려준다(실측).
+  // FX_DAY와 FX_PREV_DAY 사이를 비워 두어, 전일 환율 조회가 "어제"를 가정하지 않고
+  // 데이터가 있는 날까지 거슬러 올라가는지 확인한다.
+  if (date !== FX_DAY && date !== FX_PREV_DAY) return [{ result: 3, cur_unit: null, cur_nm: null, ttb: null, tts: null, deal_bas_r: null, bkpr: null, yy_efee_r: null, ten_dd_efee_r: null, kftc_bkpr: null, kftc_deal_bas_r: null }];
   const padCodes = ["AED", "AUD", "BHD", "BND", "CAD", "CHF", "CNH", "DKK", "EUR", "GBP", "HKD", "IDR", "KWD", "MYR", "NOK", "NZD", "SAR", "SEK", "SGD", "THB"];
   return [
     { result: 1, cur_unit: "USD", deal_bas_r: "1,380.50" },
@@ -79,7 +85,15 @@ function fxEnvelopeForDate(date) {
 
 // 실측: 코인게코는 잘못된 ID를 줘도 HTTP 200에 빈 객체 {}를 돌려준다. cryptoMode로
 // 그 경로들을 재현한다.
-const CRYPTO_BODY = { bitcoin: { krw: 91530787 }, ethereum: { krw: 2691101 }, tether: { krw: 1416.7 } };
+// 실측(2026-08-15): include_24hr_change=true를 주면 krw_24h_change가, 
+// include_last_updated_at=true를 주면 last_updated_at(초)이 붙는다.
+//   {"bitcoin":{"krw":89263800,"krw_24h_change":-0.4293991463197649,"last_updated_at":1786774430}}
+const CRYPTO_UPDATED_AT = 1786774430;
+const CRYPTO_BODY = {
+  bitcoin: { krw: 91530787, krw_24h_change: 1.25, last_updated_at: CRYPTO_UPDATED_AT },
+  ethereum: { krw: 2691101, krw_24h_change: -0.8, last_updated_at: CRYPTO_UPDATED_AT },
+  tether: { krw: 1416.7, krw_24h_change: 0.01, last_updated_at: CRYPTO_UPDATED_AT },
+};
 function cryptoResponseFor(mode) {
   if (mode === "empty") return jsonResponse({}); // HTTP 200 + {} — 성공으로 오인되던 형태
   if (mode === "error-envelope") return jsonResponse({ status: { error_code: 429, error_message: "rate limited" } });
@@ -369,6 +383,19 @@ try {
   record("전일 종가가 종가와 함께 저장된다",
     samsung && samsung.price === 73400 && samsung.prevClose === 73000,
     JSON.stringify(samsung));
+
+  record("전일 환율이 날짜와 함께 저장된다",
+    written.prevRates && written.prevRates.USD > 0 && written.prevRatesDate === FX_PREV_DAY,
+    `${written.prevRatesDate} (기대 ${FX_PREV_DAY}) · USD ${written.prevRates && written.prevRates.USD}`);
+
+  // 비영업일 조회는 "어제"가 아니라 데이터가 있는 가장 최근 날로 내려앉아야 한다.
+  record("비영업일 환율 조회는 데이터가 있는 날까지 거슬러 올라간다",
+    written.prevRatesDate === FX_PREV_DAY && written.prevRatesDate !== shift(FX_DAY, -1),
+    `${written.prevRatesDate} · 하루 전은 ${shift(FX_DAY, -1)}로 비어 있음`);
+
+  record("가상자산의 24시간 전 값과 기준 시점이 저장된다",
+    written.crypto.BTC && written.crypto.BTC.prev > 0 && written.cryptoPrevBasis === "24h" && /^\d{4}-\d{2}-\d{2}$/.test(written.cryptoPrevAt || ""),
+    JSON.stringify({ btc: written.crypto.BTC, at: written.cryptoPrevAt, basis: written.cryptoPrevBasis }));
 
   const expectedPrev = `${PREV_TRADING_DAY.slice(0, 4)}-${PREV_TRADING_DAY.slice(4, 6)}-${PREV_TRADING_DAY.slice(6, 8)}`;
   record("전일 종가 기준일이 데이터에서 확정돼 저장된다",

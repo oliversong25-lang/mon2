@@ -55,6 +55,14 @@ export async function fetchCryptoQuotes(symbols, apiKey, { plan = "demo", fetchI
   const url = new URL(`${base}/simple/price`);
   url.searchParams.set("ids", ids.join(","));
   url.searchParams.set("vs_currencies", "krw"); // 원화를 직접 받는다 — 환율 재환산을 거치지 않는다.
+  // 24시간 전 대비 변동률. 전일 종가 필드는 없지만 이 값으로 24시간 전 가격을 되돌릴 수
+  // 있다: prev = price / (1 + change/100).
+  // 실측(2026-08-15): include_24hr_change=true를 주면 krw_24h_change가 붙는다.
+  //   {"bitcoin":{"krw":89263800,"krw_24h_change":-0.4293991463197649,"last_updated_at":1786774430}}
+  // 주의 — 이것은 거래소 전일 종가가 아니라 **24시간 롤링** 변동이다. 기준 시점이
+  // 국내 종가와 다르므로 산출물에 그 사실을 따로 적는다.
+  url.searchParams.set("include_24hr_change", "true");
+  url.searchParams.set("include_last_updated_at", "true");
 
   // 어느 API가 끊겼는지 로그에 남기고, 일시적인 네트워크 오류는 몇 번 다시 시도한다.
   const response = await fetchWithRetry("CoinGecko", url, { headers: apiKey ? { [header]: apiKey } : {} }, { fetchImpl });
@@ -72,10 +80,25 @@ export async function fetchCryptoQuotes(symbols, apiKey, { plan = "demo", fetchI
 
   const quotes = {};
   const missing = [];
+  let latestUpdatedAt = 0;
   mapped.forEach((symbol) => {
-    const price = Number(json[COINGECKO_IDS[symbol]]?.krw);
-    if (Number.isFinite(price) && price > 0) quotes[symbol] = { price, currency: "KRW" };
-    else missing.push(symbol);
+    const row = json[COINGECKO_IDS[symbol]] || {};
+    const price = Number(row.krw);
+    if (!Number.isFinite(price) || price <= 0) { missing.push(symbol); return; }
+    const quote = { price, currency: "KRW" };
+    // 변동률을 못 받으면 24시간 전 가격을 만들지 않는다. 0으로 채우면 "변동 없음"이 된다.
+    const change = Number(row.krw_24h_change);
+    if (Number.isFinite(change) && change > -100) {
+      const prev = price / (1 + change / 100);
+      if (Number.isFinite(prev) && prev > 0) quote.prev = Math.round(prev);
+    }
+    const updatedAt = Number(row.last_updated_at);
+    if (Number.isFinite(updatedAt) && updatedAt > latestUpdatedAt) latestUpdatedAt = updatedAt;
+    quotes[symbol] = quote;
   });
-  return { quotes, unmapped, missing };
+  // 24시간 전이 가리키는 한국 날짜. 없으면 null — 지어내지 않는다.
+  const prevAt = latestUpdatedAt
+    ? new Date((latestUpdatedAt - 86400) * 1000).toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" })
+    : null;
+  return { quotes, unmapped, missing, prevAt };
 }
