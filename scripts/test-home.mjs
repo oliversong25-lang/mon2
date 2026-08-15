@@ -1561,6 +1561,8 @@ try {
     try {
       const fresh = await context.newPage();
       await installTestAuth(fresh);
+      // 인덱스가 둘이다. 일간 쪽이 살아 있으면 합친 최신 관측이 신선해져 경고가 안 뜬다.
+      await fresh.route("**/data/indicators/index-daily.json", (route) => route.fulfill({ status: 404, body: "" }));
       await fresh.route("**/data/indicators/index.json", (route) => route.fulfill({
         status: 200,
         contentType: "application/json",

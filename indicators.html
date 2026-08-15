@@ -143,6 +143,12 @@ function render(){
        월간 지표는 한두 달 늦는 게 정상이지만, 이 정도면 배치가 멈췄는지 확인해야 합니다.`)
     :"";
 
+  // 인덱스 한쪽이 비면 어느 쪽인지 말한다. 한쪽만 보이면 나머지가 원래 없는 줄 안다.
+  const missing=Indicators.missingSources();
+  const missingNote=missing.length
+    ?`<div class="banner">${escapeHtml(missing.map(part=>`${part.label}을(를) 불러오지 못했어요 (${part.url}: ${part.reason})`).join(" · "))} — 아래 목록에는 나머지 출처만 들어 있습니다.</div>`
+    :"";
+
   const failures=Indicators.state.data?.failures||[];
   const failureNote=failures.length
     ?`<div class="banner">지난 수집에서 ${failures.length}건이 실패했어요 · ${escapeHtml(failures.map(f=>`${f.dataflow||f.indicator}: ${f.message}`).join(" / ").slice(0,220))}</div>`
@@ -151,6 +157,7 @@ function render(){
   Shell.mount("app","indicators",[
     head(),
     staleBanner,
+    missingNote,
     failureNote,
     controls(),
     `<div data-results>${body()}</div>`,
