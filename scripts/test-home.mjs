@@ -26,14 +26,17 @@ const ASOF_DATE = "2026-08-07";
 const QUOTES_FIXTURE = {
   asOf: `${ASOF_DATE}T00:00:00+09:00`,
   sources: { equity: "금융위원회_주식시세정보", fx: "한국수출입은행", gold: "금융위원회_일반상품시세정보", crypto: "CoinGecko" },
+  // 배치는 종가와 함께 전일 종가를 싣는다(응답의 clpr - vs). 총자산 변화는 이 값으로
+  // 계산하므로 픽스처도 같은 모양이어야 한다.
+  prevCloseDate: "2026-08-06",
   quotes: {
-    "005930": { price: 73400, currency: "KRW" }, // 삼성전자
-    "035720": { price: 52300, currency: "KRW" }, // 카카오
-    "000660": { price: 474000, currency: "KRW" }, // SK하이닉스 — 축·열 확인용
+    "005930": { price: 73400, currency: "KRW", prevClose: 72400 }, // 삼성전자 · +1,000
+    "035720": { price: 52300, currency: "KRW", prevClose: 52800 }, // 카카오 · -500
+    "000660": { price: 474000, currency: "KRW", prevClose: 474000 }, // SK하이닉스 — 축·열 확인용
   },
   crypto: { BTC: { price: 91000000, currency: "KRW" }, ETH: { price: 2700000, currency: "KRW" } },
   rates: { USD: 1380.5, JPY: 9.25 },
-  commodities: { goldPerGram: 151200 },
+  commodities: { goldPerGram: 151200, goldPerGramPrev: 150000 },
 };
 
 // 손으로 계산한 기대값 — 코드가 아니라 사람이 계산한 값과 대조하기 위해 분리해 둔다.
@@ -630,13 +633,57 @@ try {
     return url.includes("asset=") ? { ok: true } : { ok: false, reason: `이동한 URL: ${url}` };
   });
 
-  await record("첫날(스냅샷 1건)에는 변화 대신 안내를 보여준다", async () => {
+  // 변화의 기준선은 방문 이력이 아니라 시세 데이터다. 스냅샷은 추이 차트만 쓴다.
+  await record("첫날에도 전일 종가와 비교해 변화를 낸다 (스냅샷 이력과 무관)", async () => {
     const snapshots = await page.evaluate(() => session.snapshots);
     if (snapshots.length !== 1) return { ok: false, reason: `스냅샷 ${snapshots.length}건 (1건 기대)` };
     if (snapshots[0].date !== ASOF_DATE) return { ok: false, reason: `스냅샷 날짜 ${snapshots[0].date}` };
-    if (snapshots[0].total !== EXPECT.total) return { ok: false, reason: `스냅샷 총액 ${snapshots[0].total}` };
     const change = await page.locator(".total-change").textContent();
-    return change.includes("내일부터") ? { ok: true } : { ok: false, reason: `변화 문구: "${change}"` };
+    // 픽스처: 삼성전자 10주 +1,000 = +10,000 · 카카오 20주 -500 = -10,000 → 합계 0
+    // 하지만 "0원"이 아니라 비교 날짜가 데이터에서 온 값인지가 요점이다.
+    if (!change.includes("2026-08-06")) return { ok: false, reason: `비교 날짜가 데이터에서 오지 않음: "${change}"` };
+    if (!/종가 대비/.test(change)) return { ok: false, reason: `변화 문구: "${change}"` };
+    if (/내일부터/.test(change)) return { ok: false, reason: "아직 방문 이력 기준 문구가 남아 있음" };
+    return { ok: true };
+  });
+
+  // 기존 결함: 스냅샷이 총액을 담고 있어 자산을 추가하면 그 금액이 통째로 변동으로 잡혔다.
+  await record("자산을 추가해도 변화로 잡히지 않는다", async () => {
+    const before = await page.evaluate(() => dayChange(session.assets));
+    await page.evaluate(() => {
+      session.assets.push({ id: "added", group: "savings", fields: { productType: "예금", balance: 50000000 }, autoFields: {} });
+      render();
+    });
+    const after = await page.evaluate(() => dayChange(session.assets));
+    const text = await page.locator(".total-change").textContent();
+    await page.evaluate(() => {
+      session.assets = session.assets.filter((asset) => asset.id !== "added");
+      render();
+    });
+    if (after.delta !== before.delta) {
+      return { ok: false, reason: `5,000만원 예금을 넣었더니 변화가 ${before.delta} → ${after.delta}로 바뀜` };
+    }
+    if (/5,000만원/.test(text)) return { ok: false, reason: `추가한 금액이 변화로 표시됨: "${text}"` };
+    return { ok: true };
+  });
+
+  // 전일 종가가 없는 자산은 0으로 때우지 않고 빼고, 몇 건인지 밝힌다.
+  await record("전일 종가가 없는 자산은 제외하고 건수를 밝힌다", async () => {
+    const probe = await page.evaluate(() => {
+      // 가상자산은 코인게코가 전일 종가를 주지 않는다 — 제외 대상이다.
+      const btc = session.assets.find((asset) => asset.group === "crypto");
+      const result = Valuation.valuatePrevious(btc);
+      const move = dayChange(session.assets);
+      return { reason: result.reason, unavailable: result.unavailable, excluded: move.excluded.map((entry) => entry.name), delta: move.delta };
+    });
+    if (!probe.unavailable) return { ok: false, reason: "가상자산에 전일 종가가 있다고 나옴" };
+    if (!probe.excluded.length) return { ok: false, reason: "제외 목록이 비어 있음" };
+    const text = await page.locator(".total-change, .change-note").allTextContents();
+    const joined = text.join(" ");
+    if (!/제외/.test(joined)) return { ok: false, reason: `제외 건수를 밝히지 않음: ${joined}` };
+    // 0으로 더해 버리면 delta가 그 자산의 현재 평가액만큼 흔들린다.
+    if (!Number.isFinite(probe.delta)) return { ok: false, reason: `delta가 숫자가 아님: ${probe.delta}` };
+    return { ok: true };
   });
 
   await record("같은 asOf로 다시 열어도 스냅샷이 중복되지 않는다", async () => {

@@ -40,15 +40,128 @@ const KOREAEXIM_FX_URL = "https://oapi.koreaexim.go.kr/site/program/financial/ex
 const ECOS_SILVER_STAT_CODE = process.env.ECOS_SILVER_STAT_CODE || "";
 const ECOS_URL_BASE = "https://ecos.bok.or.kr/api";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 전일 종가
+//
+// 응답에는 전일 종가 필드가 없다. 있는 것은 종가(clpr)와 전일 대비(vs)뿐이라
+// 빼서 만든다:  prevClose = clpr - vs
+//
+// 문제는 vs가 정말 "전일 대비"인지를 문서로만 믿어야 한다는 점이다. 이 프로젝트에서
+// 필드명을 잘못 짚으면 예외가 아니라 **조용한 0**으로 끝난다(전일 대비가 0이면 변동
+// 없음으로 보인다). 그래서 문서를 믿는 대신 매 실행마다 응답 스스로 증명하게 한다.
+//
+// 등락률(fltRt)이 같은 행에 함께 온다. 세 필드가 문서대로라면 이 항등식이 성립한다:
+//
+//     vs / (clpr - vs) * 100  ≈  fltRt
+//
+// 한 번 눈으로 확인하는 것보다 강하다 — 매 실행마다 의미를 검증하고, 제공처가 나중에
+// 조용히 의미를 바꿔도 잡힌다.
+//
+// 허용 오차: fltRt는 소수 둘째 자리에서 반올림돼 온다(실제 응답이 ".7" "-.24" 같은
+// 모양이다). 반올림만으로 최대 ±0.005%p가 벌어진다. 2026-08-13 실측으로 네 출처의
+// 최대 오차가 정확히 그 경계였다 — 주식 0.00495 · ETF 0.00500 · ETN 0.00500 ·
+// 금 0.00059 %p. 절대 오차 0.02%p(측정 최대치의 4배)와 상대 오차 1% 중 느슨한 쪽을
+// 쓴다. 반올림은 넉넉히 덮으면서, 필드가 뒤바뀌거나 의미가 달라지는 경우는
+// 오차가 자릿수로 벌어지므로 확실히 잡힌다.
+const FLT_RT_ABS_TOLERANCE = 0.02;   // %p
+const FLT_RT_REL_TOLERANCE = 0.01;   // 1%
+
+// 검사할 표본 수. 전 종목을 다 보는 것은 낭비이고, 한두 건만 보면 우연히 맞을 수 있다.
+const IDENTITY_SAMPLE = 200;
+
+class QuoteFieldError extends Error {
+  constructor(message, rows) {
+    super(message);
+    this.name = "QuoteFieldError";
+    this.rows = rows;
+  }
+}
+
+// 한 행이 항등식을 만족하는지. 검사할 수 없는 행은 null(표본에서 제외).
+function checkIdentity(row) {
+  const clpr = Number(row.clpr);
+  const vs = Number(row.vs);
+  const fltRt = Number(row.fltRt);
+  if (!Number.isFinite(clpr) || !Number.isFinite(vs) || !Number.isFinite(fltRt)) return null;
+  const prev = clpr - vs;
+  // 전일 종가가 0이면 신규 상장 등으로 등락률이 정의되지 않는다.
+  if (!(prev > 0)) return null;
+  // 상한가·하한가 없이 변동이 0인 행은 항등식이 0=0이라 정보가 없다.
+  if (vs === 0 && fltRt === 0) return null;
+
+  const derived = (vs / prev) * 100;
+  const gap = Math.abs(derived - fltRt);
+  const tolerance = Math.max(FLT_RT_ABS_TOLERANCE, Math.abs(fltRt) * FLT_RT_REL_TOLERANCE);
+  return { ok: gap <= tolerance, derived, gap, tolerance, prev };
+}
+
+// 표본을 검사한다. 하나라도 어긋나면 배치를 멈추고 원본 행을 통째로 찍는다 —
+// 기본값으로 때우거나 0을 쓰면 화면에는 "변동 없음"으로 보인다.
+function assertPreviousCloseFields(label, rows) {
+  const sample = rows.slice(0, IDENTITY_SAMPLE);
+  const checked = [];
+  const failed = [];
+  sample.forEach((row) => {
+    const result = checkIdentity(row);
+    if (!result) return;
+    checked.push(result);
+    if (!result.ok) failed.push({ row, result });
+  });
+
+  // 던지기 전에 원본 행을 통째로 찍는다. 예외 메시지만으로는 무엇이 달라졌는지
+  // 알 수 없고, 이 검사가 걸리는 날은 대개 제공처가 조용히 무언가를 바꾼 날이다.
+  const dump = (rows) => rows.forEach((row, index) => {
+    console.error(`  [${label}] 원본 행 ${index + 1}: ${JSON.stringify(row)}`);
+  });
+
+  if (!checked.length) {
+    // 검사할 수 있는 행이 하나도 없으면 필드가 없거나 이름이 바뀐 것이다.
+    const first = sample[0];
+    const message = `[${label}] 전일 종가 검증 불가: clpr·vs·fltRt를 모두 가진 행이 표본 ${sample.length}건 중 0건입니다. 필드명이 바뀌었는지 아래 원본 행을 확인하세요.`;
+    console.error(message);
+    dump(first ? [first] : []);
+    throw new QuoteFieldError(message, first ? [first] : []);
+  }
+
+  if (failed.length) {
+    const rows = failed.slice(0, 5).map((entry) => entry.row);
+    const message = `[${label}] 전일 대비(vs)·등락률(fltRt) 항등식이 깨졌습니다: 검사 ${checked.length}건 중 ${failed.length}건 불일치. vs가 '전일 대비'가 아니거나 제공처가 의미를 바꿨을 수 있습니다. 전일 종가를 만들지 않고 중단합니다.`;
+    console.error(message);
+    failed.slice(0, 5).forEach((entry, index) => {
+      console.error(`  [${label}] 불일치 ${index + 1}: 계산 ${entry.result.derived.toFixed(4)}%p vs 응답 ${entry.row.fltRt}%p (오차 ${entry.result.gap.toFixed(4)}, 허용 ${entry.result.tolerance.toFixed(4)})`);
+    });
+    dump(rows);
+    throw new QuoteFieldError(message, rows);
+  }
+
+  const worst = checked.reduce((max, entry) => (entry.gap > max.gap ? entry : max), checked[0]);
+  console.log(`[${label}] 전일 종가 항등식 통과: 표본 ${sample.length}건 중 검사 ${checked.length}건 · 최대 오차 ${worst.gap.toFixed(4)}%p (허용 ${worst.tolerance.toFixed(4)}%p)`);
+  return { checked: checked.length, sampled: sample.length, worstGap: worst.gap };
+}
+
+// 검증을 통과한 행에서 전일 종가를 만든다. 못 만들면 null — 0이 아니다.
+function previousCloseOf(row) {
+  const clpr = Number(row.clpr);
+  const vs = Number(row.vs);
+  if (!Number.isFinite(clpr) || !Number.isFinite(vs)) return null;
+  const prev = clpr - vs;
+  return prev > 0 ? prev : null;
+}
+
 async function fetchStockQuotes(basDt) {
   const rows = await fetchAll(STOCK_URL, { basDt }, DATA_GO_KR_KEY);
   if (rows[0]) console.log("[raw-sample] stock:", JSON.stringify(rows[0]));
+  assertPreviousCloseFields("주식시세정보", rows);
   const quotes = {};
   rows.forEach((row) => {
     const code = normalizeKrCode(row.srtnCd, row.isinCd);
     const price = Number(row.clpr);
     if (!code || !Number.isFinite(price) || price <= 0) return;
-    quotes[code] = { price, currency: "KRW" };
+    const prevClose = previousCloseOf(row);
+    // 전일 종가를 못 만들면 넣지 않는다. 0으로 채우면 화면에 "변동 없음"으로 보인다.
+    quotes[code] = prevClose === null
+      ? { price, currency: "KRW" }
+      : { price, currency: "KRW", prevClose };
   });
   return quotes;
 }
@@ -66,12 +179,18 @@ async function fetchEtfEtnQuotes(basDt) {
   ]);
   if (etf[0]) console.log("[raw-sample] etf:", JSON.stringify(etf[0]));
   if (etn[0]) console.log("[raw-sample] etn:", JSON.stringify(etn[0]));
+  // 출처마다 따로 검증한다 — 필드가 같으리라 넘겨짚지 않는다.
+  if (etf.length) assertPreviousCloseFields("증권상품시세정보(ETF)", etf);
+  if (etn.length) assertPreviousCloseFields("증권상품시세정보(ETN)", etn);
   const quotes = {};
   [...etf, ...etn].forEach((row) => {
     const code = normalizeKrCode(row.srtnCd, row.isinCd);
     const price = Number(row.clpr);
     if (!code || !Number.isFinite(price) || price <= 0) return;
-    quotes[code] = { price, currency: "KRW" };
+    const prevClose = previousCloseOf(row);
+    quotes[code] = prevClose === null
+      ? { price, currency: "KRW" }
+      : { price, currency: "KRW", prevClose };
   });
   return quotes;
 }
@@ -87,7 +206,11 @@ async function fetchGoldPerGram(basDt) {
   console.log("[raw-sample] gold:", JSON.stringify(rows[0]));
   const gram = rows.find((row) => /1\s*g/i.test(row.itmsNm || row.isuNm || "")) || rows[0];
   const price = Number(gram.clpr);
-  return Number.isFinite(price) && price > 0 ? Math.round(price) : null;
+  if (!Number.isFinite(price) || price <= 0) return null;
+  // 금도 같은 항등식으로 따로 검증한다. 이 출처만 필드가 다를 수 있다.
+  assertPreviousCloseFields("일반상품시세정보(금)", rows);
+  const prevClose = previousCloseOf(gram);
+  return { price: Math.round(price), prevClose: prevClose === null ? null : Math.round(prevClose) };
 }
 
 // 데이터 없는 날짜(주말 등)에도 result:3("인증코드 오류") 한 건짜리 배열이 오고,
@@ -263,7 +386,7 @@ async function main() {
   const stockBasDt = await resolveLatestBasDt(STOCK_URL, {}, DATA_GO_KR_KEY);
   const previous = await loadPrevious();
   const previousQuoteCount = previous ? Object.keys(previous.quotes || {}).length : null;
-  const [stockQuotes, etfEtnQuotes, goldPerGram, fx, tickerCodes, crypto] = await Promise.all([
+  const [stockQuotes, etfEtnQuotes, gold, fx, tickerCodes, crypto] = await Promise.all([
     fetchStockQuotes(stockBasDt),
     fetchEtfEtnQuotes(stockBasDt),
     fetchGoldPerGram(stockBasDt),
@@ -305,12 +428,30 @@ async function main() {
   const olderBasDt = stockBasDt < fx.asOfDate ? stockBasDt : fx.asOfDate;
   const asOfIso = `${olderBasDt.slice(0, 4)}-${olderBasDt.slice(4, 6)}-${olderBasDt.slice(6, 8)}T00:00:00+09:00`;
 
+  // 전일 종가가 "어느 날"인지. 응답은 그걸 말해 주지 않고 clpr과 vs만 준다.
+  // 주말만 건너뛰는 계산으로는 공휴일에서 틀리므로, 기준일 하루 전부터 데이터가
+  // 있는 날까지 실제로 물어봐 직전 거래일을 확정한다. 화면이 "8월 12일 대비"라고
+  // 적으려면 그 날짜가 추정이 아니라 데이터에서 나온 값이어야 한다.
+  const prevBasDt = await resolveLatestBasDt(STOCK_URL, {}, DATA_GO_KR_KEY, {
+    startDate: shiftDate(stockBasDt, -1),
+    maxLookback: 5,
+  }).catch((error) => {
+    console.warn(`직전 거래일 확인 실패: ${error.message}`);
+    return null;
+  });
+  const prevCloseDate = prevBasDt
+    ? `${prevBasDt.slice(0, 4)}-${prevBasDt.slice(4, 6)}-${prevBasDt.slice(6, 8)}`
+    : null;
+
   const payload = {
     asOf: asOfIso,
+    // 전일 종가가 가리키는 날짜. 못 확정하면 null — 화면은 그때 "직전 거래일 대비"로
+    // 적고 날짜를 지어내지 않는다.
+    prevCloseDate,
     sources: {
       equity: "금융위원회_주식시세정보",
       etf: "금융위원회_증권상품시세정보",
-      gold: goldPerGram ? "금융위원회_일반상품시세정보" : null,
+      gold: gold ? "금융위원회_일반상품시세정보" : null,
       silver: silverPerGram ? "한국은행 ECOS" : null,
       fx: "한국수출입은행",
       // 코인게코 약관이 요구하는 출처 표기. 화면에도 "Data provided by CoinGecko"로 뜬다.
@@ -326,7 +467,9 @@ async function main() {
     cryptoAsOf: crypto.stale ? crypto.asOfDate : kstToday().replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
     rates: fx.rates,
     commodities: {
-      ...(goldPerGram ? { goldPerGram } : {}),
+      // 전일 종가도 함께 싣는다. 없으면 키 자체를 넣지 않는다 — 0은 "변동 없음"이 된다.
+      ...(gold ? { goldPerGram: gold.price } : {}),
+      ...(gold && gold.prevClose ? { goldPerGramPrev: gold.prevClose } : {}),
       ...(silverPerGram ? { silverPerGram } : {}),
     },
   };
@@ -336,7 +479,7 @@ async function main() {
     quoteCount,
     matches,
     rateCount,
-    goldPerGram,
+    goldPerGram: gold ? gold.price : null,
     asOfIso,
     previousQuoteCount,
     unlistedQuoteCount,
@@ -345,12 +488,12 @@ async function main() {
     expectedBasDt: previousBusinessDay(kstToday()),
   });
 
-  console.log(`asOf: ${payload.asOf}`);
+  console.log(`asOf: ${payload.asOf} · 전일 종가 기준일: ${payload.prevCloseDate || "확인 불가"}`);
   console.log(formatMatch("국내 주식", matches.stock));
   console.log(formatMatch("ETF", matches.etf));
   console.log(formatMatch("ETN", matches.etn));
   console.log(`국내 주식·ETF·ETN 시세 확보: ${quoteCount.toLocaleString("ko-KR")}건 (종목 목록에 없는 코드 ${unlistedQuoteCount.toLocaleString("ko-KR")}건 포함)`);
-  console.log(`금: ${goldPerGram ? `${goldPerGram.toLocaleString("ko-KR")}원/g` : "확인 불가"}`);
+  console.log(`금: ${gold ? `${gold.price.toLocaleString("ko-KR")}원/g (전일 ${gold.prevClose ? gold.prevClose.toLocaleString("ko-KR") + "원" : "확인 불가"})` : "확인 불가"}`);
   console.log(`은: ${silverPerGram ? `${silverPerGram.toLocaleString("ko-KR")}원/g` : "확인 불가"}`);
   console.log(`환율: ${rateCount}개 통화`);
   console.log(

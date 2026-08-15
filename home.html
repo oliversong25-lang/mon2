@@ -27,6 +27,8 @@
       font-weight:500; letter-spacing:0; vertical-align:.1em; }
     .total-change { margin-top:var(--space-2); font-size:var(--font-sm); font-weight:700; }
     .total-change.flat { color:var(--muted); font-weight:600; }
+    /* 전일 종가가 없어 변화 계산에서 빠진 자산. 조용히 0으로 넣지 않는다. */
+    .change-note { margin-top:var(--space-1); color:var(--dim); font-size:var(--font-xs); line-height:1.5; }
     .split { margin-top:var(--space-5); padding-top:var(--space-4); border-top:var(--border) solid var(--line); }
     .split-row { display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-2); font-size:var(--font-sm); }
     .split-row + .split-row { margin-top:var(--space-2); }
@@ -486,16 +488,55 @@ function legacyBanner(){
   return `<div class="banner">예전 형식(v${escapeHtml(String(sessionState.schema ?? "?"))})으로 저장된 기록에서 자산 ${sessionState.assets.length}건을 불러왔어요. 원본은 지우지 않고 그대로 두었고, 이 화면에서는 새 기록(추이 등)을 저장하지 않습니다.</div>`;
 }
 
+// 총자산 변화. 기준선을 방문 이력이 아니라 시세 데이터에서 뽑는다.
+//
+// 예전에는 이 브라우저가 마지막으로 본 스냅샷과 비교했다. 그러면 두 가지가 섞인다.
+// 며칠 만에 열면 며칠치 변화가 나오고(배포가 막혀 asOf가 08-07에 멈춰 있던 엿새 뒤
+// 08-12로 뛰자 "8월 7일 대비"가 찍혔다), 자산을 하나 추가하면 그 금액이 통째로
+// 변동으로 잡혔다(예금 5,000만원을 넣으면 5,000만원이 오른 것처럼 보인다).
+//
+// 지금은 **지금 들고 있는 자산을 전일 종가로 다시 평가**해 그 차이를 낸다. 자산을
+// 더하거나 빼면 양쪽이 같이 움직이므로 변동으로 잡히지 않고, 남는 것은 가격뿐이다.
+// 전일 값이 없는 자산은 0으로 때우지 않고 빼고, 몇 건을 뺐는지 화면에 적는다.
+const PRICED_GROUPS=["equity","crypto","commodity"];
+
+function dayChange(assets){
+  let current=0,previous=0,included=0,priced=0;
+  const excluded=[];
+  (assets||[]).forEach(asset=>{
+    const now=Valuation.valuate(asset);
+    const then=Valuation.valuatePrevious(asset);
+    if(now.unavailable||then.unavailable){
+      excluded.push({name:Portfolio.assetName(asset),reason:then.unavailable?then.reason:now.reason});
+      return;
+    }
+    current+=now.krw;previous+=then.krw;included+=1;
+    // 시세로 움직이는 자산이 하나도 안 들어오면 차이는 언제나 0이다. 그 0을
+    // "변동 없음"으로 내보내면 모르는 것을 아는 것처럼 보여주는 셈이다.
+    if(PRICED_GROUPS.includes(asset.group))priced+=1;
+  });
+  if(!included)return null;
+  return {delta:current-previous,previous,included,priced,excluded,date:Valuation.prevCloseDate()};
+}
+
 function totalCard(summary){
-  const snapshots=session.snapshots||[];
-  const previous=snapshots.length>1?snapshots[snapshots.length-2]:null;
-  let change=`<div class="total-change flat">오늘이 첫 기록이에요 · 내일부터 변화가 쌓입니다</div>`;
-  if(previous){
-    const delta=summary.total-previous.total;
-    const rate=previous.total?delta/previous.total:0;
-    const tone=delta>0?"pos":delta<0?"neg":"flat";
-    const mark=delta>0?"+":delta<0?"−":"";
-    change=`<div class="total-change ${tone} num">${mark}${won(Math.abs(delta))} (${mark}${pct(Math.abs(rate))}) · ${previous.date} 대비</div>`;
+  const move=dayChange(session.assets);
+  let change=`<div class="total-change flat">전일 종가와 비교할 수 있는 자산이 없어요</div>`;
+  if(move&&!move.priced){
+    // 시세가 붙는 자산이 전부 빠졌다. 0원이라고 적으면 "그대로였다"로 읽힌다.
+    change=`<div class="total-change flat">시세가 붙는 자산의 전일 종가가 없어 변화를 계산하지 못했어요</div>
+      ${move.excluded.length?`<div class="change-note">${escapeHtml(move.excluded.slice(0,3).map(entry=>`${entry.name}(${entry.reason})`).join(", "))}${move.excluded.length>3?" 외":""}</div>`:""}`;
+  }else if(move){
+    const rate=move.previous?move.delta/move.previous:0;
+    const tone=move.delta>0?"pos":move.delta<0?"neg":"flat";
+    const mark=move.delta>0?"+":move.delta<0?"−":"";
+    // 비교 날짜는 데이터에서 온 값이다. 배치가 확정하지 못했으면 지어내지 않는다.
+    const when=move.date?`${move.date} 종가 대비`:"직전 거래일 종가 대비";
+    const skipped=move.excluded.length
+      ?` · 전일 종가가 없는 ${move.excluded.length}건 제외`
+      :"";
+    change=`<div class="total-change ${tone} num">${mark}${won(Math.abs(move.delta))} (${mark}${pct(Math.abs(rate))}) · ${escapeHtml(when)}</div>
+      ${skipped?`<div class="change-note">${escapeHtml(skipped.replace(/^ · /,""))} · ${escapeHtml(move.excluded.slice(0,3).map(entry=>entry.name).join(", "))}${move.excluded.length>3?" 외":""}</div>`:""}`;
   }
   const excluded=summary.unavailable.length
     ?`<div class="excluded">시세를 확인하지 못한 자산 ${summary.unavailable.length}건은 총자산에서 제외했어요 · ${escapeHtml(summary.unavailable.map(entry=>entry.name).join(", "))}</div>`:"";

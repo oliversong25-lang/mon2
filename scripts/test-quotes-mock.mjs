@@ -32,6 +32,9 @@ function shift(yyyymmdd, days) {
 }
 // pretend the most recent trading day is 2 days back (simulates a weekend gap)
 const TRADING_DAY = shift(TODAY, -2);
+// 직전 거래일. 배치는 전일 종가가 "어느 날" 것인지 확정하려고 이 날짜에도 데이터가
+// 있는지 물어본다(주말만 건너뛰는 계산으로는 공휴일에서 틀리기 때문이다).
+const PREV_TRADING_DAY = shift(TODAY, -3);
 const FX_DAY = shift(TODAY, -3); // FX lags by one more day than equities, on purpose
 
 function envelope(items, totalCount) {
@@ -40,21 +43,28 @@ function envelope(items, totalCount) {
 
 const STOCK_COUNT = 4200;
 // 4200 synthetic stock rows so pagination (numOfRows=1000) actually kicks in (5 pages).
-const STOCK_ROWS = Array.from({ length: STOCK_COUNT }, (_, i) => ({
+// 실제 응답은 종가(clpr)와 함께 전일 대비(vs)·등락률(fltRt)을 준다. 전일 종가 필드는
+// 없어서 clpr-vs로 만든다. mock도 같은 모양이어야 배치의 검증을 지나간다.
+// fltRt는 제공처처럼 소수 둘째 자리로 반올림해 넣는다.
+function withChange(row, vs) {
+  const clpr = Number(row.clpr);
+  const prev = clpr - vs;
+  return { ...row, vs: String(vs), fltRt: ((vs / prev) * 100).toFixed(2) };
+}
+
+const STOCK_ROWS = Array.from({ length: STOCK_COUNT }, (_, i) => withChange({
   basDt: TRADING_DAY,
   srtnCd: String(600000 + i),
   isinCd: `KR7${String(600000 + i)}00`,
   itmsNm: `테스트종목${i}`,
   clpr: String(10000 + i),
   mrktTotAmt: String(1000000 + i),
-}));
-STOCK_ROWS[0].srtnCd = "005930"; // 삼성전자 자리에 대표 케이스 하나 심어둔다
-STOCK_ROWS[0].isinCd = "KR7005930003";
-STOCK_ROWS[0].clpr = "73400";
+}, i % 2 === 0 ? 100 : -50));
+STOCK_ROWS[0] = withChange({ ...STOCK_ROWS[0], srtnCd: "005930", isinCd: "KR7005930003", clpr: "73400" }, 400);
 
-const ETF_ROWS = [{ basDt: TRADING_DAY, srtnCd: "069500", isinCd: "KR7069500007", itmsNm: "KODEX 200", clpr: "42350", mrktTotAmt: "64253000000" }];
+const ETF_ROWS = [withChange({ basDt: TRADING_DAY, srtnCd: "069500", isinCd: "KR7069500007", itmsNm: "KODEX 200", clpr: "42350", mrktTotAmt: "64253000000" }, 150)];
 const ETN_ROWS = [];
-const GOLD_ROWS = [{ basDt: TRADING_DAY, isuNm: "금99.99_1g", itmsNm: "금99.99_1g", clpr: "151200" }];
+const GOLD_ROWS = [withChange({ basDt: TRADING_DAY, isuNm: "금99.99_1g", itmsNm: "금99.99_1g", clpr: "151200" }, -800)];
 
 // 실측: 데이터 없는 날짜에도 result:3 한 건짜리 배열이 온다 (빈 배열이 아니다).
 function fxEnvelopeForDate(date) {
@@ -97,7 +107,9 @@ function makeFetchMock({ stockRows = STOCK_ROWS, cryptoMode = "ok" } = {}) {
       const isProbe = numOfRows === 1;
 
       if (url.pathname.includes("GetStockSecuritiesInfoService")) {
-        const rows = basDt === TRADING_DAY ? stockRows : [];
+        const rows = basDt === TRADING_DAY ? stockRows
+          : basDt === PREV_TRADING_DAY ? stockRows.slice(0, 1)
+          : [];
         if (isProbe) return jsonResponse(envelope(rows.slice(0, 1), rows.length));
         const start = (pageNo - 1) * numOfRows;
         return jsonResponse(envelope(rows.slice(start, start + numOfRows), rows.length));
@@ -343,6 +355,83 @@ try {
 
   // 인증키는 로그에 남으면 안 된다 — 공개 저장소의 Actions 로그로 새어 나간다.
   record("오류 메시지에 인증키가 노출되지 않는다", !/serviceKey=test-key|authkey=test-key/.test(joined), joined.slice(0, 240));
+// ===== 전일 종가 =====
+//
+// 응답에 전일 종가 필드가 없어 clpr-vs로 만든다. 문제는 vs가 정말 "전일 대비"인지를
+// 문서로만 믿어야 한다는 것인데, 이 프로젝트에서 필드명을 잘못 짚으면 예외가 아니라
+// 조용한 0으로 끝난다(전일 대비 0 = 변동 없음). 그래서 같은 행의 등락률(fltRt)로
+// 매 실행마다 의미를 검증한다:  vs / (clpr - vs) * 100 ≈ fltRt
+{
+  await runBatch();
+  const written = JSON.parse(await readFile(QUOTES_PATH, "utf8"));
+
+  const samsung = written.quotes["005930"];
+  record("전일 종가가 종가와 함께 저장된다",
+    samsung && samsung.price === 73400 && samsung.prevClose === 73000,
+    JSON.stringify(samsung));
+
+  const expectedPrev = `${PREV_TRADING_DAY.slice(0, 4)}-${PREV_TRADING_DAY.slice(4, 6)}-${PREV_TRADING_DAY.slice(6, 8)}`;
+  record("전일 종가 기준일이 데이터에서 확정돼 저장된다",
+    written.prevCloseDate === expectedPrev,
+    `${written.prevCloseDate} (기대 ${expectedPrev})`);
+
+  record("금도 전일 종가를 갖는다",
+    written.commodities.goldPerGram === 151200 && written.commodities.goldPerGramPrev === 152000,
+    JSON.stringify(written.commodities));
+}
+
+// 항등식이 깨지면 기본값으로 때우지 않고 배치를 멈춘다. 원본 행을 통째로 찍어야
+// 무엇이 달라졌는지 다음 사람이 바로 본다.
+{
+  const corrupted = STOCK_ROWS.map((row) => ({ ...row }));
+  // 한 행만 vs를 뒤집는다 — 값 자체는 그럴듯하고 fltRt와만 어긋난다.
+  corrupted[5] = { ...corrupted[5], vs: "-999" };
+
+  const logs = [];
+  const originalError = console.error;
+  const originalLog = console.log;
+  console.error = (...args) => logs.push(args.join(" "));
+  console.log = () => {};
+  const before = JSON.parse(await readFile(QUOTES_PATH, "utf8"));
+  const { exitCode } = await runBatch({ stockRows: corrupted });
+  console.error = originalError;
+  console.log = originalLog;
+  const after = JSON.parse(await readFile(QUOTES_PATH, "utf8"));
+  const joined = logs.join(" | ");
+
+  record("항등식이 깨지면 배치가 실패로 끝난다", exitCode === 1, `exitCode=${exitCode}`);
+  record("어느 출처인지 이름을 밝힌다", /주식시세정보/.test(joined), joined.slice(0, 200));
+  record("원본 행을 통째로 찍는다",
+    /"srtnCd"\s*:\s*"600005"/.test(joined) && /"fltRt"/.test(joined) && /"vs"\s*:\s*"-999"/.test(joined),
+    joined.slice(0, 400));
+  record("실패했으므로 기존 산출물을 건드리지 않는다",
+    after.asOf === before.asOf && JSON.stringify(after.quotes["005930"]) === JSON.stringify(before.quotes["005930"]),
+    `asOf ${before.asOf} -> ${after.asOf}`);
+  record("0으로 때우지 않는다 (전일 종가를 0으로 쓴 종목이 없다)",
+    !Object.values(after.quotes).some((quote) => quote.prevClose === 0),
+    "prevClose가 0인 종목이 있음");
+}
+
+// 전일 종가를 만들 수 없는 종목은 빼고 센다. 0으로 채우면 화면에 "변동 없음"으로 보인다.
+{
+  const missing = STOCK_ROWS.map((row) => ({ ...row }));
+  // vs·fltRt가 아예 없는 행(신규 상장 등). 항등식 검사는 이런 행을 표본에서 제외하므로
+  // 배치는 계속 가고, 그 종목만 전일 종가 없이 저장돼야 한다.
+  delete missing[1].vs;
+  delete missing[1].fltRt;
+  await runBatch({ stockRows: missing });
+  const written = JSON.parse(await readFile(QUOTES_PATH, "utf8"));
+  const code = missing[1].srtnCd;
+  const quote = written.quotes[code];
+  record("전일 종가를 못 만든 종목은 키 자체를 넣지 않는다",
+    quote && quote.price > 0 && !("prevClose" in quote),
+    JSON.stringify(quote));
+  record("전일 종가가 있는 종목은 그대로 저장된다",
+    written.quotes["005930"] && written.quotes["005930"].prevClose === 73000,
+    JSON.stringify(written.quotes["005930"]));
+}
+
+
 } finally {
   if (originalTickersKr !== null) await writeFile(TICKERS_KR_PATH, originalTickersKr, "utf8");
   else await rm(TICKERS_KR_PATH, { force: true });
@@ -350,6 +439,7 @@ try {
   else await rm(QUOTES_PATH, { force: true });
   await rm(`${QUOTES_PATH}.tmp`, { force: true });
 }
+
 
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} passed`);
