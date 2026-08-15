@@ -52,7 +52,9 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 `include_24hr_change=true`를 주면 `krw_24h_change`가, `include_last_updated_at=true`를 주면 `last_updated_at`(초)이 붙습니다.
 
-
+```json
+{"bitcoin":{"krw":89263800,"krw_24h_change":-0.4293991463197649,"last_updated_at":1786774430}}
+```
 
 24시간 전 가격은 `price / (1 + change/100)`으로 되돌립니다. **이것은 거래소 전일 종가가 아니라 24시간 롤링 값입니다** — 기준 시점이 국내 종가와 달라서 `cryptoPrevBasis: "24h"`로 산출물에 남기고, 화면도 가상자산이 포함되면 "가상자산은 24시간 전 대비"라고 한 줄 적습니다.
 
