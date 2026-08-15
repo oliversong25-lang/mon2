@@ -349,10 +349,10 @@ async function run() {
     const opens = (html.match(/<script/g) || []).length;
     const closes = (html.match(/<\/script>/g) || []).length;
     if (opens !== closes) return { ok: false, reason: `opens=${opens} closes=${closes}` };
-    if (opens !== 6) return { ok: false, reason: `expected 6 script tags (auth 3 + session.js + valuation.js + inline app), got ${opens}` };
+    if (opens !== 7) return { ok: false, reason: `expected 7 script tags (auth 3 + fetch-data.js + session.js + valuation.js + inline app), got ${opens}` };
     // 캐시 무효화용 쿼리스트링(?v=...)이 붙을 수 있으므로 경로만 보고 판단한다 —
     // 태그 문자열을 그대로 비교하면 버전을 올릴 때마다 이 검사가 깨진다.
-    for (const src of ["lib/supabase-config.js", "lib/account-store.js", "lib/auth-guard.js", "lib/session.js", "lib/valuation.js"]) {
+    for (const src of ["lib/supabase-config.js", "lib/account-store.js", "lib/auth-guard.js", "lib/fetch-data.js", "lib/session.js", "lib/valuation.js"]) {
       if (!new RegExp(`<script src="${src.replace(/[.]/g, "\\.")}(\\?[^"]*)?"></script>`).test(html)) {
         return { ok: false, reason: `${src} script tag not found` };
       }

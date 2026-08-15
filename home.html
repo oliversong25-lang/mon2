@@ -176,6 +176,7 @@
 </head>
 <body>
 <div id="app"></div>
+<script src="lib/fetch-data.js?v=20260815-1"></script>
 <script src="lib/session.js"></script>
 <script src="lib/valuation.js"></script>
 <script src="lib/portfolio.js"></script>
@@ -307,8 +308,26 @@ function trendChart(snapshots){
     ${gapDays?`<div class="chart-note">${gapDays}일치 기록이 비어 있어요 · 그 구간은 점선입니다</div>`:""}`;
 }
 
+// 시세가 낡아 보일 때, 그게 배치가 멈춘 것인지 이 브라우저가 옛 사본을 들고 있는
+// 것인지 구별해 말한다. 둘은 원인도 대처도 다른데 화면에는 똑같이 보인다 —
+// 실제로 그 구별이 안 돼 파이프라인 쪽을 며칠 뒤졌다.
+function cacheNotice(){
+  const info=Valuation.loadInfo&&Valuation.loadInfo();
+  if(!info||!info.known||!info.fromCache)return null;
+  const asOf=Valuation.asOfDate();
+  if(!asOf)return null;
+  const days=daysBetween(asOf,kstToday());
+  if(days<2)return null;   // 주말·공휴일이면 이틀은 정상이다
+  return {
+    text:`시세가 ${asOf} 기준이고, 이 값은 서버가 아니라 브라우저 캐시에서 나왔어요`,
+    meta:"새로고침해도 같으면 배치 쪽 문제입니다. 바뀌면 캐시 문제였습니다",
+  };
+}
+
 function checkItems(summary){
   const items=[];
+  const cached=cacheNotice();
+  if(cached)items.push(cached);
   // 날짜가 섞인 데이터를 한 시점의 스냅샷인 것처럼 보여주지 않는다. 코인게코가 실패한
   // 날 배치는 국내 시세만 갱신하고 코인 값은 직전 것을 들고 가는데, 그 사실을 밝히지
   // 않으면 화면의 모든 숫자가 같은 날 기준인 것처럼 읽힌다.
@@ -524,8 +543,8 @@ let scheduleCountry="all";     // all | KOR | USA
 let scheduleImportance="all";  // all | high | medium
 
 function loadMacroCalendar(){
-  return fetch(new URL(MACRO_URL,document.baseURI))
-    .then(response=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();})
+  // 손으로 유지하는 파일이지만 갱신하면 바로 보여야 한다. 48KB라 조건부 요청이 싸다.
+  return DataFetch.json(MACRO_URL,{fresh:true})
     .then(payload=>{macro={status:"ready",data:payload};})
     .catch(error=>{console.error("[경제 일정] 달력 로드 실패:",error);macro={status:"error",data:null};});
 }

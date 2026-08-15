@@ -2,13 +2,20 @@ name: Daily domestic quotes batch
 
 on:
   schedule:
-    # 14:00 KST daily (cron is UTC; KST = UTC+9).
+    # 14:17 KST daily (cron is UTC; KST = UTC+9).
+    #
+    # :00이 아닌 이유: 예약 워크플로는 정각 슬롯이 가장 붐빈다. 분을 옮겨 두면
+    # 대기열이 짧아진다.
     #
     # 06:00이 아닌 이유: 금융위원회_주식시세정보는 기준일 "다음 영업일 13시 이후"에
     # 갱신된다. 06:00에 돌면 전일 데이터가 아직 없어 소급 조회가 그 전 영업일로
     # 내려가고, 결과적으로 항상 2영업일 전 종가를 쓰게 된다(실측: 8/11 06:38 실행이
     # 8/10 대신 8/7 종가를 가져옴). 제공 시각보다 1시간 뒤에 돌려 전일 종가를 잡는다.
-    - cron: "0 5 * * *"
+    - cron: "17 5 * * *"
+    # 두 번째 슬롯: 18:43 KST. 예약 이벤트는 보장이 아니라 대기열이라 밀리거나 아예
+    # 버려진다(실측: "0 5" 슬롯이 75분 밀려 15:15 KST에 실행됐다). 앞 슬롯이 밀리거나
+    # 사라져도 이 실행이 스스로 메운다 — 이미 최신이면 아무것도 커밋하지 않는다.
+    - cron: "43 9 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -41,12 +48,17 @@ jobs:
           COINGECKO_PLAN: demo
         run: node scripts/build-quotes.mjs
 
+      # 결과는 셋이다. 이 셋을 뭉치면 "아무 일도 안 한 실행"이 성공으로 읽힌다.
+      #   updated        새 시세를 받아 커밋했다
+      #   already-current 배치는 정상이었고 데이터가 이미 최신이라 커밋할 게 없었다
+      #   failed          배치가 실패했다 (이 스텝까지 오지 못한다)
       - name: Commit data/quotes.json if it changed
         id: commit
         run: |
           if git diff --quiet -- data/quotes.json; then
+            echo "outcome=already-current" >> "$GITHUB_OUTPUT"
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "quotes.json unchanged, nothing to commit."
+            echo "::notice title=already-current::quotes.json이 이미 최신입니다 (asOf $(node -p "require('./data/quotes.json').asOf")). 커밋할 변경이 없습니다."
           else
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -56,8 +68,19 @@ jobs:
             # 두 배치가 겹친 주말에 push가 non-fast-forward로 튕길 수 있다.
             git pull --rebase origin main
             git push
+            echo "outcome=updated" >> "$GITHUB_OUTPUT"
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "::notice title=updated::quotes.json을 갱신해 커밋했습니다 (asOf $(node -p "require('./data/quotes.json').asOf"))."
           fi
+
+      # 실행 요약에 결과를 한 줄로 남긴다. 로그를 열지 않고도 셋 중 무엇이었는지 보인다.
+      - name: Record outcome
+        if: always()
+        run: |
+          OUTCOME="${{ steps.commit.outputs.outcome }}"
+          if [ "${{ job.status }}" != "success" ]; then OUTCOME="failed"; fi
+          if [ -z "$OUTCOME" ]; then OUTCOME="failed"; fi
+          echo "## 시세 배치 결과: $OUTCOME" >> "$GITHUB_STEP_SUMMARY"
 
       # GitHub does NOT notify anyone when a scheduled workflow fails — without this
       # step a batch could silently stop updating for weeks and the app would keep

@@ -39,6 +39,28 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-15 — 배치 산출물 캐시 무효화와 예약 슬롯 이동
+
+- 작업자: Claude Code
+- 변경: 앱이 받는 데이터 파일을 `lib/fetch-data.js` 한 곳으로 모으고 파일별 캐시 정책을 붙였습니다. 매일 바뀌는 파일(`quotes.json`, `indicators/index.json`, `indicators/latest/*`, `indicators/oecd/*`, `macro-calendar.json`)은 `cache: "no-cache"`로 매번 서버에 확인하고, 주 1회 바뀌는 종목 목록(`tickers-*.json`, 합계 4MB)은 기본 캐시를 그대로 씁니다. `quotes.yml`의 cron을 `0 5`에서 `17 5`로 옮기고 `43 9`(18:43 KST) 두 번째 슬롯을 더했습니다.
+- 이유: 배치는 커밋했고 배포도 됐는데 브라우저가 어제 파일을 들고 있었습니다(실측: 그냥 요청하면 asOf 2026-08-12, 캐시를 비껴가면 2026-08-13). 화면에는 배치가 고장 난 것과 똑같이 보여서 파이프라인 쪽을 며칠 뒤졌습니다. 코드 파일은 이미 `?v=` 표식을 달고 있었는데 정작 매일 바뀌는 데이터에는 아무것도 없었습니다. 예약 슬롯은 정각이 가장 붐벼 75분 밀린 실행이 있었습니다.
+- 검증: 전체 회귀 테스트 269건 통과. 신규 3건이 이걸 못 박습니다 — 파일을 다시 쓴 뒤 **손으로 캐시를 비껴가지 않고** 연속 두 번 로드해 둘 다 새 asOf를 보는지, 파일별 캐시 모드가 의도대로인지(`quotes`·`macro`·`indicators` = no-cache, `tickers` = 기본), 캐시에서 나온 낡은 값을 배치 문제와 구별해 알리는지.
+- 남은 일: 총자산 변화의 기준선을 시세 데이터에서 뽑는 작업(전일 종가 기반)은 시작하지 못했습니다. 금융위원회 API의 전일 대비 필드명을 살아 있는 응답으로 확인해야 하는데 로컬에 `DATA_GO_KR_KEY`가 없습니다.
+- 관련 파일: `lib/fetch-data.js`, `lib/valuation.js`, `lib/indicators-view.js`, `home.html`, `assets.html`, `asset-input.html`, `indicators.html`, `.github/workflows/quotes.yml`, `scripts/test-home.mjs`, `scripts/test-focus.mjs`
+
+**앱이 받는 데이터 파일과 캐시 결정**
+
+| 파일 | 배치 갱신 주기 | 결정 |
+|---|---|---|
+| `data/quotes.json` | 매일 | 조건부 요청(no-cache) |
+| `data/indicators/index.json` | 매일 | 조건부 요청 |
+| `data/indicators/latest/*.json` (7개) | 매일 | 조건부 요청 |
+| `data/indicators/oecd/*.json` (13개) | 매일 | 조건부 요청 |
+| `data/macro-calendar.json` | 손으로 유지 | 조건부 요청 (48KB, 갱신하면 바로 보여야 함) |
+| `data/tickers-{kr,us,global}.json` | 주 1회 | **기본 캐시** (합계 4MB) |
+
+`?t=Date.now()`를 쓰지 않은 이유: 캐시는 확실히 비껴가지만 매 로드가 전량 재다운로드가 되고 CDN 입장에서는 매번 다른 URL이라 캐시가 아예 서지 않습니다. `?v=` 버전 문자열도 안 됩니다 — 빌드 스텝이 없고 데이터는 코드 변경 없이 바뀌므로 배치가 HTML을 고치지 않는 한 표식이 따라가지 못합니다. `cache: "no-cache"`는 캐시를 끄는 게 아니라 매번 서버에 물어보게 하는 것이라, 내용이 그대로면 304로 본문 없이 끝납니다.
+
 ### 2026-08-14 — OECD 지표 7개 → 50개 확장과 경제지표 탭 개편
 
 - 작업자: Claude Code

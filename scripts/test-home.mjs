@@ -1190,6 +1190,133 @@ try {
     return { ok: true };
   });
 
+  // ===== 5a-1g. 배치 산출물 캐시 =====
+  //
+  // 배치는 커밋했고 배포도 됐는데 브라우저가 어제 파일을 들고 있던 적이 있다. 화면에는
+  // 배치가 고장 난 것과 똑같이 보여서 파이프라인 쪽을 며칠 뒤졌다. 손으로 캐시를
+  // 비껴가지 않고도 새 값이 오는지를 못 박는다.
+  await record("배치가 파일을 다시 쓰면 다음 두 번의 로드가 모두 새 값을 본다", async () => {
+    const saved = await readFile(QUOTES_PATH, "utf8");
+    // 서버가 If-None-Match를 실제로 다루도록 캐시를 허용한 새 컨텍스트를 쓴다.
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    try {
+      const fresh = await context.newPage();
+      await installTestAuth(fresh);
+      await fresh.goto(HOME_URL);
+      await seedSession(fresh, AXIS_ASSETS.slice(0, 2));
+
+      const read = async () => {
+        await fresh.reload();
+        await fresh.waitForFunction(() => window.Valuation && Valuation.state.status !== "loading", { timeout: 12000 });
+        return fresh.evaluate(() => ({
+          asOf: Valuation.asOfDate(),
+          info: Valuation.loadInfo(),
+        }));
+      };
+
+      // 1) 먼저 한 번 읽어 브라우저 캐시에 넣는다.
+      const before = await read();
+      if (before.asOf !== ASOF_DATE) return { ok: false, reason: `첫 로드 asOf ${before.asOf}` };
+
+      // 2) 배치가 파일을 다시 쓴 상황을 만든다(날짜만 하루 뒤로).
+      const next = JSON.parse(saved);
+      next.asOf = "2026-08-08T00:00:00+09:00";
+      await writeFile(QUOTES_PATH, JSON.stringify(next), "utf8");
+
+      // 3) 연속 두 번. 캐시 무력화 질의를 손으로 붙이지 않는다.
+      const first = await read();
+      const second = await read();
+      if (first.asOf !== "2026-08-08") return { ok: false, reason: `갱신 후 첫 로드가 옛 값: ${first.asOf}` };
+      if (second.asOf !== "2026-08-08") return { ok: false, reason: `갱신 후 두 번째 로드가 옛 값: ${second.asOf}` };
+      // 캐시에서 그냥 나온 것이 아니라 실제로 서버에 물어봤어야 한다.
+      if (first.info && first.info.known && first.info.fromCache) {
+        return { ok: false, reason: "새 값인데 네트워크를 타지 않았다고 보고됨" };
+      }
+      return { ok: true };
+    } finally {
+      await writeFile(QUOTES_PATH, saved, "utf8");
+      await context.close();
+    }
+  });
+
+  await record("자주 바뀌는 데이터는 조건부 요청, 종목 목록은 기본 캐시", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    try {
+      const fresh = await context.newPage();
+      await installTestAuth(fresh);
+      // 실제로 나가는 요청의 캐시 모드를 기록한다. 요청 헤더는 브라우저가 캐시 항목을
+      // 갖고 있을 때만 붙으므로, 헤더가 아니라 fetch에 넘긴 모드를 본다.
+      await fresh.addInitScript(() => {
+        window.__cacheModes = {};
+        const original = window.fetch;
+        window.fetch = function (input, init) {
+          const url = String(input && input.url ? input.url : input);
+          if (url.includes("/data/")) {
+            window.__cacheModes[url.replace(/^.*\/data\//, "data/")] = (init && init.cache) || "(기본)";
+          }
+          return original.call(this, input, init);
+        };
+      });
+
+      await fresh.goto(HOME_URL);
+      await seedSession(fresh, AXIS_ASSETS.slice(0, 2));
+      await fresh.reload();
+      await fresh.waitForFunction(() => window.Valuation && Valuation.state.status !== "loading", { timeout: 12000 });
+      await fresh.waitForTimeout(1500);
+      const home = await fresh.evaluate(() => window.__cacheModes);
+
+      if (home["data/quotes.json"] !== "no-cache") {
+        return { ok: false, reason: `quotes.json 모드 ${home["data/quotes.json"]} (no-cache 기대)` };
+      }
+      if (home["data/macro-calendar.json"] !== "no-cache") {
+        return { ok: false, reason: `macro-calendar.json 모드 ${home["data/macro-calendar.json"]}` };
+      }
+      if (home["data/indicators/index.json"] !== "no-cache") {
+        return { ok: false, reason: `indicators/index.json 모드 ${home["data/indicators/index.json"]}` };
+      }
+
+      // 종목 목록은 주 1회 바뀌고 합쳐서 4MB다. 매 로드마다 조건부 요청을 더 보낼 이유가 없다.
+      await fresh.goto(`http://127.0.0.1:${PORT}/asset-input.html`);
+      await fresh.waitForTimeout(2500);
+      const input = await fresh.evaluate(() => window.__cacheModes);
+      const ticker = Object.keys(input).find((path) => path.startsWith("data/tickers-"));
+      if (!ticker) return { ok: false, reason: `종목 파일 요청이 관찰되지 않음: ${Object.keys(input).join(", ")}` };
+      return input[ticker] === "(기본)"
+        ? { ok: true }
+        : { ok: false, reason: `${ticker} 모드 ${input[ticker]} (기본 캐시 기대)` };
+    } finally { await context.close(); }
+  });
+
+  await record("캐시에서 나온 낡은 시세는 배치 문제와 구별해 알린다", async () => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    try {
+      const fresh = await context.newPage();
+      await installTestAuth(fresh);
+      // 캐시에서 그대로 나온 상황을 만든다. DataFetch가 정의되는 순간 loadInfo만 바꾼다.
+      await fresh.addInitScript(() => {
+        let real;
+        Object.defineProperty(window, "DataFetch", {
+          configurable: true,
+          get() { return real; },
+          set(value) {
+            real = value;
+            value.loadInfo = () => ({ known: true, fromCache: true, transferSize: 0 });
+          },
+        });
+      });
+      await fresh.goto(HOME_URL);
+      await seedSession(fresh, AXIS_ASSETS.slice(0, 2));
+      await fresh.reload();
+      await fresh.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 12000 });
+      const text = await fresh.locator("#app").innerText();
+      if (!/브라우저 캐시/.test(text)) return { ok: false, reason: `캐시 안내가 없음: ${text.slice(0, 200)}` };
+      if (!/새로고침/.test(text)) return { ok: false, reason: "다음에 무엇을 할지 알려주지 않음" };
+      // 배치가 멈춘 것과 같은 문구로 뭉쳐 놓으면 원인을 가릴 수 없다.
+      if (!/캐시에서 나왔어요|브라우저 캐시에서/.test(text)) return { ok: false, reason: "출처를 밝히지 않음" };
+      return { ok: true };
+    } finally { await context.close(); }
+  });
+
   // ===== 5a-1f. 경제지표 (OECD) =====
   await record("경제지표 카드가 값과 관측 기간을 함께 보여주고 행을 늘리지 않는다", async () => {
     await page.goto(HOME_URL);
