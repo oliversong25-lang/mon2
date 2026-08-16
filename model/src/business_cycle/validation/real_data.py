@@ -105,13 +105,25 @@ def _phase_history_from_dynamic(run: PipelineRun, settings: Settings) -> pd.Data
                 float(settings.model["phase_emission_sigma_degrees"]),
                 float(settings.model["phase_origin_sigma_multiplier"]),
                 float(settings.model["phase_origin_scale"]),
+                level,
+                (
+                    float(settings.model["phase_origin_scale"])
+                    if settings.model.get("contraction_level_gate", False)
+                    else None
+                ),
             )
-            for angle, radius in coords[["angle", "radius"]].to_numpy(dtype=float)
+            for angle, radius, level in coords[["angle", "radius", "y"]].to_numpy(dtype=float)
         ]
     )
     filtered = filter_probabilities(
         emissions,
         transition_matrix(len(phases), settings.transitions["transition"]),
+        coords["radius"].to_numpy(dtype=float),
+        (
+            float(settings.model["phase_origin_scale"])
+            if settings.model.get("low_radius_jump_constraint", False)
+            else None
+        ),
     )
     winners = filtered.argmax(axis=1)
     history = coords.copy()

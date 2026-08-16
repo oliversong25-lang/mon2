@@ -15,16 +15,16 @@ dynamic_factor:
   observation_variance: 0.65
   initial_variance: 10.0
 confidence:
-  detail_probability: 0.40
-  detail_gap: 0.20
+  detail_probability: 0.4
+  detail_gap: 0.2
   detail_boundary: 0.15
   detail_radius: 0.15
   detail_agreement: 0.05
   detail_persistence: 0.05
   data_freshness: 0.35
   data_availability: 0.25
-  data_revision_stability: 0.20
-  data_model_agreement: 0.20
-  conservative_revision_default: 0.40
+  data_revision_stability: 0.2
+  data_model_agreement: 0.2
+  conservative_revision_default: 0.4
 forecast_13w:
   status: not_calibrated

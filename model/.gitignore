@@ -34,3 +34,17 @@ outputs/real_data_validation/historical_cases/*
 !outputs/real_data_validation/historical_cases/case_summary.json
 !outputs/real_data_validation/charts/
 !outputs/real_data_validation/charts/*.png
+!outputs/real_data_validation/phase2/
+outputs/real_data_validation/phase2/*
+!outputs/real_data_validation/phase2/metric_audit.md
+!outputs/real_data_validation/phase2/false_positive_episodes.csv
+!outputs/real_data_validation/phase2/false_positive_episodes_baseline_8w.csv
+!outputs/real_data_validation/phase2/false_positive_diagnosis.md
+!outputs/real_data_validation/phase2/indicator_contributions_2022_plus.csv
+!outputs/real_data_validation/phase2/candidate_comparison.csv
+!outputs/real_data_validation/phase2/validation_summary.json
+!outputs/real_data_validation/phase2/validation_report.md
+!outputs/real_data_validation/phase2/configs/
+!outputs/real_data_validation/phase2/configs/*.yaml
+!outputs/real_data_validation/phase2/charts/
+!outputs/real_data_validation/phase2/charts/*.png

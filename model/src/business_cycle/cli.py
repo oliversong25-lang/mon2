@@ -17,7 +17,7 @@ from .data.local import load_local
 from .pipeline import run_pipeline
 from .reporting.writers import write_reports
 from .synthetic import generate_synthetic_observations
-from .validation import run_real_data_validation
+from .validation import run_phase2_validation, run_real_data_validation
 
 
 def _core_ids(settings: Settings) -> list[str]:
@@ -120,6 +120,21 @@ def command_validate_real(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_validate_phase2(args: argparse.Namespace) -> int:
+    settings = load_settings()
+    result = run_phase2_validation(
+        settings,
+        args.start,
+        args.end,
+        Path(args.cache_dir),
+        Path(args.output_dir),
+    )
+    print(f"2차 실자료 보정 보고서: {result.report_path}")
+    print(f"차트 {len(result.chart_paths)}개 생성")
+    print(f"최종 채택 모델: {result.final_model}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """CLI 파서를 생성한다."""
 
@@ -165,6 +180,13 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--cache-dir", default=str(root / "data/cache"))
     validate.add_argument("--output-dir", default=str(root / "outputs/real_data_validation"))
     validate.set_defaults(handler=command_validate_real)
+
+    phase2 = subparsers.add_parser("validate-phase2", help="FRED 실자료 2차 보정 검증")
+    phase2.add_argument("--start", default="1995-01-01")
+    phase2.add_argument("--end", default="2026-08-14")
+    phase2.add_argument("--cache-dir", default=str(root / "data/cache"))
+    phase2.add_argument("--output-dir", default=str(root / "outputs/real_data_validation/phase2"))
+    phase2.set_defaults(handler=command_validate_phase2)
     return parser
 
 

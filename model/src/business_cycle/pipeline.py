@@ -173,12 +173,27 @@ def run_pipeline(
                 float(model_config["phase_emission_sigma_degrees"]),
                 float(model_config["phase_origin_sigma_multiplier"]),
                 float(model_config["phase_origin_scale"]),
+                level,
+                (
+                    float(model_config["phase_origin_scale"])
+                    if model_config.get("contraction_level_gate", False)
+                    else None
+                ),
             )
-            for angle, radius in coords[["angle", "radius"]].to_numpy(dtype=float)
+            for angle, radius, level in coords[["angle", "radius", "y"]].to_numpy(dtype=float)
         ]
     )
     matrix = transition_matrix(len(phases), settings.transitions["transition"])
-    filtered = filter_probabilities(emissions, matrix)
+    filtered = filter_probabilities(
+        emissions,
+        matrix,
+        coords["radius"].to_numpy(dtype=float),
+        (
+            float(model_config["phase_origin_scale"])
+            if model_config.get("low_radius_jump_constraint", False)
+            else None
+        ),
+    )
     winners = filtered.argmax(axis=1)
     probability_columns = [f"p_{phase.code}" for phase in phases]
     history = coords.copy()

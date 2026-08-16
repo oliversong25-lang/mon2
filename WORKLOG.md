@@ -39,6 +39,15 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-16 — 미국 경기국면 모델 v0.1 2차 FRED 실자료 보정
+
+- 작업자: Codex
+- 변경: 침체 양성을 `contraction` 3개 세부국면으로만 고정하고 평가 산식·USREC 주간 정렬·4주 causal 확인일을 감사했습니다. 기존 8주 모델의 오탐 350주와 2022년 이후 77주를 에피소드·지표 기여도로 분해한 뒤, 약한 Y 수준에서 침체 관측확률을 연속적으로 낮추는 게이트와 원점 부근에서만 인접 이동을 강제하는 최소 규칙을 추가했습니다. 4주·8주·후보 2개·Dynamic 비교표, 12개 차트, JSON·CSV·Markdown 보고서를 생성했습니다.
+- 이유: 기존 모델은 원점 부근의 약한 음수 X·Y에서도 각도만으로 침체를 확정해 정상기 오탐이 길게 이어졌고, Y 게이트만 적용하면 다단계 점프가 22건으로 늘어나는 부작용이 있었습니다.
+- 검증: 최종 후보는 전체기간 재현율 93.4%, 오탐률 6.34%, 정밀도 53.8%, F1 68.3%, 다단계 점프 4건입니다. 기존 8주 모델의 94.2% 재현율과 비교해 손실은 0.8%p이며 오탐률은 22.9%에서 6.34%로 감소했습니다. 2020 침체 최초 판정은 두 모델 모두 2주 지연, 4주 확인은 5주 지연으로 유지됐습니다. pytest 32건, Ruff format/lint, strict mypy가 모두 통과했습니다.
+- 남은 일: 최신 수정치 기반 preliminary 검증이므로 당시 공개정보 ALFRED vintage 검증이 필요합니다. 2021년 이후 구간은 이미 본 observed diagnostic holdout이며, 설정을 동결한 뒤 새 발표분으로 prospective 검증해야 합니다. 13주 전망은 계속 `not_calibrated`입니다.
+- 관련 파일: `model/src/business_cycle/models/`, `model/src/business_cycle/validation/phase2*.py`, `model/configs/model.yaml`, `model/outputs/real_data_validation/phase2/`, `model/tests/test_phase2_validation.py`
+
 ### 2026-08-16 — 미국 경기국면 모델 v0.1 공식 FRED 실자료 검증
 
 - 작업자: Codex
