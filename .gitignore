@@ -3,6 +3,7 @@ node_modules/
 .npm-cache/
 .env
 .env.*
+!model/.env.example
 supabase/.temp/
 node_modules/
 

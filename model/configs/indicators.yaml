@@ -1,0 +1,19 @@
+indicators:
+  PAYEMS: {domain: employment, frequency: monthly, weight: 0.25, direction: 1, transform: log_cycle, release_lag_days: 7, max_age_weeks: 8}
+  W875RX1: {domain: income, frequency: monthly, weight: 0.20, direction: 1, transform: log_cycle, release_lag_days: 28, max_age_weeks: 10}
+  INDPRO: {domain: production, frequency: monthly, weight: 0.20, direction: 1, transform: log_cycle, release_lag_days: 16, max_age_weeks: 8}
+  CMRMTSPL: {domain: consumption, frequency: monthly, weight: 0.10, direction: 1, transform: log_cycle, release_lag_days: 45, max_age_weeks: 14}
+  RRSFS: {domain: consumption, frequency: monthly, weight: 0.10, direction: 1, transform: log_cycle, release_lag_days: 16, max_age_weeks: 8}
+  ICSA: {domain: weekly_bridge, frequency: weekly, weight: 0.08, direction: -1, transform: claims_4w_log, release_lag_days: 5, max_age_weeks: 3}
+  CCSA: {domain: weekly_bridge, frequency: weekly, weight: 0.07, direction: -1, transform: claims_4w_log, release_lag_days: 12, max_age_weeks: 4}
+leading:
+  PERMIT: {direction: 1, transform: log_cycle}
+  NEWORDER: {direction: 1, transform: log_cycle}
+  AWHMAN: {direction: 1, transform: level_change}
+  T10Y3M: {direction: 1, transform: level_change}
+  ANFCI: {direction: -1, transform: level_change}
+constraints:
+  max_indicator_weight: 0.20
+  max_domain_weight: 0.30
+  duplicate_correlation: 0.85
+  minimum_availability: 0.55
