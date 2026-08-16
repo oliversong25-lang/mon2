@@ -1,0 +1,90 @@
+[
+  {
+    "indicator_id": "PAYEMS",
+    "status": "fresh_cache",
+    "source": "FRED_cache",
+    "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+    "observation_start": "1985-01-01",
+    "observation_end": "2026-07-01",
+    "observation_count": 499,
+    "attempts": 0,
+    "error": null
+  },
+  {
+    "indicator_id": "W875RX1",
+    "status": "fresh_cache",
+    "source": "FRED_cache",
+    "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+    "observation_start": "1985-01-01",
+    "observation_end": "2026-06-01",
+    "observation_count": 498,
+    "attempts": 0,
+    "error": null
+  },
+  {
+    "indicator_id": "INDPRO",
+    "status": "fresh_cache",
+    "source": "FRED_cache",
+    "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+    "observation_start": "1985-01-01",
+    "observation_end": "2026-06-01",
+    "observation_count": 498,
+    "attempts": 0,
+    "error": null
+  },
+  {
+    "indicator_id": "CMRMTSPL",
+    "status": "fresh_cache",
+    "source": "FRED_cache",
+    "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+    "observation_start": "1985-01-01",
+    "observation_end": "2026-05-01",
+    "observation_count": 497,
+    "attempts": 0,
+    "error": null
+  },
+  {
+    "indicator_id": "RRSFS",
+    "status": "fresh_cache",
+    "source": "FRED_cache",
+    "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+    "observation_start": "1992-01-01",
+    "observation_end": "2026-07-01",
+    "observation_count": 414,
+    "attempts": 0,
+    "error": null
+  },
+  {
+    "indicator_id": "ICSA",
+    "status": "fresh_cache",
+    "source": "FRED_cache",
+    "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+    "observation_start": "1985-01-05",
+    "observation_end": "2026-08-08",
+    "observation_count": 2171,
+    "attempts": 0,
+    "error": null
+  },
+  {
+    "indicator_id": "CCSA",
+    "status": "fresh_cache",
+    "source": "FRED_cache",
+    "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+    "observation_start": "1985-01-05",
+    "observation_end": "2026-08-01",
+    "observation_count": 2170,
+    "attempts": 0,
+    "error": null
+  },
+  {
+    "indicator_id": "USREC",
+    "status": "fresh_cache",
+    "source": "FRED_cache",
+    "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+    "observation_start": "1985-01-01",
+    "observation_end": "2026-07-01",
+    "observation_count": 499,
+    "attempts": 0,
+    "error": null
+  }
+]

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
+from typing import Any
 
 
 class CacheStore:
@@ -23,5 +25,28 @@ class CacheStore:
         target = self.path(indicator_id)
         temporary = target.with_suffix(".tmp")
         temporary.write_text(content, encoding="utf-8", newline="\n")
+        temporary.replace(target)
+        return target
+
+    def metadata_path(self, indicator_id: str) -> Path:
+        return self.root / f"{indicator_id}.meta.json"
+
+    def read_metadata(self, indicator_id: str) -> dict[str, Any] | None:
+        target = self.metadata_path(indicator_id)
+        if not target.exists():
+            return None
+        payload = json.loads(target.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError(f"{indicator_id} 캐시 메타데이터가 객체가 아닙니다")
+        return payload
+
+    def write_metadata(self, indicator_id: str, metadata: dict[str, Any]) -> Path:
+        target = self.metadata_path(indicator_id)
+        temporary = target.with_suffix(".tmp")
+        temporary.write_text(
+            json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
         temporary.replace(target)
         return target

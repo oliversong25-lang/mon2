@@ -17,6 +17,7 @@ from .data.local import load_local
 from .pipeline import run_pipeline
 from .reporting.writers import write_reports
 from .synthetic import generate_synthetic_observations
+from .validation import run_real_data_validation
 
 
 def _core_ids(settings: Settings) -> list[str]:
@@ -104,6 +105,21 @@ def command_demo(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_validate_real(args: argparse.Namespace) -> int:
+    settings = load_settings()
+    result = run_real_data_validation(
+        settings,
+        args.start,
+        args.end,
+        Path(args.cache_dir),
+        Path(args.output_dir),
+    )
+    print(f"실자료 검증 보고서: {result.report_path}")
+    print(f"차트 {len(result.chart_paths)}개 생성")
+    print(f"8주 모멘텀 조정 채택: {result.adopted_adjustment}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """CLI 파서를 생성한다."""
 
@@ -142,6 +158,13 @@ def build_parser() -> argparse.ArgumentParser:
     demo.add_argument("--end", default="2026-08-14")
     demo.add_argument("--output-dir", default=str(root / "outputs/demo"))
     demo.set_defaults(handler=command_demo)
+
+    validate = subparsers.add_parser("validate-real", help="공식 FRED 실자료 검증")
+    validate.add_argument("--start", default="1995-01-01")
+    validate.add_argument("--end", default="2026-08-14")
+    validate.add_argument("--cache-dir", default=str(root / "data/cache"))
+    validate.add_argument("--output-dir", default=str(root / "outputs/real_data_validation"))
+    validate.set_defaults(handler=command_validate_real)
     return parser
 
 

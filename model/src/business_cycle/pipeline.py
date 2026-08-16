@@ -36,6 +36,7 @@ class PipelineRun:
     events: pd.DataFrame
     composite: pd.Series
     dynamic: pd.Series
+    contributions: pd.DataFrame
 
 
 def _agreement(left: float, right: float) -> float:
@@ -140,15 +141,25 @@ def run_pipeline(
         core_settings, settings.indicators["constraints"]
     ).fit_filter(events)
     dynamic_estimate = DynamicFactorModel(model_config["dynamic_factor"]).fit_filter(events)
-    slope = dynamic_estimate.metadata["slopes"]
-    if not isinstance(slope, pd.Series):
-        raise TypeError("동적요인 기울기 메타데이터가 Series가 아닙니다")
+    # v0.1의 공식 대표모델은 기여도를 설명할 수 있는 합성요인이다.
+    # 동적요인의 상태 기울기는 비교모델에만 속하므로 대표 좌표에 섞지 않는다.
+    representative_fallback = False
     coords = coordinates(
-        dynamic_estimate.factor,
+        composite_estimate.factor,
         int(model_config["momentum_weeks"]),
         int(model_config["standardization_min_periods"]),
-        slope,
     ).dropna()
+    if coords.empty:
+        slope = dynamic_estimate.metadata["slopes"]
+        if not isinstance(slope, pd.Series):
+            raise TypeError("동적요인 기울기 메타데이터가 Series가 아닙니다")
+        coords = coordinates(
+            dynamic_estimate.factor,
+            int(model_config["momentum_weeks"]),
+            int(model_config["standardization_min_periods"]),
+            slope,
+        ).dropna()
+        representative_fallback = True
     if coords.empty:
         raise ValueError("학습기간이 짧아 경기좌표를 계산할 수 없습니다")
 
@@ -214,6 +225,8 @@ def run_pipeline(
             f"핵심지표 확보율 {availability:.0%}가 최소 기준 "
             f"{minimum_availability:.0%}보다 낮아 판정 보류"
         )
+    if representative_fallback:
+        warnings.append("합성요인 제약을 충족할 핵심지표가 부족해 판정을 보류하고 비교좌표만 표시")
     phase_probabilities = [
         {"code": phase.code, "label_ko": phase.label_ko, "probability": float(probabilities[index])}
         for index, phase in enumerate(phases)
@@ -252,6 +265,8 @@ def run_pipeline(
             "probability_sum": float(probabilities.sum()),
             "composite_model": composite_estimate.metadata["model"],
             "dynamic_model": dynamic_estimate.metadata["model"],
+            "representative_model": "CompositeFactorModel",
+            "representative_fallback_used": representative_fallback,
             "uses_backward_smoothing": False,
             "renormalized_weeks": composite_estimate.metadata["renormalized_weeks"],
             "duplicate_pairs": composite_estimate.metadata["duplicate_pairs"],
@@ -270,4 +285,5 @@ def run_pipeline(
         events=events,
         composite=composite_estimate.factor,
         dynamic=dynamic_estimate.factor,
+        contributions=composite_estimate.contributions,
     )
