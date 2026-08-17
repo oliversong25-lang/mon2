@@ -107,7 +107,11 @@ def _phase_history_from_dynamic(run: PipelineRun, settings: Settings) -> pd.Data
                 float(settings.model["phase_origin_scale"]),
                 level,
                 (
-                    float(settings.model["phase_origin_scale"])
+                    float(
+                        settings.model.get(
+                            "contraction_level_scale", settings.model["phase_origin_scale"]
+                        )
+                    )
                     if settings.model.get("contraction_level_gate", False)
                     else None
                 ),
@@ -120,7 +124,7 @@ def _phase_history_from_dynamic(run: PipelineRun, settings: Settings) -> pd.Data
         transition_matrix(len(phases), settings.transitions["transition"]),
         coords["radius"].to_numpy(dtype=float),
         (
-            float(settings.model["phase_origin_scale"])
+            float(settings.model.get("low_radius_jump_scale", settings.model["phase_origin_scale"]))
             if settings.model.get("low_radius_jump_constraint", False)
             else None
         ),

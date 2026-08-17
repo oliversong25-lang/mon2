@@ -17,7 +17,11 @@ from .data.local import load_local
 from .pipeline import run_pipeline
 from .reporting.writers import write_reports
 from .synthetic import generate_synthetic_observations
-from .validation import run_phase2_validation, run_real_data_validation
+from .validation import (
+    run_phase2_validation,
+    run_real_data_validation,
+    run_robustness_validation,
+)
 
 
 def _core_ids(settings: Settings) -> list[str]:
@@ -135,6 +139,22 @@ def command_validate_phase2(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_validate_robustness(args: argparse.Namespace) -> int:
+    settings = load_settings()
+    result = run_robustness_validation(
+        settings,
+        Path(args.cache_dir),
+        Path(args.output_dir),
+        args.start,
+        args.end,
+    )
+    print(f"강건성 검증 보고서: {result.report_path}")
+    print(f"단계 A 판정: {'통과' if result.passed else '미통과'}")
+    if result.passed:
+        print(f"동결 설정 SHA-256: {result.frozen_hash}")
+    return 0 if result.passed else 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     """CLI 파서를 생성한다."""
 
@@ -187,6 +207,13 @@ def build_parser() -> argparse.ArgumentParser:
     phase2.add_argument("--cache-dir", default=str(root / "data/cache"))
     phase2.add_argument("--output-dir", default=str(root / "outputs/real_data_validation/phase2"))
     phase2.set_defaults(handler=command_validate_phase2)
+
+    robustness = subparsers.add_parser("validate-robustness", help="채택 모델 2.5차 강건성 검증")
+    robustness.add_argument("--start", default="1995-01-01")
+    robustness.add_argument("--end", default="2026-08-14")
+    robustness.add_argument("--cache-dir", default=str(root / "data/cache"))
+    robustness.add_argument("--output-dir", default=str(root / "outputs/robustness_validation"))
+    robustness.set_defaults(handler=command_validate_robustness)
     return parser
 
 

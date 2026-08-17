@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-08-16T14:51:22.822578+00:00",
+  "run_at": "2026-08-17T02:40:46.938442+00:00",
   "period": {
     "collection_start": "1985-01-01",
     "start": "1995-01-01",
@@ -1462,7 +1462,9 @@
     "phase_emission_sigma_degrees": 22.0,
     "phase_origin_sigma_multiplier": 2.0,
     "phase_origin_scale": 0.75,
+    "contraction_level_scale": 0.75,
     "contraction_level_gate": true,
+    "low_radius_jump_scale": 0.75,
     "low_radius_jump_constraint": true,
     "dynamic_factor": {
       "level_process_variance": 0.025,

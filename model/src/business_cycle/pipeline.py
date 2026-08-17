@@ -175,7 +175,11 @@ def run_pipeline(
                 float(model_config["phase_origin_scale"]),
                 level,
                 (
-                    float(model_config["phase_origin_scale"])
+                    float(
+                        model_config.get(
+                            "contraction_level_scale", model_config["phase_origin_scale"]
+                        )
+                    )
                     if model_config.get("contraction_level_gate", False)
                     else None
                 ),
@@ -189,7 +193,7 @@ def run_pipeline(
         matrix,
         coords["radius"].to_numpy(dtype=float),
         (
-            float(model_config["phase_origin_scale"])
+            float(model_config.get("low_radius_jump_scale", model_config["phase_origin_scale"]))
             if model_config.get("low_radius_jump_constraint", False)
             else None
         ),

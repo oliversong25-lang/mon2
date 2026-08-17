@@ -48,3 +48,15 @@ outputs/real_data_validation/phase2/*
 !outputs/real_data_validation/phase2/configs/*.yaml
 !outputs/real_data_validation/phase2/charts/
 !outputs/real_data_validation/phase2/charts/*.png
+!outputs/robustness_validation/
+outputs/robustness_validation/*
+!outputs/robustness_validation/validation_report.md
+!outputs/robustness_validation/indicator_weight_audit.csv
+!outputs/robustness_validation/indicator_contribution_audit.csv
+!outputs/robustness_validation/leave_one_out.csv
+!outputs/robustness_validation/parameter_sensitivity.csv
+!outputs/robustness_validation/warmup_sensitivity.csv
+!outputs/robustness_validation/residual_instability.csv
+!outputs/robustness_validation/confidence_audit.csv
+!outputs/robustness_validation/charts/
+!outputs/robustness_validation/charts/*.png

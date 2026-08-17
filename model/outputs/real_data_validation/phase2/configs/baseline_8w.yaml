@@ -7,7 +7,9 @@ momentum_weeks: 8
 phase_emission_sigma_degrees: 22.0
 phase_origin_sigma_multiplier: 2.0
 phase_origin_scale: 0.75
+contraction_level_scale: 0.75
 contraction_level_gate: false
+low_radius_jump_scale: 0.75
 low_radius_jump_constraint: false
 dynamic_factor:
   level_process_variance: 0.025

@@ -73,10 +73,20 @@ class CompositeFactorModel(FactorModel):
             if not active.any():
                 break
             active_raw = raw[active]
-            scale = min(
+            scale_limits = [
                 remaining / float(active_raw.sum()),
-                min(float(capacities[key] / active_raw[key]) for key in active_raw.index),
-            )
+                *[float(capacities[key] / active_raw[key]) for key in active_raw.index],
+            ]
+            # 같은 영역의 여러 지표가 동시에 재분배될 때 영역 잔여용량을 각 지표가
+            # 따로 쓰면 합계 상한을 넘는다. 영역별 활성 원가중치 합에 한 번만 제약한다.
+            for domain, domain_total in domain_totals.items():
+                domain_keys = [
+                    key for key in active_raw.index if str(self.settings[key]["domain"]) == domain
+                ]
+                domain_raw = float(active_raw[domain_keys].sum())
+                if domain_raw > 0:
+                    scale_limits.append((domain_cap - domain_total) / domain_raw)
+            scale = max(0.0, min(scale_limits))
             increment = active_raw * scale
             result.loc[active] += increment
             remaining -= float(increment.sum())
