@@ -16,7 +16,8 @@
     "build:tickers": "node scripts/build-tickers.mjs",
     "build:quotes": "node scripts/build-quotes.mjs",
     "test:indicators-mock": "node scripts/test-indicators-mock.mjs",
-    "build:indicators": "node scripts/build-indicators.mjs"
+    "build:indicators": "node scripts/build-indicators.mjs",
+    "build:daily-rates": "node scripts/build-daily-rates.mjs"
   },
   "devDependencies": {
     "playwright": "^1.62.1"
