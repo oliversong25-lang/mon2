@@ -175,6 +175,47 @@ python -m mypy src
 않았고 설정 스냅샷·해시를 만들지 않았으며 ALFRED도 시작하지 않았습니다. 측정값과
 10개 차트는 `outputs/robustness_validation/phase3/`에 있습니다.
 
+## 단계 A-2 corrected baseline
+
+`configs/baselines.yaml`이 설정을 명시적으로 분리한다. `load_baseline(name)`으로 읽는다.
+
+| 이름 | 추세 | 지표 표준화 | 성숙도 | robust | 좌표 표준화 |
+|---|---|---|---|---|---|
+| `legacy_benchmark` | 156주 고정 | expanding | 없음 | 없음 | expanding |
+| `corrected_baseline` | 달력 3년 | 10년 rolling 평균·표준편차 | 5~10년 ramp | 없음 | expanding |
+| `corrected_baseline_rolling_coordinates` | 달력 3년 | 같음 | 같음 | 없음 | 10년 rolling |
+| `corrected_baseline_mature_coordinates` | 달력 3년 | 같음 | 같음 | 없음 | 10년 rolling, 최소 5년 |
+| `corrected_baseline_full_maturity` | 달력 3년 | 같음 | 같음 | 없음 | 10년 rolling, 최소 10년 |
+| `corrected_baseline_huber8` | 달력 3년 | 10년 rolling 중앙값·MAD | 같음 | Huber ±8 | expanding |
+
+`legacy_benchmark`는 월간 지표에 156**개월**(약 13년) 추세를 적용하는 빈도 단위 문제를
+그대로 갖고 있다. 이전 결과를 재현하기 위해서만 남겨 두며 운영 후보가 아니고, 재현율
+93.4%를 복원해야 할 목표로도 쓰지 않는다.
+
+```bash
+python -m business_cycle.validation.phase4
+```
+
+2026-08-17 재검증에서 단계 A-2는 **미통과**다. 빈도 수정은 정상기 오탐을 크게 줄였지만
+corrected baseline의 침체 재현율이 84.3%로 참고기준 85%에 못 미쳤고, 1985·1990 시작의
+2001년 진입일 차이도 8주 기준을 만족하지 못했다. 설정을 동결하지 않았고 ALFRED도
+시작하지 않았다. 측정값과 10개 차트는 `outputs/robustness_validation/phase4/`에 있다.
+
+확인된 원인 두 가지를 함께 적어 둔다.
+
+1. robust6은 단독으로는 해롭지 않다. 악화는 빈도 수정과의 상호작용에서 나온다.
+   3년 추세를 원빈도에 적용하면 신호 절대값이 커지고 median/MAD 척도는 작아져 ±6
+   제한이 훨씬 자주 걸린다.
+2. 워밍업 의존성은 지표 전처리가 아니라 **좌표(X·Y) 표준화**에서 나온다. 지표 표준화에는
+   5년 최소 이력 규칙이 있지만 좌표 표준화에는 26주뿐이었다. 그래서 1990 시작 실행은
+   조용한 5년 표본으로 계산한 척도 0.25로 같은 합성요인을 Y = -4까지 부풀렸다.
+   `coordinates(minimum_history_weeks=...)`로 최소 이력을 요구하면 차이가 44주에서
+   21주로, 완전성숙 후 국면 불일치가 11.3%에서 2.4%로 줄어든다.
+
+이 모델의 총 워밍업 요구는 지표 표준화 최소 이력 5년과 좌표 표준화 창 10년을 합쳐 약
+15년이다. 1990년에 시작한 실행은 2005년에야 완전 성숙하므로 2001년 판정은 미성숙
+판정이며, `corrected_baseline_full_maturity`는 그 경우 진입일을 아예 내지 않는다.
+
 ## 합성 데모 실측
 
 seed 42, 1985~2026 합성자료의 `2026-08-14` 출력은 **회복기 말기**, 대국면 확실성

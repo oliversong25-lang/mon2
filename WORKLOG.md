@@ -39,6 +39,15 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-17 — 미국 경기국면 단계 A-2 구성요소 분해와 corrected baseline
+
+- 작업자: Claude Code
+- 변경: `configs/baselines.yaml`로 legacy/corrected 설정을 파일에서 분리하고 `load_baseline()`을 추가했습니다. 10년 causal rolling 표준화에 창 시작·끝·관측 수 감사와 문서화한 척도 대체(표준편차→IQR→expanding)를 붙였고, 좌표(X·Y) 표준화에 방식·창·최소 이력 설정을 새로 열었습니다. 상태필터에 감사용 초기분포 인자를 추가하고, 영역별 상한 재정의와 실업수당 동일가중 부요인을 구현했습니다. `validation/phase4.py`가 2x2x2 ablation, 날짜별 워밍업 분해, 시작시점 수렴, 상태 초기값 감사, 실업수당 3안 비교, LOO를 한 번에 실행합니다.
+- 이유: phase3는 robust6 한 줄만 보고 단계 A를 판정했습니다. 요인을 분리해 보니 robust6 단독은 재현율을 오히려 올리고, 악화는 빈도 수정과의 상호작용에서 나옵니다. 또 워밍업 의존성의 원인은 지표 전처리가 아니라 최소 이력 규칙이 없던 좌표 표준화였습니다.
+- 검증: 단계 A-2 **미통과**. corrected baseline 재현율 84.3%(기준 85%), 오탐률 2.68%, 점프 4, 왕복 13, 2022년 이후 오탐 0주. 1985·1990의 2001 진입 차이는 좌표 최소 이력을 넣어 44주→21주, 완전성숙 후 국면 불일치 11.3%→2.4%로 줄었지만 8주 기준은 만족하지 못했습니다. 상태 초기값 영향은 104주에 1.4e-6까지 감쇠해 2001년 차이의 원인이 아닙니다. LOO에서 어떤 지표를 빼도 현재 대국면이 유지됩니다. 테스트 76개 통과, Ruff 통과, mypy 통과. 설정 동결과 ALFRED는 하지 않았습니다.
+- 남은 일: 재현율 85% 미달과 금융위기 진입 지연의 원인이 3년 추세 길이인지 확인하는 것. 2001 진입 차이 기준은 미성숙 판정을 비교하는 문제라 기준 자체를 다시 정의해야 합니다.
+- 관련 파일: `model/configs/baselines.yaml`, `model/src/business_cycle/validation/phase4.py`, `model/src/business_cycle/models/momentum.py`, `model/src/business_cycle/preprocessing/standardize.py`, `model/tests/test_phase4_corrected_baseline.py`, `model/outputs/robustness_validation/phase4/`
+
 ### 2026-08-17 — 미국 경기국면 단계 A 빈도·워밍업·극단값 재검증
 
 - 작업자: Codex

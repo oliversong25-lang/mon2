@@ -59,11 +59,23 @@ def _settings_transition_value(settings: Settings, key: str, value: float) -> Se
     return replace(settings, transitions=transitions)
 
 
+#: 공식 침체 에피소드의 시작 연도. 순서가 아니라 날짜로 사례를 찾는다.
+CASE_START_YEARS = {"2001": (2001,), "gfc": (2007, 2008), "2020": (2020,)}
+
+
 def _case_lags(evaluation: ModelEvaluation, case: str) -> tuple[Any, Any]:
+    """사례를 위치가 아니라 공식 시작 연도로 찾는다.
+
+    검증 구간이 늦게 시작하면 앞쪽 침체가 빠진다. 위치로 찾으면 그때 금융위기가
+    2001년으로 이름표만 바뀌어 조용히 잘못된 표가 나온다.
+    """
+
     points = evaluation.metrics["turning_points"]
-    position = {"2001": 0, "gfc": 1, "2020": 2}[case]
-    row = points[position]
-    return row["entry_lead_lag_weeks"], row["exit_lead_lag_weeks"]
+    years = CASE_START_YEARS[case]
+    for row in points:
+        if int(str(row["official_start_week"])[:4]) in years:
+            return row["entry_lead_lag_weeks"], row["exit_lead_lag_weeks"]
+    return None, None
 
 
 def _evaluation_row(evaluation: ModelEvaluation, experiment: str) -> dict[str, Any]:

@@ -49,6 +49,12 @@ class CompositeFactorModel(FactorModel):
                 )
         return result
 
+    def _domain_cap(self, domain: str) -> float:
+        """영역별 상한. 중복군 하나만 더 조이고 싶을 때 전역 상한을 건드리지 않는다."""
+
+        overrides = self.constraints.get("domain_caps", {}) or {}
+        return float(overrides.get(domain, self.constraints.get("max_domain_weight", 0.30)))
+
     def _base_weights(self, columns: pd.Index) -> pd.Series:
         maximum = float(self.constraints.get("max_indicator_weight", 0.20))
         weights = pd.Series(
@@ -59,12 +65,12 @@ class CompositeFactorModel(FactorModel):
             dtype=float,
         )
         # 영역 상한은 설정 실수로 한 영역이 모델을 지배하지 못하게 한다.
-        domain_cap = float(self.constraints.get("max_domain_weight", 0.30))
         for domain in {str(self.settings[column]["domain"]) for column in weights.index}:
             members = [
                 column for column in weights.index if self.settings[column]["domain"] == domain
             ]
             total = float(weights[members].sum())
+            domain_cap = self._domain_cap(domain)
             if total > domain_cap:
                 weights[members] *= domain_cap / total
         return weights
@@ -73,7 +79,6 @@ class CompositeFactorModel(FactorModel):
         """개별·영역 상한 안에서 합계 1이 되도록 비례 배분한다."""
 
         indicator_cap = float(self.constraints.get("max_indicator_weight", 0.20))
-        domain_cap = float(self.constraints.get("max_domain_weight", 0.30))
         result = pd.Series(0.0, index=raw.index, dtype=float)
         remaining = 1.0
         for _ in range(100):
@@ -93,7 +98,8 @@ class CompositeFactorModel(FactorModel):
                         0.0,
                         min(
                             indicator_cap - float(result[key]),
-                            domain_cap - domain_totals[str(self.settings[key]["domain"])],
+                            self._domain_cap(str(self.settings[key]["domain"]))
+                            - domain_totals[str(self.settings[key]["domain"])],
                         ),
                     )
                     for key in result.index
@@ -116,7 +122,7 @@ class CompositeFactorModel(FactorModel):
                 ]
                 domain_raw = float(active_raw[domain_keys].sum())
                 if domain_raw > 0:
-                    scale_limits.append((domain_cap - domain_total) / domain_raw)
+                    scale_limits.append((self._domain_cap(domain) - domain_total) / domain_raw)
             scale = max(0.0, min(scale_limits))
             increment = active_raw * scale
             result.loc[active] += increment

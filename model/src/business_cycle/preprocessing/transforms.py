@@ -9,7 +9,7 @@ import pandas as pd
 
 from .standardize import (
     causal_robust_standardize,
-    causal_rolling_standardize,
+    causal_rolling_standardize_details,
     causal_standardize,
 )
 from .trends import one_sided_ema_cycle
@@ -69,15 +69,7 @@ def transform_series_details(
     if standardization_window is None:
         raise ValueError("rolling 표준화에는 standardization_window가 필요합니다")
     if standardization_method == "rolling_mean_std":
-        standardized = causal_rolling_standardize(original, standardization_window, min_periods)
-        return pd.DataFrame(
-            {
-                "original_signal": original,
-                "preclip_signal": standardized,
-                "postclip_signal": standardized,
-            },
-            index=values.index,
-        )
+        return causal_rolling_standardize_details(original, standardization_window, min_periods)
     if standardization_method == "rolling_median_mad":
         return causal_robust_standardize(original, standardization_window, min_periods, robust_clip)
     raise ValueError(f"지원하지 않는 표준화 방식: {standardization_method}")
@@ -130,8 +122,15 @@ def transform_observations(
             else min_periods
         )
         ordered = group.sort_values("available_week").copy()
+        # 관측일을 색인으로 넘긴다. 변환·추세·표준화는 모두 위치 기준이라 결과는 같지만,
+        # 창 경계를 관측일로 기록할 수 있어야 "10년 창"이 검증 가능한 기록이 된다.
+        values = pd.Series(
+            ordered["value"].to_numpy(),
+            index=pd.DatetimeIndex(ordered["observation_period"]),
+            name="value",
+        )
         details = transform_series_details(
-            ordered["value"],
+            values,
             str(config["transform"]),
             int(config.get("direction", 1)),
             local_trend_span,
@@ -141,7 +140,7 @@ def transform_observations(
             robust_clip=robust_clip,
         )
         for column in details:
-            ordered[column] = details[column]
+            ordered[column] = details[column].to_numpy()
         # 제한 전 값을 event로 넘기고 대표 합성모형의 기여 계산 직전에 제한한다.
         # postclip은 감사와 재현을 위해 원빈도 행에 별도로 보존한다.
         ordered["signal"] = ordered["preclip_signal"]

@@ -31,6 +31,7 @@ def filter_probabilities(
     matrix: np.ndarray,
     radii: np.ndarray | None = None,
     jump_evidence_scale: float | None = None,
+    initial: np.ndarray | None = None,
 ) -> np.ndarray:
     """미래 관측 없이 순방향 상태확률을 계산한다.
 
@@ -43,7 +44,19 @@ def filter_probabilities(
     if radii is not None and len(radii) != len(emissions):
         raise ValueError("반지름과 관측확률의 주 수가 다릅니다")
     filtered = np.zeros_like(emissions, dtype=float)
-    prior = np.full(matrix.shape[0], 1.0 / matrix.shape[0])
+    # 기본 초기분포는 균등이다. 아무 정보가 없다는 뜻이고, 특정 국면에서 시작한다고
+    # 가정하지 않는다. `initial`은 초기값 영향이 얼마나 빨리 사라지는지 재기 위한
+    # 감사용 통로이며 운영 경로는 균등을 그대로 쓴다.
+    if initial is None:
+        prior = np.full(matrix.shape[0], 1.0 / matrix.shape[0])
+    else:
+        prior = np.asarray(initial, dtype=float)
+        if prior.shape != (matrix.shape[0],):
+            raise ValueError("초기 상태분포의 길이가 상태 수와 다릅니다")
+        total_initial = float(prior.sum())
+        if not np.isfinite(total_initial) or total_initial <= 0:
+            raise ValueError("초기 상태분포의 합은 양수여야 합니다")
+        prior = prior / total_initial
     for index, likelihood in enumerate(emissions):
         prediction = prior @ matrix
         posterior = prediction * likelihood

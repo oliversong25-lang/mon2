@@ -17,7 +17,7 @@ from .models.leading import preliminary_leading_score
 from .models.momentum import coordinates
 from .models.phase import emission_probabilities, phase_definitions
 from .models.transition import cyclic_distance, filter_probabilities, transition_matrix
-from .preprocessing.frequency import weekly_event_matrix
+from .preprocessing.frequency import combine_subfactor, weekly_event_matrix
 from .preprocessing.transforms import transform_observations
 from .schemas import ModelResult
 
@@ -150,20 +150,40 @@ def run_pipeline(
         robust_clip=model_config.get("robust_clip"),
     )
     events = weekly_event_matrix(transformed)
+    # 중복군을 하나의 부요인으로 합칠 수 있다. 자료 품질 점수는 원래 지표 기준으로
+    # 계속 재야 하므로 합성 결과는 요인 계산에만 쓴다.
+    factor_events, factor_settings = combine_subfactor(
+        events, core_settings, model_config.get("claims_subfactor")
+    )
     composite_estimate = CompositeFactorModel(
-        core_settings,
+        factor_settings,
         settings.indicators["constraints"],
         model_config.get("maturity"),
         model_config.get("robust_clip"),
-    ).fit_filter(events)
+    ).fit_filter(factor_events)
     dynamic_estimate = DynamicFactorModel(model_config["dynamic_factor"]).fit_filter(events)
     # v0.1의 공식 대표모델은 기여도를 설명할 수 있는 합성요인이다.
     # 동적요인의 상태 기울기는 비교모델에만 속하므로 대표 좌표에 섞지 않는다.
     representative_fallback = False
+    # 좌표 표준화는 지표 표준화와 별개의 축이다. 지표를 rolling으로 바꿔도 여기가
+    # expanding이면 시작 시점 기억이 X·Y에 그대로 남는다. 그래서 설정을 따로 둔다.
+    coordinate_method = str(
+        model_config.get("coordinate_standardization_method", "expanding_mean_std")
+    )
+    coordinate_window = int(
+        round(52.0 * float(model_config.get("coordinate_standardization_horizon_years", 10.0)))
+    )
+    coordinate_minimum = model_config.get("coordinate_standardization_min_history_years")
+    coordinate_minimum_weeks = (
+        int(round(52.0 * float(coordinate_minimum))) if coordinate_minimum is not None else None
+    )
     coords = coordinates(
         composite_estimate.factor,
         int(model_config["momentum_weeks"]),
         int(model_config["standardization_min_periods"]),
+        method=coordinate_method,
+        window=coordinate_window,
+        minimum_history_weeks=coordinate_minimum_weeks,
     ).dropna()
     if coords.empty:
         slope = dynamic_estimate.metadata["slopes"]
@@ -174,6 +194,9 @@ def run_pipeline(
             int(model_config["momentum_weeks"]),
             int(model_config["standardization_min_periods"]),
             slope,
+            method=coordinate_method,
+            window=coordinate_window,
+            minimum_history_weeks=coordinate_minimum_weeks,
         ).dropna()
         representative_fallback = True
     if coords.empty:
@@ -255,12 +278,28 @@ def run_pipeline(
     minimum_availability = float(settings.indicators["constraints"]["minimum_availability"])
     first_available = min(pd.Timestamp(value) for value in events.attrs["first_available"].values())
     history_years = (as_of_timestamp - first_available).days / 365.2425
+    # 원자료 이력만으로는 성숙도를 다 잴 수 없다. 합성요인은 지표 표준화가 끝난 뒤에야
+    # 시작하고, 좌표 표준화는 다시 그 합성요인의 이력을 필요로 한다. 두 번째 시계를
+    # 세지 않으면 짧고 조용한 표본에서 계산된 척도가 공식 판정처럼 나간다.
+    factor_history = composite_estimate.factor.dropna()
+    coordinate_history_years = (
+        (as_of_timestamp - pd.Timestamp(factor_history.index.min())).days / 365.2425
+        if not factor_history.empty
+        else 0.0
+    )
+    coordinate_required_years = float(
+        model_config.get("coordinate_standardization_horizon_years", 10.0)
+    )
+    # 보류(withheld)가 잠정(preliminary)보다 강한 상태다. 자료가 모자라 판정을 내지 않기로
+    # 한 경우를 "잠정 판정"으로 낮춰 표시하면 없는 판정이 있는 것처럼 읽힌다.
     if history_years < 5.0:
         status = "insufficient_warmup"
-    elif history_years < 10.0:
+    elif availability < minimum_availability:
+        status = "withheld"
+    elif history_years < 10.0 or coordinate_history_years < coordinate_required_years:
         status = "preliminary"
     else:
-        status = "ok" if availability >= minimum_availability else "withheld"
+        status = "ok"
     warnings = [PRELIMINARY_WARNING, *availability_warnings]
     if status == "withheld":
         warnings.append(
@@ -269,7 +308,9 @@ def run_pipeline(
         )
     if status in {"insufficient_warmup", "preliminary"}:
         warnings.append(
-            f"가용 이력 {history_years:.1f}년: 공식 결과에는 최소 10년 워밍업이 필요합니다."
+            f"가용 이력 {history_years:.1f}년, 합성요인 이력 {coordinate_history_years:.1f}년: "
+            f"공식 결과에는 원자료 10년과 합성요인 "
+            f"{coordinate_required_years:.0f}년이 모두 필요합니다."
         )
     if representative_fallback:
         warnings.append("합성요인 제약을 충족할 핵심지표가 부족해 판정을 보류하고 비교좌표만 표시")
@@ -327,6 +368,16 @@ def run_pipeline(
             "warmup_status": (
                 status if status in {"insufficient_warmup", "preliminary"} else "mature"
             ),
+            "trend_horizon_years": model_config.get("trend_horizon_years"),
+            "trend_span_weeks": model_config.get("trend_span_weeks"),
+            "standardization_method": str(
+                model_config.get("standardization_method", "expanding_mean_std")
+            ),
+            "standardization_horizon_years": model_config.get("standardization_horizon_years"),
+            "coordinate_standardization_method": coordinate_method,
+            "coordinate_history_years": coordinate_history_years,
+            "coordinate_required_years": coordinate_required_years,
+            "maturity_enabled": bool((model_config.get("maturity") or {}).get("enabled", False)),
             "robust_clip": model_config.get("robust_clip"),
             "clipped_observation_count": composite_estimate.metadata["clipped_observation_count"],
             "total_limited_amount": composite_estimate.metadata["total_limited_amount"],
