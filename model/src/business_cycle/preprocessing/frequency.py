@@ -21,6 +21,25 @@ def weekly_event_matrix(frame: pd.DataFrame) -> pd.DataFrame:
     )
     full_index = pd.date_range(matrix.index.min(), matrix.index.max(), freq="W-FRI")
     result: pd.DataFrame = matrix.reindex(full_index).sort_index()
+    # 성숙도는 표준화가 끝난 첫 값이 아니라 원자료가 처음 공개된 때부터 잰다.
+    result.attrs["first_available"] = {
+        str(key): pd.Timestamp(value)
+        for key, value in frame.groupby("indicator_id")["available_week"].min().items()
+    }
+    audit_columns = [
+        column
+        for column in (
+            "indicator_id",
+            "available_week",
+            "original_signal",
+            "preclip_signal",
+            "postclip_signal",
+            "frequency",
+            "trend_span_observations",
+        )
+        if column in frame.columns
+    ]
+    result.attrs["signal_audit"] = frame[audit_columns].copy()
     return result
 
 

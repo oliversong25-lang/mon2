@@ -197,7 +197,10 @@ def _evaluate(
         }
     )
     estimate = CompositeFactorModel(
-        settings.indicators["indicators"], settings.indicators["constraints"]
+        settings.indicators["indicators"],
+        settings.indicators["constraints"],
+        settings.model.get("maturity"),
+        settings.model.get("robust_clip"),
     ).fit_filter(result.run.events)
     raw_weights = estimate.metadata["effective_weights"]
     if not isinstance(raw_weights, dict):

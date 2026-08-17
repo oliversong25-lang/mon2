@@ -39,6 +39,15 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-17 — 미국 경기국면 단계 A 빈도·워밍업·극단값 재검증
+
+- 작업자: Codex
+- 변경: 원빈도 기준 달력 3년 추세(주간 156·월간 36·분기 12), 현재값을 제외한 rolling median/MAD와 causal IQR·표준편차 fallback, 합성 기여 직전 Huber 제한, 5~10년 지표 성숙도 ramp를 구현했습니다. 기존→달력3년→성숙도→robust6, 표준화 6종, 추세 2·3·5년, 1985·1990 워밍업, 7개 지표 LOO를 실자료로 다시 계산했습니다.
+- 이유: 기존 `156`이 주간에는 156주, 월간에는 156개월로 적용됐고 팬데믹 극단값과 짧은 워밍업에 결과가 취약했습니다. 원신호·제한 전·제한 후 값을 모두 남겨 충격을 지우지 않고 영향력만 제한하도록 했습니다.
+- 검증: 변경 전 기준값(재현율 93.4%, 오탐률 6.34%, 점프 4, 왕복 20)을 정확히 재현했습니다. robust6은 팬데믹 최초/4주 확인 지연 2주/5주와 5개 경제영역 악화를 유지하고 오탐률을 4.25%로 낮췄지만, 재현율 81.8%, 점프 7, 왕복 30으로 채택 기준을 통과하지 못했습니다. 1985·1990의 2001 진입 차이는 44주에서 25주로 줄었습니다. 단계 A 미통과로 설정을 동결하지 않았고 ALFRED도 시작하지 않았으며, 기본 `model.yaml`은 기존 후보 설정을 유지합니다.
+- 남은 일: median/MAD 후보의 재현율과 국면 안정성 저하 원인을 구조적으로 분석해야 합니다. 수치 맞춤 탐색 없이 표준화 창·좌표 단계와 Huber 적용 범위의 경제적 근거를 먼저 검토합니다. ALFRED는 단계 A 통과 뒤에만 진행합니다.
+- 관련 파일: `model/src/business_cycle/preprocessing/standardize.py`, `model/src/business_cycle/preprocessing/transforms.py`, `model/src/business_cycle/models/composite.py`, `model/src/business_cycle/validation/phase3.py`, `model/tests/test_phase3_robustness.py`, `model/outputs/robustness_validation/phase3/`
+
 ### 2026-08-17 — 미국 경기국면 모델 2.5차 강건성 검증 및 ALFRED 중단
 
 - 작업자: Codex

@@ -133,12 +133,28 @@ def run_pipeline(
     transformed = transform_observations(
         available,
         core_settings,
-        int(model_config["trend_span_weeks"]),
+        (
+            int(model_config["trend_span_weeks"])
+            if "trend_horizon_years" not in model_config
+            else None
+        ),
         int(model_config["standardization_min_periods"]),
+        trend_horizon_years=model_config.get("trend_horizon_years"),
+        standardization_method=str(
+            model_config.get("standardization_method", "expanding_mean_std")
+        ),
+        standardization_horizon_years=float(
+            model_config.get("standardization_horizon_years", 10.0)
+        ),
+        standardization_min_history_years=model_config.get("standardization_min_history_years"),
+        robust_clip=model_config.get("robust_clip"),
     )
     events = weekly_event_matrix(transformed)
     composite_estimate = CompositeFactorModel(
-        core_settings, settings.indicators["constraints"]
+        core_settings,
+        settings.indicators["constraints"],
+        model_config.get("maturity"),
+        model_config.get("robust_clip"),
     ).fit_filter(events)
     dynamic_estimate = DynamicFactorModel(model_config["dynamic_factor"]).fit_filter(events)
     # v0.1의 공식 대표모델은 기여도를 설명할 수 있는 합성요인이다.
@@ -237,12 +253,23 @@ def run_pipeline(
     )
     supporting, conflicting = _indicator_evidence(composite_estimate.contributions, timestamp)
     minimum_availability = float(settings.indicators["constraints"]["minimum_availability"])
-    status = "ok" if availability >= minimum_availability else "withheld"
+    first_available = min(pd.Timestamp(value) for value in events.attrs["first_available"].values())
+    history_years = (as_of_timestamp - first_available).days / 365.2425
+    if history_years < 5.0:
+        status = "insufficient_warmup"
+    elif history_years < 10.0:
+        status = "preliminary"
+    else:
+        status = "ok" if availability >= minimum_availability else "withheld"
     warnings = [PRELIMINARY_WARNING, *availability_warnings]
     if status == "withheld":
         warnings.append(
             f"핵심지표 확보율 {availability:.0%}가 최소 기준 "
             f"{minimum_availability:.0%}보다 낮아 판정 보류"
+        )
+    if status in {"insufficient_warmup", "preliminary"}:
+        warnings.append(
+            f"가용 이력 {history_years:.1f}년: 공식 결과에는 최소 10년 워밍업이 필요합니다."
         )
     if representative_fallback:
         warnings.append("합성요인 제약을 충족할 핵심지표가 부족해 판정을 보류하고 비교좌표만 표시")
@@ -296,6 +323,13 @@ def run_pipeline(
             ),
             "revision_basis": "latest_revision",
             "release_date_basis": "actual_when_provided_else_configured_lag",
+            "warmup_years": history_years,
+            "warmup_status": (
+                status if status in {"insufficient_warmup", "preliminary"} else "mature"
+            ),
+            "robust_clip": model_config.get("robust_clip"),
+            "clipped_observation_count": composite_estimate.metadata["clipped_observation_count"],
+            "total_limited_amount": composite_estimate.metadata["total_limited_amount"],
         },
     )
     return PipelineRun(

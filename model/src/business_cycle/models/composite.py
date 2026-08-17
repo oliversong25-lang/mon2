@@ -14,9 +14,40 @@ from .base import FactorEstimate, FactorModel
 class CompositeFactorModel(FactorModel):
     """가용 신호의 가중치를 재정규화하는 투명한 기준 모델."""
 
-    def __init__(self, indicator_settings: dict[str, Any], constraints: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        indicator_settings: dict[str, Any],
+        constraints: dict[str, Any],
+        maturity: dict[str, Any] | None = None,
+        robust_clip: float | None = None,
+    ) -> None:
         self.settings = indicator_settings
         self.constraints = constraints
+        self.maturity = maturity or {"enabled": False}
+        self.robust_clip = robust_clip
+
+    def _maturity_weights(self, events: pd.DataFrame, week: pd.Timestamp) -> pd.Series:
+        """5년 미만 제외, 5~10년 선형 증가, 10년 이후 완전 반영한다."""
+
+        result = pd.Series(1.0, index=events.columns, dtype=float)
+        if not bool(self.maturity.get("enabled", False)):
+            return result
+        first_available = events.attrs.get("first_available", {})
+        excluded = float(self.maturity.get("exclude_years", 5.0))
+        full = float(self.maturity.get("full_weight_years", 10.0))
+        for column in result.index:
+            first = first_available.get(str(column))
+            if first is None:
+                result[column] = 0.0
+                continue
+            age_years = max(0.0, (week - pd.Timestamp(first)).days / 365.2425)
+            if full <= excluded:
+                result[column] = float(age_years >= excluded)
+            else:
+                result[column] = float(
+                    np.clip((age_years - excluded) / (full - excluded), 0.0, 1.0)
+                )
+        return result
 
     def _base_weights(self, columns: pd.Index) -> pd.Series:
         maximum = float(self.constraints.get("max_indicator_weight", 0.20))
@@ -110,11 +141,14 @@ class CompositeFactorModel(FactorModel):
         factor = pd.Series(np.nan, index=held.index, dtype=float, name="composite_factor")
         renormalized = 0
         effective_weights: dict[pd.Timestamp, dict[str, float]] = {}
+        maturity_weights: dict[pd.Timestamp, dict[str, float]] = {}
+        clipping_events: list[dict[str, Any]] = []
         for position in range(len(held)):
             week = pd.Timestamp(str(held.index[position]))
             row = held.iloc[position]
             available = row.notna()
-            weights = (base * freshness.iloc[position]).where(available, 0.0)
+            maturity = self._maturity_weights(events, week)
+            weights = (base * freshness.iloc[position] * maturity).where(available, 0.0)
             total = float(weights.sum())
             if total <= 0:
                 continue
@@ -123,12 +157,27 @@ class CompositeFactorModel(FactorModel):
                 continue
             if abs(total - float(base.sum())) > 1e-12:
                 renormalized += 1
-            values = row.fillna(0.0).to_numpy(dtype=float) * normalized.to_numpy(dtype=float)
+            bounded = row.copy()
+            if self.robust_clip is not None:
+                bounded = bounded.clip(-self.robust_clip, self.robust_clip)
+                changed = row.notna() & bounded.ne(row)
+                for indicator in row.index[changed]:
+                    clipping_events.append(
+                        {
+                            "date": week.date().isoformat(),
+                            "indicator_id": str(indicator),
+                            "preclip": float(row[indicator]),
+                            "postclip": float(bounded[indicator]),
+                            "limited_amount": float(abs(row[indicator]) - abs(bounded[indicator])),
+                        }
+                    )
+            values = bounded.fillna(0.0).to_numpy(dtype=float) * normalized.to_numpy(dtype=float)
             contributions.iloc[position, :] = values
             factor.iloc[position] = float(np.sum(values))
             effective_weights[week] = {
                 str(k): float(v) for k, v in normalized[normalized > 0].items()
             }
+            maturity_weights[week] = {str(k): float(v) for k, v in maturity.items()}
         correlations = events.corr(min_periods=12)
         duplicate_threshold = float(self.constraints.get("duplicate_correlation", 0.85))
         correlation_values = correlations.to_numpy(dtype=float)
@@ -151,6 +200,13 @@ class CompositeFactorModel(FactorModel):
                 "model": "composite",
                 "renormalized_weeks": renormalized,
                 "effective_weights": effective_weights,
+                "maturity_weights": maturity_weights,
+                "robust_clip": self.robust_clip,
+                "clipping_events": clipping_events,
+                "clipped_observation_count": len(clipping_events),
+                "total_limited_amount": float(
+                    sum(float(event["limited_amount"]) for event in clipping_events)
+                ),
                 "duplicate_pairs": duplicate_pairs,
             },
         )
