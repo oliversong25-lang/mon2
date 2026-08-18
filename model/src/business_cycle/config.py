@@ -53,6 +53,7 @@ def _baseline_model(name: str, document: dict[str, Any], base: dict[str, Any]) -
             "coordinate_standardization_horizon_years",
             "coordinate_standardization_min_history_years",
             "coordinate_full_history_years",
+            "contraction_breadth_gate",
         }
     }
     trend = document.get("trend", {})
@@ -109,6 +110,13 @@ def _baseline_model(name: str, document: dict[str, Any], base: dict[str, Any]) -
         model["coordinate_standardization_min_history_years"] = float(
             coordinates["minimum_history_years"]
         )
+    gate = document.get("contraction_breadth_gate")
+    if gate is not None:
+        model["contraction_breadth_gate"] = {
+            "enabled": bool(gate.get("enabled", False)),
+            "minimum_domains": float(gate["minimum_domains"]),
+        }
+
     if "full_history_years" in coordinates:
         model["coordinate_full_history_years"] = float(coordinates["full_history_years"])
     return model

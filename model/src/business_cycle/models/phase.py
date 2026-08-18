@@ -51,12 +51,19 @@ def emission_probabilities(
     origin_scale: float,
     level: float | None = None,
     contraction_level_scale: float | None = None,
+    breadth: float | None = None,
+    minimum_breadth: float | None = None,
 ) -> np.ndarray:
     """경계에서 끊기지 않고 원점에서 넓어지는 원형 Gaussian 확률을 계산한다.
 
     선택적인 침체 수준 게이트는 Y가 약한 음수일 뿐인 원점 부근에서 각도만으로
     현재 침체를 확정하지 않게 한다. 0/1 임계값 대신 기존 원점 척도까지 연속적으로
     근거를 늘리므로 강한 실제 침체의 관측확률은 바꾸지 않는다.
+
+    선택적인 영역 폭 게이트는 같은 이유를 넓이 쪽에서 건다. 현재 침체는 여러 독립
+    경제영역이 동시에 나빠졌다는 판정이어야 한다. 한두 영역만 음수인데 각도가
+    침체 구간을 가리키면 후퇴기로 남긴다. 실업수당 두 계열은 같은 영역에 속하므로
+    영역 수를 셀 때 한 번만 세어진다.
     """
 
     closeness = math.exp(-max(radius, 0.0) / max(origin_scale, 1e-9))
@@ -66,9 +73,16 @@ def emission_probabilities(
         [math.exp(-0.5 * (circular_distance(angle, center) / sigma) ** 2) for center in centers],
         dtype=float,
     )
+    evidences: list[float] = []
     if level is not None and contraction_level_scale is not None:
         scale = max(float(contraction_level_scale), 1e-9)
-        evidence = min(1.0, max(0.0, -float(level) / scale))
+        evidences.append(min(1.0, max(0.0, -float(level) / scale)))
+    if breadth is not None and minimum_breadth is not None:
+        # 최소 폭에서 1, 그 한 단계 아래에서 0으로 선형 증가한다.
+        required = max(float(minimum_breadth), 1e-9)
+        evidences.append(min(1.0, max(0.0, float(breadth) - (required - 1.0))))
+    if evidences:
+        evidence = min(evidences)
         contraction_indexes = [
             index for index, phase in enumerate(phases) if phase.broad == "contraction"
         ]

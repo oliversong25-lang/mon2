@@ -252,3 +252,20 @@ coordinate_g_scale_only_10y:
   robust: {enabled: false}
   coordinates: {standardization: scale_only, window_years: 10, minimum_history_years: 2,
                 full_history_years: 5}
+
+candidate_h_breadth_gate:
+  description: >-
+    후보 H. 후보 G에 영역 폭 확인 규칙만 더한 설정. 현재 침체는 여러 독립 경제영역이
+    동시에 나빠졌다는 판정이어야 한다는 요구다. 최소 영역 수 4는 개발구간(1995~2012)의
+    실제 침체 주에서 관측된 최소 폭에서 가져왔다 — 2001년 최소 4, 금융위기 최소 5.
+    2020년은 스트레스 시험 구간이라 임계값 선택에 쓰지 않았다. 실업수당 두 계열은
+    같은 영역(weekly_bridge)이라 폭 계산에서 한 번만 세어진다.
+  operational: true
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: scale_only, window_years: 10, minimum_history_years: 2,
+                full_history_years: 5}
+  contraction_breadth_gate: {enabled: true, minimum_domains: 4}

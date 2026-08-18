@@ -208,6 +208,25 @@ def run_pipeline(
     if coords.empty:
         raise ValueError("학습기간이 짧아 경기좌표를 계산할 수 없습니다")
 
+    # 현재 침체는 여러 독립 경제영역이 동시에 나빠졌다는 판정이어야 한다. 영역 폭을
+    # 주 단위로 세어 관측확률 게이트에 넘긴다. 기여도는 그 주에 보유 중인 신호만
+    # 쓰므로 미래 정보가 들어가지 않는다. 실업수당 두 계열은 같은 영역이라 한 번 센다.
+    breadth_config = model_config.get("contraction_breadth_gate") or {}
+    breadth_minimum = (
+        float(breadth_config["minimum_domains"])
+        if bool(breadth_config.get("enabled", False))
+        else None
+    )
+    domain_of = {str(key): str(value["domain"]) for key, value in factor_settings.items()}
+    contributions_by_domain = (
+        composite_estimate.contributions.reindex(coords.index)
+        .rename(columns=domain_of)
+        .T.groupby(level=0)
+        .sum()
+        .T
+    )
+    negative_domains = (contributions_by_domain < 0).sum(axis=1).astype(float)
+
     phases = phase_definitions(settings.transitions["phases"])
     emissions = np.vstack(
         [
@@ -228,8 +247,15 @@ def run_pipeline(
                     if model_config.get("contraction_level_gate", False)
                     else None
                 ),
+                breadth,
+                breadth_minimum,
             )
-            for angle, radius, level in coords[["angle", "radius", "y"]].to_numpy(dtype=float)
+            for angle, radius, level, breadth in np.column_stack(
+                [
+                    coords[["angle", "radius", "y"]].to_numpy(dtype=float),
+                    negative_domains.to_numpy(dtype=float),
+                ]
+            )
         ]
     )
     matrix = transition_matrix(len(phases), settings.transitions["transition"])
@@ -380,6 +406,7 @@ def run_pipeline(
                 model_config.get("standardization_method", "expanding_mean_std")
             ),
             "standardization_horizon_years": model_config.get("standardization_horizon_years"),
+            "contraction_breadth_minimum": breadth_minimum,
             "coordinate_standardization_method": coordinate_method,
             "coordinate_standardization_window_years": coordinate_window_years,
             "coordinate_history_years": coordinate_history_years,

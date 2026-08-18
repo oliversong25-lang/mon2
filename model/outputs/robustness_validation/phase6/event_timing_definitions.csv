@@ -1,0 +1,7 @@
+case,first_contraction_signal_date,continuous_episode_start_date,confirmation_decision_date,confirmed_episode_effective_date,nber_reference_week,entry_lead_lag_from_first_signal,entry_lead_lag_from_confirmation_decision,pre_nber_false_positive_weeks,post_nber_false_positive_weeks,within_nber_true_positive_weeks,candidate,warmup_start
+2001,2001-02-23,2001-02-23,2001-03-16,2001-02-23,2001-04-06,-6.0,-3.0,6,14,107,coordinate_g_scale_only_10y,1985
+gfc,2008-01-18,2008-01-18,2008-02-08,2008-01-18,2008-01-04,2.0,5.0,0,0,107,coordinate_g_scale_only_10y,1985
+2020,2019-12-06,2019-12-06,2019-12-27,2019-12-06,2020-03-06,-13.0,-10.0,12,5,107,coordinate_g_scale_only_10y,1985
+2001,2001-02-23,2001-02-23,2001-03-16,2001-02-23,2001-04-06,-6.0,-3.0,6,14,107,candidate_h_breadth_gate,1985
+gfc,2008-01-18,2008-01-18,2008-02-08,2008-01-18,2008-01-04,2.0,5.0,0,0,107,candidate_h_breadth_gate,1985
+2020,2020-03-20,2020-03-20,2020-04-10,2020-03-20,2020-03-06,2.0,5.0,0,5,107,candidate_h_breadth_gate,1985
