@@ -178,7 +178,7 @@ def test_coordinate_standardization_method_is_honoured() -> None:
         index=pd.date_range("2000-01-07", periods=800, freq="W-FRI"),
     )
     expanding = coordinates(factor, 8, 26, method="expanding_mean_std")
-    rolling = coordinates(factor, 8, 26, method="rolling_mean_std", window=520)
+    rolling = coordinates(factor, 8, 26, method="rolling_mean_std", window_years=10)
     assert not np.allclose(
         expanding["y"].dropna().to_numpy()[-50:], rolling["y"].dropna().to_numpy()[-50:]
     )

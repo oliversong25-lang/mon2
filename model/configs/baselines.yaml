@@ -142,3 +142,113 @@ corrected_baseline_huber8:
     clip: 8
   coordinates:
     standardization: expanding
+
+# ── 단계 A-3 좌표층 후보 ────────────────────────────────────────────────────
+#
+# 공통: 달력 3년 추세, 10년 causal rolling 지표 표준화, 5~10년 성숙도 ramp, robust 없음.
+# 좌표 창만 바꾼다. robust 파라미터와 좌표 창을 같은 실험에서 섞지 않는다.
+
+coordinate_a_10y:
+  description: >-
+    후보 A. 단계 A-2에서 만든 10년 좌표 rolling. 지표 성숙 5~10년 위에 좌표 성숙
+    10년이 더 쌓여 전체 성숙 요구가 약 15년이 된다. 비교 기준으로만 쓴다.
+  operational: false
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: rolling, window_years: 10, minimum_history_years: 5,
+                full_history_years: 10}
+
+coordinate_b_5y:
+  description: >-
+    후보 B. 좌표 창 5년, 최소 이력 2년, 완전 성숙 5년. 지표가 5년에 쓰이기 시작하므로
+    좌표 창은 모델 나이 10년 안에서 성숙을 끝낸다. 전체 성숙 요구가 15년으로 늘지 않는다.
+  operational: true
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: rolling, window_years: 5, minimum_history_years: 2,
+                full_history_years: 5}
+
+coordinate_c_3y:
+  description: 후보 C. 좌표 창 3년. 짧은 창 민감도 사례이며 기본값으로 쓰지 않는다.
+  operational: false
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: rolling, window_years: 3, minimum_history_years: 2,
+                full_history_years: 3}
+
+coordinate_d_7y:
+  description: 후보 D. 좌표 창 7년. 긴 창 민감도 사례.
+  operational: false
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: rolling, window_years: 7, minimum_history_years: 2,
+                full_history_years: 7}
+
+coordinate_e_none:
+  description: >-
+    후보 E. 좌표 재표준화 없음. 합성요인을 그대로 Y로, 8주 변화량을 X로 쓴다.
+    Y 게이트(contraction_level_scale)와 원점 관련 임계값(phase_origin_scale,
+    low_radius_jump_scale)은 표준화된 z 척도를 전제로 정해진 값이라 여기서는
+    원래 의미를 잃는다. 구조 진단용이며 채택 후보가 아니다.
+  operational: false
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: none}
+
+frequency_maturity_reference:
+  description: >-
+    성능 참조선. ablation 5번 칸(빈도 수정 + 성숙도, expanding 지표 표준화, expanding 좌표).
+    좌표층 수정이 이 성능을 근거 없이 버리지 않았는지 보는 기준이며, 시작시점 의존성이
+    남아 있으므로 그 자체로 최종 후보는 아니다.
+  operational: false
+  trend: {horizon_years: 3}
+  standardization: {method: expanding, include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: expanding}
+
+coordinate_f_scale_only:
+  description: >-
+    후보 F. 진단에서 도출한 설정. 2차 표준화가 하던 일은 두 가지였다 — (1) 중심 재추정,
+    (2) X·Y 척도 맞추기. 시작시점 의존성은 (1)에서만 나오고, 임계값이 의존하는 것은
+    (2)다. 합성요인은 평균 0인 표준화 신호의 가중평균이므로 중심은 이론값 0으로
+    고정할 수 있다. 그래서 중심은 0으로 두고 척도만 5년 causal rolling으로 추정한다.
+    전체 성숙 요구는 10년을 넘지 않는다.
+  operational: true
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: scale_only, window_years: 5, minimum_history_years: 2,
+                full_history_years: 5}
+
+coordinate_g_scale_only_10y:
+  description: >-
+    후보 G. F와 같이 중심은 0으로 고정하되 척도 창을 10년으로 늘린 설정. F가 5년
+    척도를 쓰면서 조용한 구간에서 척도가 작아져 2022년 이후 오탐이 늘었기 때문이다.
+    척도는 평균보다 훨씬 안정적인 통계라 창을 늘려도 시작시점 의존성이 크게 늘지
+    않을 것이라는 가설을 시험한다. 완전 성숙은 5년으로 두어 전체 요구를 10년에 맞춘다.
+  operational: true
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: scale_only, window_years: 10, minimum_history_years: 2,
+                full_history_years: 5}

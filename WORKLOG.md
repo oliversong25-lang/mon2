@@ -39,6 +39,15 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-18 — 미국 경기국면 단계 A-3 좌표층 재검증
+
+- 작업자: Claude Code
+- 변경: 좌표 표준화를 달력 창·최소 이력·완전 성숙으로 나눠 설정 가능하게 하고, 창 시작·끝·길이·관측 수·척도 대체를 감사 열로 남겼습니다. 좌표 창 후보 A(10년)·B(5년)·C(3년)·D(7년)·E(없음)와 진단에서 도출한 F·G(중심 0 고정, 척도만 추정)를 비교했습니다. 성숙도 시계를 원자료와 합성요인 둘로 나누고 상태를 `withheld`/`preliminary`/`official`로 정리해 사유를 기록합니다. Python 3.11 전용 검사 환경(`.venv311`)을 만들어 `mypy --strict`를 선언된 목표에서 통과시켰습니다.
+- 이유: 단계 A-2의 10년 좌표 창은 지표 성숙 위에 좌표 성숙을 겹쳐 전체 요구를 15년으로 만들었고, 그래서 1990 시작 실행의 2001년 판정은 애초에 미성숙 판정이었습니다.
+- 검증: 단계 A-3 **미통과**. 지정 후보 A~E 중 전 기준 통과 없음. B·C는 시작시점 차이를 3주·2주로 줄이지만 오탐률이 11.9%·17.5%로 뛰고 2022년 이후 오탐이 28주·60주가 됩니다. E는 표면 성능이 가장 좋지만 각도의 80%가 두 수직축에 몰려 원점 임계값 세 개가 의미를 잃습니다. 후보 G는 재현율 88.4%, 오탐률 3.01%, F1 78.1%, 2022년 이후 오탐 0주, 2001년 차이 8.0주로 필수 기준을 만족하지만 한계값에 여유가 없고 2020년 수축을 조기 판정합니다(구간 오탐 13주). 테스트 101개 통과, Ruff 통과, Python 3.11 mypy --strict 통과. 동결·ALFRED 모두 하지 않았습니다.
+- 남은 일: 후보 G의 2020년 조기 판정 원인 분해, 2001년 8.0주의 잡음 민감도 확인, 점프 6건의 발생 시점 확인. ALFRED에는 `FRED_API_KEY`가 필요하며 현재 환경에 없습니다.
+- 관련 파일: `model/src/business_cycle/models/momentum.py`, `model/src/business_cycle/validation/phase5.py`, `model/src/business_cycle/validation/phase5_report.py`, `model/configs/baselines.yaml`, `model/tests/test_phase5_coordinate_layer.py`, `model/outputs/robustness_validation/phase5/`
+
 ### 2026-08-17 — 미국 경기국면 단계 A-2 구성요소 분해와 corrected baseline
 
 - 작업자: Claude Code

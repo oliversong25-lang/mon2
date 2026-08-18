@@ -51,6 +51,8 @@ def _baseline_model(name: str, document: dict[str, Any], base: dict[str, Any]) -
             "maturity",
             "coordinate_standardization_method",
             "coordinate_standardization_horizon_years",
+            "coordinate_standardization_min_history_years",
+            "coordinate_full_history_years",
         }
     }
     trend = document.get("trend", {})
@@ -94,16 +96,21 @@ def _baseline_model(name: str, document: dict[str, Any], base: dict[str, Any]) -
 
     coordinates = document.get("coordinates", {})
     coordinate_method = str(coordinates.get("standardization", "expanding"))
-    if coordinate_method not in {"expanding", "rolling"}:
+    if coordinate_method not in {"expanding", "rolling", "scale_only", "none"}:
         raise ValueError(f"[{name}] 지원하지 않는 좌표 표준화 방식: {coordinate_method}")
-    model["coordinate_standardization_method"] = (
-        "rolling_mean_std" if coordinate_method == "rolling" else "expanding_mean_std"
-    )
+    model["coordinate_standardization_method"] = {
+        "rolling": "rolling_mean_std",
+        "expanding": "expanding_mean_std",
+        "scale_only": "scale_only",
+        "none": "none",
+    }[coordinate_method]
     model["coordinate_standardization_horizon_years"] = float(coordinates.get("window_years", 10.0))
     if "minimum_history_years" in coordinates:
         model["coordinate_standardization_min_history_years"] = float(
             coordinates["minimum_history_years"]
         )
+    if "full_history_years" in coordinates:
+        model["coordinate_full_history_years"] = float(coordinates["full_history_years"])
     return model
 
 
