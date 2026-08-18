@@ -1,0 +1,82 @@
+{
+  "evidence_layers": {
+    "A_latest_vintage_development": "1995-01-01..2026-08-14 (기존 결과, 재생성하지 않음)",
+    "B_strict_alfred_validation": "2013-06-14..2026-08-14",
+    "C_earlier_partial_indicators": "만들지 않았다. 선행 계열 대체나 재정규화를 하지 않는다."
+  },
+  "frozen_candidate": "candidate_h_breadth_gate",
+  "thresholds_changed_for_alfred": false,
+  "verification": {
+    "week_count": 688,
+    "week_count_matches_688": true,
+    "first_as_of": "2013-06-14",
+    "last_as_of": "2026-08-14",
+    "first_matches": true,
+    "last_matches": true,
+    "missing_weeks": [],
+    "duplicate_weeks": [],
+    "error_weeks": 0,
+    "empty_or_missing_files": [],
+    "frozen_hash": "c367e2a0f8e907b6f927191f03379bab5ea5eace6b671454c4b63e44d4b2bb21",
+    "frozen_hash_matches": true,
+    "valid": true
+  },
+  "detection_2020": {
+    "first_contraction_signal_date": "2020-05-01",
+    "confirmation_decision_date": "2020-05-22",
+    "nber_reference_week": "2020-03-06",
+    "entry_lead_lag_from_first_signal": 8.0,
+    "entry_lead_lag_from_confirmation_decision": 11.0,
+    "pre_recession_false_positive_weeks": 0,
+    "post_recession_false_positive_weeks": 6,
+    "within_recession_contraction_weeks": 0,
+    "nber_weeks_in_window": 8,
+    "recession_episodes_in_window": 1
+  },
+  "revision_effects": {
+    "weeks_compared": 688,
+    "broad_phase_agreement": 0.8575581395348837,
+    "detail_phase_agreement": 0.5901162790697675,
+    "broad_phase_disagreement_weeks": 98,
+    "detail_phase_disagreement_weeks": 282,
+    "broad_disagreement_pairs": {
+      "slowdown -> expansion": 55,
+      "expansion -> slowdown": 29,
+      "slowdown -> contraction": 6,
+      "slowdown -> recovery": 4,
+      "recovery -> expansion": 3,
+      "contraction -> recovery": 1
+    },
+    "y_difference_mean": 0.037665466681053646,
+    "y_difference_mean_absolute": 0.18498867930272056,
+    "y_difference_max_absolute": 6.245710154041204
+  },
+  "stability": {
+    "broad_phase_changes": 56,
+    "detail_phase_changes": 131,
+    "broad_phase_share": {
+      "slowdown": 0.7631,
+      "expansion": 0.1584,
+      "recovery": 0.0698,
+      "contraction": 0.0087
+    },
+    "last_52_week_broad_changes": 0,
+    "final_as_of": "2026-08-14",
+    "final_broad_phase": "slowdown",
+    "final_detail_phase": "slowdown_late",
+    "final_top_probability": 0.9850598299916083,
+    "final_runner_up": "slowdown_mid",
+    "breadth_minimum_observed": 4.0,
+    "breadth_minimum_constant": true,
+    "negative_domain_median": 1.0,
+    "weeks_breadth_below_minimum": 629,
+    "contraction_weeks_with_insufficient_breadth": 0,
+    "official_status_weeks": 678,
+    "non_official_status_weeks": 10
+  },
+  "nber_window": {
+    "start": "2020-03-06",
+    "end": "2020-04-24"
+  },
+  "statistical_limitation": "엄격 창에는 NBER 침체가 2020년 하나뿐이다. 침체 한 건으로는 실시간 침체 탐지 성능을 일반화할 수 없다. 재현율·오탐률을 여러 순환에 걸쳐 검증했다고 말할 수 없으며, 2001년과 금융위기는 이 자료로 실시간 검증이 불가능하다. 여기서 확인할 수 있는 것은 2020년 탐지 시점, 침체 전후 오탐, 수정에 따른 판정 변화, 최초 공개와 최신 수정치의 불일치, 현재 국면 안정성, 영역 폭 게이트 안정성뿐이다."
+}
