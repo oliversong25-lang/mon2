@@ -125,3 +125,15 @@ outputs/robustness_validation/phase6/*
 !outputs/robustness_validation/phase6/frozen_model_config.sha256
 !outputs/robustness_validation/phase6/charts/
 !outputs/robustness_validation/phase6/charts/*.png
+data/cache/alfred/*
+!outputs/robustness_validation/phase7/
+outputs/robustness_validation/phase7/*
+!outputs/robustness_validation/phase7/validation_report.md
+!outputs/robustness_validation/phase7/validation_summary.json
+!outputs/robustness_validation/phase7/vintage_provenance.csv
+!outputs/robustness_validation/phase7/realtime_path.csv
+!outputs/robustness_validation/phase7/realtime_vs_latest.csv
+!outputs/robustness_validation/phase7/latest_vintage_history.csv
+!outputs/robustness_validation/phase7/charts/
+!outputs/robustness_validation/phase7/charts/*.png
+!outputs/robustness_validation/phase7/runner_errors.log
