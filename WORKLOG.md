@@ -39,6 +39,16 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-19 — 미국 경기국면 단계 A-5: 후보 H2 미통과, v1 미채택
+
+- 작업자: Claude Code
+- 변경: 3영역 주 전수 감사(`validation/phase8.py`), 청구건수 제외 심각도와 leave-one-out 계산(`models/severity.py`), 체계적 충격 예외를 붙인 후보 H2(`candidate_h2_systemic_override`), 두 게이트 판정과 보고서 생성(`validation/phase8_report.py`)을 추가했습니다. 러너에 샤드 실행을 넣어 688주를 6개 프로세스로 나눠 돌 수 있게 했습니다. 후보 H의 설정·동결 파일·해시·phase6/phase7 산출물은 하나도 건드리지 않았습니다.
+- 이유: 단계 B에서 후보 H가 2020년 공식 침체 8주 중 수축 판정 0주로 실패했습니다. 폭 임계값을 3으로 낮추면 2019년 말 오탐이 돌아오므로, 게이트를 바꾸기 전에 3영역 주가 실제로 무엇이었는지부터 세고 일반적인 예외 규칙을 사전 등록했습니다.
+- 검증: 단계 A-5 **미통과**. 최신 수정치 게이트 8개는 전부 통과했지만(재현율 88.4%, 오탐률 2.22%, F1 81.7%, 2019년 말 확인 수축 0주, 2022년 이후 0주, 미해명 점프 0건) 이는 예외가 1995~2026 전 구간에서 **0주** 발동해 후보 H와 국면 경로가 완전히 동일하기 때문입니다. 엄격 ALFRED 688주에서도 예외 발동 0주, H와 대국면·세부국면·상태 불일치 0주. 4주 확인 +11주(기준 +10주 초과), **공식 침체 8주 중 수축 판정 0주**로 두 항목 미달입니다. 진단이 원인을 특정합니다 — 2020-03-27 실시간 신호의 95.8%가 실업수당이었고 ICSA 한 계열이 92.3%, 핵심 동행지표만으로 잰 수준은 +0.16으로 음수조차 아니었습니다. 개발구간 3영역 주 78개 중 공식 침체 주는 0개입니다. 임계값은 전부 1995~2012에서만 뽑아 더 엄격한 쪽으로 반올림했고 ALFRED 결과로 조정한 것이 없습니다. 테스트 141개 통과, Ruff 통과, Python 3.11 mypy --strict 통과.
+- 남은 일: 정지 규칙에 따라 H3를 만들지 않습니다. 현재 설계에서 미국 v1 모델은 **채택하지 않음**으로 보고합니다. 다음 판단은 사용자 몫입니다 — 지표 구성이나 발표지연 처리를 바꾸는 별도 설계 논의가 아니면 이 설계에서 더 할 수 있는 수정이 없습니다. 2025년 10~12월 보류 10주는 원천 발표 중단이며 표시 정책 사안으로 남깁니다.
+- 관련 파일: `model/src/business_cycle/models/severity.py`, `model/src/business_cycle/validation/phase8.py`, `model/src/business_cycle/validation/phase8_report.py`, `model/src/business_cycle/validation/phase7_runner.py`, `model/configs/baselines.yaml`, `model/tests/test_phase8_systemic_override.py`, `model/outputs/robustness_validation/phase8/`
+
+
 ### 2026-08-19 — ALFRED point-in-time 검증 (단계 B)
 
 - 작업자: Claude Code

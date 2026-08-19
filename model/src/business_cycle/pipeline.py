@@ -16,6 +16,7 @@ from .models.dynamic_factor import DynamicFactorModel
 from .models.leading import preliminary_leading_score
 from .models.momentum import coordinate_details
 from .models.phase import emission_probabilities, phase_definitions
+from .models.severity import severity_details, systemic_override
 from .models.transition import cyclic_distance, filter_probabilities, transition_matrix
 from .preprocessing.frequency import combine_subfactor, weekly_event_matrix
 from .preprocessing.transforms import transform_observations
@@ -38,6 +39,7 @@ class PipelineRun:
     dynamic: pd.Series
     contributions: pd.DataFrame
     coordinate_audit: pd.DataFrame
+    breadth_audit: pd.DataFrame
 
 
 def _agreement(left: float, right: float) -> float:
@@ -228,47 +230,101 @@ def run_pipeline(
     negative_domains = (contributions_by_domain < 0).sum(axis=1).astype(float)
 
     phases = phase_definitions(settings.transitions["phases"])
-    emissions = np.vstack(
-        [
-            emission_probabilities(
-                angle,
-                radius,
-                phases,
-                float(model_config["phase_emission_sigma_degrees"]),
-                float(model_config["phase_origin_sigma_multiplier"]),
-                float(model_config["phase_origin_scale"]),
-                level,
-                (
-                    float(
-                        model_config.get(
-                            "contraction_level_scale", model_config["phase_origin_scale"]
-                        )
-                    )
-                    if model_config.get("contraction_level_gate", False)
-                    else None
-                ),
-                breadth,
-                breadth_minimum,
-            )
-            for angle, radius, level, breadth in np.column_stack(
-                [
-                    coords[["angle", "radius", "y"]].to_numpy(dtype=float),
-                    negative_domains.to_numpy(dtype=float),
-                ]
-            )
-        ]
-    )
     matrix = transition_matrix(len(phases), settings.transitions["transition"])
-    filtered = filter_probabilities(
-        emissions,
-        matrix,
-        coords["radius"].to_numpy(dtype=float),
-        (
-            float(model_config.get("low_radius_jump_scale", model_config["phase_origin_scale"]))
-            if model_config.get("low_radius_jump_constraint", False)
-            else None
-        ),
+    level_scale = (
+        float(model_config.get("contraction_level_scale", model_config["phase_origin_scale"]))
+        if model_config.get("contraction_level_gate", False)
+        else None
     )
+    jump_scale = (
+        float(model_config.get("low_radius_jump_scale", model_config["phase_origin_scale"]))
+        if model_config.get("low_radius_jump_constraint", False)
+        else None
+    )
+    geometry = coords[["angle", "radius", "y"]].to_numpy(dtype=float)
+
+    def _emissions(breadth_values: np.ndarray | None) -> np.ndarray:
+        """폭 계열을 바꿔 가며 같은 관측확률 계산을 재사용한다."""
+
+        column = (
+            np.full(len(geometry), np.nan)
+            if breadth_values is None
+            else np.asarray(breadth_values, dtype=float)
+        )
+        return np.vstack(
+            [
+                emission_probabilities(
+                    float(geometry[position][0]),
+                    float(geometry[position][1]),
+                    phases,
+                    float(model_config["phase_emission_sigma_degrees"]),
+                    float(model_config["phase_origin_sigma_multiplier"]),
+                    float(model_config["phase_origin_scale"]),
+                    float(geometry[position][2]),
+                    level_scale,
+                    None if breadth_values is None else float(column[position]),
+                    None if breadth_values is None else breadth_minimum,
+                )
+                for position in range(len(geometry))
+            ]
+        )
+
+    def _filter(emission_matrix: np.ndarray) -> np.ndarray:
+        return filter_probabilities(
+            emission_matrix,
+            matrix,
+            coords["radius"].to_numpy(dtype=float),
+            jump_scale,
+        )
+
+    contraction_indexes = [
+        index for index, phase in enumerate(phases) if phase.broad == "contraction"
+    ]
+    # 체계적 충격 예외. 폭이 한 단계 모자란 주에서만, 청구건수를 빼고도 심각도가
+    # 개발구간 밖이고 한 항목을 빼도 남아 있을 때에 한해 침체 판정을 허용한다.
+    # 임계값은 1995~2012 개발구간에서만 정했고 특정 사건의 날짜·분기·상수가 없다.
+    override_config = model_config.get("systemic_shock_override") or {}
+    override_enabled = breadth_minimum is not None and bool(override_config.get("enabled", False))
+    raw_weights = composite_estimate.metadata["effective_weights"]
+    weights_by_week = (
+        {
+            pd.Timestamp(str(timestamp)): {str(k): float(v) for k, v in values.items()}
+            for timestamp, values in raw_weights.items()
+            if isinstance(values, dict)
+        }
+        if isinstance(raw_weights, dict)
+        else {}
+    )
+    severity = severity_details(
+        composite_estimate.contributions,
+        weights_by_week,
+        domain_of,
+        coordinate_audit["coordinate_scale"],
+        coords.index,
+    )
+    override_active = pd.Series(False, index=coords.index)
+    ungated_contraction = pd.Series(np.nan, index=coords.index)
+    if override_enabled and breadth_minimum is not None:
+        ungated = _filter(_emissions(None))
+        ungated_contraction = pd.Series(
+            ungated[:, contraction_indexes].sum(axis=1), index=coords.index
+        )
+        override_active = systemic_override(
+            severity,
+            negative_domains,
+            ungated_contraction,
+            dynamic_estimate.factor.reindex(coords.index, method="ffill"),
+            breadth_minimum,
+            override_config,
+        )
+    effective_breadth = negative_domains.where(~override_active, breadth_minimum)
+    emissions = _emissions(None if breadth_minimum is None else effective_breadth.to_numpy())
+    filtered = _filter(emissions)
+    breadth_audit = severity.copy()
+    breadth_audit["negative_domains"] = negative_domains
+    breadth_audit["effective_breadth"] = effective_breadth
+    breadth_audit["ungated_contraction_probability"] = ungated_contraction
+    breadth_audit["systemic_override_active"] = override_active
     winners = filtered.argmax(axis=1)
     probability_columns = [f"p_{phase.code}" for phase in phases]
     history = coords.copy()
@@ -407,6 +463,9 @@ def run_pipeline(
             ),
             "standardization_horizon_years": model_config.get("standardization_horizon_years"),
             "contraction_breadth_minimum": breadth_minimum,
+            "systemic_override_enabled": override_enabled,
+            "systemic_override_active": bool(override_active.iloc[-1]),
+            "systemic_override_weeks": int(override_active.sum()),
             "coordinate_standardization_method": coordinate_method,
             "coordinate_standardization_window_years": coordinate_window_years,
             "coordinate_history_years": coordinate_history_years,
@@ -427,4 +486,5 @@ def run_pipeline(
         dynamic=dynamic_estimate.factor,
         contributions=composite_estimate.contributions,
         coordinate_audit=coordinate_audit,
+        breadth_audit=breadth_audit,
     )

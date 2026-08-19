@@ -54,6 +54,7 @@ def _baseline_model(name: str, document: dict[str, Any], base: dict[str, Any]) -
             "coordinate_standardization_min_history_years",
             "coordinate_full_history_years",
             "contraction_breadth_gate",
+            "systemic_shock_override",
         }
     }
     trend = document.get("trend", {})
@@ -115,6 +116,22 @@ def _baseline_model(name: str, document: dict[str, Any], base: dict[str, Any]) -
         model["contraction_breadth_gate"] = {
             "enabled": bool(gate.get("enabled", False)),
             "minimum_domains": float(gate["minimum_domains"]),
+        }
+
+    override = document.get("systemic_shock_override")
+    if override is not None:
+        if gate is None or not bool(gate.get("enabled", False)):
+            raise ValueError(f"[{name}] systemic_shock_override는 폭 게이트가 있어야 합니다")
+        model["systemic_shock_override"] = {
+            "enabled": bool(override.get("enabled", False)),
+            "minimum_core_negative_domains": int(override["minimum_core_negative_domains"]),
+            "core_level": float(override["core_level"]),
+            "leave_one_indicator_level": float(override["leave_one_indicator_level"]),
+            "leave_one_domain_level": float(override["leave_one_domain_level"]),
+            "minimum_ungated_contraction_probability": float(
+                override["minimum_ungated_contraction_probability"]
+            ),
+            "require_dynamic_agreement": bool(override.get("require_dynamic_agreement", True)),
         }
 
     if "full_history_years" in coordinates:

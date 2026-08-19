@@ -1,0 +1,6 @@
+constant,value,source,measured_at,development_weeks_behind_it,note
+core_level,-2.9254,개발구간 비침체 주의 최저 핵심수준,2009-07-03,29,3영역 주 78개의 핵심수준은 -0.695~0.211로 이 값 근처에도 오지 않는다
+leave_one_indicator_level,-2.8174,심각도 기준을 넘은 개발구간 주 가운데 가장 약한 지표 제거 심각도,2009-07-03,29,최대 기여 지표 하나를 빼도 남는 값. 한 지표가 만든 신호를 걸러낸다
+leave_one_domain_level,-2.3273,같은 구간에서 가장 약한 영역 제거 심각도,2008-11-21,29,최대 기여 영역 하나를 빼도 남는 값
+minimum_ungated_contraction_probability,0.9,개발구간 3영역 주의 게이트 이전 침체확률 최댓값 대비,2001-01-12,78,"3영역 주 최댓값 0.173, 침체 주 중앙값 0.981"
+minimum_core_negative_domains,2.0,개발구간 3영역 주의 핵심 음수영역 최솟값,1995-01-01,78,관측 범위 2~3. 하한이며 맞춘 값이 아니다

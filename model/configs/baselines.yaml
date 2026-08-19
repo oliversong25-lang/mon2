@@ -269,3 +269,31 @@ candidate_h_breadth_gate:
   coordinates: {standardization: scale_only, window_years: 10, minimum_history_years: 2,
                 full_history_years: 5}
   contraction_breadth_gate: {enabled: true, minimum_domains: 4}
+
+candidate_h2_systemic_override:
+  description: >-
+    후보 H2. 후보 H의 영역 폭 규칙(최소 4개)을 그대로 두고, 폭이 한 단계 모자란 주에만
+    적용되는 체계적 충격 예외를 더한 설정. 단계 A-5의 진단에서 나왔다 — 2020년 실시간에서
+    붕괴는 실업수당 한 영역에만 보였고 핵심 동행지표는 아직 아무 말도 하지 않았다.
+    그래서 예외는 넓이 대신 **청구건수를 제외한 심각도**를 묻고, 그 심각도가 한 항목을
+    빼도 남는지를 함께 묻는다. 임계값은 전부 1995~2012 개발구간에서만 정했다.
+    core_level -2.93은 개발구간에서 침체가 아닌 주가 기록한 가장 낮은 핵심 수준이고
+    (2009-07-03, -2.9254), leave_one_* 값은 그 심각도 기준을 넘은 개발구간 28주 가운데
+    가장 약한 값이다(-2.8179 / -2.3273). 특정 사건의 날짜·분기·상수는 없다.
+  operational: true
+  trend: {horizon_years: 3}
+  standardization: {method: rolling, window_years: 10, minimum_history_years: 5,
+                    include_current_observation: false}
+  maturity: {enabled: true, exclude_years: 5, full_weight_years: 10}
+  robust: {enabled: false}
+  coordinates: {standardization: scale_only, window_years: 10, minimum_history_years: 2,
+                full_history_years: 5}
+  contraction_breadth_gate: {enabled: true, minimum_domains: 4}
+  systemic_shock_override:
+    enabled: true
+    minimum_core_negative_domains: 2
+    core_level: -2.93
+    leave_one_indicator_level: -2.82
+    leave_one_domain_level: -2.33
+    minimum_ungated_contraction_probability: 0.90
+    require_dynamic_agreement: true
