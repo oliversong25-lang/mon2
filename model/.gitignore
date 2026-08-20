@@ -191,3 +191,11 @@ outputs/candidate_j/*
 !outputs/candidate_j/current_diagnosis.json
 !outputs/candidate_j/subphase_monotonicity.csv
 !outputs/candidate_j/weekly_state.csv
+!outputs/four_phase/
+outputs/four_phase/*
+!outputs/four_phase/frozen_config.yaml
+!outputs/four_phase/frozen_config.sha256
+!outputs/four_phase/validation_summary.json
+!outputs/four_phase/current_reading.json
+!outputs/four_phase/country_contract.json
+!outputs/four_phase/weekly_state.csv

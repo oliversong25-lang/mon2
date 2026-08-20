@@ -1,0 +1,88 @@
+{
+  "phases": [
+    "recovery",
+    "expansion",
+    "slowdown",
+    "contraction"
+  ],
+  "phase_status": [
+    "official",
+    "preliminary",
+    "withheld"
+  ],
+  "evidence_quality": [
+    "high",
+    "medium",
+    "low"
+  ],
+  "transition_watch": [
+    "none",
+    "toward_recovery",
+    "toward_expansion",
+    "toward_slowdown",
+    "toward_contraction"
+  ],
+  "recession_alert": [
+    "none",
+    "watch",
+    "elevated",
+    "active"
+  ],
+  "required_fields": [
+    "official_current_phase",
+    "phase_status",
+    "phase_separation",
+    "evidence_quality",
+    "activity_level",
+    "activity_momentum",
+    "domain_breadth",
+    "contribution_concentration",
+    "supporting_domains",
+    "opposing_domains",
+    "mixed_domains",
+    "transition_watch",
+    "recession_alert",
+    "as_of_date",
+    "latest_observation_by_domain",
+    "known_limitations"
+  ],
+  "forbidden_tokens": [
+    "recommend",
+    "recommendation",
+    "buy",
+    "sell",
+    "hold_rating",
+    "target_price",
+    "price_target",
+    "valuation",
+    "intrinsic_value",
+    "fair_value",
+    "allocation",
+    "portfolio",
+    "weight_change",
+    "overweight",
+    "underweight",
+    "position_size",
+    "ticker",
+    "security",
+    "stock",
+    "sector_pick",
+    "asset_class",
+    "trade",
+    "order"
+  ],
+  "semantics": {
+    "recovery": "현재 활동이 정상 아래로 약하지만, 개선이 넓고 지금 관측된다",
+    "expansion": "현재 활동이 넓게 양호하고 모멘텀이 안정적이거나 개선 중이다",
+    "slowdown": "광범위한 침체는 아니지만 성장 모멘텀이 경제의 상당 부분에서 약해지고 있다",
+    "contraction": "현재 활동이 여러 동행 도메인에 걸쳐 넓고 상당하게 하락 중이다",
+    "evidence_quality": "판정의 근거가 얼마나 든든한가. 보정된 확률이 아니다",
+    "transition_watch": "인접 국면 쪽으로의 이동 조짐. 공식 국면을 바꾸지 않는다",
+    "recession_alert": "침체 스트레스 경보. 공식 국면과 별개이며 다섯 번째 국면이 아니다"
+  },
+  "notes": [
+    "official_current_phase는 현재상태 측정이며 예측이 아니다.",
+    "이 모델은 투자 판단을 만들지 않는다. 그 해석은 사용자가 수행한다.",
+    "국가별 지표와 임계값은 달라도 위 의미는 같아야 한다."
+  ]
+}
