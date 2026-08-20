@@ -169,3 +169,16 @@ outputs/phase_interpretation/*
 !outputs/phase_interpretation/historical_parity_check.sha256
 !outputs/phase_interpretation/validation_report.md
 !outputs/phase_interpretation/validation_summary.json
+!outputs/current_state/
+outputs/current_state/*
+!outputs/current_state/frozen_candidate_config.yaml
+!outputs/current_state/frozen_candidate_config.sha256
+!outputs/current_state/validation_report.md
+!outputs/current_state/validation_summary.json
+!outputs/current_state/current_diagnosis.json
+!outputs/current_state/subphase_monotonicity.csv
+!outputs/current_state/momentum_scale_candidates.csv
+!outputs/current_state/normalization_variants.csv
+!outputs/current_state/frozen_model_leave_one_out.csv
+!outputs/current_state/frozen_model_lock_counterfactual.csv
+!outputs/current_state/weekly_state.csv

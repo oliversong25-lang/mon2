@@ -1,0 +1,319 @@
+{
+  "candidate": "candidate_i_current_state",
+  "frozen_config_sha256": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
+  "frozen_config_matches_snapshot": true,
+  "development_window": [
+    "1995-01-01",
+    "2012-12-31"
+  ],
+  "momentum_scale": {
+    "method": "rolling_mad",
+    "window_years": 10.0,
+    "minimum_years": 2.0
+  },
+  "stabilizer": {
+    "method": "bounded_margin",
+    "margin": 0.0212
+  },
+  "comparison_window": [
+    "1995-01-06",
+    "2026-08-14"
+  ],
+  "weeks": 1650,
+  "recession_metrics": {
+    "candidate_H": {
+      "recall": 0.884298,
+      "false_positive_rate": 0.022237,
+      "precision": 0.758865,
+      "f1": 0.816794,
+      "true_positive_weeks": 107,
+      "false_positive_weeks": 34,
+      "false_negative_weeks": 14
+    },
+    "candidate_I": {
+      "recall": 0.694215,
+      "false_positive_rate": 0.012426,
+      "precision": 0.815534,
+      "f1": 0.75,
+      "true_positive_weeks": 84,
+      "false_positive_weeks": 19,
+      "false_negative_weeks": 37
+    }
+  },
+  "episode_detection": {
+    "candidate_H": {
+      "2001": {
+        "official_start": "2001-04-06",
+        "official_end": "2001-12-07",
+        "official_weeks": 36,
+        "weeks_called_contraction": 34,
+        "first_signal": "2001-02-23",
+        "first_signal_lag_weeks": -6.0,
+        "confirmation": "2001-03-16",
+        "confirmation_lag_weeks": -3.0
+      },
+      "2008": {
+        "official_start": "2008-01-04",
+        "official_end": "2009-07-03",
+        "official_weeks": 79,
+        "weeks_called_contraction": 67,
+        "first_signal": "2008-01-18",
+        "first_signal_lag_weeks": 2.0,
+        "confirmation": "2008-02-08",
+        "confirmation_lag_weeks": 5.0
+      },
+      "2020": {
+        "official_start": "2020-03-06",
+        "official_end": "2020-05-01",
+        "official_weeks": 9,
+        "weeks_called_contraction": 7,
+        "first_signal": "2020-03-20",
+        "first_signal_lag_weeks": 2.0,
+        "confirmation": "2020-04-10",
+        "confirmation_lag_weeks": 5.0
+      },
+      "late_2019_confirmed_false_positive_weeks": 0,
+      "post_2022_confirmed_false_positive_weeks": 0
+    },
+    "candidate_I": {
+      "2001": {
+        "official_start": "2001-04-06",
+        "official_end": "2001-12-07",
+        "official_weeks": 36,
+        "weeks_called_contraction": 33,
+        "first_signal": "2001-04-13",
+        "first_signal_lag_weeks": 1.0,
+        "confirmation": "2001-05-04",
+        "confirmation_lag_weeks": 4.0
+      },
+      "2008": {
+        "official_start": "2008-01-04",
+        "official_end": "2009-07-03",
+        "official_weeks": 79,
+        "weeks_called_contraction": 48,
+        "first_signal": "2008-03-21",
+        "first_signal_lag_weeks": 11.0,
+        "confirmation": "2008-04-11",
+        "confirmation_lag_weeks": 14.0
+      },
+      "2020": {
+        "official_start": "2020-03-06",
+        "official_end": "2020-05-01",
+        "official_weeks": 9,
+        "weeks_called_contraction": 5,
+        "first_signal": "2020-04-03",
+        "first_signal_lag_weeks": 4.0,
+        "confirmation": "2020-04-24",
+        "confirmation_lag_weeks": 7.0
+      },
+      "late_2019_confirmed_false_positive_weeks": 0,
+      "post_2022_confirmed_false_positive_weeks": 0
+    }
+  },
+  "state_validity": {
+    "candidate_H": {
+      "phase_share": {
+        "slowdown_late": 0.253939,
+        "slowdown_early": 0.210303,
+        "expansion_late": 0.141818,
+        "slowdown_middle": 0.072121,
+        "recovery_middle": 0.071515,
+        "recovery_early": 0.055152,
+        "recovery_late": 0.046061,
+        "contraction_middle": 0.044242,
+        "expansion_middle": 0.037576,
+        "contraction_late": 0.033939,
+        "expansion_early": 0.026061,
+        "contraction_early": 0.007273
+      },
+      "max_phase_share": 0.253939,
+      "longest_run_by_phase": {
+        "expansion_late": 35,
+        "slowdown_early": 24,
+        "slowdown_middle": 9,
+        "slowdown_late": 133,
+        "expansion_middle": 10,
+        "contraction_early": 8,
+        "contraction_middle": 39,
+        "contraction_late": 11,
+        "recovery_early": 22,
+        "recovery_middle": 44,
+        "recovery_late": 13,
+        "expansion_early": 15
+      },
+      "longest_run_overall": 133,
+      "run_count": 211,
+      "transitions": 210,
+      "one_step": 204,
+      "two_step": 2,
+      "three_or_more": 4,
+      "three_week_whipsaws": 15
+    },
+    "candidate_I": {
+      "phase_share": {
+        "slowdown_early": 0.212727,
+        "slowdown_late": 0.187273,
+        "expansion_late": 0.128485,
+        "expansion_early": 0.107273,
+        "slowdown_middle": 0.095152,
+        "recovery_late": 0.081212,
+        "recovery_early": 0.066667,
+        "recovery_middle": 0.035152,
+        "contraction_late": 0.029091,
+        "contraction_early": 0.024242,
+        "expansion_middle": 0.023636,
+        "contraction_middle": 0.009091
+      },
+      "max_phase_share": 0.212727,
+      "longest_run_by_phase": {
+        "expansion_late": 13,
+        "expansion_middle": 5,
+        "expansion_early": 22,
+        "slowdown_early": 39,
+        "slowdown_middle": 8,
+        "slowdown_late": 39,
+        "contraction_early": 22,
+        "contraction_middle": 8,
+        "contraction_late": 14,
+        "recovery_early": 39,
+        "recovery_middle": 25,
+        "recovery_late": 23
+      },
+      "longest_run_overall": 39,
+      "run_count": 381,
+      "transitions": 380,
+      "one_step": 213,
+      "two_step": 74,
+      "three_or_more": 93,
+      "three_week_whipsaws": 63
+    }
+  },
+  "responsiveness": {
+    "raw_official_disagreement_rate": 0.056364,
+    "longest_disagreement_run": 6,
+    "filter_reversal_count": 93,
+    "max_filter_gain": 0.020873,
+    "filter_gain_within_margin": true,
+    "minimum_phase_score": 9.999890001210017e-07,
+    "zero_score_weeks": 0,
+    "phases_ever_reached": 12,
+    "phases_never_reached": []
+  },
+  "evidence_versus_separation": {
+    "weak_evidence_weeks": 464,
+    "weak_evidence_share": 0.281212,
+    "weak_high_separation_weeks": 0,
+    "weak_high_separation_share": 0.0,
+    "strong_high_separation_share": 0.055649,
+    "median_separation_weak": 0.032261,
+    "median_separation_strong": 0.119363
+  },
+  "subphase_monotonicity": {
+    "slowdown": {
+      "monotonic": true,
+      "level_median": {
+        "values": [
+          0.5818,
+          0.299,
+          -0.1914
+        ],
+        "monotonic": true
+      },
+      "negative_domains_median": {
+        "values": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "monotonic": true
+      }
+    },
+    "contraction": {
+      "monotonic": true,
+      "level_median": {
+        "values": [
+          -1.1459,
+          -1.6953,
+          -2.6471
+        ],
+        "monotonic": true
+      }
+    },
+    "recovery": {
+      "monotonic": true,
+      "level_median": {
+        "values": [
+          -1.2444,
+          -0.6733,
+          -0.0652
+        ],
+        "monotonic": true
+      }
+    },
+    "expansion": {
+      "monotonic": true,
+      "momentum_median": {
+        "values": [
+          0.8561,
+          0.4134,
+          0.1264
+        ],
+        "monotonic": true
+      }
+    }
+  },
+  "finite_memory_convergence": {
+    "after_4_weeks": {
+      "distinct_final_phases": 2,
+      "converged": false,
+      "final_phases": [
+        "expansion_late",
+        "slowdown_middle"
+      ]
+    },
+    "after_13_weeks": {
+      "distinct_final_phases": 1,
+      "converged": true,
+      "final_phases": [
+        "slowdown_middle"
+      ]
+    },
+    "after_26_weeks": {
+      "distinct_final_phases": 1,
+      "converged": true,
+      "final_phases": [
+        "slowdown_middle"
+      ]
+    },
+    "after_52_weeks": {
+      "distinct_final_phases": 1,
+      "converged": true,
+      "final_phases": [
+        "slowdown_middle"
+      ]
+    }
+  },
+  "response_latency": {
+    "episodes": 380,
+    "median_weeks": 1.0,
+    "p90_weeks": 1.0,
+    "max_weeks": 5.0,
+    "unresolved_at_end": 3
+  },
+  "current": {
+    "raw_current_phase": "expansion_late",
+    "official_current_phase": "slowdown_middle",
+    "evidence_quality": "low",
+    "phase_separation": 0.015979
+  },
+  "strict_alfred": {
+    "run": false,
+    "reason": "최신 수정치 기준으로 이미 §16의 기각 사유에 해당해 중단했다. 엄격 ALFRED는 최신 수정치 기각을 뒤집을 수 없다."
+  },
+  "adopted": false,
+  "rejection_reasons": [
+    "침체 재현율이 실질적으로 떨어졌다 (0.884 → 0.694)",
+    "침체 F1이 실질적으로 떨어졌다 (0.817 → 0.750)",
+    "3단계 이상 점프가 4건 → 93건으로 늘었다"
+  ]
+}
