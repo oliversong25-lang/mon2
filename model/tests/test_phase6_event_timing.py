@@ -177,14 +177,19 @@ def test_no_pandemic_specific_branching() -> None:
 
     root = Path(business_cycle.__file__).parent
     # 검증 코드에는 사례 창이 있어도 되고, nber.py는 공식 기준일 표라 날짜가 자료다.
-    # 지키려는 것은 "모델이 특정 날짜로 분기하지 않는다"이며, 지표를 계산하고 보고하는
-    # 모듈은 그 대상이 아니다. 디렉터리 이름만 보던 조건이 다른 패키지 안의 검증·보고
-    # 모듈을 놓쳤으므로 파일 역할로도 면제한다. 모델 모듈은 그대로 전부 검사한다.
+    # 지키려는 것은 "모델이 특정 날짜로 분기하지 않는다"이다. 지표를 계산하고 보고하는
+    # 모듈은 그 대상이 아니지만, 면제는 **파일 하나씩** 지정한다. 파일명만 보면
+    # 앞으로 만들 모델 패키지의 report.py까지 함께 면제되어 보호가 헐거워진다.
     allowed = {"nber.py"}
-    reporting = {"validation.py", "report.py"}
+    reporting = {
+        ("current_state", "validation.py"),
+        ("current_state", "report.py"),
+        ("candidate_j", "report.py"),
+    }
     offenders = []
     for path in root.rglob("*.py"):
-        if "validation" in path.parts or path.name in allowed or path.name in reporting:
+        relative = path.relative_to(root).parts
+        if "validation" in path.parts or path.name in allowed or relative in reporting:
             continue
         text = path.read_text(encoding="utf-8")
         for token in ('"2020', "'2020", '"2019', "'2019"):

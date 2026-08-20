@@ -1,0 +1,13 @@
+phase,broad,weeks,level_median,momentum_median,negative_domains_median,concentration_median
+recovery_early,recovery,101,-1.4352,0.9112,4.0,0.318
+recovery_middle,recovery,51,-0.752,1.0001,4.0,0.3716
+recovery_late,recovery,83,-0.2321,0.6148,1.0,0.3796
+expansion_early,expansion,146,0.5489,0.8338,0.0,0.464
+expansion_middle,expansion,77,0.4852,0.4522,0.0,0.3823
+expansion_late,expansion,205,0.6142,0.1989,0.0,0.3875
+slowdown_early,slowdown,387,0.4694,-0.0938,0.0,0.3772
+slowdown_middle,slowdown,198,0.1937,-0.2789,0.0,0.4051
+slowdown_late,slowdown,292,-0.1446,-0.723,1.0,0.4262
+contraction_early,contraction,54,-1.6133,-1.7709,3.0,0.5118
+contraction_middle,contraction,12,-1.8775,-1.538,3.0,0.442
+contraction_late,contraction,44,-2.4614,-1.0328,4.0,0.3112

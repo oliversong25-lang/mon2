@@ -182,3 +182,12 @@ outputs/current_state/*
 !outputs/current_state/frozen_model_leave_one_out.csv
 !outputs/current_state/frozen_model_lock_counterfactual.csv
 !outputs/current_state/weekly_state.csv
+!outputs/candidate_j/
+outputs/candidate_j/*
+!outputs/candidate_j/frozen_candidate_config.yaml
+!outputs/candidate_j/frozen_candidate_config.sha256
+!outputs/candidate_j/validation_report.md
+!outputs/candidate_j/validation_summary.json
+!outputs/candidate_j/current_diagnosis.json
+!outputs/candidate_j/subphase_monotonicity.csv
+!outputs/candidate_j/weekly_state.csv
