@@ -155,3 +155,17 @@ outputs/robustness_validation/phase8/*
 outputs/robustness_validation/phase8/alfred/*
 !outputs/robustness_validation/phase8/alfred/realtime_path.csv
 !outputs/robustness_validation/phase8/alfred/runner_errors.log
+!outputs/phase_interpretation/
+outputs/phase_interpretation/*
+!outputs/phase_interpretation/interpretation_contract.json
+!outputs/phase_interpretation/boundary_policy.md
+!outputs/phase_interpretation/confidence_policy.md
+!outputs/phase_interpretation/domain_diagnostic_schema.json
+!outputs/phase_interpretation/industry_data_availability.csv
+!outputs/phase_interpretation/country_extension_requirements.md
+!outputs/phase_interpretation/current_us_diagnosis.json
+!outputs/phase_interpretation/current_us_diagnosis.md
+!outputs/phase_interpretation/historical_parity_check.csv
+!outputs/phase_interpretation/historical_parity_check.sha256
+!outputs/phase_interpretation/validation_report.md
+!outputs/phase_interpretation/validation_summary.json

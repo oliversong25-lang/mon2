@@ -1,0 +1,45 @@
+{
+  "measure_name": "economic_domain_diagnosis",
+  "not_industry_breadth": true,
+  "domains": [
+    "employment",
+    "income",
+    "production",
+    "consumption",
+    "claims"
+  ],
+  "fields": {
+    "domain": "경제영역 이름",
+    "direction": "positive / negative / flat",
+    "standardized_contribution": "합성요인에 대한 그 주의 표준화 기여도",
+    "contribution_share": "절대 기여도의 영역 간 점유율",
+    "recent_change": "momentum_weeks 만큼 앞선 시점 대비 기여도 변화",
+    "stance": "supports / opposes / mixed",
+    "data_freshness_weeks": "그 영역에서 가장 최근 관측까지의 주 수",
+    "missing": "그 주에 기여도를 만들 수 없었는지"
+  },
+  "stance_rule": {
+    "definition": "대국면은 좌표 사분면이다. 기여도 부호가 그 국면의 Y 부호와 같으면 수준이, 기여도의 momentum_weeks 변화 부호가 X 부호와 같으면 모멘텀이 뒷받침한다.",
+    "expected_signs": {
+      "recovery": {
+        "level": -1,
+        "momentum": 1
+      },
+      "expansion": {
+        "level": 1,
+        "momentum": 1
+      },
+      "slowdown": {
+        "level": 1,
+        "momentum": -1
+      },
+      "contraction": {
+        "level": -1,
+        "momentum": -1
+      }
+    },
+    "supports": "수준과 모멘텀이 모두 일치",
+    "opposes": "둘 다 어긋남",
+    "mixed": "하나만 일치"
+  }
+}
