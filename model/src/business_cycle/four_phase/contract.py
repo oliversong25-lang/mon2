@@ -23,7 +23,16 @@ TRANSITION_WATCH: Final[tuple[str, ...]] = (
     "toward_contraction",
 )
 
-RECESSION_ALERT: Final[tuple[str, ...]] = ("none", "watch", "elevated", "active")
+#: §3의 경보 강도. 공식 국면과 별개이며 다섯 번째 국면이 아니다.
+RECESSION_ALERT: Final[tuple[str, ...]] = ("none", "watch", "elevated", "high")
+
+#: 경보의 성격. 강도만으로는 "심각하지만 한쪽에 몰렸다"를 말할 수 없다.
+ALERT_CHARACTER: Final[tuple[str, ...]] = (
+    "broad_and_confirmed",
+    "severe_but_concentrated",
+    "preliminary",
+    "absent",
+)
 
 #: §3이 요구한 필드. 순서가 곧 사용자가 읽는 순서다.
 REQUIRED_FIELDS: Final[tuple[str, ...]] = (
@@ -40,6 +49,7 @@ REQUIRED_FIELDS: Final[tuple[str, ...]] = (
     "mixed_domains",
     "transition_watch",
     "recession_alert",
+    "recession_alert_character",
     "as_of_date",
     "latest_observation_by_domain",
     "known_limitations",
@@ -125,6 +135,20 @@ def validate(payload: dict[str, Any]) -> None:
         raise ContractViolation("침체 경보가 어휘 밖입니다")
     if payload["recession_alert"] in PHASES:
         raise ContractViolation("침체 경보를 다섯 번째 공식 국면처럼 쓸 수 없습니다")
+    if payload["recession_alert_character"] not in ALERT_CHARACTER:
+        raise ContractViolation("경보 성격이 어휘 밖입니다")
+    if payload["recession_alert_character"] in PHASES:
+        raise ContractViolation("경보 성격을 공식 국면처럼 쓸 수 없습니다")
+    if (payload["recession_alert"] == "none") != (payload["recession_alert_character"] == "absent"):
+        raise ContractViolation("경보 강도와 성격이 어긋납니다")
+    if (
+        payload["official_current_phase"] == "contraction"
+        and payload["recession_alert_character"] == "severe_but_concentrated"
+    ):
+        raise ContractViolation(
+            "공식 침체는 동행 도메인 둘 이상의 확인을 요구합니다 — "
+            "한쪽에 몰린 충격만으로는 선언할 수 없습니다"
+        )
 
 
 def country_schema() -> dict[str, Any]:
@@ -136,6 +160,7 @@ def country_schema() -> dict[str, Any]:
         "evidence_quality": list(EVIDENCE_QUALITY),
         "transition_watch": list(TRANSITION_WATCH),
         "recession_alert": list(RECESSION_ALERT),
+        "recession_alert_character": list(ALERT_CHARACTER),
         "required_fields": list(REQUIRED_FIELDS),
         "forbidden_tokens": list(FORBIDDEN_TOKENS),
         "semantics": {
@@ -146,10 +171,17 @@ def country_schema() -> dict[str, Any]:
             "evidence_quality": "판정의 근거가 얼마나 든든한가. 보정된 확률이 아니다",
             "transition_watch": "인접 국면 쪽으로의 이동 조짐. 공식 국면을 바꾸지 않는다",
             "recession_alert": "침체 스트레스 경보. 공식 국면과 별개이며 다섯 번째 국면이 아니다",
+            "recession_alert_character": (
+                "경보가 넓게 확인됐는지(broad_and_confirmed), 심각하지만 한 도메인에 "
+                "몰렸는지(severe_but_concentrated), 아직 예비 단계인지(preliminary), "
+                "없는지(absent)"
+            ),
         },
         "notes": [
             "official_current_phase는 현재상태 측정이며 예측이 아니다.",
             "이 모델은 투자 판단을 만들지 않는다. 그 해석은 사용자가 수행한다.",
             "국가별 지표와 임계값은 달라도 위 의미는 같아야 한다.",
+            "공식 침체는 독립적인 동행 도메인 둘 이상의 확인을 요구한다. 한 도메인의 "
+            "극단적 충격은 경보를 올릴 수 있으나 공식 국면을 바꿀 수 없다.",
         ],
     }

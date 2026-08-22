@@ -68,6 +68,9 @@ class Thresholds:
     recovery_persistence_weeks: int
     breadth_weight: float
     concentration_flag: float
+    #: §2의 금지. 공식 침체는 독립적인 동행 도메인 이만큼의 확인을 요구한다.
+    #: 중단된 v1.0 설정에는 이 항목이 없으므로 0을 기본값으로 두어 감사 재현이 가능하다.
+    minimum_coincident_domains: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -84,6 +87,7 @@ class Thresholds:
             "recovery_persistence_weeks": self.recovery_persistence_weeks,
             "breadth_weight": self.breadth_weight,
             "concentration_flag": self.concentration_flag,
+            "minimum_coincident_domains": self.minimum_coincident_domains,
         }
 
 
@@ -128,12 +132,29 @@ def contraction_evidence(
     broad_route = (1.0 - share) * core_broad * momentum_nonpositive + share * corroboration
     rapid_route = (1.0 - share) * core_rapid * not_expansionary + share * corroboration
 
-    # 한 도메인만으로는 침체를 선언할 수 없다. 폭이 없으면 핵심 항이 0이므로 남는 것은
-    # 뒷받침 몫뿐이고, 그 값은 진입 문턱보다 작도록 개발구간에서 정한다.
+    # §2의 금지를 연속 항이 아니라 **하드 게이트**로 건다. 각 경로는 그 경로가 실제로
+    # 읽는 폭에서 최소 도메인 수를 채워야 살아남는다. 넓은 하락 경로는 음수 수준
+    # 도메인을, 급속 악화 경로는 음수 모멘텀 도메인을 본다. 노동시장은 동행 도메인이
+    # 아니므로 이 셈에 들어가지 않는다 — 뒷받침만 할 수 있다.
+    minimum = thresholds.minimum_coincident_domains
+    broad_gate = 1.0 if negative_level_domains >= minimum else 0.0
+    rapid_gate = 1.0 if negative_momentum_domains >= minimum else 0.0
+    official = max(broad_route * broad_gate, rapid_route * rapid_gate)
+
+    # 경보 증거는 폭을 **아예 빼고** 다시 잰다. 폭 항을 0으로 두는 것으로는 부족하다 —
+    # 평균 안에 0이 들어가면 한 도메인의 극단적 충격조차 절반 아래로 눌려 경보가 영영
+    # 울리지 않는다. 그러면 §3이 요구한 "심각하지만 한쪽에 몰림"이라는 상태가 도달
+    # 불가능해진다. 그래서 공식 증거와 경보 증거의 차이는 정확히 폭 하나다.
+    alert_broad = (1.0 - share) * level_severity * momentum_nonpositive + share * corroboration
+    alert_rapid = (1.0 - share) * momentum_severity * not_expansionary + share * corroboration
+
     return {
         "broad_level_route": broad_route,
         "rapid_deterioration_route": rapid_route,
-        "contraction_evidence": max(broad_route, rapid_route),
+        "contraction_evidence": official,
+        "alert_evidence": max(alert_broad, alert_rapid),
+        "broad_route_gate": broad_gate,
+        "rapid_route_gate": rapid_gate,
         "level_severity": level_severity,
         "momentum_severity": momentum_severity,
         "level_breadth": level_breadth,
@@ -142,6 +163,58 @@ def contraction_evidence(
         "momentum_nonpositive": momentum_nonpositive,
         "not_expansionary": not_expansionary,
     }
+
+
+#: §3의 경보 성격. 공식 국면이 아니라 경보가 어떤 종류인지 설명하는 어휘다.
+ALERT_CHARACTER: Final[tuple[str, ...]] = (
+    "broad_and_confirmed",
+    "severe_but_concentrated",
+    "preliminary",
+    "absent",
+)
+
+
+def confirming_coincident_domains(
+    level_scaled: pd.Series, momentum_scaled: pd.Series, thresholds: Thresholds
+) -> int:
+    """침체를 실제로 확증하는 **동행** 도메인 수.
+
+    한 도메인이 확증한다는 것은 그 도메인 자신이 중립대 아래로 약하거나 중립대 아래로
+    악화 중이라는 뜻이다. 노동시장 스트레스는 동행 활동지표가 아니므로 이 셈에
+    들어가지 않는다 — 뒷받침만 할 수 있다.
+    """
+
+    count = 0
+    for domain in COINCIDENT_DOMAINS:
+        if domain not in level_scaled.index:
+            continue
+        weak = float(level_scaled[domain]) < -thresholds.neutral_level
+        falling = float(momentum_scaled[domain]) < -thresholds.neutral_momentum
+        if weak or falling:
+            count += 1
+    return count
+
+
+def recession_alert(
+    alert_evidence: float, confirming_domains: int, thresholds: Thresholds
+) -> tuple[str, str]:
+    """§3의 보조 경보. 공식 국면과 별개이며 다섯 번째 국면이 아니다.
+
+    경보는 폭 금지를 적용하지 **않은** 증거를 쓴다. 한 도메인의 극심한 충격도 경보를
+    올릴 수 있다. 그래야 공식 국면이 폭 확인을 기다리는 동안 그 사실을 숨기지 않고
+    드러낼 수 있다. 대신 경보의 **성격**을 함께 낸다 — 넓게 확인됐는지, 심각하지만
+    한쪽에 몰렸는지, 아직 예비 단계인지, 없는지.
+    """
+
+    entry = thresholds.contraction_entry
+    if alert_evidence >= entry:
+        broad = confirming_domains >= thresholds.minimum_coincident_domains
+        return "high", ("broad_and_confirmed" if broad else "severe_but_concentrated")
+    if alert_evidence >= 0.8 * entry:
+        return "elevated", "preliminary"
+    if alert_evidence >= 0.5 * entry:
+        return "watch", "preliminary"
+    return "none", "absent"
 
 
 def recovery_evidence(

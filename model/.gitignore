@@ -199,3 +199,24 @@ outputs/four_phase/*
 !outputs/four_phase/current_reading.json
 !outputs/four_phase/country_contract.json
 !outputs/four_phase/weekly_state.csv
+
+# 4국면 v1.1. 개념적 결정 반영판. 중단된 v1.0 산출물은 위에서 그대로 보존한다.
+!outputs/four_phase_v1_1/
+outputs/four_phase_v1_1/*
+!outputs/four_phase_v1_1/frozen_config.yaml
+!outputs/four_phase_v1_1/frozen_config.sha256
+!outputs/four_phase_v1_1/validation_summary.json
+!outputs/four_phase_v1_1/current_reading.json
+!outputs/four_phase_v1_1/country_contract.json
+!outputs/four_phase_v1_1/weekly_state.csv
+!outputs/four_phase_v1_1/whipsaw_audit.json
+!outputs/four_phase_v1_1/recovery_slowdown_audit.json
+!outputs/four_phase_v1_1/confirmation_audit.json
+!outputs/four_phase_v1_1/false_positive_audit.json
+!outputs/four_phase_v1_1/recession_alert_audit.json
+!outputs/four_phase_v1_1/alfred_cache_audit.json
+!outputs/four_phase_v1_1/development_gate_check.json
+!outputs/four_phase_v1_1/development_frontier.json
+!outputs/four_phase_v1_1/development_frontier.csv
+!outputs/four_phase_v1_1/strict_alfred_summary.json
+!outputs/four_phase_v1_1/strict_alfred_path.csv

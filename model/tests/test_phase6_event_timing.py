@@ -185,6 +185,13 @@ def test_no_pandemic_specific_branching() -> None:
         ("current_state", "validation.py"),
         ("current_state", "report.py"),
         ("candidate_j", "report.py"),
+        # 4국면 보고 모듈. 침체 에피소드 시작일과 오탐 확인 구간을 **보고하기 위해**
+        # 쓴다. 국면 판정 경로에는 들어가지 않으며, 그 사실은 four_phase 패키지의 날짜
+        # 리터럴 검사가 모델 로직 모듈에서 따로 지킨다.
+        ("four_phase", "report.py"),
+        # 엄격 ALFRED. 2020년 기준일은 실시간 경로를 요약하기 위한 것이고, 시작 주
+        # 2013-06-14는 아카이브 커버리지라는 자료의 사실이다.
+        ("four_phase", "alfred.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

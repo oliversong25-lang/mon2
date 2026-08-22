@@ -1,0 +1,752 @@
+{
+  "official_transitions": 97,
+  "immediate_transitions": 25,
+  "confirmed_transitions": 72,
+  "median_delay_weeks": 2.0,
+  "p90_delay_weeks": 2.0,
+  "maximum_delay_weeks": 2,
+  "entry_delay_by_phase": {
+    "recovery": {
+      "entries": 4,
+      "median": 1.5,
+      "maximum": 2
+    },
+    "expansion": {
+      "entries": 44,
+      "median": 2.0,
+      "maximum": 2
+    },
+    "slowdown": {
+      "entries": 44,
+      "median": 2.0,
+      "maximum": 2
+    },
+    "contraction": {
+      "entries": 5,
+      "median": 0.0,
+      "maximum": 2
+    }
+  },
+  "high_evidence_transitions": 69,
+  "low_evidence_transitions": 28,
+  "high_evidence_immediate": 25,
+  "low_evidence_immediate": 0,
+  "raw_official_disagreement_rate": 0.179104,
+  "longest_disagreement_run": 10,
+  "confirmation_weeks": 3,
+  "immediate_margin": 0.3,
+  "delay_within_locked_rule": true,
+  "weeks_stalled_beyond_the_rule": 0,
+  "recreates_a_state_lock": false,
+  "finite_memory_convergence": {
+    "after_4_weeks": {
+      "distinct_final_states": 1,
+      "converged": true,
+      "final_states": [
+        "expansion"
+      ]
+    },
+    "after_13_weeks": {
+      "distinct_final_states": 1,
+      "converged": true,
+      "final_states": [
+        "expansion"
+      ]
+    },
+    "after_26_weeks": {
+      "distinct_final_states": 1,
+      "converged": true,
+      "final_states": [
+        "expansion"
+      ]
+    },
+    "after_52_weeks": {
+      "distinct_final_states": 1,
+      "converged": true,
+      "final_states": [
+        "expansion"
+      ]
+    }
+  },
+  "transitions": [
+    {
+      "date": "1995-02-24",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "1995-09-22",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "1995-11-17",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "1996-03-22",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "1996-08-30",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "1996-12-13",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "1997-01-24",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "1997-02-21",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "1997-05-09",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "1997-07-18",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "1998-03-13",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "1998-04-24",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "1998-06-26",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "1998-09-18",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "1998-11-27",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "1999-03-12",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "1999-04-23",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "1999-07-30",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "1999-08-27",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "1999-11-19",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2000-02-18",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2000-03-24",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2000-05-26",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2001-01-26",
+      "from": "slowdown",
+      "to": "contraction",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2002-01-25",
+      "from": "contraction",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2002-02-15",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2002-04-26",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2002-06-14",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2002-07-05",
+      "from": "expansion",
+      "to": "recovery",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2002-10-25",
+      "from": "recovery",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2002-12-06",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2003-03-14",
+      "from": "expansion",
+      "to": "contraction",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2003-05-30",
+      "from": "contraction",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2003-06-27",
+      "from": "expansion",
+      "to": "recovery",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2004-02-27",
+      "from": "recovery",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2005-03-18",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2005-05-13",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2005-09-16",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2005-11-18",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2006-05-19",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2007-01-05",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2007-03-16",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2007-04-13",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2007-07-13",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2008-01-25",
+      "from": "slowdown",
+      "to": "contraction",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2009-06-05",
+      "from": "contraction",
+      "to": "recovery",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2010-08-13",
+      "from": "recovery",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2011-06-03",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2011-07-15",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2012-05-18",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2012-11-16",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2013-02-15",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2013-06-28",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2013-08-09",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2013-10-04",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2013-11-22",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2014-01-03",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2014-02-14",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2014-03-21",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2015-02-13",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2016-07-22",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2016-12-02",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2017-01-13",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2017-07-21",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2017-10-20",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2018-02-16",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2018-05-11",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2018-10-12",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2019-09-13",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2019-10-11",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2019-11-29",
+      "from": "slowdown",
+      "to": "contraction",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2020-02-28",
+      "from": "contraction",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2020-03-20",
+      "from": "slowdown",
+      "to": "contraction",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2020-07-03",
+      "from": "contraction",
+      "to": "recovery",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2021-03-26",
+      "from": "recovery",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2021-09-17",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2021-10-29",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2022-02-04",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2022-03-25",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2022-04-22",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2022-09-02",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2022-11-18",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2023-02-17",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2023-03-31",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 1,
+      "immediate": false
+    },
+    {
+      "date": "2023-09-01",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2023-11-03",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2024-07-05",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2024-08-02",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2025-01-03",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2025-03-07",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2025-04-25",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2025-05-30",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 0,
+      "immediate": true
+    },
+    {
+      "date": "2025-08-22",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2025-10-17",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2026-03-13",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2026-06-26",
+      "from": "expansion",
+      "to": "slowdown",
+      "delay_weeks": 2,
+      "immediate": false
+    },
+    {
+      "date": "2026-07-31",
+      "from": "slowdown",
+      "to": "expansion",
+      "delay_weeks": 2,
+      "immediate": false
+    }
+  ]
+}

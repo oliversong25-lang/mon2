@@ -1,0 +1,33 @@
+{
+  "recovery_slowdown_moves": 1,
+  "moves_from_a_single_week_sign_flip": 0,
+  "moves_into_recovery_without_evidence": 0,
+  "neutral_zone_weeks": 469,
+  "neutral_zone_share": 0.28,
+  "neutral_zone_occupancy": {
+    "recovery": 0.012793,
+    "expansion": 0.434968,
+    "slowdown": 0.552239,
+    "contraction": 0.0
+  },
+  "weak_level_occupancy": {
+    "recovery": 0.346626,
+    "expansion": 0.095092,
+    "slowdown": 0.070552,
+    "contraction": 0.48773
+  },
+  "recovery_persistence_weeks": 9,
+  "moves": [
+    {
+      "date": "2002-10-25",
+      "move": "recovery->slowdown",
+      "activity_level": -1.4873,
+      "momentum_before": -0.295,
+      "momentum_after": -0.2863,
+      "momentum_sign_flip": false,
+      "inside_neutral_momentum": true,
+      "recovery_evidence": 0.0,
+      "positive_momentum_domains": 1
+    }
+  ]
+}

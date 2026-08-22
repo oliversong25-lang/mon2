@@ -1,0 +1,178 @@
+# 미국 4국면 경기시계 v1.1 — 개념적 결정 반영판
+#
+# 이전 버전 `four_phase.yaml`(SHA-256 892fbbfb…)은 검증 전에 중단된 설정이며 감사
+# 기록으로 그대로 보존한다. 이 파일은 그것을 덮어쓰지 않는 **새 버전**이다.
+#
+# 결정: 선택지 2. 한 도메인 단독 침체 선언 금지를 지키고, 오탐률 상한 0.05를 지키고,
+# 하나짜리 NBER 재현율 게이트를 **분절 현재상태 검증**으로 바꾼다.
+#
+# 선택지 1(단독 선언 허용)과 3(오탐률 완화)은 채택하지 않았다. 한 극단 도메인이 만든
+# 거짓 공식 침체가, 폭 확인을 기다리며 경보를 투명하게 내는 것보다 더 해롭기 때문이다.
+
+model: us_four_phase_v1
+version: "1.1"
+status: validated_pending_report
+development_window: ["1995-01-01", "2012-12-31"]
+
+conceptual_decision:
+  option: 2
+  previous_config_sha256: "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027"
+  rejected: [1, 3]
+  rationale: >
+    공식 침체는 독립적인 동행 도메인 둘 이상의 확인을 요구한다. 현재상태 정의 아래에서
+    침체 말기의 넓은 개선 주는 회복기에 속할 수 있으므로 전체 NBER 재현율 목표를
+    0.80으로 낮추되, 진입과 핵심 탐지는 별도 게이트로 엄격히 잰다. 심각하지만 한쪽에
+    몰린 충격은 침체 경보를 올리고 공식 국면은 폭 확인을 기다린다.
+  changed_gates:
+    recession_recall_minimum: {from: 0.85, to: 0.80}
+    core_recession_recall_minimum: {from: "보고 항목", to: "필수 게이트 0.90"}
+    segmented_recall_reporting: {from: "없음", to: "1/3·중간1/3·끝1/3·전반1/2·핵심 개별 보고"}
+    trough_adjacent_recovery: {from: "재현율에 합산", to: "별도 보고"}
+    false_positive_rate_maximum: {from: 0.05, to: 0.05}
+  changed_parameters:
+    level_severity: {from: 1.7915, to: 2.6}
+    momentum_severity: {from: 1.2954, to: 0.7}
+    momentum_breadth: {from: 3, to: 2}
+    contraction_entry: {from: 0.8818, to: 0.75}
+    corroboration_share: {from: 0.2, to: 0.15}
+    minimum_coincident_domains: {from: "없음(연속 항으로만 반영)", to: 2}
+    recession_alert: {from: "침체 증거 문턱의 파생값", to: "폭 항을 뺀 별도 증거 + 성격 라벨"}
+    soft_filter.confirmation_weeks: {from: "없음", to: 3}
+    soft_filter.immediate_margin: {from: "없음", to: 0.3}
+
+# §7의 출처 기록. 이 설정이 어디서 나왔는지 파일 안에 남긴다.
+provenance:
+  previous_config_sha256: "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027"
+  source_commit: "ac96cfa4ceb894e77a178018cfc62c7f29f8c898"
+  frontier_artifact_sha256: "bcf423aa128a3c8b0c2dd5294ac34f0d9c1955b81a44fd3927432cc15b4b6afd"
+  frontier_csv_sha256: "2390a22c2e2a877e803767a5ca894573694e92461607f2b30bf7ef666c9b2607"
+  selection_rule_sha256: "71647ea8e81951229d67f1556bc504aa0f38877ca713c069b8b68a20a88cbcd0"
+  frontier_generated_at_utc: "2026-08-22T12:52:09+00:00"
+  combinations_evaluated: 10970
+  feasible_combinations: 4396
+
+# 후보 I·J에서 확정된 전처리 결론을 그대로 승계한다. 다시 열지 않는다.
+inherited_preprocessing:
+  transformations: candidate_h_breadth_gate
+  no_additional_deflation: [RRSFS, W875RX1, CMRMTSPL, INDPRO]
+  no_scale_division: [payems_population, payems_labor_force, icsa_covered, ccsa_covered]
+  momentum_scale_method: rolling_mad
+  release_aware_momentum: true
+  fabricate_zero_between_releases: false
+
+momentum_scale:
+  method: rolling_mad
+  window_years: 10.0
+  minimum_years: 2.0
+momentum_weeks: 8
+
+# 도메인 기여 상한. 개발구간 |도메인 점수| p99.
+domain_caps:
+  level: 3.7763
+  momentum: 3.7547
+
+thresholds:
+  # 침체 전후 26주를 뺀 개발구간 평상시 주의 |총량| 중앙값. v1.0에서 그대로 승계.
+  neutral_level: 0.5030
+  neutral_momentum: 0.3903
+  # 총량 심각도 척도. 개발구간 폭 제약 프런티어에서 선택.
+  level_severity: 2.6
+  momentum_severity: 0.7
+  # 각 경로가 완전한 폭 점수를 받기 위한 음수 동행 도메인 수.
+  level_breadth: 3
+  momentum_breadth: 2
+  # 뒷받침(노동시장)이 침체 증거에 더할 수 있는 최대 몫. 진입 문턱보다 작아야
+  # 노동시장 단독 선언이 불가능하다 — 0.15 < 0.75.
+  corroboration_share: 0.15
+  # 개발구간 평상시 침체증거의 p99.
+  contraction_entry: 0.75
+  # §2의 금지. 공식 침체는 독립적인 동행 도메인 이만큼의 확인을 요구한다.
+  # 이 값은 탐색 대상이 아니라 개념적 결정으로 고정된 값이다.
+  minimum_coincident_domains: 2
+  # 회복 요건. 저점 이후 26주 구간에서 도출했다.
+  recovery_breadth: 1
+  recovery_momentum: 0.7640
+  # 평상시 양수 모멘텀 연속 길이의 p75. §9에 따라 v1.0 값을 유지한다.
+  recovery_persistence_weeks: 9
+  # 중립대 안에서 폭이 결정을 돕는 정도.
+  breadth_weight: 0.3
+  # 개발구간 도메인 집중도 p95. 증거 품질 표시일 뿐 국면을 바꾸지 않는다.
+  concentration_flag: 0.6104
+
+# 4상태 소프트 필터와 §8의 전역 단일 확인 규칙.
+#
+# 확인 규칙은 국면마다 따로 두지 않는다. 증거 품질이 높고 원시 점수 우위가 충분히
+# 크면 즉시 전환하고, 아니면 새 국면이 confirmation_weeks 동안 계속 승자여야 한다.
+# 유한 기억이며 어떤 국면도 흡수하지 않는다 — 도전자가 확인 기간만 버티면 반드시
+# 이긴다.
+soft_filter:
+  lambda: 1.8
+  epsilon: 0.01
+  confirmation_weeks: 3
+  immediate_margin: 0.3
+
+# 증거 품질 판정에 쓰는 값. 확인 규칙의 "품질이 높은가"도 같은 값을 쓴다.
+evidence_quality:
+  separation_floor: 0.10
+  stale_weeks: 8.0
+
+# 신선도 정책. 캐시에 값이 있다는 것과 그 값이 현재 판단을 뒷받침할 만큼 새롭다는 것은
+# 다른 사실이다. 여기 있는 값은 전부 이미 잠긴 값이거나 개발구간에서 나온 값이며,
+# 2025년 발표 중단 사건을 보고 만든 것이 아니다.
+freshness_policy:
+  # 위 evidence_quality.stale_weeks와 같은 값을 쓴다. 개발구간에서 월간 도메인의
+  # 마지막 발표 이후 주 수는 최대 4주였으므로 8주는 정규 발표 하나를 통째로 놓친
+  # 뒤에야 걸린다.
+  domain_stale_weeks: 8.0
+  # 개발구간 939주 중 어떤 도메인도 새 관측을 받지 못한 주는 0주였다. 패널에 주간
+  # 실업수당청구가 있어 정규 도착 간격이 1주이기 때문이다. 유예는 놓친 발표 하나.
+  panel_silent_grace_weeks: 1
+  # 패널 전체가 이만큼 넘게 조용하면 보류한다. 가장 느린 도메인의 정규 발표 간격이
+  # 한 달(약 4.35주)이므로, 한 발표 주기를 통째로 건너뛰면 모든 값이 이월된 것이다.
+  panel_silent_withhold_weeks: 4
+  # §2가 고정한 값과 같다. 공식 국면은 신선한 동행 도메인 둘을 요구한다.
+  minimum_fresh_coincident_domains: 2
+  # 금지 사항. 하나라도 쓰면 그것은 더 이상 실시간이 아니다.
+  never_used:
+    - future_vintages
+    - latest_value_substitution
+    - backward_fill
+    - inferred_releases
+    - synthetic_updates
+
+# 반지름·각도는 진단 출력일 뿐 공식 분류에 쓰이지 않는다.
+radius_role: diagnostic_only
+
+# §4의 분절 검증. 핵심 침체 주는 각 NBER 에피소드의 가운데 3분의 1이며, 이 정의는
+# NBER 날짜만으로 결정되고 후보의 검증 결과를 보지 않는다.
+segmentation:
+  core_recession_weeks: middle_third_of_each_nber_episode
+  reported_separately:
+    - first_third_recall
+    - middle_third_recall
+    - final_third_recall
+    - first_half_recall
+    - core_recall
+    - trough_adjacent_classified_recovery
+  trough_weeks: 8
+  hidden_weighted_score: false
+
+# 검증 전에 잠근 채택 게이트(§12).
+adoption_gates:
+  recession_recall_minimum: 0.80
+  core_recession_recall_minimum: 0.90
+  false_positive_rate_maximum: 0.05
+  two_step_transitions_maximum: 5
+  three_week_whipsaws_maximum: 5
+  gfc_first_signal_maximum_weeks: 10
+  pandemic_first_signal_maximum_weeks: 10
+  pandemic_recession_weeks_as_contraction_minimum: 1
+  late_2019_confirmed_contraction_maximum: 0
+  post_2022_confirmed_contraction_maximum: 0
+  # §12의 "원시-공식 불일치는 유계여야 한다"·"H식 다년 고착 없음"을 하나의 수로 만든다.
+  # 후보 H는 이 값이 133주였다.
+  longest_disagreement_run_maximum: 26
+  all_phases_reachable: true
+  no_zero_transition_support: true
+  no_single_domain_official_contraction: true
+  no_low_evidence_certainty_inversion: true

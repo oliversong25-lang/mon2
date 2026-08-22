@@ -54,10 +54,79 @@ class FourStateFilter:
     raw: pd.Series
     changed: pd.Series
     matrix: np.ndarray
+    filtered_winner: pd.Series
+    confirmation_pending: pd.Series
 
 
-def filter_scores(scores: pd.DataFrame, lam: float, epsilon: float) -> FourStateFilter:
-    """순방향 필터. 미래 관측을 쓰지 않는다."""
+def confirm_transitions(
+    filtered: pd.DataFrame,
+    scores: pd.DataFrame,
+    quality_high: pd.Series,
+    confirmation_weeks: int,
+    immediate_margin: float,
+) -> tuple[pd.Series, pd.Series]:
+    """전역 단일 확인 규칙. 국면마다 따로 두지 않는다.
+
+    후보 J 감사에서 3주 왕복 10건 중 **7건이 `expansion|slowdown` 경계**였고, 그중 4건이
+    2006년 11~12월 한 덩어리였다. 10건 중 9건의 원시 점수 마진이 0.072 이하였다.
+    즉 왕복은 증거가 실제로 뒤집혀서가 아니라 거의 동점인 두 국면 사이에서 매주
+    승자가 바뀌어 생겼다.
+
+    그래서 두 갈래만 둔다.
+
+    * 새 국면의 증거 품질이 높고 원시 점수 우위가 충분히 크면 **즉시** 전환한다.
+    * 그렇지 않으면 새 국면이 개발구간에서 정한 짧은 기간 동안 **계속** 승자여야 한다.
+
+    이 규칙은 유한 기억이다. 상태는 (현재 국면, 도전자, 연속 주 수)뿐이고 연속 주 수는
+    확인 기간에서 잘린다. 어떤 국면도 흡수하지 않는다 — 도전자가 확인 기간만 버티면
+    증거가 아무리 약해도 반드시 이긴다. 후보 H를 133주 가둔 구조는 도전자가 **영원히**
+    이길 수 없게 만든 것이었고, 여기에는 그런 경로가 없다.
+    """
+
+    if confirmation_weeks < 1:
+        raise ValueError("확인 기간은 최소 1주여야 합니다")
+    if not 0.0 <= immediate_margin <= 1.0:
+        raise ValueError("즉시 전환 마진은 0과 1 사이여야 합니다")
+
+    winner = filtered[list(PHASES)].idxmax(axis=1).astype(str)
+    ordered = np.sort(scores[list(PHASES)].to_numpy(dtype=float), axis=1)
+    margin = ordered[:, -1] - ordered[:, -2]
+
+    official: list[str] = []
+    pending: list[int] = []
+    current = str(winner.iloc[0])
+    challenger = ""
+    streak = 0
+    for position, week in enumerate(winner.index):
+        candidate = str(winner.loc[week])
+        if candidate == current:
+            challenger, streak = "", 0
+        else:
+            if candidate == challenger:
+                streak += 1
+            else:
+                challenger, streak = candidate, 1
+            immediate = bool(quality_high.loc[week]) and margin[position] >= immediate_margin
+            if immediate or streak >= confirmation_weeks:
+                current = candidate
+                challenger, streak = "", 0
+        official.append(current)
+        pending.append(streak)
+    return (
+        pd.Series(official, index=winner.index, name="official_phase"),
+        pd.Series(pending, index=winner.index, name="confirmation_pending"),
+    )
+
+
+def filter_scores(
+    scores: pd.DataFrame,
+    lam: float,
+    epsilon: float,
+    quality_high: pd.Series | None = None,
+    confirmation_weeks: int = 1,
+    immediate_margin: float = 1.0,
+) -> FourStateFilter:
+    """순방향 필터와 확인 규칙. 미래 관측을 쓰지 않는다."""
 
     matrix = transition_matrix(lam, epsilon)
     values = scores[list(PHASES)].to_numpy(dtype=float)
@@ -71,9 +140,16 @@ def filter_scores(scores: pd.DataFrame, lam: float, epsilon: float) -> FourState
         out[position] = posterior
         prior = posterior
     filtered = pd.DataFrame(out, index=scores.index, columns=list(PHASES))
-    official = filtered.idxmax(axis=1).astype(str)
+    winner = filtered.idxmax(axis=1).astype(str)
     raw = scores[list(PHASES)].idxmax(axis=1).astype(str)
-    return FourStateFilter(filtered, official, raw, official.ne(raw), matrix)
+    if quality_high is None:
+        official = winner
+        pending = pd.Series(0, index=winner.index, name="confirmation_pending")
+    else:
+        official, pending = confirm_transitions(
+            filtered, scores, quality_high, confirmation_weeks, immediate_margin
+        )
+    return FourStateFilter(filtered, official, raw, official.ne(raw), matrix, winner, pending)
 
 
 def convergence(
