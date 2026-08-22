@@ -1,0 +1,529 @@
+{
+  "provenance": {
+    "verified": true,
+    "hashes": {
+      "v1_1_config": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+      "v1_0_stopped_config": "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027",
+      "selection_rule": "71647ea8e81951229d67f1556bc504aa0f38877ca713c069b8b68a20a88cbcd0",
+      "frontier_csv": "2390a22c2e2a877e803767a5ca894573694e92461607f2b30bf7ef666c9b2607",
+      "candidate_h": "c367e2a0f8e907b6f927191f03379bab5ea5eace6b671454c4b63e44d4b2bb21",
+      "candidate_i": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
+      "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f"
+    },
+    "expected_source_commit": "3964e1b12f070d158f3b31ef716a528eecb22b5f",
+    "protected_paths_clean": true,
+    "stage": "operational_review",
+    "stage_is_read_only": true,
+    "parameter_search_run": false,
+    "v1_1_adoption_status": "rejected",
+    "executed_at_utc": "2026-08-22T14:39:08+00:00"
+  },
+  "trough_date_convention": {
+    "recession_2001": {
+      "trough": "2001-11-30",
+      "usrec_at_trough_week": 1,
+      "usrec_after_trough_week": 0
+    },
+    "gfc_2009": {
+      "trough": "2009-06-30",
+      "usrec_at_trough_week": 1,
+      "usrec_after_trough_week": 0
+    },
+    "recession_2020": {
+      "trough": "2020-04-30",
+      "usrec_at_trough_week": 1,
+      "usrec_after_trough_week": 0
+    },
+    "matches_usrec_labels": true,
+    "rule": "NBER 저점 월을 침체에 포함한다. 프로젝트가 쓰는 USREC 라벨과 같다."
+  },
+  "evidence_hierarchy": {
+    "operational_behaviour": "strict_alfred_real_time",
+    "revision_sensitivity": "latest_vintage_causal",
+    "episode_labels": "nber_retrospective_only",
+    "2020_is_untouched_holdout": false,
+    "thirteen_week_monitoring_can_validate_recession_accuracy": false
+  },
+  "benchmark": {
+    "development_episodes": [
+      "recession_2001",
+      "gfc_2009"
+    ],
+    "development_sample_size": 2,
+    "worst_development_first_recovery_lag_weeks": 31,
+    "worst_development_post_trough_contraction_run": 8,
+    "measured_first_recovery_lag_weeks": 11,
+    "measured_post_trough_contraction_run": 11,
+    "first_recovery_lag_passes": true,
+    "post_trough_contraction_run_passes": false,
+    "passes": false
+  },
+  "development_episodes": [
+    {
+      "episode": "recession_2001",
+      "sample_role": "development_latest_vintage",
+      "covered": true,
+      "nber_peak": "2001-03-01",
+      "nber_trough": "2001-11-30",
+      "post_trough_horizon_weeks": 52,
+      "post_trough_window_end": "2002-11-29",
+      "raw_first_recovery": "2002-06-21",
+      "raw_first_recovery_lag_weeks": 29,
+      "raw_first_four_week_recovery": "2002-06-21",
+      "raw_first_four_week_recovery_lag_weeks": 29,
+      "filtered_winner_first_recovery": "2002-06-28",
+      "filtered_winner_first_recovery_lag_weeks": 30,
+      "filtered_winner_first_four_week_recovery": "2002-06-28",
+      "filtered_winner_first_four_week_recovery_lag_weeks": 30,
+      "official_first_recovery": "2002-07-05",
+      "official_first_recovery_lag_weeks": 31,
+      "official_first_four_week_recovery": "2002-07-05",
+      "official_first_four_week_recovery_lag_weeks": 31,
+      "post_trough_contraction_weeks": 8,
+      "longest_post_trough_contraction_run": 8,
+      "last_official_contraction": "2002-01-18",
+      "last_official_contraction_lag_weeks": 7,
+      "first_recovery_transition_watch": "2002-06-28",
+      "first_recovery_transition_watch_lag_weeks": 30,
+      "return_to_contraction_within_4_weeks": 0,
+      "return_to_contraction_within_8_weeks": 0,
+      "return_to_contraction_within_13_weeks": 0,
+      "premature_four_week_recovery_inside_the_recession": null,
+      "evidence_quality_high_at_recovery": "True",
+      "phase_separation_at_recovery": 0.42933776203406965,
+      "confirmation_pending_at_recovery": 0.0,
+      "negative_level_domains_at_recovery": 4.0,
+      "positive_momentum_domains_at_recovery": 3.0,
+      "confirming_domains_at_recovery": 4.0,
+      "concentration_at_recovery": 0.3430613638707118
+    },
+    {
+      "episode": "gfc_2009",
+      "sample_role": "development_latest_vintage",
+      "covered": true,
+      "nber_peak": "2007-12-01",
+      "nber_trough": "2009-06-30",
+      "post_trough_horizon_weeks": 52,
+      "post_trough_window_end": "2010-06-29",
+      "raw_first_recovery": "2009-07-03",
+      "raw_first_recovery_lag_weeks": 0,
+      "raw_first_four_week_recovery": "2009-06-12",
+      "raw_first_four_week_recovery_lag_weeks": -3,
+      "filtered_winner_first_recovery": "2009-07-03",
+      "filtered_winner_first_recovery_lag_weeks": 0,
+      "filtered_winner_first_four_week_recovery": "2009-06-12",
+      "filtered_winner_first_four_week_recovery_lag_weeks": -3,
+      "official_first_recovery": "2009-07-03",
+      "official_first_recovery_lag_weeks": 0,
+      "official_first_four_week_recovery": "2009-06-12",
+      "official_first_four_week_recovery_lag_weeks": -3,
+      "post_trough_contraction_weeks": 0,
+      "longest_post_trough_contraction_run": 0,
+      "last_official_contraction": "2009-05-29",
+      "last_official_contraction_lag_weeks": -5,
+      "first_recovery_transition_watch": "2010-10-15",
+      "first_recovery_transition_watch_lag_weeks": 67,
+      "return_to_contraction_within_4_weeks": 0,
+      "return_to_contraction_within_8_weeks": 0,
+      "return_to_contraction_within_13_weeks": 0,
+      "premature_four_week_recovery_inside_the_recession": "2009-06-05",
+      "evidence_quality_high_at_recovery": "True",
+      "phase_separation_at_recovery": 0.995762518755255,
+      "confirmation_pending_at_recovery": 0.0,
+      "negative_level_domains_at_recovery": 4.0,
+      "positive_momentum_domains_at_recovery": 3.0,
+      "confirming_domains_at_recovery": 4.0,
+      "concentration_at_recovery": 0.24082146316430672
+    }
+  ],
+  "recession_2020_real_time": {
+    "episode": "recession_2020",
+    "sample_role": "strict_alfred_real_time",
+    "covered": true,
+    "nber_peak": "2020-02-01",
+    "nber_trough": "2020-04-30",
+    "post_trough_horizon_weeks": 52,
+    "post_trough_window_end": "2021-04-29",
+    "raw_first_recovery": "2020-07-17",
+    "raw_first_recovery_lag_weeks": 11,
+    "raw_first_four_week_recovery": "2020-07-17",
+    "raw_first_four_week_recovery_lag_weeks": 11,
+    "filtered_winner_first_recovery": "2020-07-17",
+    "filtered_winner_first_recovery_lag_weeks": 11,
+    "filtered_winner_first_four_week_recovery": "2020-07-17",
+    "filtered_winner_first_four_week_recovery_lag_weeks": 11,
+    "official_first_recovery": "2020-07-17",
+    "official_first_recovery_lag_weeks": 11,
+    "official_first_four_week_recovery": "2020-07-17",
+    "official_first_four_week_recovery_lag_weeks": 11,
+    "post_trough_contraction_weeks": 11,
+    "longest_post_trough_contraction_run": 11,
+    "last_official_contraction": "2020-07-10",
+    "last_official_contraction_lag_weeks": 10,
+    "first_recovery_transition_watch": "2021-02-19",
+    "first_recovery_transition_watch_lag_weeks": 42,
+    "return_to_contraction_within_4_weeks": 0,
+    "return_to_contraction_within_8_weeks": 0,
+    "return_to_contraction_within_13_weeks": 0,
+    "premature_four_week_recovery_inside_the_recession": null,
+    "evidence_quality_high_at_recovery": "True",
+    "phase_separation_at_recovery": 0.6501754623940581,
+    "confirmation_pending_at_recovery": 0.0,
+    "negative_level_domains_at_recovery": 4.0,
+    "positive_momentum_domains_at_recovery": 3.0,
+    "confirming_domains_at_recovery": 4.0,
+    "concentration_at_recovery": 0.3601097154046792,
+    "information_lag_weeks_at_recovery": 0.0,
+    "panel_silence_at_recovery": 0.0
+  },
+  "recession_2020_latest_vintage_reference": {
+    "episode": "recession_2020_latest_vintage",
+    "sample_role": "latest_vintage_reference",
+    "covered": true,
+    "nber_peak": "2020-02-01",
+    "nber_trough": "2020-04-30",
+    "post_trough_horizon_weeks": 52,
+    "post_trough_window_end": "2021-04-29",
+    "raw_first_recovery": "2020-07-03",
+    "raw_first_recovery_lag_weeks": 9,
+    "raw_first_four_week_recovery": "2020-07-03",
+    "raw_first_four_week_recovery_lag_weeks": 9,
+    "filtered_winner_first_recovery": "2020-06-19",
+    "filtered_winner_first_recovery_lag_weeks": 7,
+    "filtered_winner_first_four_week_recovery": "2020-06-19",
+    "filtered_winner_first_four_week_recovery_lag_weeks": 7,
+    "official_first_recovery": "2020-07-03",
+    "official_first_recovery_lag_weeks": 9,
+    "official_first_four_week_recovery": "2020-07-03",
+    "official_first_four_week_recovery_lag_weeks": 9,
+    "post_trough_contraction_weeks": 9,
+    "longest_post_trough_contraction_run": 9,
+    "last_official_contraction": "2020-06-26",
+    "last_official_contraction_lag_weeks": 8,
+    "first_recovery_transition_watch": "2020-06-19",
+    "first_recovery_transition_watch_lag_weeks": 7,
+    "return_to_contraction_within_4_weeks": 0,
+    "return_to_contraction_within_8_weeks": 0,
+    "return_to_contraction_within_13_weeks": 0,
+    "premature_four_week_recovery_inside_the_recession": null,
+    "evidence_quality_high_at_recovery": "True",
+    "phase_separation_at_recovery": 0.32006643354512715,
+    "confirmation_pending_at_recovery": 0.0,
+    "negative_level_domains_at_recovery": 4.0,
+    "positive_momentum_domains_at_recovery": 4.0,
+    "confirming_domains_at_recovery": 4.0,
+    "concentration_at_recovery": 0.5442455644501434
+  },
+  "delay_decomposition": [
+    {
+      "episode": "recession_2001",
+      "sample_role": "development_latest_vintage",
+      "raw_evidence_lag_weeks": 29,
+      "filter_lag_weeks": 1,
+      "confirmation_lag_weeks": 1,
+      "total_official_lag_weeks": 31
+    },
+    {
+      "episode": "gfc_2009",
+      "sample_role": "development_latest_vintage",
+      "raw_evidence_lag_weeks": 0,
+      "filter_lag_weeks": 0,
+      "confirmation_lag_weeks": 0,
+      "total_official_lag_weeks": 0
+    },
+    {
+      "episode": "recession_2020",
+      "sample_role": "strict_alfred_real_time",
+      "raw_evidence_lag_weeks": 11,
+      "filter_lag_weeks": 0,
+      "confirmation_lag_weeks": 0,
+      "total_official_lag_weeks": 11
+    },
+    {
+      "episode": "recession_2020_latest_vintage",
+      "sample_role": "latest_vintage_reference",
+      "raw_evidence_lag_weeks": 9,
+      "filter_lag_weeks": -2,
+      "confirmation_lag_weeks": 2,
+      "total_official_lag_weeks": 9
+    }
+  ],
+  "gates": {
+    "contraction_entry": {
+      "no_confirmed_2019_contraction_before_the_recession": {
+        "value": null,
+        "passes": true
+      },
+      "first_official_contraction_within_10_weeks": {
+        "value": 3,
+        "passes": true
+      },
+      "first_persistent_four_week_sequence_within_10_weeks": {
+        "value": 8,
+        "passes": true
+      },
+      "at_least_four_of_eight_recession_weeks_as_contraction": {
+        "value": 4,
+        "of": 8,
+        "passes": true
+      },
+      "no_official_contraction_below_two_confirming_domains": {
+        "value": 0,
+        "passes": true
+      },
+      "no_concentrated_signal_decided_the_official_phase": {
+        "value": 0,
+        "passes": true
+      }
+    },
+    "recovery_and_exit": {
+      "development_benchmark_first_recovery_lag": {
+        "value": 11,
+        "limit": 31,
+        "passes": true
+      },
+      "development_benchmark_post_trough_contraction_run": {
+        "value": 11,
+        "limit": 8,
+        "passes": false
+      },
+      "no_premature_four_week_recovery_inside_a_recession": {
+        "value": [
+          "gfc_2009"
+        ],
+        "passes": false
+      },
+      "contraction_recovery_round_trips_within_13_weeks": {
+        "value": 0,
+        "reported_only": true,
+        "passes": true
+      }
+    },
+    "operational_integrity": {
+      "zero_future_information_violations": {
+        "value": 0,
+        "passes": true
+      },
+      "cache_only_no_network_no_key": {
+        "value": {
+          "network_used": false,
+          "api_key_used": false,
+          "latest_vintage_substitution": false,
+          "backward_fill_used": false
+        },
+        "passes": true
+      },
+      "exactly_688_as_of_weeks": {
+        "value": 688,
+        "passes": true
+      },
+      "withheld_and_preliminary_weeks_reproduced": {
+        "value": {
+          "official_weeks": 646,
+          "preliminary_weeks": 32,
+          "withheld_weeks": 10
+        },
+        "passes": true
+      },
+      "no_official_phase_on_a_withheld_week": {
+        "value": 0,
+        "passes": true
+      },
+      "raw_measurements_preserved_on_withheld_weeks": {
+        "value": 10,
+        "passes": true
+      },
+      "raw_versus_official_disagreement_within_structural_limit": {
+        "value": 5,
+        "limit": 26,
+        "passes": true
+      }
+    }
+  },
+  "decision": {
+    "classification": "operational_rejection",
+    "reason": "운영 게이트 실패: recovery_and_exit.development_benchmark_post_trough_contraction_run, recovery_and_exit.no_premature_four_week_recovery_inside_a_recession",
+    "failed_gates": [
+      "recovery_and_exit.development_benchmark_post_trough_contraction_run",
+      "recovery_and_exit.no_premature_four_week_recovery_inside_a_recession"
+    ],
+    "final_validated_is_not_available": true,
+    "v1_1_original_status": "rejected"
+  },
+  "cache": {
+    "expected_as_of_dates": 688,
+    "actual_as_of_dates": 688,
+    "missing_as_of_dates": [],
+    "duplicate_as_of_dates": 0,
+    "first_week": "2013-06-14",
+    "last_week": "2026-08-14",
+    "cache_coverage": {
+      "series": {
+        "PAYEMS": {
+          "cached": true,
+          "rows": 7220,
+          "first_realtime_start": "1985-02-01",
+          "last_realtime_start": "2026-08-07",
+          "open_ended_vintages": 499,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "W875RX1": {
+          "cached": true,
+          "rows": 4186,
+          "first_realtime_start": "2010-05-28",
+          "last_realtime_start": "2026-07-30",
+          "open_ended_vintages": 498,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "INDPRO": {
+          "cached": true,
+          "rows": 11295,
+          "first_realtime_start": "1985-02-15",
+          "last_realtime_start": "2026-07-17",
+          "open_ended_vintages": 498,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "CMRMTSPL": {
+          "cached": true,
+          "rows": 2930,
+          "first_realtime_start": "2013-06-14",
+          "last_realtime_start": "2026-07-30",
+          "open_ended_vintages": 497,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "RRSFS": {
+          "cached": true,
+          "rows": 6713,
+          "first_realtime_start": "2001-06-15",
+          "last_realtime_start": "2026-08-14",
+          "open_ended_vintages": 415,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "ICSA": {
+          "cached": true,
+          "rows": 6844,
+          "first_realtime_start": "2009-05-28",
+          "last_realtime_start": "2026-08-13",
+          "open_ended_vintages": 2171,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "CCSA": {
+          "cached": true,
+          "rows": 7419,
+          "first_realtime_start": "2009-09-10",
+          "last_realtime_start": "2026-08-13",
+          "open_ended_vintages": 2170,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        }
+      },
+      "series_without_full_coverage": [],
+      "all_series_cover_window": true
+    },
+    "new_vintage_activity": {
+      "weeks_with_no_new_vintage_in_any_series": 7,
+      "longest_all_series_publication_pause_weeks": 7,
+      "pause_weeks": [
+        "2025-10-03",
+        "2025-10-10",
+        "2025-10-17",
+        "2025-10-24",
+        "2025-10-31",
+        "2025-11-07",
+        "2025-11-14"
+      ]
+    },
+    "weeks_to_withhold": [],
+    "network_used": false,
+    "api_key_used": false,
+    "latest_vintage_substitution": false,
+    "backward_fill_used": false,
+    "inferred_releases_used": false,
+    "provenance": "data/cache/alfred/*.csv — ALFRED 값만. URL도 키도 저장하지 않는다."
+  },
+  "alfred_audit_classification": "B",
+  "revision_risk": {
+    "window": [
+      "2019-07-01",
+      "2020-06-30"
+    ],
+    "weeks": 52,
+    "raw_phase_agreement": 0.692308,
+    "official_phase_agreement": 0.653846,
+    "contraction_agreement": 0.730769,
+    "alert_agreement": 0.769231,
+    "phase_confusion_matrix": {
+      "recovery": {
+        "recovery": 0,
+        "expansion": 0,
+        "slowdown": 0,
+        "contraction": 0,
+        "": 0
+      },
+      "expansion": {
+        "recovery": 0,
+        "expansion": 0,
+        "slowdown": 0,
+        "contraction": 0,
+        "": 0
+      },
+      "slowdown": {
+        "recovery": 0,
+        "expansion": 4,
+        "slowdown": 19,
+        "contraction": 13,
+        "": 0
+      },
+      "contraction": {
+        "recovery": 0,
+        "expansion": 0,
+        "slowdown": 1,
+        "contraction": 15,
+        "": 0
+      },
+      "": {
+        "recovery": 0,
+        "expansion": 0,
+        "slowdown": 0,
+        "contraction": 0,
+        "": 0
+      }
+    },
+    "contraction_confusion_matrix": {
+      "realtime_contraction_latest_contraction": 15,
+      "realtime_contraction_latest_other": 1,
+      "realtime_other_latest_contraction": 13,
+      "realtime_other_latest_other": 23
+    },
+    "disagreement_causes": {
+      "direct_data_revision": 7,
+      "filter_path_dependence_after_revision": 11,
+      "freshness_or_status_difference": 0,
+      "unresolved": 0
+    },
+    "disagreement_duration_distribution": [
+      2,
+      4,
+      5,
+      7
+    ],
+    "longest_disagreement_episode_weeks": 7,
+    "revision_changed_breadth_weeks": 29,
+    "revision_changed_only_severity_weeks": 20,
+    "revision_changed_the_official_phase_weeks": 18,
+    "revision_changed_the_alert_but_not_the_phase_weeks": 10,
+    "late_2019": {
+      "weeks": 26,
+      "realtime_contraction_weeks": 0,
+      "latest_vintage_contraction_weeks": 5,
+      "material_revision_sensitivity_failure": true,
+      "note": "최신 수정치에만 있는 침체다. 실시간 운영 오탐은 아니지만, 개정 민감도 실패로 그대로 기록에 남는다."
+    }
+  }
+}

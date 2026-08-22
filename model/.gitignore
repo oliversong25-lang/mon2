@@ -231,3 +231,17 @@ outputs/four_phase_v1_1/alfred_audit/*
 !outputs/four_phase_v1_1/development_frontier.csv
 !outputs/four_phase_v1_1/strict_alfred_summary.json
 !outputs/four_phase_v1_1/strict_alfred_path.csv
+
+# 운영 수용 심사. 동결 모델을 읽기만 하는 별도 단계의 격리 산출물.
+!outputs/operational_review/
+outputs/operational_review/*
+!outputs/operational_review/operational_review_report.md
+!outputs/operational_review/operational_decision.json
+!outputs/operational_review/recovery_timing_audit.csv
+!outputs/operational_review/recovery_delay_decomposition.csv
+!outputs/operational_review/realtime_operational_gates.csv
+!outputs/operational_review/revision_disagreement_audit.csv
+!outputs/operational_review/current_state_output.json
+!outputs/operational_review/live_monitoring_spec.md
+!outputs/operational_review/provenance.json
+!outputs/operational_review/validation_summary.json

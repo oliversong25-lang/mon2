@@ -1,0 +1,5 @@
+episode,sample_role,raw_evidence_lag_weeks,filter_lag_weeks,confirmation_lag_weeks,total_official_lag_weeks
+recession_2001,development_latest_vintage,29,1,1,31
+gfc_2009,development_latest_vintage,0,0,0,0
+recession_2020,strict_alfred_real_time,11,0,0,11
+recession_2020_latest_vintage,latest_vintage_reference,9,-2,2,9

@@ -195,6 +195,12 @@ def test_no_pandemic_specific_branching() -> None:
         # 기각 모델의 실시간 감사. 2019·2020 기준일은 감사 창을 정의할 뿐
         # 국면 판정 경로에 들어가지 않는다.
         ("four_phase", "alfred_audit.py"),
+        # 운영 수용 심사. 이 패키지는 동결 모델을 **읽기만** 하고 국면 분류에 관여하지
+        # 않는다. 2019·2020 날짜는 NBER 회고 라벨에 맞춘 평가 창을 정의할 뿐이다.
+        ("operational_review", "review.py"),
+        ("operational_review", "recovery.py"),
+        ("operational_review", "revision.py"),
+        ("operational_review", "__main__.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):
