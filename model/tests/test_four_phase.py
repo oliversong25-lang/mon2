@@ -13,6 +13,7 @@ import pytest
 from business_cycle.config import load_baseline, load_settings
 from business_cycle.data.alfred import slice_vintage
 from business_cycle.four_phase import alfred as AL
+from business_cycle.four_phase import alfred_audit as AA
 from business_cycle.four_phase import contract as C
 from business_cycle.four_phase import evidence as E
 from business_cycle.four_phase import filter as F
@@ -417,7 +418,7 @@ _DATE = re.compile(r"""["'](19|20)\d{2}-\d{2}-\d{2}["']""")
 #: * ``frontier.py`` 개발구간 탐색 하네스. 개발 구간 경계를 쓴다.
 #: * ``alfred.py`` 아카이브 커버리지 경계(2013-06-14)를 쓴다. 이 날짜는 모델의 규칙이
 #:   아니라 자료의 사실이다 — 일곱 지표가 모두 진짜 빈티지를 갖는 첫 주다.
-_NOT_MODEL_LOGIC = {"report.py", "frontier.py", "alfred.py"}
+_NOT_MODEL_LOGIC = {"report.py", "frontier.py", "alfred.py", "alfred_audit.py"}
 
 
 def test_no_date_literals_in_four_phase_model_logic() -> None:
@@ -1203,14 +1204,17 @@ def test_a_cached_snapshot_does_not_by_itself_make_a_week_eligible() -> None:
 
 
 def test_the_eligible_week_count_can_be_smaller_than_the_cached_week_count() -> None:
-    audit = dict(_summary()["alfred_cache"])  # type: ignore[arg-type]
-    strict = _summary().get("strict_alfred")
-    if not strict:
-        pytest.skip("엄격 ALFRED를 아직 실행하지 않았다")
-    counts = dict(dict(strict)["phase_eligibility"])  # type: ignore[arg-type]
+    """캐시가 688주를 덮는다고 688주가 공식 판정 자격을 갖는 것은 아니다.
+
+    채택 절차의 엄격 ALFRED는 게이트 실패로 실행하지 않았다. 688주 실시간 경로는
+    기각 모델 감사에 있으므로 그것으로 확인한다 — 같은 동결 정책을 쓴다.
+    """
+
+    cache = dict(_summary()["alfred_cache"])  # type: ignore[arg-type]
+    counts = dict(_audit()["phase_eligibility"])  # type: ignore[arg-type]
     total = counts["official_weeks"] + counts["preliminary_weeks"] + counts["withheld_weeks"]
-    assert total == audit["expected_as_of_dates"]
-    assert counts["official_weeks"] <= audit["expected_as_of_dates"]
+    assert total == cache["expected_as_of_dates"]
+    assert counts["official_weeks"] < cache["expected_as_of_dates"]
 
 
 def test_a_carried_forward_value_is_distinguishable_from_a_new_release() -> None:
@@ -1348,3 +1352,222 @@ def test_the_cache_audit_separates_coverage_from_publication_activity() -> None:
     assert activity["longest_all_series_publication_pause_weeks"] >= 5
     assert audit["latest_vintage_substitution"] is False
     assert audit["backward_fill_used"] is False
+
+
+# ── 기각된 동결 모델의 실시간 감사 ───────────────────────────────────────────
+
+
+def _audit_dir() -> Path:
+    return _root() / "outputs" / "four_phase_v1_1" / "alfred_audit"
+
+
+def _audit() -> dict[str, object]:
+    path = _audit_dir() / "audit_summary.json"
+    if not path.exists():
+        pytest.skip("실시간 감사 산출물이 아직 생성되지 않았다")
+    return dict(json.loads(path.read_text(encoding="utf-8")))
+
+
+def _audit_path() -> pd.DataFrame:
+    path = _audit_dir() / "weekly_path.csv"
+    if not path.exists():
+        pytest.skip("실시간 감사 경로가 아직 생성되지 않았다")
+    return pd.read_csv(path, parse_dates=["as_of"]).set_index("as_of")
+
+
+def test_the_audit_does_not_change_the_rejected_status() -> None:
+    """§10. 어떤 결과가 나오든 v1.1은 기각 상태로 남는다."""
+
+    audit = _audit()
+    assert audit["heading"] == "Frozen rejected-model ALFRED audit"
+    assert audit["model_status"] == "rejected"
+    assert audit["adoption_unchanged"] == "rejected"
+    assert _summary()["adopted"] is False
+    assert dict(_summary()["adoption_gates"])["passed"] is False
+
+
+def test_nothing_was_retuned_for_the_audit() -> None:
+    """동결 설정과 선택 규칙이 감사 전후로 같아야 한다."""
+
+    config = load_config(load_settings())
+    assert config.sha256 == AA.EXPECTED["config"]
+    assert FR.selection_rule_digest() == AA.EXPECTED["selection_rule"]
+    provenance = dict(_audit()["provenance"])  # type: ignore[arg-type]
+    assert provenance["config"] == AA.EXPECTED["config"]
+    assert provenance["stopped_config"] == AA.EXPECTED["stopped_config"]
+    for name in ("candidate_h", "candidate_i", "candidate_j"):
+        assert provenance[name] == AA.EXPECTED[name]
+
+
+def test_provenance_verification_refuses_a_changed_target() -> None:
+    """지문이 어긋나면 감사를 시작하지 않는다."""
+
+    original = dict(AA.EXPECTED)
+    try:
+        AA.EXPECTED["config"] = "0" * 64
+        with pytest.raises(AA.ProvenanceMismatch):
+            AA.verify_provenance(load_settings())
+    finally:
+        AA.EXPECTED.clear()
+        AA.EXPECTED.update(original)
+    assert AA.verify_provenance(load_settings())["verified"] is True
+
+
+def test_the_audit_used_cache_only() -> None:
+    cache = dict(_audit()["cache"])  # type: ignore[arg-type]
+    for flag in (
+        "network_used",
+        "api_key_used",
+        "latest_vintage_substitution",
+        "backward_fill_used",
+        "future_vintage_used",
+    ):
+        assert cache[flag] is False, flag
+    assert _audit()["future_observation_violations"] == 0
+
+
+def test_the_audit_covers_every_expected_as_of_date() -> None:
+    audit = _audit()
+    path = _audit_path()
+    assert audit["weeks"] == 688
+    assert len(path) == 688
+    assert str(path.index[0].date()) == "2013-06-14"
+    assert str(path.index[-1].date()) == "2026-08-14"
+    assert not path.index.duplicated().any()
+
+
+def test_eligible_weeks_are_fewer_than_cached_weeks() -> None:
+    """§5의 첫 요구. 688개 캐시 스냅샷이 688개 공식 판정을 뜻하지 않는다."""
+
+    counts = dict(_audit()["phase_eligibility"])  # type: ignore[arg-type]
+    total = counts["official_weeks"] + counts["preliminary_weeks"] + counts["withheld_weeks"]
+    assert total == 688
+    assert counts["official_weeks"] < 688
+    assert counts["withheld_weeks"] > 0
+
+
+def test_the_publication_pause_weeks_are_withheld_exactly_as_the_policy_says() -> None:
+    """§4. 2025-10-24 ~ 2025-12-19 아홉 주가 그대로 재현되는지."""
+
+    path = _audit_path()
+    expected = pd.date_range("2025-10-24", "2025-12-19", freq="W-FRI")
+    assert len(expected) == 9
+    for moment in expected:
+        assert str(path.loc[moment, "phase_status"]) == "withheld", moment
+    # 그 직전 두 주는 예비, 그 앞 한 주는 공식이어야 한다.
+    assert str(path.loc[pd.Timestamp("2025-10-10"), "phase_status"]) == "preliminary"
+    assert str(path.loc[pd.Timestamp("2025-10-17"), "phase_status"]) == "preliminary"
+    assert str(path.loc[pd.Timestamp("2025-10-03"), "phase_status"]) == "official"
+
+
+def test_a_withheld_week_carries_no_official_phase() -> None:
+    path = _audit_path()
+    withheld = path[path["phase_status"].astype(str).eq("withheld")]
+    assert len(withheld) > 0
+    assert withheld["official_phase"].isna().all() or (
+        withheld["official_phase"].astype(str).isin(("", "nan")).all()
+    )
+    # 원시 측정값은 보류 주에도 그대로 남는다.
+    assert withheld["raw_phase"].astype(str).isin(C.PHASES).all()
+
+
+def test_late_2019_has_no_real_time_official_contraction() -> None:
+    """이 감사의 핵심 질문. 2019년 후반 거짓 침체가 실시간에 존재했는가."""
+
+    late = dict(_audit()["late_2019"])  # type: ignore[arg-type]
+    assert late["official_contraction_weeks"] == 0
+    assert late["four_week_confirmed_weeks"] == 0
+    path = _audit_path()
+    window = path.loc["2019-07-01":"2019-12-31"]
+    assert len(window) > 20
+    assert not window["official_phase"].astype(str).eq("contraction").any()
+    # 그런데도 경보는 울렸다. 경보와 공식 국면이 분리돼 있다는 증거다.
+    assert window["recession_alert"].astype(str).eq("high").any()
+
+
+def test_late_2019_contraction_exists_only_in_latest_vintage() -> None:
+    """최신 수정치에는 있고 실시간에는 없다. 수정치가 만든 실패다."""
+
+    latest = dict(_summary()["latest_vintage"])  # type: ignore[arg-type]
+    assert latest["late_2019_confirmed_contraction_weeks"] == 2
+    assert dict(_audit()["late_2019"])["official_contraction_weeks"] == 0  # type: ignore[arg-type]
+
+
+def test_the_breadth_two_rule_held_in_real_time() -> None:
+    breadth = dict(_audit()["breadth"])  # type: ignore[arg-type]
+    assert breadth["with_fewer_than_two_confirming_domains"] == 0
+    assert breadth["concentrated_alert_became_official_contraction"] == 0
+
+
+def test_the_2020_recession_is_detected_in_real_time() -> None:
+    twenty = dict(_audit()["recession_2020"])  # type: ignore[arg-type]
+    assert twenty["recession_weeks_as_contraction"] >= 1
+    assert twenty["recession_weeks_withheld"] == 0
+    first = pd.Timestamp(str(twenty["first_official_contraction"]))
+    start = pd.Timestamp(str(twenty["nber_start_used"]))
+    assert 0 <= (first - start).days // 7 <= 10
+    assert twenty["phase_at_trough"] == "contraction"
+
+
+def test_the_2020_weekly_path_is_recorded_not_only_the_timing() -> None:
+    path = _audit_path()
+    window = path.loc["2020-02-01":"2020-05-01"]
+    assert len(window) >= 12
+    for column in ("official_phase", "raw_phase", "recession_alert", "confirming_domains"):
+        assert column in window.columns
+    assert window["official_phase"].astype(str).eq("contraction").any()
+
+
+def test_disagreement_causes_are_not_collapsed_into_one_count() -> None:
+    """§6. 불일치 원인을 하나의 뭉뚱그린 숫자로 합치지 않는다."""
+
+    comparison = pd.read_csv(_audit_dir() / "latest_versus_realtime.csv")
+    causes = set(comparison.loc[~comparison["official_agrees"], "disagreement_cause"])
+    assert len(causes) >= 2
+    assert causes <= {
+        "data_revision",
+        "release_timing",
+        "missing_current_observation",
+        "freshness_eligibility",
+        "filter_path_dependence",
+        "score_boundary_sensitivity",
+    }
+    impact = dict(_audit()["revision_impact"])  # type: ignore[arg-type]
+    assert impact["official_phase_agreement"] < 1.0
+    assert (
+        sum(dict(impact["disagreement_causes"]).values())
+        == (  # type: ignore[arg-type]
+            impact["weeks_where_revisions_changed_the_official_phase"]
+        )
+    )
+
+
+def test_real_time_false_contraction_episodes_are_listed_by_kind() -> None:
+    episodes = json.loads(
+        (_audit_dir() / "false_contraction_episodes.json").read_text(encoding="utf-8")
+    )
+    summary = dict(_audit()["false_contraction_episodes"])  # type: ignore[arg-type]
+    assert len(episodes) == summary["count"]
+    kinds = {str(item["kind"]) for item in episodes}
+    assert kinds <= {"isolated_week", "short_preliminary_signal", "four_week_confirmed"}
+    for item in episodes:
+        for key in (
+            "start_date",
+            "end_date",
+            "duration_weeks",
+            "confirming_domains",
+            "concentration",
+            "dominant_domain",
+            "recession_alert",
+        ):
+            assert key in item, key
+
+
+def test_the_audit_classifies_the_outcome_into_exactly_one_branch() -> None:
+    outcome = dict(_audit()["outcome"])  # type: ignore[arg-type]
+    assert outcome["classification"] in {"A", "B", "C", "D"}
+    # 분류가 실제 측정과 어긋나면 안 된다.
+    late = dict(_audit()["late_2019"])  # type: ignore[arg-type]
+    assert outcome["confirmed_late_2019_false_contraction_in_real_time"] == (
+        late["four_week_confirmed_weeks"] > 0
+    )

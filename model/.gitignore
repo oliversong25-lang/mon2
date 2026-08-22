@@ -216,6 +216,17 @@ outputs/four_phase_v1_1/*
 !outputs/four_phase_v1_1/recession_alert_audit.json
 !outputs/four_phase_v1_1/alfred_cache_audit.json
 !outputs/four_phase_v1_1/development_gate_check.json
+
+# 기각된 동결 모델의 실시간 감사. 채택 절차가 아니다.
+!outputs/four_phase_v1_1/alfred_audit/
+outputs/four_phase_v1_1/alfred_audit/*
+!outputs/four_phase_v1_1/alfred_audit/provenance.json
+!outputs/four_phase_v1_1/alfred_audit/cache_audit.json
+!outputs/four_phase_v1_1/alfred_audit/audit_summary.json
+!outputs/four_phase_v1_1/alfred_audit/weekly_path.csv
+!outputs/four_phase_v1_1/alfred_audit/late_2019_weekly_path.csv
+!outputs/four_phase_v1_1/alfred_audit/latest_versus_realtime.csv
+!outputs/four_phase_v1_1/alfred_audit/false_contraction_episodes.json
 !outputs/four_phase_v1_1/development_frontier.json
 !outputs/four_phase_v1_1/development_frontier.csv
 !outputs/four_phase_v1_1/strict_alfred_summary.json

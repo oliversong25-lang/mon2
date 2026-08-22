@@ -192,6 +192,9 @@ def test_no_pandemic_specific_branching() -> None:
         # 엄격 ALFRED. 2020년 기준일은 실시간 경로를 요약하기 위한 것이고, 시작 주
         # 2013-06-14는 아카이브 커버리지라는 자료의 사실이다.
         ("four_phase", "alfred.py"),
+        # 기각 모델의 실시간 감사. 2019·2020 기준일은 감사 창을 정의할 뿐
+        # 국면 판정 경로에 들어가지 않는다.
+        ("four_phase", "alfred_audit.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

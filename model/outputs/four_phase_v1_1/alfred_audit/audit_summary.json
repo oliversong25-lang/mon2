@@ -1,0 +1,195 @@
+{
+  "heading": "Frozen rejected-model ALFRED audit",
+  "model_status": "rejected",
+  "provenance": {
+    "verified": true,
+    "config": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+    "stopped_config": "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027",
+    "selection_rule": "71647ea8e81951229d67f1556bc504aa0f38877ca713c069b8b68a20a88cbcd0",
+    "candidate_h": "c367e2a0f8e907b6f927191f03379bab5ea5eace6b671454c4b63e44d4b2bb21",
+    "candidate_i": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
+    "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f",
+    "source_commit": "d6b63b63233f183d010afd69ced0a7f598346cce",
+    "frontier_artifact_sha256": "2390a22c2e2a877e803767a5ca894573694e92461607f2b30bf7ef666c9b2607",
+    "frontier_generated_at_utc": "2026-08-22T12:52:09+00:00",
+    "model_status": "rejected",
+    "audit_purpose": "기각된 동결 모델의 실시간 감사. 채택 절차가 아니며 기각 판정을 바꾸지 않는다."
+  },
+  "window": [
+    "2013-06-14",
+    "2026-08-14"
+  ],
+  "weeks": 688,
+  "phase_eligibility": {
+    "official_weeks": 646,
+    "preliminary_weeks": 32,
+    "withheld_weeks": 10
+  },
+  "future_observation_violations": 0,
+  "maximum_information_lag_weeks": 7,
+  "longest_panel_silence_weeks": 7,
+  "late_2019": {
+    "official_contraction_weeks": 0,
+    "four_week_confirmed_weeks": 0,
+    "first_official_contraction": null,
+    "first_raw_contraction": "2019-12-27",
+    "first_alert": "2019-11-15"
+  },
+  "recession_2020": {
+    "nber_start_used": "2020-02-07",
+    "first_alert": "2019-06-28",
+    "first_high_alert": "2019-11-29",
+    "first_raw_contraction": "2020-03-13",
+    "first_official_contraction": "2020-02-28",
+    "first_four_week_confirmed": "2020-04-24",
+    "official_recession_weeks": 8,
+    "recession_weeks_as_contraction": 4,
+    "recession_weeks_withheld": 0,
+    "first_recovery_signal": "2020-07-17",
+    "phase_at_trough": "contraction"
+  },
+  "false_contraction": {
+    "before_the_recession_weeks": 2,
+    "after_the_recession_weeks": 11
+  },
+  "breadth": {
+    "official_contraction_weeks": 18,
+    "with_fewer_than_two_confirming_domains": 0,
+    "concentrated_alert_became_official_contraction": 0
+  },
+  "cache": {
+    "network_used": false,
+    "api_key_used": false,
+    "latest_vintage_substitution": false,
+    "backward_fill_used": false,
+    "future_vintage_used": false
+  },
+  "cache_audit": {
+    "expected_as_of_dates": 688,
+    "actual_as_of_dates": 688,
+    "missing_as_of_dates": [],
+    "duplicate_as_of_dates": 0,
+    "first_week": "2013-06-14",
+    "last_week": "2026-08-14",
+    "cache_coverage": {
+      "series": {
+        "PAYEMS": {
+          "cached": true,
+          "rows": 7220,
+          "first_realtime_start": "1985-02-01",
+          "last_realtime_start": "2026-08-07",
+          "open_ended_vintages": 499,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "W875RX1": {
+          "cached": true,
+          "rows": 4186,
+          "first_realtime_start": "2010-05-28",
+          "last_realtime_start": "2026-07-30",
+          "open_ended_vintages": 498,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "INDPRO": {
+          "cached": true,
+          "rows": 11295,
+          "first_realtime_start": "1985-02-15",
+          "last_realtime_start": "2026-07-17",
+          "open_ended_vintages": 498,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "CMRMTSPL": {
+          "cached": true,
+          "rows": 2930,
+          "first_realtime_start": "2013-06-14",
+          "last_realtime_start": "2026-07-30",
+          "open_ended_vintages": 497,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "RRSFS": {
+          "cached": true,
+          "rows": 6713,
+          "first_realtime_start": "2001-06-15",
+          "last_realtime_start": "2026-08-14",
+          "open_ended_vintages": 415,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "ICSA": {
+          "cached": true,
+          "rows": 6844,
+          "first_realtime_start": "2009-05-28",
+          "last_realtime_start": "2026-08-13",
+          "open_ended_vintages": 2171,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        },
+        "CCSA": {
+          "cached": true,
+          "rows": 7419,
+          "first_realtime_start": "2009-09-10",
+          "last_realtime_start": "2026-08-13",
+          "open_ended_vintages": 2170,
+          "rows_after_window_end": 0,
+          "covers_window": true
+        }
+      },
+      "series_without_full_coverage": [],
+      "all_series_cover_window": true
+    },
+    "new_vintage_activity": {
+      "weeks_with_no_new_vintage_in_any_series": 7,
+      "longest_all_series_publication_pause_weeks": 7,
+      "pause_weeks": [
+        "2025-10-03",
+        "2025-10-10",
+        "2025-10-17",
+        "2025-10-24",
+        "2025-10-31",
+        "2025-11-07",
+        "2025-11-14"
+      ]
+    },
+    "network_used": false,
+    "api_key_used": false,
+    "latest_vintage_substitution": false,
+    "backward_fill_used": false,
+    "inferred_releases_used": false,
+    "provenance": "data/cache/alfred/*.csv — ALFRED 값만. URL도 키도 저장하지 않는다."
+  },
+  "revision_impact": {
+    "weeks": 52,
+    "raw_phase_agreement": 0.692308,
+    "official_phase_agreement": 0.653846,
+    "contraction_agreement": 0.730769,
+    "alert_agreement": 0.769231,
+    "weeks_where_revisions_changed_the_official_phase": 18,
+    "weeks_where_revisions_changed_the_alert": 12,
+    "longest_disagreement_run": 7,
+    "disagreements_in_2019": 9,
+    "disagreements_in_2020": 9,
+    "disagreement_causes": {
+      "data_revision": 7,
+      "filter_path_dependence": 11
+    },
+    "mean_level_difference": 0.350278,
+    "mean_momentum_difference": 0.114238
+  },
+  "false_contraction_episodes": {
+    "count": 3,
+    "four_week_confirmed": 1,
+    "isolated_weeks": 1,
+    "short_preliminary": 1
+  },
+  "outcome": {
+    "classification": "B",
+    "statement": "실시간에는 확인된 후반 2019 거짓 침체가 없고 2020년은 요건 안에서 탐지된다",
+    "confirmed_late_2019_false_contraction_in_real_time": false,
+    "weeks_to_first_official_contraction_2020": 3,
+    "detects_2020_within_requirements": true
+  },
+  "adoption_unchanged": "rejected"
+}
