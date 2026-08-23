@@ -1,0 +1,85 @@
+{
+  "as_of_date": "2026-08-14",
+  "official_current_phase": "expansion",
+  "evidence_quality": "low",
+  "raw_current_phase": "expansion",
+  "filtered_winner": "expansion",
+  "semantic_class": "low_evidence_ambiguous",
+  "reason_code": "low_separation_or_stale",
+  "why_this_phase_wins": "필터 사후확률에서 `expansion`가 0.7191로 1위이고 2위 `slowdown`가 0.1620다. 분리도 0.5571는 하한 0.1보다 크지만 증거 품질을 높이기에는 다른 조건이 모자란다.",
+  "raw_scores": {
+    "recovery": 0.25,
+    "expansion": 0.501614,
+    "slowdown": 0.248385,
+    "contraction": 1e-06
+  },
+  "filtered_scores": {
+    "recovery": 0.118965,
+    "expansion": 0.71908,
+    "slowdown": 0.161955,
+    "contraction": 0.0
+  },
+  "ranked_phases": [
+    {
+      "phase": "expansion",
+      "filtered_score": 0.71908
+    },
+    {
+      "phase": "slowdown",
+      "filtered_score": 0.161955
+    },
+    {
+      "phase": "recovery",
+      "filtered_score": 0.118965
+    },
+    {
+      "phase": "contraction",
+      "filtered_score": 0.0
+    }
+  ],
+  "separation_from_second": 0.557125,
+  "phase_separation_field": 0.557125,
+  "activity_level": -0.247821,
+  "activity_momentum": 0.274323,
+  "sign_quadrant": "recovery",
+  "sign_quadrant_matches_official": false,
+  "level_materially_contradicted": false,
+  "momentum_materially_contradicted": false,
+  "neutral_both": true,
+  "breadth": {
+    "confirming_coincident_domains": 2,
+    "positive_momentum_domains": 1,
+    "coincident_domains": [
+      "production",
+      "employment",
+      "real_income",
+      "consumption"
+    ]
+  },
+  "concentration": 0.525839,
+  "concentration_flag": 0.6104,
+  "concentration_is_crowded": false,
+  "domain_freshness_weeks": {
+    "production": 8.0,
+    "employment": 5.0,
+    "real_income": 6.0,
+    "consumption": 4.0,
+    "labor_stress": 0.0
+  },
+  "domain_stale_weeks_limit": 8.0,
+  "domains_at_or_beyond_the_stale_limit": [
+    "production"
+  ],
+  "domain_support": {},
+  "previous_official_phase": "expansion",
+  "previous_state_materially_determines_the_result": false,
+  "semantically_supported_or_retained": "low_evidence_but_contemporaneously_agreed",
+  "what_would_change_the_official_phase": {
+    "route_a_immediate_transition": "`slowdown`가 필터 승자가 되고 **동시에** 증거 품질이 high여야 하며, 원시 점수 마진이 0.3 이상이어야 한다. 지금 증거 품질이 low라 이 경로는 닫혀 있다.",
+    "route_b_confirmation": "`slowdown`가 필터 승자로 3주 연속 버티면 증거가 약해도 전환한다. 흡수 상태는 없다.",
+    "what_would_move_the_evidence_quality_to_high": "중립대 밖으로 나가고(|수준| > 0.503 또는 |모멘텀| > 0.3903), 집중도가 0.6104 아래로 내려가며, 국면 분리도가 0.1 이상이 되고, 신선한 동행 도메인이 유지돼야 한다."
+  },
+  "evidence_quality_was_not_upgraded": true,
+  "single_official_phase": true,
+  "headline": "Current official U.S. phase: expansion\nEvidence quality: low"
+}

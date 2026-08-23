@@ -264,3 +264,20 @@ outputs/recovery_semantics/*
 !outputs/recovery_semantics/recovery_latency_segments.csv
 !outputs/recovery_semantics/layer_recovery_timelines.csv
 !outputs/recovery_semantics/post_trough_phase_path_2001.csv
+
+# 상태 의미론 감사. 동결 모델을 읽기만 하는 마지막 감사의 격리 산출물.
+!outputs/state_semantics/
+outputs/state_semantics/*
+!outputs/state_semantics/state_semantics_report.md
+!outputs/state_semantics/state_semantics_decision.json
+!outputs/state_semantics/weekly_semantic_audit.csv
+!outputs/state_semantics/episode_semantic_audit.csv
+!outputs/state_semantics/current_state_semantic_audit.json
+!outputs/state_semantics/semantic_conflicts.csv
+!outputs/state_semantics/validation_summary.json
+!outputs/state_semantics/provenance.json
+!outputs/state_semantics/operational_manifest.json
+!outputs/state_semantics/current_state_output.json
+!outputs/state_semantics/current_state_report.md
+!outputs/state_semantics/live_monitoring_spec.md
+!outputs/state_semantics/monitoring_baseline_snapshot.json

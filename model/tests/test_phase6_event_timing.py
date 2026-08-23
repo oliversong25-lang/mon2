@@ -210,6 +210,10 @@ def test_no_pandemic_specific_branching() -> None:
         ("recovery_semantics", "decide.py"),
         ("recovery_semantics", "manifest.py"),
         ("recovery_semantics", "__main__.py"),
+        # 상태 의미론 감사. 같은 이유다 — 동결 모델을 읽기만 하고, 날짜는 감사 창이다.
+        ("state_semantics", "episodes.py"),
+        ("state_semantics", "review.py"),
+        ("state_semantics", "preserve.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

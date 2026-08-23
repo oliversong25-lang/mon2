@@ -39,6 +39,15 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-23 — 4국면 v1.1 상태 의미론 감사: 잠정 운영 잠금
+
+- 작업자: Claude Code
+- 변경: 새 브랜치 `model/four-phase-state-semantics-audit`에 격리 패키지 `src/business_cycle/state_semantics/`(동결 의미 계약 도출·주별 의미 분류·에피소드 감사·현재 국면 감사·의미 지문·잠금 산출물)와 `outputs/state_semantics/`를 추가했습니다. 동결 v1.1을 읽기만 했고 새 국면 분류기를 만들지 않았습니다.
+- 이유: 모든 공식 국면 라벨이 그 시점 인과 증거와 경제적으로 정합했는지 확인하기 위해서입니다. 국면 순서를 기계적으로 강요하지 않는 것이 전제였습니다 — 순서 강제는 앞서 진단한 경로 의존과 끈적한 상태 결함을 되살립니다.
+- 검증: **`provisional_model_locked`.** 높은 증거 의미 충돌이 두 표본 모두 **0건**이고 2주 이상 충돌 구간도 0개입니다. 2001년 경로 39주는 지지 28·확인 지연 11·충돌 0이며, contraction → slowdown → expansion → recovery라는 비단조 경로가 매주 증거로 뒷받침됐습니다. **숨기지 않은 것 둘** — ① §5 표의 `no_high_evidence_week_contradicts_both_level_and_momentum`이 최신 수정치 2주(2002-06-07, 2002-11-29)에서 문자 그대로 어긋납니다. 둘 다 3주 확인 창의 마지막 주였고 다음 주에 해소됐지만, §5 전 항목을 게이트로 걸었다면 결론은 `operational_rejection_confirmed`로 바뀝니다. ② 두 감쇠의 잔여 배분 때문에 수준이 정상 아래인데도 확장기가 이기는 주가 최신 144·실시간 33주 있습니다. 현재 2026-08-14 출력은 `expansion` / 증거 품질 `low`이며, 원시·필터·공식이 모두 일치해 직전 상태 의존이 아닙니다. 감사 중 제 시험 코드의 결함 셋을 먼저 고쳤습니다 — 부호만 보는 분류기(§3 위반), 필터 설명 누락, 노동시장 규칙 오정의. 테스트 통과·skip 0, Ruff 통과, Python 3.11 mypy --strict 119개 파일 통과.
+- 남은 일: 미국 4국면 모델 개발을 중단합니다. 지표 추가·문턱 조정·전이 재설계를 하지 않고 13주 전방 모니터링만 돌립니다. 그 모니터링은 새 침체가 오지 않는 한 침체 탐지 정확도를 검증하지 못합니다.
+- 관련 파일: `model/src/business_cycle/state_semantics/`, `model/outputs/state_semantics/`, `model/tests/test_state_semantics.py`, `model/README.md`
+
 ### 2026-08-23 — 4국면 v1.1 회복 인식 의미론 심사: 잠정 운영 채택
 
 - 작업자: Claude Code

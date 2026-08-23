@@ -1,0 +1,101 @@
+{
+  "as_of_date": "2026-08-14",
+  "official_current_phase": "expansion",
+  "raw_current_phase": "expansion",
+  "phase_status": "official",
+  "evidence_quality": "low",
+  "phase_separation": 0.557125,
+  "activity_level": -0.247821,
+  "activity_momentum": 0.274323,
+  "transition_watch": "none",
+  "recession_alert": {
+    "level": "none",
+    "character": "absent"
+  },
+  "domain_evidence": {
+    "production": {
+      "role": "coincident",
+      "series": [
+        "INDPRO"
+      ]
+    },
+    "employment": {
+      "role": "coincident",
+      "series": [
+        "PAYEMS"
+      ]
+    },
+    "real_income": {
+      "role": "coincident",
+      "series": [
+        "W875RX1"
+      ]
+    },
+    "consumption": {
+      "role": "coincident",
+      "series": [
+        "RRSFS",
+        "CMRMTSPL"
+      ]
+    },
+    "labor_stress": {
+      "role": "bridge_only",
+      "series": [
+        "ICSA",
+        "CCSA"
+      ],
+      "level": 0.1750074360481522,
+      "momentum": 0.6488466108121292
+    }
+  },
+  "domain_freshness": {
+    "production": {
+      "weeks_since_release": 8.0,
+      "new_observation_arrived_this_week": false
+    },
+    "employment": {
+      "weeks_since_release": 5.0,
+      "new_observation_arrived_this_week": false
+    },
+    "real_income": {
+      "weeks_since_release": 6.0,
+      "new_observation_arrived_this_week": false
+    },
+    "consumption": {
+      "weeks_since_release": 4.0,
+      "new_observation_arrived_this_week": false
+    },
+    "labor_stress": {
+      "weeks_since_release": 0.0,
+      "new_observation_arrived_this_week": true
+    }
+  },
+  "breadth": {
+    "confirming_coincident_domains": 2,
+    "negative_level_domains": 2,
+    "positive_momentum_domains": 1,
+    "minimum_required_for_official_contraction": 2
+  },
+  "concentration": 0.525839,
+  "model_status": "provisional",
+  "recovery_latency_warning": {
+    "band": "amber",
+    "calendar_recovery_latency_weeks": 11,
+    "evidence_availability_adjusted_latency_weeks": 4,
+    "limitation": "coincident-data recognition lag",
+    "meaning": "저점 이후 회복 인식이 최대 11주까지 늦을 수 있다. 이 모델은 저점을 실시간으로 짚지 못한다."
+  },
+  "known_limitations": [
+    "엄격 실시간 침체 에피소드가 하나뿐이다. 실시간 침체 성능을 일반화할 수 없다.",
+    "2020년 결과는 이미 들여다봤으므로 손대지 않은 홀드아웃이 아니다.",
+    "2013-06-14 이전에는 진짜 빈티지가 없어 실시간 경로가 존재하지 않는다.",
+    "v1.1은 최신 수정치 규약 아래에서 기각된 상태로 남아 있다.",
+    "잠정 운영이며 최종 검증이 아니다.",
+    "이 산출물은 투자 판단·섹터·비중·종목·매매 지시를 담지 않는다."
+  ],
+  "provenance": {
+    "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+    "source_commit": "81941a79c66c5bd39888ec66de9921c0e6dcb445",
+    "evidence_source": "strict_alfred_real_time_cache_only"
+  }
+}

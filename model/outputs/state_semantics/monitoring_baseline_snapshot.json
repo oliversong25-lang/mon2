@@ -1,0 +1,26 @@
+{
+  "as_of_date": "2026-08-14",
+  "recorded_at_utc": null,
+  "official_current_phase": "expansion",
+  "raw_current_phase": "expansion",
+  "phase_status": "official",
+  "evidence_quality": "low",
+  "phase_separation": 0.557125,
+  "recession_alert": {
+    "level": "none",
+    "character": "absent"
+  },
+  "hashes": {
+    "v1_1_config": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+    "selection_rule": "71647ea8e81951229d67f1556bc504aa0f38877ca713c069b8b68a20a88cbcd0",
+    "frontier_csv": "2390a22c2e2a877e803767a5ca894573694e92461607f2b30bf7ef666c9b2607",
+    "candidate_h": "c367e2a0f8e907b6f927191f03379bab5ea5eace6b671454c4b63e44d4b2bb21",
+    "candidate_i": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
+    "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f"
+  },
+  "payload_sha256": "07495fe55650ab290268ba662acee90ee73d8ac7820632a98490809f0492f612",
+  "immutable": true,
+  "role": "thirteen_week_monitoring_baseline",
+  "state_semantics_semantic_digest": "0ea6db2eaabd9adf0c20d9bbf31e633fd4c82737a36dd561550f9f693bd75c1d",
+  "model_development": "stopped"
+}
