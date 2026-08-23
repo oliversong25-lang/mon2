@@ -1,0 +1,4 @@
+episode,layer,first_recovery_week,first_four_week_sequence_start,first_four_week_sequence_end,weeks_of_the_sequence_before_the_trough_month,weeks_of_the_sequence_inside_the_turning_month,sequence_position,entire_confirmed_sequence_before_the_trough_month,entered_recovery_before_the_trough_month,return_to_contraction_within_4_weeks,return_to_contraction_within_8_weeks,return_to_contraction_within_13_weeks,is_the_adoption_gate_layer,role
+gfc_2009,raw_phase,2009-05-22,2009-05-22,2009-06-12,2,2,begins_pre_trough_and_overlaps_turning_month,False,True,0,0,0,False,stability_diagnostic_disclosed_not_gated
+gfc_2009,filtered_winner,2009-05-01,2009-05-22,2009-06-12,2,2,begins_pre_trough_and_overlaps_turning_month,False,True,0,0,0,False,stability_diagnostic_disclosed_not_gated
+gfc_2009,official_phase,2009-06-05,2009-06-05,2009-06-26,0,4,within_turning_month,False,False,0,0,0,True,adoption_gate

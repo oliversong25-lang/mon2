@@ -245,3 +245,22 @@ outputs/operational_review/*
 !outputs/operational_review/live_monitoring_spec.md
 !outputs/operational_review/provenance.json
 !outputs/operational_review/validation_summary.json
+
+# 회복 인식 의미론 심사. 동결 모델을 읽기만 하는 마지막 평가 단계의 격리 산출물.
+!outputs/recovery_semantics/
+outputs/recovery_semantics/*
+!outputs/recovery_semantics/recovery_semantics_report.md
+!outputs/recovery_semantics/recovery_semantics_decision.json
+!outputs/recovery_semantics/turning_month_audit.csv
+!outputs/recovery_semantics/recovery_latency_decomposition.csv
+!outputs/recovery_semantics/domain_recovery_timeline.csv
+!outputs/recovery_semantics/rechecked_operational_gates.csv
+!outputs/recovery_semantics/provenance.json
+!outputs/recovery_semantics/validation_summary.json
+!outputs/recovery_semantics/operational_manifest.json
+!outputs/recovery_semantics/current_state_output.json
+!outputs/recovery_semantics/current_state_report.md
+!outputs/recovery_semantics/live_monitoring_spec.md
+!outputs/recovery_semantics/recovery_latency_segments.csv
+!outputs/recovery_semantics/layer_recovery_timelines.csv
+!outputs/recovery_semantics/post_trough_phase_path_2001.csv

@@ -1,0 +1,22 @@
+group,gate,previously_passed,value,limit,passes,regressed
+contraction_entry,no_confirmed_2019_contraction_before_the_recession,True,null,null,True,False
+contraction_entry,first_official_contraction_within_10_weeks,True,3,null,True,False
+contraction_entry,first_persistent_four_week_sequence_within_10_weeks,True,8,null,True,False
+contraction_entry,at_least_four_of_eight_recession_weeks_as_contraction,True,4,null,True,False
+contraction_entry,no_official_contraction_below_two_confirming_domains,True,0,null,True,False
+contraction_entry,no_concentrated_signal_decided_the_official_phase,True,0,null,True,False
+operational_integrity,zero_future_information_violations,True,0,null,True,False
+operational_integrity,cache_only_no_network_no_key,True,"{""network_used"": false, ""api_key_used"": false, ""latest_vintage_substitution"": false, ""backward_fill_used"": false}",null,True,False
+operational_integrity,exactly_688_as_of_weeks,True,688,null,True,False
+operational_integrity,withheld_and_preliminary_weeks_reproduced,True,"{""official_weeks"": 646, ""preliminary_weeks"": 32, ""withheld_weeks"": 10}",null,True,False
+operational_integrity,no_official_phase_on_a_withheld_week,True,0,null,True,False
+operational_integrity,raw_measurements_preserved_on_withheld_weeks,True,10,null,True,False
+operational_integrity,raw_versus_official_disagreement_within_structural_limit,True,5,26,True,False
+amber_conditions,delay_not_extended_by_filter_or_confirmation,False,0,4,True,False
+amber_conditions,official_follows_raw_within_confirmation_allowance,False,0,4,True,False
+amber_conditions,adjusted_latency_within_allowance,False,4,4,True,False
+amber_conditions,no_contraction_recovery_contraction_round_trip_within_13_weeks,False,0,null,True,False
+amber_conditions,no_genuine_pre_trough_four_week_recovery,False,[],null,True,False
+amber_conditions,pre_trough_recovery_in_the_raw_or_filtered_layer,False,"{""gfc_2009"": {""raw"": ""2009-05-22"", ""raw_position"": ""begins_pre_trough_and_overlaps_turning_month"", ""filtered_winner"": ""2009-05-22"", ""filtered_winner_position"": ""begins_pre_trough_and_overlaps_turning_month""}}",null,True,False
+amber_conditions,previously_passed_gates_still_pass,False,[],null,True,False
+amber_conditions,one_unambiguous_official_phase,False,0,null,True,False

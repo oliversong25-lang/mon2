@@ -201,6 +201,15 @@ def test_no_pandemic_specific_branching() -> None:
         ("operational_review", "recovery.py"),
         ("operational_review", "revision.py"),
         ("operational_review", "__main__.py"),
+        # 회복 인식 의미론 심사. 같은 이유다 — 동결 모델을 읽기만 하고, 2019·2020 날짜는
+        # NBER 월간 전환점을 주간 격자에 얹는 평가 창일 뿐 국면 판정에 들어가지 않는다.
+        ("recovery_semantics", "turning.py"),
+        ("recovery_semantics", "review.py"),
+        ("recovery_semantics", "consistency.py"),
+        ("recovery_semantics", "canonical.py"),
+        ("recovery_semantics", "decide.py"),
+        ("recovery_semantics", "manifest.py"),
+        ("recovery_semantics", "__main__.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):
