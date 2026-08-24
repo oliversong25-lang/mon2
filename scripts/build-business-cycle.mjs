@@ -1,0 +1,242 @@
+// scripts/build-business-cycle.mjs
+// 동결된 미국 4국면 모델(v1.1)의 산출물을 앱이 읽을 수 있는 정적 JSON 하나로 옮긴다.
+//
+// ── 왜 내보내기인가 ───────────────────────────────────────────────────────
+// 모델은 파이썬이고 앱은 정적 파일이다. 브라우저에서 모델을 돌릴 수 없으므로,
+// 다른 배치(build-indicators, build-quotes)와 같은 방식으로 **결과만** 옮긴다.
+// 여기서 값을 다시 계산하지 않는다 — 계산이 두 곳에 있으면 언젠가 갈라진다.
+//
+// ── 왜 모델 저장소를 가리키나 ─────────────────────────────────────────────
+// 모델은 같은 저장소의 `model/*` 브랜치에서 개발됐고 앱은 main에 있다. 산출물을
+// main에 커밋해 두면 앱은 브랜치를 몰라도 되고, 모델을 다시 돌린 날에만 이 스크립트를
+// 실행하면 된다. 경로는 `--model-outputs`로 바꿀 수 있다(기본값은 옆 워크트리).
+//
+// ── 무엇을 반드시 함께 옮기나 ─────────────────────────────────────────────
+// 국면 이름만 옮기면 안 된다. 이 모델은 `provisional`이고 증거 품질이 낮을 수 있으며
+// 회복 인식이 늦을 수 있다는 사실이 결론과 **같은 무게**로 붙어 있어야 한다.
+// 그래서 `modelStatus`, `evidenceQuality`, `recoveryLatencyWarning`, `limitations`를
+// 선택 항목이 아니라 필수 항목으로 두고, 하나라도 없으면 빌드를 실패시킨다.
+
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(HERE, "..");
+
+// 기본값은 형제 워크트리다. 모델 브랜치를 따로 체크아웃해 두는 지금 구조를 그대로 따른다.
+const DEFAULT_MODEL_OUTPUTS = resolve(ROOT, "..", "mon2-bc", "model", "outputs");
+const OUT_DIR = join(ROOT, "data", "business-cycle");
+const OUT_FILE = join(OUT_DIR, "us.json");
+
+// 4국면. 순서는 순환 순서이며, 화면이 임의로 재정렬하지 않도록 여기서 정한다.
+const PHASES = ["recovery", "expansion", "slowdown", "contraction"];
+
+const PHASE_KO = {
+  recovery: "회복기",
+  expansion: "확장기",
+  slowdown: "후퇴기",
+  contraction: "침체기",
+};
+
+const DOMAIN_KO = {
+  production: "생산",
+  employment: "고용",
+  real_income: "실질소득",
+  consumption: "소비·실질판매",
+  labor_stress: "노동시장 스트레스",
+};
+
+// 화면이 그대로 쓰는 상태 어휘. 영어 키를 화면에 노출하지 않기 위해 여기서 한 번만 옮긴다.
+const STATUS_KO = {
+  official: "확정",
+  preliminary: "예비",
+  withheld: "판정 보류",
+};
+
+const ALERT_KO = {
+  none: "없음",
+  watch: "주시",
+  elevated: "높아짐",
+  high: "높음",
+};
+
+function arg(name, fallback) {
+  const hit = process.argv.find((value) => value.startsWith(`--${name}=`));
+  return hit ? hit.slice(name.length + 3) : fallback;
+}
+
+function readJson(path) {
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+// CSV는 모델이 쓴 것이고 따옴표가 없다(전부 숫자·짧은 식별자). 그래서 단순 분해로 충분하다.
+// 만약 따옴표가 생기면 값이 조용히 어긋나므로, 그 경우를 감지해 즉시 멈춘다.
+function readCsv(path) {
+  const text = readFileSync(path, "utf8").trim();
+  if (text.includes('"')) throw new Error(`${path}에 따옴표가 있습니다. 파서를 손봐야 합니다.`);
+  const [head, ...rows] = text.split(/\r?\n/);
+  const columns = head.split(",");
+  return rows.map((line) => {
+    const cells = line.split(",");
+    const row = {};
+    columns.forEach((name, index) => { row[name] = cells[index]; });
+    return row;
+  });
+}
+
+// 소수점은 6자리에서 끊는다. 모델이 쓴 부동소수 전체 자릿수를 그대로 실으면
+// 688주 파일이 두 배가 되는데, 화면은 그 아래 자리를 쓰지 않는다.
+function num(value, digits = 6) {
+  if (value === undefined || value === "" || value === "nan") return null;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return null;
+  return Number(parsed.toFixed(digits));
+}
+
+function bool(value) {
+  return value === "True" || value === "true" || value === "1";
+}
+
+// 판정 보류 주에는 공식 국면이 없다. 빈 문자열을 "국면 없음"으로 바꾸지 않고 null로 둔다 —
+// 화면이 빈칸과 보류를 다르게 그려야 하기 때문이다.
+function phaseOrNull(value) {
+  return PHASES.includes(value) ? value : null;
+}
+
+function main() {
+  const outputs = resolve(arg("model-outputs", DEFAULT_MODEL_OUTPUTS));
+  if (!existsSync(outputs)) {
+    throw new Error(
+      `모델 산출물 폴더가 없습니다: ${outputs}\n` +
+      `--model-outputs=<경로> 로 지정하세요.`
+    );
+  }
+
+  const currentPath = join(outputs, "state_semantics", "current_state_output.json");
+  const manifestPath = join(outputs, "state_semantics", "operational_manifest.json");
+  const decisionPath = join(outputs, "state_semantics", "state_semantics_decision.json");
+  const pathCsv = join(outputs, "four_phase_v1_1", "alfred_audit", "weekly_path.csv");
+  for (const path of [currentPath, manifestPath, decisionPath, pathCsv]) {
+    if (!existsSync(path)) throw new Error(`모델 산출물이 없습니다: ${path}`);
+  }
+
+  const current = readJson(currentPath);
+  const manifest = readJson(manifestPath);
+  const decision = readJson(decisionPath);
+
+  // 결론과 한계를 함께 싣지 않으면 내보내지 않는다. 화면에서 빠뜨릴 수 있는 것을
+  // 애초에 데이터에서 뺄 수 없게 만든다.
+  for (const key of ["model_status", "evidence_quality", "recovery_latency_warning", "known_limitations"]) {
+    if (current[key] === undefined) throw new Error(`현재상태 산출물에 ${key}가 없습니다.`);
+  }
+  if (current.model_status !== "provisional") {
+    throw new Error(`모델 상태가 provisional이 아닙니다: ${current.model_status}`);
+  }
+
+  // 주간 경로. 엄격 실시간(ALFRED) 재구성이며, 화면에 필요한 열만 남긴다.
+  const history = readCsv(pathCsv).map((row) => ({
+    week: row.as_of,
+    official: phaseOrNull(row.official_phase),
+    raw: phaseOrNull(row.raw_phase),
+    status: row.phase_status,
+    level: num(row.activity_level),
+    momentum: num(row.activity_momentum),
+    separation: num(row.phase_separation),
+    evidenceQuality: bool(row.evidence_quality_high) ? "high" : "low",
+    alert: row.recession_alert,
+    confirmingDomains: num(row.confirming_domains),
+  }));
+  if (!history.length) throw new Error("주간 경로가 비어 있습니다.");
+
+  const last = history[history.length - 1];
+  if (last.week !== current.as_of_date) {
+    throw new Error(
+      `현재상태(${current.as_of_date})와 주간 경로 마지막 주(${last.week})가 다릅니다. ` +
+      `두 산출물이 같은 실행에서 나왔는지 확인하세요.`
+    );
+  }
+
+  // 공식 국면이 실제로 바뀐 지점. 국면 시계를 강요하지 않으므로 인접 여부를 따지지 않는다.
+  const transitions = [];
+  for (let i = 1; i < history.length; i += 1) {
+    const before = history[i - 1].official;
+    const after = history[i].official;
+    if (before && after && before !== after) {
+      transitions.push({ week: history[i].week, from: before, to: after });
+    }
+  }
+
+  const counts = {};
+  PHASES.forEach((name) => { counts[name] = 0; });
+  let withheld = 0;
+  let preliminary = 0;
+  history.forEach((row) => {
+    if (row.status === "withheld") withheld += 1;
+    else if (row.status === "preliminary") preliminary += 1;
+    if (row.official) counts[row.official] += 1;
+  });
+
+  const payload = {
+    model: "us_four_phase_v1",
+    version: "v1.1",
+    region: "US",
+    modelStatus: current.model_status,
+    // 잠금은 "운영에 쓸 수 있다"는 뜻이지 "검증이 끝났다"는 뜻이 아니다. 둘을 같이 싣는다.
+    stateSemanticsDecision: decision.classification,
+    isFinalValidation: false,
+    developmentStopped: manifest.us_four_phase_model_development === "stopped",
+    generatedAt: new Date().toISOString(),
+    provenance: {
+      sourceCommit: current.provenance.source_commit,
+      configHash: current.provenance.frozen_config_sha256,
+      evidenceSource: current.provenance.evidence_source,
+      semanticDigest: decision.semantic_digest,
+    },
+    labels: { phases: PHASE_KO, domains: DOMAIN_KO, status: STATUS_KO, alert: ALERT_KO },
+    phaseOrder: PHASES,
+    current: {
+      asOf: current.as_of_date,
+      official: current.official_current_phase,
+      raw: current.raw_current_phase,
+      status: current.phase_status,
+      evidenceQuality: current.evidence_quality,
+      separation: current.phase_separation,
+      level: current.activity_level,
+      momentum: current.activity_momentum,
+      transitionWatch: current.transition_watch,
+      recessionAlert: current.recession_alert,
+      breadth: current.breadth,
+      concentration: current.concentration,
+      domains: current.domain_evidence,
+      freshness: current.domain_freshness,
+    },
+    recoveryLatencyWarning: current.recovery_latency_warning,
+    limitations: current.known_limitations,
+    history,
+    summary: {
+      weeks: history.length,
+      firstWeek: history[0].week,
+      lastWeek: last.week,
+      phaseWeeks: counts,
+      withheldWeeks: withheld,
+      preliminaryWeeks: preliminary,
+      transitions,
+    },
+  };
+
+  const body = JSON.stringify(payload);
+  payload.checksum = createHash("sha256").update(body).digest("hex").slice(0, 16);
+
+  mkdirSync(OUT_DIR, { recursive: true });
+  writeFileSync(OUT_FILE, JSON.stringify(payload), "utf8");
+
+  const kb = (Buffer.byteLength(JSON.stringify(payload)) / 1024).toFixed(1);
+  console.log(`경기국면 내보내기 완료 · ${OUT_FILE} · ${kb}KB`);
+  console.log(`  기준일 ${payload.current.asOf} · 공식 ${payload.current.official} · 증거 품질 ${payload.current.evidenceQuality}`);
+  console.log(`  주간 경로 ${payload.summary.weeks}주 (${payload.summary.firstWeek} ~ ${payload.summary.lastWeek}) · 전환 ${transitions.length}회`);
+  console.log(`  모델 상태 ${payload.modelStatus} · 최종 검증 아님`);
+}
+
+main();
