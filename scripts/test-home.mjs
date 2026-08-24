@@ -500,7 +500,7 @@ try {
   });
 
   // 5번: 자리만 잡아둔 칸들
-  await record("오늘의 주요 뉴스만 준비 중이고, 다가오는 일정·주요 경제지표는 실제로 동작한다", async () => {
+  await record("오늘의 주요 뉴스만 준비 중이고, 다가오는 일정·경기국면은 실제로 동작한다", async () => {
     await page.goto(HOME_URL);
     await page.evaluate((assets) => {
       localStorage.setItem("assetInput.session", JSON.stringify({ schema: 7, snapshots: [], assets }));
@@ -511,8 +511,8 @@ try {
     const news = headings.find((text) => text.includes("오늘의 주요 뉴스"));
     if (!news) return { ok: false, reason: `오늘의 주요 뉴스 칸이 없음: ${headings.join(" | ")}` };
     if (!news.includes("준비 중")) return { ok: false, reason: "오늘의 주요 뉴스에 준비 중 표시가 없음" };
-    // 다가오는 일정과 주요 경제지표는 이제 자리표시가 아니라 실제 기능이다.
-    for (const title of ["다가오는 일정", "주요 경제지표"]) {
+    // 다가오는 일정과 경기국면은 이제 자리표시가 아니라 실제 기능이다.
+    for (const title of ["다가오는 일정", "경기국면"]) {
       const found = headings.find((text) => text.includes(title));
       if (!found) return { ok: false, reason: `"${title}" 칸이 없음: ${headings.join(" | ")}` };
       if (found.includes("준비 중")) return { ok: false, reason: `"${title}"이 아직 준비 중 표시로 남아 있음` };
@@ -1348,8 +1348,8 @@ try {
       if (home["data/macro-calendar.json"] !== "no-cache") {
         return { ok: false, reason: `macro-calendar.json 모드 ${home["data/macro-calendar.json"]}` };
       }
-      if (home["data/indicators/index.json"] !== "no-cache") {
-        return { ok: false, reason: `indicators/index.json 모드 ${home["data/indicators/index.json"]}` };
+      if (home["data/business-cycle/us.json"] !== "no-cache") {
+        return { ok: false, reason: `business-cycle/us.json 모드 ${home["data/business-cycle/us.json"]}` };
       }
 
       // 종목 목록은 주 1회 바뀌고 합쳐서 4MB다. 매 로드마다 조건부 요청을 더 보낼 이유가 없다.
@@ -1394,36 +1394,55 @@ try {
     } finally { await context.close(); }
   });
 
-  // ===== 5a-1f. 경제지표 (OECD) =====
-  await record("경제지표 카드가 값과 관측 기간을 함께 보여주고 행을 늘리지 않는다", async () => {
+  // ===== 5a-1f. 경기국면 (미국 4국면 모델) =====
+  await record("경기국면 카드가 국면과 기준일·증거 품질을 함께 보여주고 행을 늘리지 않는다", async () => {
     await page.goto(HOME_URL);
     await seedSession(page, AXIS_ASSETS.slice(0, 2));
     await page.reload();
-    await page.waitForFunction(() => document.querySelector(".ind-rows"), { timeout: 12000 });
+    await page.waitForFunction(() => document.querySelector(".cyc-name"), { timeout: 12000 });
     const box = await page.evaluate(() => {
       const row = document.querySelector(".grid-mid");
-      const card = document.querySelector(".ind-rows").closest(".card");
+      const card = document.querySelector(".cyc-name").closest(".card");
       const style = getComputedStyle(card);
       // 카드는 그리드에서 늘어나므로 실제 높이가 아니라 내용 높이로 비교해야 한다.
       const content = [...card.children].reduce((sum, el) => sum + el.getBoundingClientRect().height, 0)
         + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      const labels = [...card.querySelectorAll(".cyc-row > span:first-child")].map((n) => n.textContent.trim());
       return {
         rowH: Math.round(row.getBoundingClientRect().height),
         content: Math.round(content),
-        rows: document.querySelectorAll(".ind-row").length,
-        periods: [...document.querySelectorAll(".ind-row-period")].map((node) => node.textContent.trim()),
+        phase: document.querySelector(".cyc-name").textContent.trim(),
+        asOf: (card.querySelector(".cyc-asof") || {}).textContent || "",
+        labels,
+        note: (card.querySelector(".card-note") || {}).textContent || "",
       };
     });
-    if (!box.rows) return { ok: false, reason: "지표 행이 없음" };
-    // 값마다 관측 기간이 반드시 붙어야 한다 — 몇 달 전 값도 그 시점의 정상 데이터다.
-    if (box.periods.length !== box.rows) return { ok: false, reason: `기간 표기 ${box.periods.length} / 행 ${box.rows}` };
-    if (box.periods.some((text) => !/\d{4}년/.test(text))) return { ok: false, reason: `기간 형식 이상: ${box.periods.join(", ")}` };
-    return box.content <= box.rowH ? { ok: true } : { ok: false, reason: `지표 카드 내용 ${box.content} > 행 ${box.rowH}` };
+    // 국면 이름 하나만 남으면 안 된다. 언제 기준인지, 얼마나 믿을 수 있는지가 붙어야 한다.
+    if (!["회복기", "확장기", "후퇴기", "침체기"].includes(box.phase)) {
+      return { ok: false, reason: `국면 이름이 아님: ${box.phase}` };
+    }
+    if (!/\d{4}-\d{2}-\d{2}/.test(box.asOf)) return { ok: false, reason: `기준일 표기 없음: ${box.asOf}` };
+    if (!box.labels.includes("증거 품질")) return { ok: false, reason: `증거 품질 줄이 없음: ${box.labels.join(", ")}` };
+    // 이 모델은 예측이 아니다. 그 사실이 카드에서 사라지면 안 된다.
+    if (!/예측이 아니/.test(box.note)) return { ok: false, reason: "예측이 아니라는 문구가 없음" };
+    return box.content <= box.rowH ? { ok: true } : { ok: false, reason: `경기국면 카드 내용 ${box.content} > 행 ${box.rowH}` };
   });
 
-  await record("더보기가 경제지표 탭으로 가고, 한국·미국이 같은 계열에서 값을 받는다", async () => {
-    await page.locator(".card").filter({ hasText: "주요 경제지표" }).locator("a.btn").click();
-    await page.waitForURL(/indicators\.html/, { timeout: 8000 });
+  await record("경기국면 카드의 '자세히'가 분석 탭으로 간다", async () => {
+    await page.locator(".card").filter({ hasText: "경기국면" }).locator("a.btn").click();
+    await page.waitForURL(/analysis\.html/, { timeout: 8000 });
+    await page.waitForFunction(() => document.querySelector(".now-name"), { timeout: 12000 });
+    const text = await page.locator("#app").innerText();
+    // 분석 탭은 국면만이 아니라 한계까지 보여야 한다 — 상세 화면이 결론만 반복하면
+    // 홈 카드와 다를 게 없다.
+    for (const needle of ["증거 품질", "회복 인식 지연", "최종 검증"]) {
+      if (!text.includes(needle)) return { ok: false, reason: `"${needle}"이 분석 탭에 없음` };
+    }
+    return { ok: true };
+  });
+
+  await record("경제지표 탭에서 한국·미국이 같은 계열에서 값을 받는다", async () => {
+    await page.goto(`http://127.0.0.1:${PORT}/indicators.html`);
     await page.waitForSelector(".topic-tab", { timeout: 12000 });
     const tabs = await page.locator(".topic-tab").count();
     if (tabs < 5) return { ok: false, reason: `갈래 탭 ${tabs}개 (5개 이상 기대)` };
@@ -1556,34 +1575,44 @@ try {
     } finally { await context.close(); }
   });
 
-  await record("카탈로그가 오래되면 홈 카드가 그 사실을 말한다", async () => {
+  // 3.7b: 낡은 판정을 현재처럼 보여주는 것이 빈 카드보다 나쁘다. 홈은 지표 카탈로그
+  // 대신 경기국면을 싣게 됐으므로, 같은 요구를 그쪽에서 지킨다.
+  //
+  // 관측이 오래된 것과 **배치가 멈춘 것**은 다른 문제라 카드도 따로 말한다. 여기서
+  // 보는 것은 후자다 — 모델을 몇 주째 안 돌렸으면 국면 값을 내밀기 전에 그 사실부터
+  // 말해야 한다.
+  await record("판정이 오래되면 홈 경기국면 카드가 그 사실을 먼저 말한다", async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     try {
       const fresh = await context.newPage();
       await installTestAuth(fresh);
-      // 인덱스가 둘이다. 일간 쪽이 살아 있으면 합친 최신 관측이 신선해져 경고가 안 뜬다.
-      await fresh.route("**/data/indicators/index-daily.json", (route) => route.fulfill({ status: 404, body: "" }));
-      await fresh.route("**/data/indicators/index.json", (route) => route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          newestPeriod: "2019-01", updatedAt: "2019-02-01T00:00:00Z", attribution: "OECD",
-          countries: { KOR: { ko: "대한민국", en: "Korea" } },
-          topics: [{ id: "cycle", nameKo: "경기", nameEn: "Cycle", file: "latest/cycle.json", count: 1 }],
-          indicators: [{ id: "cli", source: "OECD", topic: "cycle", nameKo: "경기선행지수", nameEn: "CLI", unitKo: "지수", freq: "M", headline: true, file: "oecd/DF_CLI.json", countries: ["KOR"] }],
-          headlineSeries: { "oecd:cli:KOR": { indicator: "cli", country: "KOR", period: "2019-01", value: 100 } },
-          failures: [],
-        }),
-      }));
+      const stale = new Date(Date.now() - 70 * 864e5).toISOString().slice(0, 10);
+      await fresh.route("**/data/business-cycle/us.json", async (route) => {
+        // 실제 산출물을 받아 기준일만 과거로 민다. 손으로 만든 픽스처를 쓰면 계약이
+        // 바뀌었을 때 이 검사만 통과하고 화면은 깨진다.
+        const real = await route.fetch();
+        const payload = JSON.parse(await real.text());
+        payload.current.asOf = stale;
+        payload.history[payload.history.length - 1].week = stale;
+        payload.summary.lastWeek = stale;
+        route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) });
+      });
       await fresh.goto(HOME_URL);
       await seedSession(fresh, AXIS_ASSETS.slice(0, 2));
       await fresh.reload();
       await fresh.waitForFunction(() => {
         const host = document.getElementById("page");
-        return host && host.innerText.includes("주요 경제지표");
+        return host && host.innerText.includes("경기국면");
       }, { timeout: 12000 });
-      const card = await fresh.locator(".card").filter({ hasText: "주요 경제지표" }).innerText();
-      return /오래됨|2019-01/.test(card) ? { ok: true } : { ok: false, reason: `홈 카드에 경고 없음: ${card.slice(0, 140)}` };
+      const card = await fresh.locator(".card").filter({ hasText: "경기국면" }).innerText();
+      if (!/오래됨/.test(card)) return { ok: false, reason: `오래됨 표시가 없음: ${card.slice(0, 160)}` };
+      // 며칠짜리인지 말해야 사용자가 심각도를 판단할 수 있다.
+      if (!new RegExp(stale).test(card)) return { ok: false, reason: `마지막 판정일을 밝히지 않음: ${card.slice(0, 160)}` };
+      // 낡은 국면 이름을 그대로 크게 띄우면 안 된다 — 그게 이 검사의 요점이다.
+      if (/cyc-name/.test(await fresh.locator(".card").filter({ hasText: "경기국면" }).innerHTML())) {
+        return { ok: false, reason: "낡은 판정인데 국면 이름을 그대로 크게 보여줌" };
+      }
+      return { ok: true };
     } finally { await context.close(); }
   });
 

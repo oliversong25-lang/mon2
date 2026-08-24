@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>분석 · 경기국면</title>
+  <!-- 폰트는 렌더를 막지 않게 받는다. 도착 전에는 폴백으로 읽히고 도착하면 바뀐다. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="lib/app.css?v=20260814-1">
+  <script src="lib/supabase-config.js?v=20260811-1"></script>
+  <script src="lib/account-store.js"></script>
+  <script src="lib/auth-guard.js"></script>
+  <style>
+    /* 이 화면의 주인공은 국면 이름 하나다. 나머지는 전부 "그 이름을 어떻게 읽어야
+       하는가"에 답하는 줄이다 — 근거, 폭, 신선도, 그리고 이 모델이 못 하는 일. */
+    .now { display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--space-4); }
+    .now-name { font-family:var(--font-display); font-size:var(--font-total); font-weight:600; line-height:1.1; }
+    .now-name.warn { color:var(--brand-ink); }
+    .now-name.bad { color:var(--pos); }
+    .now-run { color:var(--muted); font-size:var(--font-md); }
+    .now-meta { margin-top:var(--space-3); color:var(--dim); }
+
+    .facts { display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr)); gap:var(--space-4);
+      margin-top:var(--space-6); }
+    .fact { min-width:0; }
+    .fact-label { color:var(--muted); font-size:var(--font-xs); }
+    .fact-value { margin-top:var(--space-1); font-size:var(--font-lg); font-weight:700;
+      font-variant-numeric:tabular-nums; }
+    .fact-value.quiet { color:var(--dim); font-weight:400; }
+    .fact-note { margin-top:var(--space-1); color:var(--dim); font-size:var(--font-xs); line-height:1.6; }
+
+    /* 국면 띠. 한 칸이 한 주다. 색이 아니라 **길이**로 읽는 그림이라 범례를 붙인다. */
+    .strip { display:flex; gap:.0625rem; height:2.5rem; margin-top:var(--space-4);
+      border-radius:var(--radius-sm); overflow:hidden; }
+    .strip i { flex:1 1 auto; min-width:.0625rem; }
+    .strip i.recovery { background:#4a6fa5; }
+    .strip i.expansion { background:#3f7d6a; }
+    .strip i.slowdown { background:#8a7546; }
+    .strip i.contraction { background:#9a4b4b; }
+    .strip i.none { background:var(--surface-2); }
+    .strip-axis { display:flex; justify-content:space-between; margin-top:var(--space-2);
+      color:var(--dim); font-size:var(--font-xs); }
+    .legend { display:flex; flex-wrap:wrap; gap:var(--space-4); margin-top:var(--space-4);
+      color:var(--muted); font-size:var(--font-xs); }
+    .legend span { display:inline-flex; align-items:center; gap:var(--space-2); }
+    .legend b { width:.75rem; height:.75rem; border-radius:.1875rem; }
+
+    .warn-panel { margin-top:var(--space-4); padding:var(--space-4);
+      border:var(--border) solid var(--line); border-radius:var(--radius-md); background:var(--surface-2); }
+    .warn-panel h3 { margin:0 0 var(--space-2); font-size:var(--font-sm); }
+    .warn-panel p { margin:0; color:var(--muted); font-size:var(--font-sm); line-height:1.7; }
+
+    .limits { margin:var(--space-3) 0 0; padding-left:var(--space-5); color:var(--muted);
+      font-size:var(--font-sm); line-height:1.9; }
+    .soon-body { color:var(--dim); font-size:var(--font-sm); line-height:1.7; }
+    .sources { margin-top:var(--space-6); color:var(--dim); font-size:var(--font-xs); line-height:1.8; }
+    .sources code { font-family:var(--font-mono); }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script src="lib/fetch-data.js?v=20260815-1"></script>
+<script src="lib/session.js"></script>
+<script src="lib/shell.js?v=20260813-2"></script>
+<script src="lib/format.js"></script>
+<script src="lib/business-cycle-view.js"></script>
+<script>
+// 분석 탭. 지금은 미국 4국면 모델 하나만 들어 있다.
+//
+// ── 이 화면이 답하는 것 ────────────────────────────────────────────────────
+// "지금 미국 경제가 네 국면 중 어디인가", 그리고 "그 판단을 얼마나 믿을 수 있는가".
+// 두 번째 질문을 빼면 첫 번째가 실제보다 단단해 보인다. 그래서 증거 품질·폭·신선도·
+// 회복 인식 지연·한계를 국면 이름과 같은 화면에 둔다.
+//
+// ── 이 화면이 답하지 않는 것 ───────────────────────────────────────────────
+// 침체가 언제 오는지, 무엇을 사고팔지. 모델이 그것을 만들지 않으므로 화면도 만들지 않는다.
+const { escapeHtml } = Format;
+
+// 띠에 몇 주를 그릴지. 전체 688주를 다 그리면 한 칸이 1픽셀 아래로 내려가 읽을 수 없다.
+// 최근 3년이면 국면이 몇 번 바뀌었는지 눈으로 셀 수 있다.
+const STRIP_WEEKS = 157;
+
+function navOptions(){
+  const state=SessionStore.read();
+  return {assetCounts:Shell.countByGroup(state.assets)};
+}
+
+function head(){
+  const now=BusinessCycle.current();
+  const sub=now
+    ?`미국 · 4국면 모델 v1.1 · ${escapeHtml(now.asOf)} 기준`
+    :"미국 · 4국면 모델 v1.1";
+  return `<div class="page-head">
+    <div><p class="eyebrow">경기국면</p><h1>분석</h1>
+      <div class="sub">${sub}</div></div>
+  </div>`;
+}
+
+// 없는 것과 못 받은 것을 뭉치지 않는다. 어느 쪽인지 말해야 다음에 무엇을 볼지 안다.
+function problemPanel(title,detail){
+  return `<div class="card">
+    <h2>${escapeHtml(title)} <span class="pill warn">확인 필요</span></h2>
+    <p class="soon-body" style="margin-top:var(--space-3)">${detail}</p>
+    <div class="card-note">배치: <code>npm run build:business-cycle</code> · 산출물: ${escapeHtml(BusinessCycle.URL)}</div>
+  </div>`;
+}
+
+function num(value,digits){
+  return typeof value==="number"?value.toFixed(digits==null?2:digits):"—";
+}
+
+// ── 현재 국면 ──────────────────────────────────────────────────────────────
+function nowCard(){
+  const now=BusinessCycle.current();
+  const run=BusinessCycle.currentRun();
+
+  if(now.withheld){
+    return `<div class="card">
+      <h2>현재 국면 <span class="pill warn">판정 보류</span></h2>
+      <p class="soon-body" style="margin-top:var(--space-3)">
+        ${escapeHtml(now.asOf)} 기준으로 판정을 보류했어요. 동행 지표 발표가 멈춰 현재 국면을 말할 만큼의
+        근거가 없습니다.<br>원시 측정값은 그대로 남아 있고, 상태 판정이 경제 측정 자체를 바꾸지는 않습니다.</p>
+    </div>`;
+  }
+
+  // 원시 국면과 공식 국면이 다르면 확인 규칙이 돌고 있다는 뜻이다. 숨기면 다음 주에
+  // 국면이 바뀌었을 때 이유를 알 수 없다.
+  const pending=now.rawDiffers
+    ? `<div class="fact-note">이번 주 관측 승자는 <b>${escapeHtml(now.rawKo)}</b>예요. 확인 규칙이 도는 중이라
+       공식 국면은 아직 <b>${escapeHtml(now.phaseKo)}</b>입니다.</div>`
+    : "";
+
+  return `<div class="card">
+    <h2>현재 국면 <span class="pill warn">잠정</span></h2>
+    <div class="now" style="margin-top:var(--space-4)">
+      <b class="now-name ${escapeHtml(now.tone)}">${escapeHtml(now.phaseKo)}</b>
+      ${run&&run.weeks?`<span class="now-run">${run.weeks}주째${run.since?` · ${escapeHtml(run.since)}부터`:""}</span>`:""}
+    </div>
+    <div class="now-meta stamp">${escapeHtml(now.asOf)} 기준 · ${escapeHtml(now.statusKo)}</div>
+    ${pending}
+    <div class="facts">
+      <div class="fact"><div class="fact-label">증거 품질</div>
+        <div class="fact-value ${now.evidenceQuality==="high"?"":"quiet"}">${now.evidenceQuality==="high"?"높음":"낮음"}</div>
+        <div class="fact-note">${now.evidenceQuality==="high"
+          ?"중립대 밖이고 국면 사이 거리가 충분해요."
+          :"국면 사이 거리가 뚜렷하지 않아요. 국면이 틀렸다는 뜻은 아닙니다."}</div></div>
+      <div class="fact"><div class="fact-label">침체 경보</div>
+        <div class="fact-value ${now.alert.level==="none"?"quiet":""}">${escapeHtml(BusinessCycle.alertLabel(now.alert.level))}</div>
+        <div class="fact-note">공식 국면과 별개로 매기는 보조 경보예요.</div></div>
+      <div class="fact"><div class="fact-label">전환 감시</div>
+        <div class="fact-value ${now.transitionWatch==="none"?"quiet":""}">${now.transitionWatch==="none"?"없음":escapeHtml(now.transitionWatch)}</div>
+        <div class="fact-note">부차적인 표시입니다. 현재 국면을 대체하지 않아요.</div></div>
+    </div>
+  </div>`;
+}
+
+// ── 왜 이 국면인가 ─────────────────────────────────────────────────────────
+function evidenceCard(){
+  const now=BusinessCycle.current();
+  const breadth=now.breadth||{};
+  return `<div class="card">
+    <h2>판단 근거</h2>
+    <div class="card-sub">활동 수준과 모멘텀의 조합이 국면을 정하고, 폭이 그 판단을 확인합니다.</div>
+    <div class="facts">
+      <div class="fact"><div class="fact-label">활동 수준</div>
+        <div class="fact-value">${num(now.level)}</div>
+        <div class="fact-note">0보다 크면 정상 위, 작으면 정상 아래예요.</div></div>
+      <div class="fact"><div class="fact-label">활동 모멘텀</div>
+        <div class="fact-value">${num(now.momentum)}</div>
+        <div class="fact-note">0보다 크면 개선 중이에요.</div></div>
+      <div class="fact"><div class="fact-label">국면 분리도</div>
+        <div class="fact-value">${num(now.separation)}</div>
+        <div class="fact-note">1·2위 국면의 점수 차예요. 작을수록 판단이 아슬아슬합니다.</div></div>
+      <div class="fact"><div class="fact-label">확증 동행 도메인</div>
+        <div class="fact-value">${breadth.confirming_coincident_domains ?? "—"} / 4</div>
+        <div class="fact-note">공식 침체를 부르려면 최소 ${breadth.minimum_required_for_official_contraction ?? 2}개가 필요해요.</div></div>
+      <div class="fact"><div class="fact-label">기여 집중도</div>
+        <div class="fact-value">${num(now.concentration)}</div>
+        <div class="fact-note">한 도메인이 총량을 끌고 가는 정도예요.</div></div>
+    </div>
+  </div>`;
+}
+
+// ── 도메인 증거 ────────────────────────────────────────────────────────────
+function domainCard(){
+  const now=BusinessCycle.current();
+  const fresh=BusinessCycle.freshness();
+  const rows=(fresh?fresh.rows:[]).map(row=>{
+    const meta=now.domains[row.id]||{};
+    const series=(meta.series||[]).join(" · ");
+    const role=meta.role==="coincident"?"동행":"가교";
+    // 월간 지표 위의 주간 판정이라 발표 사이 주의 이월은 정상이다. 8주를 넘겨야 신호다.
+    const age=row.weeks==null?"—":`${row.weeks}주 전`;
+    return `<tr>
+      <td><b>${escapeHtml(row.label)}</b><br><span class="stamp">${escapeHtml(series)}</span></td>
+      <td>${escapeHtml(role)}</td>
+      <td class="num${row.stale?"":" "}"${row.stale?' style="color:var(--pos)"':""}>${escapeHtml(age)}${row.stale?" ⚠":""}</td>
+      <td class="num">${row.arrived?"이번 주 도착":"—"}</td>
+    </tr>`;
+  }).join("");
+
+  return `<div class="card">
+    <h2>도메인 증거</h2>
+    <div class="card-sub">동행 도메인 넷이 국면을 정하고, 노동시장은 가교로만 씁니다 — 단독으로 침체를 선언할 수 없어요.</div>
+    <table class="data" style="margin-top:var(--space-4)">
+      <thead><tr><th>도메인</th><th>역할</th><th>마지막 발표</th><th>이번 주</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="card-note">월간 지표 위에 주간 판정을 얹으므로 발표 사이 주에 값이 이월되는 것은 정상입니다.
+    ${BusinessCycle.STALE_WEEKS}주를 넘으면 표시합니다.</div>
+  </div>`;
+}
+
+// ── 국면 타임라인 ──────────────────────────────────────────────────────────
+function timelineCard(){
+  const rows=BusinessCycle.recent(STRIP_WEEKS);
+  const summary=BusinessCycle.summary();
+  if(!rows.length)return"";
+
+  const strip=rows.map(row=>{
+    const cls=row.official||"none";
+    const label=`${row.week} ${BusinessCycle.phaseLabel(row.official)||"판정 보류"}`;
+    return `<i class="${escapeHtml(cls)}" title="${escapeHtml(label)}"></i>`;
+  }).join("");
+
+  const legend=BusinessCycle.state.data.phaseOrder.map(id=>
+    `<span><b class="${escapeHtml(id)}" style="background:${
+      {recovery:"#4a6fa5",expansion:"#3f7d6a",slowdown:"#8a7546",contraction:"#9a4b4b"}[id]
+    }"></b>${escapeHtml(BusinessCycle.phaseLabel(id))}</span>`).join("");
+
+  const dist=summary?BusinessCycle.state.data.phaseOrder.map(id=>
+    `${BusinessCycle.phaseLabel(id)} ${summary.phaseWeeks[id]}주`).join(" · "):"";
+
+  return `<div class="card">
+    <h2>국면 경로</h2>
+    <div class="card-sub">최근 ${rows.length}주. 한 칸이 한 주이고, 회색은 판정 보류입니다.</div>
+    <div class="strip">${strip}</div>
+    <div class="strip-axis"><span class="stamp">${escapeHtml(rows[0].week)}</span><span class="stamp">${escapeHtml(rows[rows.length-1].week)}</span></div>
+    <div class="legend">${legend}<span><b style="background:var(--surface-2)"></b>판정 보류</span></div>
+    ${summary?`<div class="card-note">전체 ${summary.weeks}주(${escapeHtml(summary.firstWeek)} ~ ${escapeHtml(summary.lastWeek)}) 기준 ${escapeHtml(dist)}.<br>
+      공식 국면 전환 ${summary.transitions.length}회 · 판정 보류 ${summary.withheldWeeks}주 · 예비 ${summary.preliminaryWeeks}주.<br>
+      국면은 정해진 순서로 돌지 않습니다. 후퇴기에서 확장기로 재가속하거나 중간 국면을 건너뛸 수 있고, 그건 오류가 아닙니다.</div>`:""}
+  </div>`;
+}
+
+// ── 한계 ───────────────────────────────────────────────────────────────────
+function limitsCard(){
+  const warning=BusinessCycle.recoveryWarning();
+  const limits=BusinessCycle.limitations();
+  const provenance=BusinessCycle.provenance()||{};
+  return `<div class="card">
+    <h2>이 모델의 한계</h2>
+    <div class="card-sub">결론과 같은 무게로 읽어야 하는 부분입니다.</div>
+    ${warning?`<div class="warn-panel">
+      <h3>회복 인식 지연 · ${escapeHtml(String(warning.band||"").toUpperCase())}</h3>
+      <p>${escapeHtml(warning.meaning||"")}<br>
+      달력 기준 ${warning.calendar_recovery_latency_weeks}주, 자료가용성으로 조정하면 ${warning.evidence_availability_adjusted_latency_weeks}주입니다.</p>
+    </div>`:""}
+    <ul class="limits">${limits.map(item=>`<li>${escapeHtml(item)}</li>`).join("")}</ul>
+    <div class="card-note">
+      모델 상태 <b>${escapeHtml(BusinessCycle.state.data.modelStatus)}</b> · 최종 검증이 아닙니다.<br>
+      동결 설정 <code>${escapeHtml(String(provenance.configHash||"").slice(0,16))}…</code> ·
+      소스 커밋 <code>${escapeHtml(String(provenance.sourceCommit||"").slice(0,10))}</code>
+    </div>
+  </div>`;
+}
+
+function sourcesLine(){
+  const data=BusinessCycle.state.data;
+  return `<div class="sources">
+    출처: Federal Reserve Bank of St. Louis (FRED/ALFRED) — INDPRO · PAYEMS · W875RX1 · RRSFS · CMRMTSPL · ICSA · CCSA<br>
+    산출: 미국 4국면 모델 ${escapeHtml(data.version)} · 실시간 빈티지 재구성 · 배치 ${escapeHtml(String(data.generatedAt||"").slice(0,10))}<br>
+    이 화면은 현재 경제 국면을 서술합니다. 침체 예측·시점 예측·투자 판단을 제공하지 않습니다.
+  </div>`;
+}
+
+function render(){
+  const state=BusinessCycle.state;
+
+  if(state.status==="loading"){
+    const bar=(w)=>`<span class="skel" style="width:${w}"></span>`;
+    Shell.mount("app","analysis",`${head()}<div class="card">${bar("40%")}${bar("70%")}${bar("55%")}</div>`,navOptions());
+    return;
+  }
+  if(state.status==="error"){
+    Shell.mount("app","analysis",`${head()}${problemPanel("경기국면을 불러오지 못했어요",
+      `${escapeHtml(BusinessCycle.URL)}을 읽지 못했어요 (${escapeHtml(state.error||"원인 미상")}).`)}`,navOptions());
+    return;
+  }
+  if(state.status==="empty"){
+    Shell.mount("app","analysis",`${head()}${problemPanel("경기국면 데이터가 비어 있어요",
+      "파일은 있지만 현재국면이 들어 있지 않아요.")}`,navOptions());
+    return;
+  }
+
+  // 배치가 멈춘 경우는 값이 낡은 것과 다른 문제라 맨 위에서 따로 말한다.
+  const run=BusinessCycle.runFreshness();
+  const stalePanel=run&&run.stale
+    ?`<div class="card"><h2>판정이 오래됐어요 <span class="pill warn">확인 필요</span></h2>
+       <p class="soon-body" style="margin-top:var(--space-3)">마지막 판정이 ${escapeHtml(run.asOf)}로 ${run.weeksSinceRun}주 전이에요.
+       아래 값은 그 시점의 판정이며 지금 상태가 아닐 수 있습니다.</p></div>`
+    :"";
+
+  Shell.mount("app","analysis",[
+    head(),
+    stalePanel,
+    nowCard(),
+    `<div style="margin-top:var(--space-4)">${evidenceCard()}</div>`,
+    `<div style="margin-top:var(--space-4)">${timelineCard()}</div>`,
+    `<div style="margin-top:var(--space-4)">${domainCard()}</div>`,
+    `<div style="margin-top:var(--space-4)">${limitsCard()}</div>`,
+    sourcesLine(),
+  ].join(""),navOptions());
+}
+
+render();
+BusinessCycle.load().then(render);
+</script>
+</body>
+</html>

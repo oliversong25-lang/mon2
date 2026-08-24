@@ -163,12 +163,20 @@
     .overlay-body { min-height:0; flex:1; overflow-y:auto; }
     .overlay-body .sched-when { white-space:normal; }
 
-    .ind-rows { display:grid; gap:var(--space-2); }
-    .ind-row { display:grid; grid-template-columns:1fr auto; align-items:baseline; gap:var(--space-2) var(--space-3); }
-    .ind-row-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:var(--font-sm); }
-    .ind-row-value { font-weight:800; font-variant-numeric:tabular-nums; }
-    /* 관측 기간은 값과 반드시 함께 나간다 — 몇 달 전 값도 그 시점의 정상 데이터다. */
-    .ind-row-period { grid-column:1 / -1; margin-top:-.125rem; color:var(--dim); font-size:var(--font-xs); }
+    /* 경기국면 카드. 국면 이름 하나가 카드의 주인공이고, 나머지는 그 이름을 어떻게
+       읽어야 하는지 말하는 줄이다 — 증거 품질과 경보를 빼면 이름만 남아 과신하게 된다. */
+    .cyc-phase { display:flex; align-items:baseline; gap:var(--space-3); margin-bottom:var(--space-1); }
+    .cyc-name { font-family:var(--font-display); font-size:var(--font-xl); font-weight:600; }
+    .cyc-name.warn { color:var(--brand-ink); }
+    .cyc-name.bad { color:var(--pos); }
+    .cyc-run { color:var(--muted); font-size:var(--font-sm); }
+    .cyc-asof { display:block; margin-bottom:var(--space-4); color:var(--dim); }
+    .cyc-rows { display:grid; gap:var(--space-2); }
+    .cyc-row { display:flex; justify-content:space-between; align-items:baseline; gap:var(--space-3);
+      font-size:var(--font-sm); }
+    .cyc-row > span:first-child { color:var(--muted); }
+    .cyc-val { font-weight:700; }
+    .cyc-val.quiet { color:var(--dim); font-weight:400; }
     .soon-card { padding:var(--space-5); border:var(--border) dashed var(--line);
       border-radius:var(--radius-lg); background:var(--surface); }
     .soon-card b { display:block; margin:var(--space-2) 0 var(--space-1); font-size:var(--font-md); }
@@ -184,14 +192,14 @@
 <script src="lib/portfolio.js"></script>
 <script src="lib/shell.js?v=20260813-1"></script>
 <script src="lib/format.js"></script>
-<script src="lib/indicators-view.js"></script>
+<script src="lib/business-cycle-view.js"></script>
 <script>
 // 홈 화면. 금액 계산은 lib/valuation.js, 집계·분류는 lib/portfolio.js, 세션 읽기는
 // lib/session.js가 담당한다. 이 파일은 그 결과를 그리기만 한다 — 여기서 평가금액을
 // 다시 계산하지 말 것.
 const INPUT_URL="asset-input.html";
 const ASSETS_URL="assets.html";
-const INDICATORS_URL="indicators.html";
+const ANALYSIS_URL="analysis.html";
 const { won, pct, escapeHtml, daysBetween } = Format;
 
 let sessionState=SessionStore.read();
@@ -363,8 +371,11 @@ function sourcesLine(){
   const sources=Valuation.state.sources||{};
   const names=[...new Set(Object.values(sources).filter(Boolean))];
   if(!names.length)return"";
-  const oecd=Indicators.state.status==="ready"?`<br>${escapeHtml(Indicators.attribution())}`:"";
-  return `<div class="sources">출처: ${escapeHtml(names.join(" · "))}${oecd}
+  // 경기국면 모델은 FRED/ALFRED 계열로 만든다. 출처와 함께 **모델 상태**를 적는다 —
+  // 출처만 적으면 이 값이 확정된 공식 통계처럼 읽힌다.
+  const cycle=BusinessCycle.state.status==="ready"
+    ?`<br>경기국면: Federal Reserve Bank of St. Louis (FRED/ALFRED) · 4국면 모델 v1.1 · 잠정(최종 검증 아님)`:"";
+  return `<div class="sources">출처: ${escapeHtml(names.join(" · "))}${cycle}
     ${sources.crypto?"<br>Data provided by CoinGecko · 가상자산은 국제 시세 기준이라 국내 거래소 체결가와 다를 수 있어요":""}</div>`;
 }
 
@@ -415,7 +426,7 @@ function render(){
     pageHead(),
     legacyBanner(),
     `<div class="grid grid-top">${totalCard(summary)}${newsCard()}${scheduleCard()}</div>`,
-    `<div class="grid grid-mid" style="margin-top:var(--space-4)">${compositionCard(summary)}${indicatorCard()}${portfolioCard(summary)}</div>`,
+    `<div class="grid grid-mid" style="margin-top:var(--space-4)">${compositionCard(summary)}${cycleCard()}${portfolioCard(summary)}</div>`,
     `<div class="stack-rows" style="margin-top:var(--space-4)">${trendCard()}${holdingsCard(summary)}</div>`,
     comingCards(),
     sourcesLine(),
@@ -448,8 +459,9 @@ function rail(){
   const marks=[];
   const crypto=status==="ready"?Valuation.staleCryptoDate():null;
   if(crypto)marks.push(["가상자산",crypto]);
-  const indicators=Indicators.staleness?.();
-  if(indicators?.newest)marks.push(["경제지표",indicators.newest]);
+  // 경기국면은 주간 판정이라 기준일이 시세와 다르다. 그 차이를 눈금으로 드러낸다.
+  const cycle=BusinessCycle.current?.();
+  if(cycle?.asOf)marks.push(["경기국면",cycle.asOf]);
 
   return `<div class="rail">
     <div class="rail-anchor stamp">${anchor}</div>
@@ -476,7 +488,7 @@ function skeleton(){
     </div>`,
     `<div class="grid grid-mid" style="margin-top:var(--space-4)">
       ${card("자산 구성",`${bar("100%")}${bar("70%")}${bar("60%")}`)}
-      ${indicatorCard()}
+      ${cycleCard()}
       ${card("포트폴리오 요약",`${bar("85%")}${bar("60%")}${bar("60%")}`)}
     </div>`,
     `<div style="margin-top:var(--space-4)">${card("보유 자산",`${bar("100%")}${bar("100%")}${bar("80%")}`)}</div>`,
@@ -878,56 +890,76 @@ function newsCard(){
     "삼성전자를 보유하면 삼성전자 소식, 달러 자산이 있으면 환율 소식.<br>보유와 무관한 뉴스는 넣지 않습니다.");
 }
 
-// 핵심 지표 몇 개만 올린다. 카드 높이가 상단·중간 행을 끌어올리면 안 되므로
-// 의도적으로 적게 두고, 나머지는 더보기로 경제지표 탭에 넘긴다.
-// 카드 높이를 지켜야 하므로 의도적으로 적게 둔다. 어느 지표를 올릴지는 카탈로그의
-// headline 플래그가 정하고(index.json의 headlineSeries에 값까지 실려 온다),
-// 여기서는 그중 네 줄과 나라를 고른다. 주제 파일을 받지 않아도 그려진다.
-const HOME_INDICATORS=[
-  {indicator:"cli",country:"KOR"},
-  {indicator:"cpi",country:"KOR"},
-  {indicator:"unemployment",country:"KOR"},
-  {indicator:"long-rate",country:"KOR"},
-];
-
-function indicatorCard(){
-  const state=Indicators.state;
+// 홈의 경제 칸은 이제 4국면 모델이 맡는다. 지표 여러 줄을 늘어놓는 대신 **지금 어느
+// 국면인지** 하나를 크게 두고, 그 이름을 어떻게 읽어야 하는지를 아래 줄이 말한다.
+//
+// 국면 이름만 크게 띄우면 과신하게 된다. 이 모델은 잠정 상태이고, 증거 품질이 낮을 수
+// 있으며, 회복 인식이 늦을 수 있다. 그래서 증거 품질과 침체 경보를 카드 안에 함께 두고
+// 주석 줄에 "예측이 아니다"를 못박는다 — 자세한 내용은 분석 탭이 맡는다.
+function cycleCard(){
+  const state=BusinessCycle.state;
   const head=(badge)=>`<div class="chart-head" style="margin-bottom:var(--space-3)">
-      <div><h2>주요 경제지표${badge?` <span class="pill warn">${badge}</span>`:""}</h2>
-        <div class="card-sub" style="margin:0">OECD · 갈래별 주요 지표</div></div>
-      <div class="toolbar"><a class="btn" href="${INDICATORS_URL}">더보기</a></div>
+      <div><h2>경기국면${badge?` <span class="pill warn">${escapeHtml(badge)}</span>`:""}</h2>
+        <div class="card-sub" style="margin:0">미국 · 4국면 모델</div></div>
+      <div class="toolbar"><a class="btn" href="${ANALYSIS_URL}">자세히</a></div>
     </div>`;
 
   if(state.status==="loading"){
     const bar=(w)=>`<span class="skel" style="width:${w}"></span>`;
-    return `<div class="card">${head("")}${bar("80%")}${bar("60%")}</div>`;
+    return `<div class="card">${head("")}${bar("55%")}${bar("80%")}${bar("70%")}</div>`;
   }
-  // 없거나 비었으면 0이나 빈 칸으로 때우지 않고 무엇이 없는지 말한다.
+  // 못 받은 것과 비어 있는 것을 뭉치지 않는다. 어느 쪽인지 말해야 다음에 뭘 볼지 안다.
   if(state.status==="error"||state.status==="empty"){
     const detail=state.status==="error"
-      ?`data/indicators/index.json을 읽지 못했어요 (${escapeHtml(state.error||"원인 미상")}).`
-      :"index.json은 있지만 지표가 하나도 없어요.";
-    return `<div class="card">${head("확인 필요")}<p class="soon-body">${detail}<br>지표 배치가 한 번이라도 성공했는지 확인하세요.</p></div>`;
-  }
-
-  const stale=Indicators.staleness();
-  if(stale&&stale.stale){
-    return `<div class="card">${head("오래됨")}
-      <p class="soon-body">가장 최신 관측이 ${escapeHtml(stale.newest)}로 ${stale.monthsBehind}개월 전이에요(기준 ${Indicators.STALE_MONTHS}개월).<br>지표 배치가 멈췄는지 확인하세요.</p></div>`;
-  }
-
-  const rows=HOME_INDICATORS.map(pick=>Indicators.find(pick.indicator,pick.country)).filter(Boolean);
-  if(!rows.length){
+      ?`${escapeHtml(BusinessCycle.URL)}을 읽지 못했어요 (${escapeHtml(state.error||"원인 미상")}).`
+      :"파일은 있지만 현재국면이 비어 있어요.";
     return `<div class="card">${head("확인 필요")}
-      <p class="soon-body">홈에 올릴 지표(${escapeHtml(HOME_INDICATORS.map(p=>`${p.indicator}/${p.country}`).join(", "))})를 카탈로그에서 찾지 못했어요.</p></div>`;
+      <p class="soon-body">${detail}<br>npm run build:business-cycle 이 한 번이라도 성공했는지 확인하세요.</p></div>`;
   }
 
-  return `<div class="card">${head("")}
-    <div class="ind-rows">${rows.map(row=>`<div class="ind-row">
-      <span class="ind-row-name">${escapeHtml(row.countryKo)} ${escapeHtml(row.indicatorKo)}</span>
-      <span class="ind-row-value num">${escapeHtml(Indicators.formatValue(row))}</span>
-      <span class="ind-row-period">${escapeHtml(row.periodKo)}</span>
+  const now=BusinessCycle.current();
+
+  // 판정 보류. 국면을 만들어 내지 않고 보류라는 사실을 그대로 보여준다.
+  if(now.withheld){
+    return `<div class="card">${head("판정 보류")}
+      <p class="soon-body">${escapeHtml(now.asOf)} 기준으로 판정을 보류했어요.<br>
+      동행 지표 발표가 멈춰 현재 국면을 말할 만큼의 근거가 없습니다. 원시 측정값은 그대로 남아 있어요.</p></div>`;
+  }
+
+  // 관측이 아니라 **배치**가 멈춘 경우. 관측이 오래된 것과는 다른 문제라 따로 말한다.
+  const run=BusinessCycle.runFreshness();
+  if(run&&run.stale){
+    return `<div class="card">${head("오래됨")}
+      <p class="soon-body">마지막 판정이 ${escapeHtml(run.asOf)}로 ${run.weeksSinceRun}주 전이에요.<br>
+      경기국면 배치가 멈췄는지 확인하세요.</p></div>`;
+  }
+
+  const cycleRun=BusinessCycle.currentRun();
+  const stale=(BusinessCycle.freshness()?.stale)||[];
+  const alert=now.alert.level;
+
+  const rows=[
+    ["증거 품질", now.evidenceQuality==="high"?"높음":"낮음", now.evidenceQuality==="high"?"":"quiet"],
+    ["침체 경보", BusinessCycle.alertLabel(alert), alert==="none"?"quiet":""],
+    ["확증 동행 도메인",
+      `${now.breadth.confirming_coincident_domains ?? "—"} / 4`,
+      "num"],
+  ];
+
+  return `<div class="card">${head(now.status==="preliminary"?"예비":"잠정")}
+    <div class="cyc-phase">
+      <b class="cyc-name ${escapeHtml(now.tone)}">${escapeHtml(now.phaseKo)}</b>
+      ${cycleRun&&cycleRun.weeks?`<span class="cyc-run">${cycleRun.weeks}주째</span>`:""}
+    </div>
+    <span class="cyc-asof stamp">${escapeHtml(now.asOf)} 기준 · ${escapeHtml(now.statusKo)}</span>
+    <div class="cyc-rows">${rows.map(([label,value,cls])=>`<div class="cyc-row">
+      <span>${escapeHtml(label)}</span>
+      <span class="cyc-val ${cls}">${escapeHtml(String(value))}</span>
     </div>`).join("")}</div>
+    <div class="card-note">지금 어느 국면인지를 서술합니다. 침체 예측이 아니고 투자 판단이 아닙니다.<br>
+    잠정 운영 단계이며 최종 검증이 아닙니다.${
+      stale.length?`<br>${escapeHtml(stale.map(row=>row.label).join(" · "))} 발표가 ${BusinessCycle.STALE_WEEKS}주 이상 없었어요.`:""
+    }</div>
   </div>`;
 }
 
@@ -1108,8 +1140,8 @@ render();
 Valuation.load().then(render);
 // 경제 일정은 시세와 무관한 정적 파일이라 따로 받는다 — 한쪽이 늦어도 다른 쪽을 막지 않는다.
 loadMacroCalendar().then(render);
-// 경제지표 카탈로그도 독립적으로 받는다 — 한쪽이 늦어도 다른 카드를 막지 않는다.
-Indicators.load().then(render);
+// 경기국면도 독립적으로 받는다 — 한쪽이 늦어도 다른 카드를 막지 않는다.
+BusinessCycle.load().then(render);
 </script>
 </body>
 </html>
