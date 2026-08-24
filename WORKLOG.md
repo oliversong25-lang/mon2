@@ -39,6 +39,15 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-24 — 미국 4국면 운영 v1 완성
+
+- 작업자: Codex
+- 변경: `1566972`에서 `model/us-four-phase-operational-v1`을 분기해 최상위 `run_us_cycle.py`, 운영 어댑터, 보호 지문 검사, 네 국면 대칭 JSON·Markdown, append-only 주간 이력과 필수 회귀 테스트를 추가했습니다. 상태 표기는 `operational_v1 / provisional`입니다.
+- 이유: 동결 모델을 다시 연구하거나 침체 탐지기로 바꾸지 않고, Codex·Claude 앱 안에서 매주 현재 미국 경기국면 하나를 바로 확인할 수 있게 하기 위해서입니다.
+- 검증: 보호 설정·후보 H/I/J·회복/상태 의미 결정이 유지됨을 확인했습니다. frontier CSV의 기록 해시는 Windows CRLF 바이트 기준이고 Git blob은 LF라는 기존 차이를 규명했습니다(CRLF로 복원하면 기록값 일치). `2026-08-14 expansion / low / official`을 재현했고 ALFRED 실자료로 최신 적격 `2026-08-21 expansion / low / official`, 전환 감시 없음, 미래정보 위반 0건을 실행했습니다. 전체 테스트 520건 통과·skip 0, Ruff format/check 통과, Python 3.11 대상으로 mypy `--strict` 120개 소스 파일 통과를 확인했습니다.
+- 남은 일: 13주 전향 관찰만 수행합니다. 지표·문턱·전이·확인 규칙을 조정하거나 새 후보를 만들지 않습니다. 실시간 침체 표본이 하나뿐이고 회복 인식 지연 경고가 남아 있습니다.
+- 관련 파일: `run_us_cycle.py`, `model/src/business_cycle/operational.py`, `model/tests/test_operational.py`, `outputs/us_cycle/`, `README.md`, `model/README.md`
+
 ### 2026-08-23 — 4국면 v1.1 상태 의미론 감사: 잠정 운영 잠금
 
 - 작업자: Claude Code

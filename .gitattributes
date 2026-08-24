@@ -12,6 +12,10 @@
 # (Windows에서 실행하는 것은 python·node뿐이고 LF를 그대로 읽는다. .bat/.cmd 없음.)
 * text=auto eol=lf
 
+# 이 감사 CSV의 보호 SHA-256은 생성 당시 Windows CRLF 바이트로 기록됐다. Git blob은
+# LF지만 검증기는 작업 트리 바이트를 읽으므로 이 파일만 기록된 형식을 복원한다.
+model/outputs/four_phase_v1_1/development_frontier.csv text eol=crlf
+
 # 바이너리는 변환 대상이 아니다 — 손대면 파일이 깨진다.
 *.zip binary
 *.png binary

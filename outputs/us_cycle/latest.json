@@ -1,0 +1,231 @@
+{
+  "as_of_date": "2026-08-21",
+  "generated_at": "2026-08-24T06:05:46.106127+00:00",
+  "model_version": "us_four_phase_v1.1",
+  "model_status": "operational_v1",
+  "validation_status": "provisional",
+  "configuration_hash": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "official_current_phase": "expansion",
+  "raw_current_phase": "expansion",
+  "phase_status": "official",
+  "evidence_quality": "low",
+  "raw_phase_scores": {
+    "recovery": 0.249999767,
+    "expansion": 0.522982405,
+    "slowdown": 0.227016897,
+    "contraction": 9.3e-07
+  },
+  "filtered_phase_scores": {
+    "recovery": 0.116473097,
+    "expansion": 0.77828207,
+    "slowdown": 0.105244716,
+    "contraction": 1.17e-07
+  },
+  "phase_ranking": [
+    {
+      "phase": "expansion",
+      "raw_score": 0.522982405,
+      "filtered_score": 0.77828207,
+      "rank": 1,
+      "supporting_domains": [
+        "labor_stress",
+        "production"
+      ],
+      "opposing_domains": [
+        "employment"
+      ],
+      "mixed_domains": [
+        "consumption",
+        "real_income"
+      ],
+      "breadth": {
+        "supporting_domains": 2,
+        "available_domains": 5
+      },
+      "evidence_quality": "low"
+    },
+    {
+      "phase": "recovery",
+      "raw_score": 0.249999767,
+      "filtered_score": 0.116473097,
+      "rank": 2,
+      "supporting_domains": [
+        "real_income"
+      ],
+      "opposing_domains": [
+        "consumption"
+      ],
+      "mixed_domains": [
+        "employment",
+        "labor_stress",
+        "production"
+      ],
+      "breadth": {
+        "supporting_domains": 1,
+        "available_domains": 5
+      },
+      "evidence_quality": "low"
+    },
+    {
+      "phase": "slowdown",
+      "raw_score": 0.227016897,
+      "filtered_score": 0.105244716,
+      "rank": 3,
+      "supporting_domains": [
+        "consumption"
+      ],
+      "opposing_domains": [
+        "real_income"
+      ],
+      "mixed_domains": [
+        "employment",
+        "labor_stress",
+        "production"
+      ],
+      "breadth": {
+        "supporting_domains": 1,
+        "available_domains": 5
+      },
+      "evidence_quality": "low"
+    },
+    {
+      "phase": "contraction",
+      "raw_score": 9.3e-07,
+      "filtered_score": 1.17e-07,
+      "rank": 4,
+      "supporting_domains": [
+        "employment"
+      ],
+      "opposing_domains": [
+        "labor_stress",
+        "production"
+      ],
+      "mixed_domains": [
+        "consumption",
+        "real_income"
+      ],
+      "breadth": {
+        "supporting_domains": 1,
+        "available_domains": 5
+      },
+      "evidence_quality": "low"
+    }
+  ],
+  "phase_separation": 0.661808973,
+  "activity_level": -0.21778226,
+  "activity_momentum": 0.325714471,
+  "domain_support": {
+    "domains": [
+      "labor_stress",
+      "production"
+    ],
+    "directional_rule": "level_and_momentum_signs_match_the_official_phase",
+    "details": {
+      "production": {
+        "level": 1.279451600716536,
+        "momentum": 0.36929114892393405
+      },
+      "employment": {
+        "level": -0.5191398891642165,
+        "momentum": -0.439616118202615
+      },
+      "real_income": {
+        "level": -2.014183267700995,
+        "momentum": 1.1812094119666363
+      },
+      "consumption": {
+        "level": 0.03852574093463906,
+        "momentum": -0.009884471430304267
+      },
+      "labor_stress": {
+        "level": 0.12643451274752182,
+        "momentum": 0.5275723820731302
+      }
+    }
+  },
+  "domain_opposition": {
+    "domains": [
+      "employment"
+    ]
+  },
+  "mixed_domains": [
+    "consumption",
+    "real_income"
+  ],
+  "domain_freshness": {
+    "production": 5.0,
+    "employment": 6.0,
+    "real_income": 7.0,
+    "consumption": 5.0,
+    "labor_stress": 0.0
+  },
+  "stale_domains": [],
+  "breadth": {
+    "confirming_coincident_domains": 2,
+    "negative_level_domains": 2,
+    "negative_momentum_domains": 1,
+    "positive_momentum_domains": 1,
+    "coincident_domains": [
+      "production",
+      "employment",
+      "real_income",
+      "consumption"
+    ]
+  },
+  "concentration": 0.506364366,
+  "confirmation_state": {
+    "filtered_winner": "expansion",
+    "pending_weeks": 0,
+    "required_weeks": 3,
+    "transition": {
+      "changed": false,
+      "previous_official_phase": "expansion",
+      "new_official_phase": "expansion"
+    }
+  },
+  "transition_watch": "none",
+  "recession_alert": {
+    "level": "none",
+    "character": "absent",
+    "role": "secondary_validation_signal"
+  },
+  "change_from_previous_week": "unchanged",
+  "source_vintage_dates": {
+    "PAYEMS": "2026-08-07",
+    "W875RX1": "2026-07-30",
+    "INDPRO": "2026-08-18",
+    "CMRMTSPL": "2026-07-30",
+    "RRSFS": "2026-08-14",
+    "ICSA": "2026-08-20",
+    "CCSA": "2026-08-20"
+  },
+  "latest_observation_dates": {
+    "PAYEMS": "2026-07-01",
+    "W875RX1": "2026-06-01",
+    "INDPRO": "2026-07-01",
+    "CMRMTSPL": "2026-05-01",
+    "RRSFS": "2026-07-01",
+    "ICSA": "2026-08-15",
+    "CCSA": "2026-08-08"
+  },
+  "source_vintage_status": "strict_alfred_point_in_time",
+  "future_information_violation_count": 0,
+  "known_limitations": [
+    "Strict real-time validation contains only one recession episode, so generalisation is limited.",
+    "The 2020 episode is not an untouched holdout.",
+    "Genuine common ALFRED vintage coverage starts on 2013-06-14.",
+    "The model remains provisional rather than finally validated.",
+    "Recovery recognition has an amber latency warning: 11 calendar weeks and 4 evidence-adjusted weeks."
+  ],
+  "operational_source": "alfred_raw_cache",
+  "protected_hashes": {
+    "v1_1_config": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+    "v1_0_stopped_config": "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027",
+    "selection_rule": "71647ea8e81951229d67f1556bc504aa0f38877ca713c069b8b68a20a88cbcd0",
+    "frontier_csv": "2390a22c2e2a877e803767a5ca894573694e92461607f2b30bf7ef666c9b2607",
+    "candidate_h": "c367e2a0f8e907b6f927191f03379bab5ea5eace6b671454c4b63e44d4b2bb21",
+    "candidate_i": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
+    "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f"
+  },
+  "result_digest": "741be4ace3a0e40c478b7bc368ea2f52b6e5fcf5027475d80c007c96d6c6df7a"
+}

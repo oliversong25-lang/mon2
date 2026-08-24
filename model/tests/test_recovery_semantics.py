@@ -637,7 +637,9 @@ def test_two_clean_processes_produce_identical_results() -> None:
     root = _root()
     python = root / ".venv" / "Scripts" / "python.exe"
     assert python.exists(), "프로젝트 가상환경을 찾을 수 없다"
-    before = _decision()["run_digest"]
+    # run_digest에는 실행 시각·현재 커밋·계속 자라는 ALFRED 캐시 감사 정보가
+    # 포함된다. 의미 결과의 재현성은 이 변동 메타데이터를 제외한 지문으로 본다.
+    before = _decision()["semantic_digest"]
     subprocess.run(
         [str(python), "-m", "business_cycle.recovery_semantics"],
         cwd=root,
@@ -645,7 +647,7 @@ def test_two_clean_processes_produce_identical_results() -> None:
         check=True,
         timeout=3600,
     )
-    assert _decision()["run_digest"] == before
+    assert _decision()["semantic_digest"] == before
 
 
 def test_no_provisional_artifact_exists_unless_the_stage_adopted() -> None:
