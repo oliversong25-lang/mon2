@@ -324,3 +324,11 @@ outputs/phase_value/*
 !outputs/phase_value/phase_conditional_value.csv
 !outputs/phase_value/rate_control.csv
 !outputs/phase_value/leave_one_macro_window_out.csv
+
+# 가치 대리 변수 스윕. Fama-French 원자료는 data/cache 아래라 이미 제외된다.
+!outputs/value_proxies/
+outputs/value_proxies/*
+!outputs/value_proxies/value_proxy_report.md
+!outputs/value_proxies/validation_summary.json
+!outputs/value_proxies/test_a_by_sort.csv
+!outputs/value_proxies/decision.csv

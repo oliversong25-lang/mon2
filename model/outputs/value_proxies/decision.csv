@@ -1,0 +1,6 @@
+sort,decision_window_annualised,decision_window_hac_t,is_value_proxy,passes_nominally,passes_after_multiplicity
+book_to_market,0.0012,0.346,True,False,False
+earnings_to_price,0.0054,0.509,True,False,False
+cashflow_to_price,-0.0092,-0.128,True,False,False
+dividend_yield,-0.0142,-0.242,True,False,False
+operating_profitability,0.0318,1.825,False,False,False

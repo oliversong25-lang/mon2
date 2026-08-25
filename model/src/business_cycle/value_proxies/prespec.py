@@ -67,6 +67,17 @@ PRIMARY_SORT: Final[tuple[str, str]] = ("Hi 30", "Lo 30")
 #: 보조로 함께 싣는 구성. 판정에는 쓰지 않는다.
 SECONDARY_SORT: Final[tuple[str, str]] = ("Hi 10", "Lo 10")
 
+#: 월간 자료의 Newey-West 지연. **자료를 내려받은 뒤에 추가한 값이다.**
+#:
+#: 이익/가격·현금흐름/가격·배당수익률 정렬은 Fama-French가 일간으로 내주지 않아
+#: 월간으로만 돌릴 수 있었다. 트랙 19의 주간 8지연에 대응하는 값을 정해야 했고 6개월로
+#: 잡았다. 이 선택이 결과를 유리하게 만들 수는 없다 — 지연을 늘리면 표준오차가 넓어져
+#: 통과가 **더 어려워진다.** 그래서 사후 추가지만 문턱을 무르게 하지 않는다.
+MONTHLY_HAC_LAGS: Final[int] = 6
+
+#: 월간 격자에서의 연율화 단위.
+MONTHS_PER_YEAR: Final[float] = 12.0
+
 
 def rule() -> dict[str, Any]:
     """보고서와 산출물에 그대로 실리는 판정 규칙."""
@@ -81,9 +92,7 @@ def rule() -> dict[str, Any]:
         ),
         "primary_sort": f"{PRIMARY_SORT[0]} - {PRIMARY_SORT[1]} (가치가중 3분위)",
         "secondary_sort": f"{SECONDARY_SORT[0]} - {SECONDARY_SORT[1]} (가치가중 10분위, 참고)",
-        "passes_nominally_if": (
-            f"판정 창에서 연율 스프레드가 양이고 HAC t >= {NOMINAL_T}"
-        ),
+        "passes_nominally_if": (f"판정 창에서 연율 스프레드가 양이고 HAC t >= {NOMINAL_T}"),
         "value_definitions_tested_project_wide": list(VALUE_DEFINITIONS_TESTED),
         "family_size": len(VALUE_DEFINITIONS_TESTED),
         "family_alpha_bonferroni": round(FAMILY_ALPHA, 4),
@@ -94,9 +103,14 @@ def rule() -> dict[str, Any]:
             "영업이익률은 수익성 요인이지 가치 대리 변수가 아니다. 따로 싣고 가치 "
             "결론에 접어 넣지 않으며, 보정 가족에도 넣지 않는다."
         ),
+        "monthly_hac_lags": MONTHLY_HAC_LAGS,
+        "monthly_hac_lags_note": (
+            "이익/가격 등의 정렬이 일간으로 제공되지 않아 월간으로 돌렸다. 6개월 지연은 "
+            "자료를 본 뒤 정했지만, 지연을 늘리면 표준오차가 넓어져 통과가 더 어려워지므로 "
+            "문턱을 무르게 하지 않는다."
+        ),
         "test_b_opens_only_if": (
-            "다중비교 보정을 통과한 대리 변수가 하나 이상 있을 때만. 없으면 B를 "
-            "돌리지 않는다."
+            "다중비교 보정을 통과한 대리 변수가 하나 이상 있을 때만. 없으면 B를 돌리지 않는다."
         ),
     }
 
