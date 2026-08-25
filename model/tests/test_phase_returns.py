@@ -44,8 +44,7 @@ def test_forward_return_starts_the_week_after_the_call() -> None:
 def test_relative_return_is_industry_minus_market() -> None:
     weeks = ["2020-01-03", "2020-01-10", "2020-01-17"]
     weekly = pd.DataFrame(
-        {name: [0.0, 0.02, 0.0] for name in french.INDUSTRIES}
-        | {"MKT": [0.0, 0.01, 0.0]},
+        {name: [0.0, 0.02, 0.0] for name in french.INDUSTRIES} | {"MKT": [0.0, 0.01, 0.0]},
         index=weeks,
     )
     relative = F.forward_relative(weekly, 1)
@@ -191,9 +190,7 @@ def test_disjoint_samples_do_not_overlap() -> None:
 def test_a_thin_cell_is_reported_as_insufficient_rather_than_summarised() -> None:
     index = [f"w{i}" for i in range(6)]
     phase = pd.Series(["contraction"] * 6, index=index)
-    frame = pd.DataFrame(
-        {name: [0.01] * 6 for name in french.INDUSTRIES}, index=index
-    )
+    frame = pd.DataFrame({name: [0.01] * 6 for name in french.INDUSTRIES}, index=index)
     cells = D.cells(phase, frame)
     assert cells["contraction"]["NoDur"]["sufficient"] is False
     assert "mean" not in cells["contraction"]["NoDur"]

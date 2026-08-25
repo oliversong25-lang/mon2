@@ -1,0 +1,13 @@
+change_weeks,predeclared,phase,late_weeks,successor_rate_base,successor_rate_duration_only,successor_rate_late_signal,beats_duration
+4,False,recovery,82,0.2583,0.5882,0.3293,False
+4,False,expansion,227,0.5971,0.6102,0.8238,True
+4,False,slowdown,419,0.0532,0.1097,0.0811,False
+4,False,contraction,18,0.1605,0.2364,0.3333,True
+8,True,recovery,76,0.2583,0.5882,0.3421,False
+8,True,expansion,237,0.5971,0.6102,0.7848,True
+8,True,slowdown,517,0.0532,0.1097,0.0638,False
+8,True,contraction,20,0.1605,0.2364,0.4,True
+13,False,recovery,70,0.2583,0.5882,0.3286,False
+13,False,expansion,226,0.5971,0.6102,0.8142,True
+13,False,slowdown,526,0.0532,0.1097,0.0646,False
+13,False,contraction,16,0.1605,0.2364,0.5,True

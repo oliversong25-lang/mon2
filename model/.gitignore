@@ -302,3 +302,13 @@ outputs/phase_returns/*
 !outputs/phase_returns/cell_significance.csv
 !outputs/phase_returns/phase_significance.csv
 !outputs/phase_returns/rotation.csv
+
+# 국면 성숙도. 새로 들이는 FRED 계열(TCU·UNRATE·NROU)은 data/cache 아래라 이미 제외된다.
+!outputs/phase_maturity/
+outputs/phase_maturity/*
+!outputs/phase_maturity/phase_maturity_report.md
+!outputs/phase_maturity/validation_summary.json
+!outputs/phase_maturity/phase_results.csv
+!outputs/phase_maturity/threshold_sweep.csv
+!outputs/phase_maturity/change_window_sensitivity.csv
+!outputs/phase_maturity/weekly_maturity.csv

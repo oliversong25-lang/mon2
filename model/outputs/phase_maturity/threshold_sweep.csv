@@ -1,0 +1,17 @@
+phase,threshold,weeks,share_of_phase,successor_rate,predeclared
+recovery,0.0,151,1.0,0.2583,False
+recovery,0.333,151,1.0,0.2583,False
+recovery,0.667,76,0.5033,0.3421,True
+recovery,1.0,0,0.0,,False
+expansion,0.0,677,0.9883,0.6041,False
+expansion,0.333,529,0.7723,0.6767,False
+expansion,0.667,237,0.346,0.7848,True
+expansion,1.0,22,0.0321,0.9091,False
+slowdown,0.0,677,1.0,0.0532,False
+slowdown,0.333,587,0.8671,0.0596,False
+slowdown,0.667,517,0.7637,0.0638,True
+slowdown,1.0,255,0.3767,0.0627,False
+contraction,0.0,162,1.0,0.1605,False
+contraction,0.333,108,0.6667,0.2407,False
+contraction,0.667,20,0.1235,0.4,True
+contraction,1.0,2,0.0123,0.5,False
