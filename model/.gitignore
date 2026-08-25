@@ -312,3 +312,15 @@ outputs/phase_maturity/*
 !outputs/phase_maturity/threshold_sweep.csv
 !outputs/phase_maturity/change_window_sensitivity.csv
 !outputs/phase_maturity/weekly_maturity.csv
+
+# 국면-가치 프리미엄 검정. Fama-French 원자료와 기간 스프레드는 data/cache 아래라
+# 이미 제외된다.
+!outputs/phase_value/
+outputs/phase_value/*
+!outputs/phase_value/phase_value_report.md
+!outputs/phase_value/validation_summary.json
+!outputs/phase_value/value_premium_windows.csv
+!outputs/phase_value/value_premium_by_decade.csv
+!outputs/phase_value/phase_conditional_value.csv
+!outputs/phase_value/rate_control.csv
+!outputs/phase_value/leave_one_macro_window_out.csv

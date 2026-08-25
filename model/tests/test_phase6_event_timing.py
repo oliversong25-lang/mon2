@@ -223,6 +223,10 @@ def test_no_pandemic_specific_branching() -> None:
         # 확인하는 제외 구간이며, 국면 판정에도 수익률 계산에도 들어가지 않는다.
         ("phase_returns", "samples.py"),
         ("phase_returns", "__main__.py"),
+        # 국면-가치 프리미엄 검정. 2020 날짜는 거시 사건 창을 정의하는 제외 구간이며,
+        # 국면 판정에도 수익률 계산에도 들어가지 않는다.
+        ("phase_value", "leaveout.py"),
+        ("phase_value", "__main__.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):
