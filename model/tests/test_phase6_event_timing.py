@@ -219,6 +219,10 @@ def test_no_pandemic_specific_branching() -> None:
         ("transition_gate", "gate.py"),
         ("transition_gate", "nber.py"),
         ("transition_gate", "__main__.py"),
+        # 국면-수익률 검증. 2020 날짜는 "이 결과가 코로나 한 에피소드에 얹혀 있는가"를
+        # 확인하는 제외 구간이며, 국면 판정에도 수익률 계산에도 들어가지 않는다.
+        ("phase_returns", "samples.py"),
+        ("phase_returns", "__main__.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

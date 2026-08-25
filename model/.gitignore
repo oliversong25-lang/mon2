@@ -291,3 +291,14 @@ outputs/transition_gate/*
 !outputs/transition_gate/nber_validation.csv
 !outputs/transition_gate/transitions.csv
 !outputs/transition_gate/recommended_weekly_path.csv
+
+# 국면-수익률 검증. Fama-French 원자료는 data/cache 아래라 이미 제외된다 —
+# 라이선스 자료이므로 저장소에 들어가면 안 된다. 여기 산출물은 파생 통계뿐이다.
+!outputs/phase_returns/
+outputs/phase_returns/*
+!outputs/phase_returns/phase_returns_report.md
+!outputs/phase_returns/validation_summary.json
+!outputs/phase_returns/forward_distributions.csv
+!outputs/phase_returns/cell_significance.csv
+!outputs/phase_returns/phase_significance.csv
+!outputs/phase_returns/rotation.csv
