@@ -48,9 +48,7 @@ def admissible(row: dict[str, Any]) -> tuple[bool, list[str]]:
         elif entry["max_delay_weeks"] is not None and int(entry["max_delay_weeks"]) > 0:
             broken.append(f"{name} 인식이 {entry['max_delay_weeks']}주 늦어진다")
     if int(row["nber"]["false_positive_episodes"]) > BASELINE_FALSE_POSITIVE_EPISODES:
-        broken.append(
-            f"NBER 오탐 구간이 {row['nber']['false_positive_episodes']}건으로 늘어난다"
-        )
+        broken.append(f"NBER 오탐 구간이 {row['nber']['false_positive_episodes']}건으로 늘어난다")
     if not row["breadth_gate_holds"]:
         broken.append("침체 폭 게이트가 깨진다")
     return (not broken), broken

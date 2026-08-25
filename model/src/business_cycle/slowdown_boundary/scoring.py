@@ -166,14 +166,21 @@ def observation_scores(
         share = quadrant[name] / weight if weight > 0 else 1.0 / len(remaining)
         quadrant[name] += held * share
 
-    # 여기가 유일하게 새로운 단계다. 회복과 같은 자리, 같은 방식.
+    # 여기가 유일하게 새로운 단계다. 회복과 같은 자리, 같은 방식으로 기준선 초과분만
+    # 깎는다. 다만 **깎은 몫은 확장기로만 보낸다.**
+    #
+    # 처음에는 회복과 똑같이 나머지 셋에 비례 배분했다. 그랬더니 2020년 1~3월에
+    # 회복기가 9주 연속으로 켜졌다 — 코로나 폭락이 시작되던 구간이다. 이유는 순서다.
+    # 회복 감쇠가 이 단계보다 **먼저** 끝나므로, 여기서 회복에 넘긴 몫은 회복 자신의
+    # 폭·지속 게이트를 통과하지 않은 채로 들어간다. 침체도 마찬가지다.
+    #
+    # 확장기만 받는 것은 임시방편이 아니라 진단과 같은 말이다 — 후퇴기가 흡수하던 것은
+    # 확장기의 애매한 주였고, 증거가 모자라 후퇴기라 부르지 못하는 높은 수준의 주는
+    # 확장기로 돌아가는 것이 맞다. 그리고 확장기는 자기 게이트가 없어서 우회할 게이트도
+    # 없다.
     withheld = max(0.0, quadrant["slowdown"] - baseline) * (1.0 - slowdown)
     quadrant["slowdown"] -= withheld
-    rest = ("expansion", "recovery", "contraction")
-    weight = sum(quadrant[name] for name in rest)
-    for name in rest:
-        share = quadrant[name] / weight if weight > 0 else 1.0 / len(rest)
-        quadrant[name] += withheld * share
+    quadrant["expansion"] += withheld
 
     tilt = thresholds.breadth_weight
     scores = {

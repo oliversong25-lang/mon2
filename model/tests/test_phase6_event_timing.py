@@ -227,6 +227,9 @@ def test_no_pandemic_specific_branching() -> None:
         # 국면 판정에도 수익률 계산에도 들어가지 않는다.
         ("phase_value", "leaveout.py"),
         ("phase_value", "__main__.py"),
+        # 후퇴기 경계 변형. 2020 날짜는 NBER 침체 구간이며 "인식이 늦어지지 않았는가"를
+        # 재는 평가 창이다. 국면 점수에도 경계 게이트에도 들어가지 않는다.
+        ("slowdown_boundary", "metrics.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

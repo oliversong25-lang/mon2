@@ -332,3 +332,13 @@ outputs/value_proxies/*
 !outputs/value_proxies/validation_summary.json
 !outputs/value_proxies/test_a_by_sort.csv
 !outputs/value_proxies/decision.csv
+
+# 후퇴기 경계. 실시간 2x2는 빈티지 688개를 다시 돌린 중간 산출물이라 크고,
+# 보고서에 들어간 수치만 남긴다.
+!outputs/slowdown_boundary/
+outputs/slowdown_boundary/*
+!outputs/slowdown_boundary/slowdown_boundary_report.md
+!outputs/slowdown_boundary/validation_summary.json
+!outputs/slowdown_boundary/sweep.csv
+!outputs/slowdown_boundary/matrix.csv
+!outputs/slowdown_boundary/realtime_matrix.csv

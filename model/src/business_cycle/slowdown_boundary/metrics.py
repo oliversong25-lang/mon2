@@ -105,9 +105,7 @@ def progression(phase: pd.Series) -> dict[str, Any]:
     """후퇴기 블록이 어디로 갔는가. 침체기로 나아갔는가, 확장기로 되돌아갔는가."""
 
     spans = [
-        span
-        for span in blocks(phase)
-        if span["phase"] == "slowdown" and span["next"] is not None
+        span for span in blocks(phase) if span["phase"] == "slowdown" and span["next"] is not None
     ]
     destinations: dict[str, int] = {}
     for span in spans:
@@ -140,29 +138,48 @@ def shape(phase: pd.Series) -> dict[str, Any]:
         "transitions": moves,
         "phases_shorter_than_four_weeks": len(short),
         "phase_weeks": counts,
-        "phase_shares": {
-            name: round(value / total, 4) for name, value in counts.items()
-        },
+        "phase_shares": {name: round(value / total, 4) for name, value in counts.items()},
         "withheld_weeks": int(sum(1 for value in values if value not in PHASES)),
     }
 
 
-def _first_week(phase: pd.Series, name: str, after: str) -> str | None:
-    for week in phase.index:
-        if str(week) >= after and str(phase[week]) == name:
-            return str(week)
+def _first_week(phase: pd.Series, name: str, after: str, sustained: int = 1) -> str | None:
+    """그 국면이 **연속 `sustained`주 이상** 이어진 첫 주.
+
+    기준선의 첫 호출을 그대로 쓰면 1주짜리 깜빡임이 기준이 된다. 실제로 그 일이
+    일어났다 — 2020-02-28의 1주짜리 침체 깜빡임을 기준으로 삼으면, 그 깜빡임을 일부러
+    막는 전이 게이트가 "인식 11주 지연"으로 기록된다. 트랙 16은 v1.1이 실제로 부른 주
+    (2020-04-03)를 기준으로 삼아 지연 0으로 적었고, 그쪽이 맞다.
+
+    ``sustained=1``이면 예전 동작 그대로다.
+    """
+
+    values = [str(item) for item in phase.tolist()]
+    weeks = [str(week) for week in phase.index]
+    for position, week in enumerate(weeks):
+        if week < after or values[position] != name:
+            continue
+        run = 0
+        while position + run < len(values) and values[position + run] == name:
+            run += 1
+        if run >= sustained:
+            return week
     return None
 
 
 def recognition(phase: pd.Series, baseline: pd.Series) -> dict[str, Any]:
-    """침체·회복을 기준선보다 늦게 부르지 않았는가. 늦으면 몇 주인가."""
+    """침체·회복을 기준선보다 늦게 부르지 않았는가. 늦으면 몇 주인가.
+
+    기준선의 **이어진** 첫 호출과 견준다. 1주짜리 깜빡임을 기준으로 삼으면 그것을
+    막는 것이 지연으로 기록되기 때문이다. 변형 쪽도 같은 기준으로 읽는다.
+    """
 
     out: dict[str, Any] = {}
     for name in ("contraction", "recovery"):
         rows = []
         for start, _ in NBER_RECESSIONS:
-            reference = _first_week(baseline, name, start)
-            variant = _first_week(phase, name, start)
+            reference = _first_week(baseline, name, start, SHORT_PHASE_WEEKS)
+            variant = _first_week(phase, name, start, SHORT_PHASE_WEEKS)
             delay = (
                 int((pd.Timestamp(variant) - pd.Timestamp(reference)).days // 7)
                 if reference and variant
@@ -220,6 +237,4 @@ def breadth_gate_holds(frame: pd.DataFrame) -> bool:
 def negative_level_expansion(frame: pd.DataFrame) -> int:
     """수준이 음인 확장기 주 수. 성숙도 결함이 사는 자리다."""
 
-    return int(
-        (frame["official_phase"].eq("expansion") & frame["activity_level"].lt(0)).sum()
-    )
+    return int((frame["official_phase"].eq("expansion") & frame["activity_level"].lt(0)).sum())

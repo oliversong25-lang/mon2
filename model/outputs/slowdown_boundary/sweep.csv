@@ -1,0 +1,13 @@
+cell,gate,transitions,phases_shorter_than_four_weeks,slowdown_weeks,slowdown_share,expansion_weeks,recovery_weeks,contraction_weeks,withheld_weeks,slowdown_discrimination,slowdown_discrimination_p,progression_rate,progressed_to_contraction,closed_slowdown_blocks,contraction_delay_weeks,recovery_delay_weeks,nber_false_positive_episodes,breadth_gate_holds,current_call
+dead0.5,dead0.5,79,7,323,0.1928,1043,144,165,0,1.231,0.3732,0.088,3,34,0,0,5,True,expansion
+dead1,dead1,49,3,198,0.1182,1169,144,164,0,1.425,0.2791,0.167,3,18,0,0,5,True,expansion
+persist4w,persist4w,71,7,246,0.1469,1121,144,164,0,1.178,0.4056,0.103,3,29,0,0,5,True,expansion
+persist6w,persist6w,55,5,190,0.1134,1177,144,164,0,1.381,0.295,0.143,3,21,0,0,5,True,expansion
+persist9w,persist9w,43,3,146,0.0872,1221,144,164,0,1.528,0.246,0.2,3,15,0,0,5,True,expansion
+persist13w,persist13w,38,4,107,0.0639,1260,144,164,0,2.421,0.1214,0.167,2,12,0,0,5,True,expansion
+breadth2,breadth2,96,15,435,0.2597,935,144,161,0,0.637,0.7959,0.093,4,43,0,0,5,True,expansion
+breadth3,breadth3,73,15,224,0.1337,1144,144,163,0,2.179,0.136,0.067,2,30,0,0,5,True,expansion
+persist6w+breadth2,persist6w+breadth2,50,4,176,0.1051,1191,144,164,0,1.259,0.3401,0.111,2,18,0,0,5,True,expansion
+persist9w+breadth2,persist9w+breadth2,42,2,144,0.086,1223,144,164,0,1.478,0.2606,0.143,2,14,0,0,5,True,expansion
+persist9w+breadth3,persist9w+breadth3,46,8,112,0.0669,1255,144,164,0,1.82,0.1996,0.125,2,16,0,0,5,True,expansion
+dead0.5+persist9w,dead0.5+persist9w,43,3,144,0.086,1223,144,164,0,1.534,0.2473,0.2,3,15,0,0,5,True,expansion

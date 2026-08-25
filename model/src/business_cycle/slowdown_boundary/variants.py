@@ -11,7 +11,7 @@ from typing import Any, Final
 
 import pandas as pd
 
-from ..config import Settings
+from ..config import Settings, load_baseline
 from ..four_phase.engine import FourPhaseConfig, PreparedInputs, decide
 from ..transition_gate.gate import GateConfig
 from ..transition_gate.gate import apply as apply_gate
@@ -35,9 +35,7 @@ class Variant:
         return f"{boundary} · {'gate:on' if self.transition_gate else 'gate:off'}"
 
 
-def path(
-    prepared: PreparedInputs, config: FourPhaseConfig, variant: Variant
-) -> pd.DataFrame:
+def path(prepared: PreparedInputs, config: FourPhaseConfig, variant: Variant) -> pd.DataFrame:
     """한 변형의 주간 경로. 동결 `decide`를 그대로 쓴다."""
 
     built = observation_layer(prepared, config.thresholds, config.stale_weeks, variant.boundary)
@@ -129,7 +127,6 @@ def build(settings: Settings) -> tuple[PreparedInputs, FourPhaseConfig]:
 
     from ..four_phase.alfred_audit import AS_OF
     from ..four_phase.engine import load_config, prepare
-    from ..four_phase.report import load_baseline
     from ..validation.phase4 import load_core_observations
 
     config = load_config(settings)

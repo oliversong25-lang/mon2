@@ -84,9 +84,7 @@ def by_phase(phase: pd.Series) -> list[dict[str, Any]]:
                 "week_share": round(float((phase == name).sum() / total_weeks), 4),
                 "episodes": len(mine),
                 "closed_episodes": len(closed),
-                "median_episode_weeks": (
-                    round(statistics.median(lengths), 1) if lengths else None
-                ),
+                "median_episode_weeks": (round(statistics.median(lengths), 1) if lengths else None),
                 "episodes_shorter_than_four_weeks": len(short),
                 "short_rate": round(len(short) / len(closed), 3) if closed else None,
                 "episodes_that_revert_to_the_previous_phase": len(reverted),
