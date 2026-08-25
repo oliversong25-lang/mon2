@@ -281,3 +281,13 @@ outputs/state_semantics/*
 !outputs/state_semantics/current_state_report.md
 !outputs/state_semantics/live_monitoring_spec.md
 !outputs/state_semantics/monitoring_baseline_snapshot.json
+
+# 전이 게이트. 동결 v1.1 위에 얹는 병렬 변형의 격리 산출물.
+!outputs/transition_gate/
+outputs/transition_gate/*
+!outputs/transition_gate/transition_gate_report.md
+!outputs/transition_gate/validation_summary.json
+!outputs/transition_gate/threshold_sweep.csv
+!outputs/transition_gate/nber_validation.csv
+!outputs/transition_gate/transitions.csv
+!outputs/transition_gate/recommended_weekly_path.csv

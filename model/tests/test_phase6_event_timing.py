@@ -214,6 +214,11 @@ def test_no_pandemic_specific_branching() -> None:
         ("state_semantics", "episodes.py"),
         ("state_semantics", "review.py"),
         ("state_semantics", "preserve.py"),
+        # 전이 게이트. 2020 날짜는 인식 지연을 **재는 기준점**이고 NBER 대조 창이다.
+        # 국면 판정 경로에는 들어가지 않는다 — 게이트는 분리도와 원시 동의만 본다.
+        ("transition_gate", "gate.py"),
+        ("transition_gate", "nber.py"),
+        ("transition_gate", "__main__.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):
