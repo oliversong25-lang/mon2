@@ -1,0 +1,1475 @@
+{
+  "stage": "boundary_verification",
+  "frozen_model_modified": false,
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "executed_at_utc": "2026-08-26T02:54:05+00:00",
+  "track21_gate": "persist13w",
+  "revised_gate": "persist17w",
+  "a": {
+    "rows": [
+      {
+        "horizon_weeks": 4,
+        "phase": "recovery",
+        "before": 1.916,
+        "before_p": 0.2333,
+        "after": 2.446,
+        "after_p": 0.1596,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 4,
+        "phase": "expansion",
+        "before": 2.65,
+        "before_p": 0.0413,
+        "after": 4.119,
+        "after_p": 0.0038,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 4,
+        "phase": "slowdown",
+        "before": 0.453,
+        "before_p": 0.9091,
+        "after": 1.19,
+        "after_p": 0.4126,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 4,
+        "phase": "contraction",
+        "before": 1.339,
+        "before_p": 0.3325,
+        "after": 1.482,
+        "after_p": 0.2823,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 13,
+        "phase": "recovery",
+        "before": 1.862,
+        "before_p": 0.2441,
+        "after": 1.968,
+        "after_p": 0.2187,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 13,
+        "phase": "expansion",
+        "before": 2.52,
+        "before_p": 0.0388,
+        "after": 3.619,
+        "after_p": 0.0235,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 13,
+        "phase": "slowdown",
+        "before": 0.369,
+        "before_p": 0.9619,
+        "after": 2.421,
+        "after_p": 0.1214,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 13,
+        "phase": "contraction",
+        "before": 2.008,
+        "before_p": 0.1532,
+        "after": 2.022,
+        "after_p": 0.1411,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 26,
+        "phase": "recovery",
+        "before": 1.863,
+        "before_p": 0.2467,
+        "after": 2.039,
+        "after_p": 0.2117,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 26,
+        "phase": "expansion",
+        "before": 2.504,
+        "before_p": 0.0369,
+        "after": 4.982,
+        "after_p": 0.0006,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 26,
+        "phase": "slowdown",
+        "before": 0.38,
+        "before_p": 0.9485,
+        "after": 1.067,
+        "after_p": 0.4603,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 26,
+        "phase": "contraction",
+        "before": 3.046,
+        "before_p": 0.0788,
+        "after": 3.21,
+        "after_p": 0.0617,
+        "improved": true
+      }
+    ],
+    "expansion_floor": 1.5,
+    "expansion_holds": true,
+    "expansion_rises_at_every_horizon": true,
+    "phases_that_degraded": [],
+    "no_trade": true,
+    "passes": true,
+    "reading": "확장기 판별력이 모든 지평선에서 **올라간다.** 국면이 685주에서 1260주로 거의 두 배가 됐는데도 그렇다 — 애매한 주를 부으면 보통 1.0 쪽으로 희석되는데 반대로 날카로워졌다. 그 주들은 원래 확장기에 속했던 것이고, 찌꺼기 통이 옮겨간 것이 아니다."
+  },
+  "a_revised": {
+    "rows": [
+      {
+        "horizon_weeks": 4,
+        "phase": "recovery",
+        "before": 1.916,
+        "before_p": 0.2333,
+        "after": 2.446,
+        "after_p": 0.1596,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 4,
+        "phase": "expansion",
+        "before": 2.65,
+        "before_p": 0.0413,
+        "after": 3.744,
+        "after_p": 0.0121,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 4,
+        "phase": "slowdown",
+        "before": 0.453,
+        "before_p": 0.9091,
+        "after": 1.082,
+        "after_p": 0.452,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 4,
+        "phase": "contraction",
+        "before": 1.339,
+        "before_p": 0.3325,
+        "after": 1.482,
+        "after_p": 0.2823,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 13,
+        "phase": "recovery",
+        "before": 1.862,
+        "before_p": 0.2441,
+        "after": 1.968,
+        "after_p": 0.2187,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 13,
+        "phase": "expansion",
+        "before": 2.52,
+        "before_p": 0.0388,
+        "after": 3.644,
+        "after_p": 0.028,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 13,
+        "phase": "slowdown",
+        "before": 0.369,
+        "before_p": 0.9619,
+        "after": 3.353,
+        "after_p": 0.0572,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 13,
+        "phase": "contraction",
+        "before": 2.008,
+        "before_p": 0.1532,
+        "after": 2.022,
+        "after_p": 0.1411,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 26,
+        "phase": "recovery",
+        "before": 1.863,
+        "before_p": 0.2467,
+        "after": 2.039,
+        "after_p": 0.2117,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 26,
+        "phase": "expansion",
+        "before": 2.504,
+        "before_p": 0.0369,
+        "after": 5.122,
+        "after_p": 0.0006,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 26,
+        "phase": "slowdown",
+        "before": 0.38,
+        "before_p": 0.9485,
+        "after": 1.635,
+        "after_p": 0.2517,
+        "improved": true
+      },
+      {
+        "horizon_weeks": 26,
+        "phase": "contraction",
+        "before": 3.046,
+        "before_p": 0.0788,
+        "after": 3.21,
+        "after_p": 0.0617,
+        "improved": true
+      }
+    ],
+    "expansion_floor": 1.5,
+    "expansion_holds": true,
+    "expansion_rises_at_every_horizon": true,
+    "phases_that_degraded": [],
+    "no_trade": true,
+    "passes": true,
+    "reading": "확장기 판별력이 모든 지평선에서 **올라간다.** 국면이 685주에서 1260주로 거의 두 배가 됐는데도 그렇다 — 애매한 주를 부으면 보통 1.0 쪽으로 희석되는데 반대로 날카로워졌다. 그 주들은 원래 확장기에 속했던 것이고, 찌꺼기 통이 옮겨간 것이 아니다."
+  },
+  "b": {
+    "curve": [
+      {
+        "gate": "persist5w",
+        "persistence_weeks": 5,
+        "persistence_band": 1.0,
+        "slowdown_blocks": 28,
+        "slowdown_discrimination": 1.211,
+        "slowdown_p": 0.3872,
+        "slowdown_share": 0.1349,
+        "progression_rate": 0.107,
+        "transitions": 69,
+        "phases_shorter_than_four_weeks": 11,
+        "contraction_delay_weeks": 0,
+        "recovery_delay_weeks": 0,
+        "nber_false_positive_episodes": 5,
+        "expansion_discrimination": 4.152,
+        "enough_blocks_to_call_it_a_state": true
+      },
+      {
+        "gate": "persist7w",
+        "persistence_weeks": 7,
+        "persistence_band": 1.0,
+        "slowdown_blocks": 19,
+        "slowdown_discrimination": 1.469,
+        "slowdown_p": 0.2594,
+        "slowdown_share": 0.1063,
+        "progression_rate": 0.158,
+        "transitions": 51,
+        "phases_shorter_than_four_weeks": 3,
+        "contraction_delay_weeks": 0,
+        "recovery_delay_weeks": 0,
+        "nber_false_positive_episodes": 5,
+        "expansion_discrimination": 3.905,
+        "enough_blocks_to_call_it_a_state": true
+      },
+      {
+        "gate": "persist9w",
+        "persistence_weeks": 9,
+        "persistence_band": 1.0,
+        "slowdown_blocks": 15,
+        "slowdown_discrimination": 1.528,
+        "slowdown_p": 0.246,
+        "slowdown_share": 0.0872,
+        "progression_rate": 0.2,
+        "transitions": 43,
+        "phases_shorter_than_four_weeks": 3,
+        "contraction_delay_weeks": 0,
+        "recovery_delay_weeks": 0,
+        "nber_false_positive_episodes": 5,
+        "expansion_discrimination": 3.565,
+        "enough_blocks_to_call_it_a_state": true
+      },
+      {
+        "gate": "persist11w",
+        "persistence_weeks": 11,
+        "persistence_band": 1.0,
+        "slowdown_blocks": 15,
+        "slowdown_discrimination": 1.468,
+        "slowdown_p": 0.2645,
+        "slowdown_share": 0.0788,
+        "progression_rate": 0.2,
+        "transitions": 43,
+        "phases_shorter_than_four_weeks": 3,
+        "contraction_delay_weeks": 0,
+        "recovery_delay_weeks": 0,
+        "nber_false_positive_episodes": 5,
+        "expansion_discrimination": 3.544,
+        "enough_blocks_to_call_it_a_state": true
+      },
+      {
+        "gate": "persist13w",
+        "persistence_weeks": 13,
+        "persistence_band": 1.0,
+        "slowdown_blocks": 12,
+        "slowdown_discrimination": 2.421,
+        "slowdown_p": 0.1214,
+        "slowdown_share": 0.0639,
+        "progression_rate": 0.167,
+        "transitions": 38,
+        "phases_shorter_than_four_weeks": 4,
+        "contraction_delay_weeks": 0,
+        "recovery_delay_weeks": 0,
+        "nber_false_positive_episodes": 5,
+        "expansion_discrimination": 3.619,
+        "enough_blocks_to_call_it_a_state": true
+      },
+      {
+        "gate": "persist15w",
+        "persistence_weeks": 15,
+        "persistence_band": 1.0,
+        "slowdown_blocks": 11,
+        "slowdown_discrimination": 3.137,
+        "slowdown_p": 0.0636,
+        "slowdown_share": 0.0567,
+        "progression_rate": 0.182,
+        "transitions": 36,
+        "phases_shorter_than_four_weeks": 3,
+        "contraction_delay_weeks": 0,
+        "recovery_delay_weeks": 0,
+        "nber_false_positive_episodes": 5,
+        "expansion_discrimination": 3.6,
+        "enough_blocks_to_call_it_a_state": true
+      },
+      {
+        "gate": "persist17w",
+        "persistence_weeks": 17,
+        "persistence_band": 1.0,
+        "slowdown_blocks": 11,
+        "slowdown_discrimination": 3.353,
+        "slowdown_p": 0.0572,
+        "slowdown_share": 0.0519,
+        "progression_rate": 0.182,
+        "transitions": 36,
+        "phases_shorter_than_four_weeks": 3,
+        "contraction_delay_weeks": 0,
+        "recovery_delay_weeks": 0,
+        "nber_false_positive_episodes": 5,
+        "expansion_discrimination": 3.644,
+        "enough_blocks_to_call_it_a_state": true
+      },
+      {
+        "gate": "persist21w",
+        "persistence_weeks": 21,
+        "persistence_band": 1.0,
+        "slowdown_blocks": 7,
+        "slowdown_discrimination": 3.388,
+        "slowdown_p": 0.0629,
+        "slowdown_share": 0.0382,
+        "progression_rate": 0.286,
+        "transitions": 28,
+        "phases_shorter_than_four_weeks": 3,
+        "contraction_delay_weeks": 0,
+        "recovery_delay_weeks": 0,
+        "nber_false_positive_episodes": 5,
+        "expansion_discrimination": 3.786,
+        "enough_blocks_to_call_it_a_state": false
+      }
+    ],
+    "peak_at_weeks": 21,
+    "peak_value": 3.388,
+    "plateau_weeks": [
+      15,
+      17,
+      21
+    ],
+    "plateau_is_wide": true,
+    "chosen_weeks": 17,
+    "chosen_is_in_the_plateau": true,
+    "chosen_has_enough_blocks": true,
+    "reading": "판별력은 길이에 따라 단조롭게 오르다 15~21주에서 평탄해진다. **13주에서 뾰족한 봉우리가 아니라 13주가 그 평탄역 아래에 있다.** 적합의 위험은 없지만, 평탄역 안에서 고르는 쪽이 더 낫고 그 값이 곧 권고다.",
+    "why_not_the_longest": "가장 긴 길이는 판별력이 조금 더 높지만 후퇴기 블록이 크게 줄어 상태라고 부르기 어려워진다. 블록이 8개 아래로 내려가면 판별력이 높아도 그것은 몇몇 구간의 성질이지 상태의 성질이 아니다."
+  },
+  "b_length_curve": [
+    {
+      "gate": "persist5w",
+      "persistence_weeks": 5,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 28,
+      "slowdown_discrimination": 1.211,
+      "slowdown_p": 0.3872,
+      "slowdown_share": 0.1349,
+      "progression_rate": 0.107,
+      "transitions": 69,
+      "phases_shorter_than_four_weeks": 11,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 4.152,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist7w",
+      "persistence_weeks": 7,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 19,
+      "slowdown_discrimination": 1.469,
+      "slowdown_p": 0.2594,
+      "slowdown_share": 0.1063,
+      "progression_rate": 0.158,
+      "transitions": 51,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.905,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist9w",
+      "persistence_weeks": 9,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 15,
+      "slowdown_discrimination": 1.528,
+      "slowdown_p": 0.246,
+      "slowdown_share": 0.0872,
+      "progression_rate": 0.2,
+      "transitions": 43,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.565,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist11w",
+      "persistence_weeks": 11,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 15,
+      "slowdown_discrimination": 1.468,
+      "slowdown_p": 0.2645,
+      "slowdown_share": 0.0788,
+      "progression_rate": 0.2,
+      "transitions": 43,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.544,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist13w",
+      "persistence_weeks": 13,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 12,
+      "slowdown_discrimination": 2.421,
+      "slowdown_p": 0.1214,
+      "slowdown_share": 0.0639,
+      "progression_rate": 0.167,
+      "transitions": 38,
+      "phases_shorter_than_four_weeks": 4,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.619,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist15w",
+      "persistence_weeks": 15,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 11,
+      "slowdown_discrimination": 3.137,
+      "slowdown_p": 0.0636,
+      "slowdown_share": 0.0567,
+      "progression_rate": 0.182,
+      "transitions": 36,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.6,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist17w",
+      "persistence_weeks": 17,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 11,
+      "slowdown_discrimination": 3.353,
+      "slowdown_p": 0.0572,
+      "slowdown_share": 0.0519,
+      "progression_rate": 0.182,
+      "transitions": 36,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.644,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist21w",
+      "persistence_weeks": 21,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 7,
+      "slowdown_discrimination": 3.388,
+      "slowdown_p": 0.0629,
+      "slowdown_share": 0.0382,
+      "progression_rate": 0.286,
+      "transitions": 28,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.786,
+      "enough_blocks_to_call_it_a_state": false
+    }
+  ],
+  "b_band_curve": [
+    {
+      "gate": "persist17w+band0.5",
+      "persistence_weeks": 17,
+      "persistence_band": 0.5,
+      "slowdown_blocks": 17,
+      "slowdown_discrimination": 2.587,
+      "slowdown_p": 0.0655,
+      "slowdown_share": 0.0919,
+      "progression_rate": 0.176,
+      "transitions": 45,
+      "phases_shorter_than_four_weeks": 5,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.522,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist17w+band0.75",
+      "persistence_weeks": 17,
+      "persistence_band": 0.75,
+      "slowdown_blocks": 16,
+      "slowdown_discrimination": 2.812,
+      "slowdown_p": 0.0807,
+      "slowdown_share": 0.0722,
+      "progression_rate": 0.188,
+      "transitions": 43,
+      "phases_shorter_than_four_weeks": 6,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.637,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist17w",
+      "persistence_weeks": 17,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 11,
+      "slowdown_discrimination": 3.353,
+      "slowdown_p": 0.0572,
+      "slowdown_share": 0.0519,
+      "progression_rate": 0.182,
+      "transitions": 36,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.644,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist17w+band1.25",
+      "persistence_weeks": 17,
+      "persistence_band": 1.25,
+      "slowdown_blocks": 10,
+      "slowdown_discrimination": 2.811,
+      "slowdown_p": 0.0642,
+      "slowdown_share": 0.0412,
+      "progression_rate": 0.1,
+      "transitions": 35,
+      "phases_shorter_than_four_weeks": 4,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.201,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    {
+      "gate": "persist17w+band1.5",
+      "persistence_weeks": 17,
+      "persistence_band": 1.5,
+      "slowdown_blocks": 6,
+      "slowdown_discrimination": 1.986,
+      "slowdown_p": 0.1888,
+      "slowdown_share": 0.0227,
+      "progression_rate": 0.167,
+      "transitions": 27,
+      "phases_shorter_than_four_weeks": 2,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.376,
+      "enough_blocks_to_call_it_a_state": false
+    },
+    {
+      "gate": "persist17w+band2",
+      "persistence_weeks": 17,
+      "persistence_band": 2.0,
+      "slowdown_blocks": 4,
+      "slowdown_discrimination": 4.028,
+      "slowdown_p": 0.0515,
+      "slowdown_share": 0.0107,
+      "progression_rate": 0.25,
+      "transitions": 23,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.462,
+      "enough_blocks_to_call_it_a_state": false
+    }
+  ],
+  "extended_coverage": [
+    {
+      "series": "PAYEMS",
+      "first": "1939-01-01",
+      "last": "2026-07-01",
+      "observations": 1051
+    },
+    {
+      "series": "W875RX1",
+      "first": "1959-01-01",
+      "last": "2026-06-01",
+      "observations": 810
+    },
+    {
+      "series": "INDPRO",
+      "first": "1919-01-01",
+      "last": "2026-07-01",
+      "observations": 1291
+    },
+    {
+      "series": "CMRMTSPL",
+      "first": "1967-01-01",
+      "last": "2026-05-01",
+      "observations": 713
+    },
+    {
+      "series": "RRSFS",
+      "first": "1992-01-01",
+      "last": "2026-07-01",
+      "observations": 415
+    },
+    {
+      "series": "ICSA",
+      "first": "1967-01-07",
+      "last": "2026-08-15",
+      "observations": 3111
+    },
+    {
+      "series": "CCSA",
+      "first": "1967-01-07",
+      "last": "2026-08-08",
+      "observations": 3110
+    }
+  ],
+  "extended_profiles": {
+    "boundary:off": {
+      "gate": "boundary:off",
+      "weeks": 2614,
+      "discrimination": {
+        "4": {
+          "recovery": {
+            "weeks": 228,
+            "ratio_to_chance": 1.378,
+            "p_value": 0.3021
+          },
+          "expansion": {
+            "weeks": 1102,
+            "ratio_to_chance": 2.39,
+            "p_value": 0.0362
+          },
+          "slowdown": {
+            "weeks": 1034,
+            "ratio_to_chance": 0.489,
+            "p_value": 0.8869
+          },
+          "contraction": {
+            "weeks": 250,
+            "ratio_to_chance": 3.051,
+            "p_value": 0.0318
+          }
+        },
+        "13": {
+          "recovery": {
+            "weeks": 228,
+            "ratio_to_chance": 1.186,
+            "p_value": 0.3822
+          },
+          "expansion": {
+            "weeks": 1102,
+            "ratio_to_chance": 2.142,
+            "p_value": 0.0924
+          },
+          "slowdown": {
+            "weeks": 1034,
+            "ratio_to_chance": 0.47,
+            "p_value": 0.881
+          },
+          "contraction": {
+            "weeks": 250,
+            "ratio_to_chance": 4.004,
+            "p_value": 0.0115
+          }
+        },
+        "26": {
+          "recovery": {
+            "weeks": 228,
+            "ratio_to_chance": 1.578,
+            "p_value": 0.2261
+          },
+          "expansion": {
+            "weeks": 1102,
+            "ratio_to_chance": 2.307,
+            "p_value": 0.0525
+          },
+          "slowdown": {
+            "weeks": 1034,
+            "ratio_to_chance": 0.291,
+            "p_value": 0.9689
+          },
+          "contraction": {
+            "weeks": 250,
+            "ratio_to_chance": 4.136,
+            "p_value": 0.0111
+          }
+        }
+      },
+      "shape": {
+        "transitions": 162,
+        "phases_shorter_than_four_weeks": 13,
+        "phase_weeks": {
+          "recovery": 228,
+          "expansion": 1102,
+          "slowdown": 1034,
+          "contraction": 250
+        },
+        "phase_shares": {
+          "recovery": 0.0872,
+          "expansion": 0.4216,
+          "slowdown": 0.3956,
+          "contraction": 0.0956
+        },
+        "withheld_weeks": 0
+      },
+      "progression": {
+        "closed_slowdown_blocks": 70,
+        "progressed_to_contraction": 9,
+        "reverted_to_expansion": 61,
+        "progression_rate": 0.129,
+        "where_they_went": {
+          "expansion": 61,
+          "contraction": 9
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-02-08",
+              "variant_call": "2008-02-08",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-03-20",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 132,
+        "false_positive_episodes": 12,
+        "recession_weeks_called_contraction": 118,
+        "recall": 0.881
+      },
+      "breadth_gate_holds": true,
+      "blocks": {
+        "recovery": 9,
+        "expansion": 72,
+        "slowdown": 70,
+        "contraction": 12
+      },
+      "current_call": "expansion"
+    },
+    "persist13w": {
+      "gate": "persist13w",
+      "weeks": 2614,
+      "discrimination": {
+        "4": {
+          "recovery": {
+            "weeks": 226,
+            "ratio_to_chance": 1.395,
+            "p_value": 0.2938
+          },
+          "expansion": {
+            "weeks": 1973,
+            "ratio_to_chance": 2.871,
+            "p_value": 0.0346
+          },
+          "slowdown": {
+            "weeks": 151,
+            "ratio_to_chance": 0.909,
+            "p_value": 0.5553
+          },
+          "contraction": {
+            "weeks": 264,
+            "ratio_to_chance": 3.145,
+            "p_value": 0.0239
+          }
+        },
+        "13": {
+          "recovery": {
+            "weeks": 226,
+            "ratio_to_chance": 1.213,
+            "p_value": 0.3718
+          },
+          "expansion": {
+            "weeks": 1973,
+            "ratio_to_chance": 2.97,
+            "p_value": 0.0326
+          },
+          "slowdown": {
+            "weeks": 151,
+            "ratio_to_chance": 2.081,
+            "p_value": 0.1043
+          },
+          "contraction": {
+            "weeks": 264,
+            "ratio_to_chance": 3.653,
+            "p_value": 0.0147
+          }
+        },
+        "26": {
+          "recovery": {
+            "weeks": 226,
+            "ratio_to_chance": 1.579,
+            "p_value": 0.2229
+          },
+          "expansion": {
+            "weeks": 1973,
+            "ratio_to_chance": 4.398,
+            "p_value": 0.0004
+          },
+          "slowdown": {
+            "weeks": 151,
+            "ratio_to_chance": 0.879,
+            "p_value": 0.5772
+          },
+          "contraction": {
+            "weeks": 264,
+            "ratio_to_chance": 4.146,
+            "p_value": 0.0088
+          }
+        }
+      },
+      "shape": {
+        "transitions": 71,
+        "phases_shorter_than_four_weeks": 4,
+        "phase_weeks": {
+          "recovery": 226,
+          "expansion": 1973,
+          "slowdown": 151,
+          "contraction": 264
+        },
+        "phase_shares": {
+          "recovery": 0.0865,
+          "expansion": 0.7548,
+          "slowdown": 0.0578,
+          "contraction": 0.101
+        },
+        "withheld_weeks": 0
+      },
+      "progression": {
+        "closed_slowdown_blocks": 18,
+        "progressed_to_contraction": 4,
+        "reverted_to_expansion": 14,
+        "progression_rate": 0.222,
+        "where_they_went": {
+          "expansion": 14,
+          "contraction": 4
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-02-08",
+              "variant_call": "2008-02-01",
+              "delay_weeks": -1
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 143,
+        "false_positive_episodes": 12,
+        "recession_weeks_called_contraction": 121,
+        "recall": 0.903
+      },
+      "breadth_gate_holds": true,
+      "blocks": {
+        "recovery": 9,
+        "expansion": 33,
+        "slowdown": 18,
+        "contraction": 12
+      },
+      "current_call": "expansion"
+    },
+    "persist17w": {
+      "gate": "persist17w",
+      "weeks": 2614,
+      "discrimination": {
+        "4": {
+          "recovery": {
+            "weeks": 226,
+            "ratio_to_chance": 1.395,
+            "p_value": 0.2938
+          },
+          "expansion": {
+            "weeks": 2005,
+            "ratio_to_chance": 2.835,
+            "p_value": 0.0346
+          },
+          "slowdown": {
+            "weeks": 119,
+            "ratio_to_chance": 0.836,
+            "p_value": 0.6127
+          },
+          "contraction": {
+            "weeks": 264,
+            "ratio_to_chance": 3.145,
+            "p_value": 0.0239
+          }
+        },
+        "13": {
+          "recovery": {
+            "weeks": 226,
+            "ratio_to_chance": 1.213,
+            "p_value": 0.3718
+          },
+          "expansion": {
+            "weeks": 2005,
+            "ratio_to_chance": 2.961,
+            "p_value": 0.0326
+          },
+          "slowdown": {
+            "weeks": 119,
+            "ratio_to_chance": 3.078,
+            "p_value": 0.0458
+          },
+          "contraction": {
+            "weeks": 264,
+            "ratio_to_chance": 3.653,
+            "p_value": 0.0147
+          }
+        },
+        "26": {
+          "recovery": {
+            "weeks": 226,
+            "ratio_to_chance": 1.579,
+            "p_value": 0.2229
+          },
+          "expansion": {
+            "weeks": 2005,
+            "ratio_to_chance": 4.314,
+            "p_value": 0.0004
+          },
+          "slowdown": {
+            "weeks": 119,
+            "ratio_to_chance": 1.429,
+            "p_value": 0.2978
+          },
+          "contraction": {
+            "weeks": 264,
+            "ratio_to_chance": 4.146,
+            "p_value": 0.0088
+          }
+        }
+      },
+      "shape": {
+        "transitions": 67,
+        "phases_shorter_than_four_weeks": 6,
+        "phase_weeks": {
+          "recovery": 226,
+          "expansion": 2005,
+          "slowdown": 119,
+          "contraction": 264
+        },
+        "phase_shares": {
+          "recovery": 0.0865,
+          "expansion": 0.767,
+          "slowdown": 0.0455,
+          "contraction": 0.101
+        },
+        "withheld_weeks": 0
+      },
+      "progression": {
+        "closed_slowdown_blocks": 16,
+        "progressed_to_contraction": 4,
+        "reverted_to_expansion": 12,
+        "progression_rate": 0.25,
+        "where_they_went": {
+          "expansion": 12,
+          "contraction": 4
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-02-08",
+              "variant_call": "2008-02-01",
+              "delay_weeks": -1
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 143,
+        "false_positive_episodes": 12,
+        "recession_weeks_called_contraction": 121,
+        "recall": 0.903
+      },
+      "breadth_gate_holds": true,
+      "blocks": {
+        "recovery": 9,
+        "expansion": 31,
+        "slowdown": 16,
+        "contraction": 12
+      },
+      "current_call": "expansion"
+    }
+  },
+  "c": {
+    "frozen_window": {
+      "gate": "persist17w",
+      "persistence_weeks": 17,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 11,
+      "slowdown_discrimination": 3.353,
+      "slowdown_p": 0.0572,
+      "slowdown_share": 0.0519,
+      "progression_rate": 0.182,
+      "transitions": 36,
+      "phases_shorter_than_four_weeks": 3,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 5,
+      "expansion_discrimination": 3.644,
+      "enough_blocks_to_call_it_a_state": true
+    },
+    "extended": {
+      "gate": "persist17w",
+      "persistence_weeks": 17,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 16,
+      "slowdown_discrimination": 3.078,
+      "slowdown_p": 0.0458,
+      "slowdown_share": 0.0455,
+      "progression_rate": 0.25,
+      "transitions": 67,
+      "phases_shorter_than_four_weeks": 6,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 12,
+      "expansion_discrimination": 2.961,
+      "enough_blocks_to_call_it_a_state": true,
+      "weeks": 2614
+    },
+    "overlap_with_frozen": {
+      "frozen_weeks": 1675,
+      "overlapping_weeks": 1675,
+      "weeks_agreeing": 1617,
+      "agreement": 0.9654,
+      "identical": false,
+      "why_not_identical": "표준화 창이 더 긴 계열을 보므로 같은 주의 표준화 값이 달라진다. 확장 실행은 v1.1의 상위집합이 아니라 **같은 모델에 더 긴 입력**을 준 것이다."
+    },
+    "significance_threshold": 0.05,
+    "significance_reached": true,
+    "reading": "확장 역사에서 p=0.0458로 0.05 문턱을 넘는다. 짧은 창에서 방향만 강했던 것이 긴 창에서 통계적으로도 성립한다."
+  },
+  "c_rows": [
+    {
+      "gate": "boundary:off",
+      "persistence_weeks": 0,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 70,
+      "slowdown_discrimination": 0.47,
+      "slowdown_p": 0.881,
+      "slowdown_share": 0.3956,
+      "progression_rate": 0.129,
+      "transitions": 162,
+      "phases_shorter_than_four_weeks": 13,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 12,
+      "expansion_discrimination": 2.142,
+      "enough_blocks_to_call_it_a_state": true,
+      "weeks": 2614
+    },
+    {
+      "gate": "persist13w",
+      "persistence_weeks": 13,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 18,
+      "slowdown_discrimination": 2.081,
+      "slowdown_p": 0.1043,
+      "slowdown_share": 0.0578,
+      "progression_rate": 0.222,
+      "transitions": 71,
+      "phases_shorter_than_four_weeks": 4,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 12,
+      "expansion_discrimination": 2.97,
+      "enough_blocks_to_call_it_a_state": true,
+      "weeks": 2614
+    },
+    {
+      "gate": "persist17w",
+      "persistence_weeks": 17,
+      "persistence_band": 1.0,
+      "slowdown_blocks": 16,
+      "slowdown_discrimination": 3.078,
+      "slowdown_p": 0.0458,
+      "slowdown_share": 0.0455,
+      "progression_rate": 0.25,
+      "transitions": 67,
+      "phases_shorter_than_four_weeks": 6,
+      "contraction_delay_weeks": 0,
+      "recovery_delay_weeks": 0,
+      "nber_false_positive_episodes": 12,
+      "expansion_discrimination": 2.961,
+      "enough_blocks_to_call_it_a_state": true,
+      "weeks": 2614
+    }
+  ],
+  "realtime": {
+    "baseline": {
+      "shape": {
+        "transitions": 72,
+        "phases_shorter_than_four_weeks": 19,
+        "phase_weeks": {
+          "recovery": 34,
+          "expansion": 288,
+          "slowdown": 338,
+          "contraction": 18
+        },
+        "phase_shares": {
+          "recovery": 0.0494,
+          "expansion": 0.4186,
+          "slowdown": 0.4913,
+          "contraction": 0.0262
+        },
+        "withheld_weeks": 10
+      },
+      "progression": {
+        "closed_slowdown_blocks": 37,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 32,
+        "progression_rate": 0.081,
+        "where_they_went": {
+          "expansion": 32,
+          "contraction": 3,
+          "": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 13,
+        "false_positive_episodes": 2,
+        "recession_weeks_called_contraction": 5,
+        "recall": 0.417
+      },
+      "breadth_gate_holds": true,
+      "current_call": "expansion"
+    },
+    "boundary_only": {
+      "shape": {
+        "transitions": 20,
+        "phases_shorter_than_four_weeks": 6,
+        "phase_weeks": {
+          "recovery": 34,
+          "expansion": 593,
+          "slowdown": 33,
+          "contraction": 18
+        },
+        "phase_shares": {
+          "recovery": 0.0494,
+          "expansion": 0.8619,
+          "slowdown": 0.048,
+          "contraction": 0.0262
+        },
+        "withheld_weeks": 10
+      },
+      "progression": {
+        "closed_slowdown_blocks": 8,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 5,
+        "progression_rate": 0.375,
+        "where_they_went": {
+          "expansion": 5,
+          "contraction": 3
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 13,
+        "false_positive_episodes": 2,
+        "recession_weeks_called_contraction": 5,
+        "recall": 0.417
+      },
+      "breadth_gate_holds": true,
+      "current_call": "expansion"
+    }
+  },
+  "limitations": [
+    "후퇴기 판별력은 확장 역사(1976~2026, 2614주, 후퇴기 블록 16개)에서 3.078배이고 p=0.0458다. 5% 수준에서 유의하다.",
+    "지속 요건 17주는 15~21주 평탄역 안에서 고른 값이다. 자연 실험이 가리킨 것은 '지속이 우선'이라는 모양이지 숫자가 아니었다.",
+    "확장 역사는 동결 v1.1과 겹치는 구간에서 96.5% 일치한다. 완전 일치가 아닌 이유는 표준화 창이 더 긴 계열을 보기 때문이며, 확장 실행은 v1.1의 상위집합이 아니라 같은 모델에 더 긴 입력을 준 것이다.",
+    "확장 역사에서 소비 도메인 구성이 1992년에 바뀐다 — 그 전에는 CMRMTSPL 하나, 그 뒤로는 RRSFS가 더해진다. 확장 실행은 균질하지 않다.",
+    "확장 역사는 최종 수정치이며 실시간으로 알 수 있었던 것이 아니다. ALFRED 경로와 섞어 읽으면 안 된다."
+  ],
+  "verdict": {
+    "a_passes": true,
+    "b_plateau": [
+      15,
+      17,
+      21
+    ],
+    "c_significance_reached": true,
+    "recommendation": "adjust_parameter",
+    "statement": "A가 통과한다 — 확장기 판별력이 유지되는 정도가 아니라 모든 지평선에서 올라간다. 찌꺼기 통이 옮겨간 것이 아니다. B는 13주가 봉우리가 아니라 15~21주 평탄역 **아래**임을 보이고, C는 확장 역사에서 17주가 유의에 도달함을 보인다. 권고를 persist13w에서 **persist17w**로 조정한다."
+  }
+}

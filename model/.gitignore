@@ -342,3 +342,14 @@ outputs/slowdown_boundary/*
 !outputs/slowdown_boundary/sweep.csv
 !outputs/slowdown_boundary/matrix.csv
 !outputs/slowdown_boundary/realtime_matrix.csv
+
+# 경계 검증. 확장 역사 원자료는 data/cache 아래라 이미 제외되고, 실시간 중간
+# 산출물은 빈티지 688개를 다시 돌린 것이라 크다.
+!outputs/boundary_verification/
+outputs/boundary_verification/*
+!outputs/boundary_verification/boundary_verification_report.md
+!outputs/boundary_verification/validation_summary.json
+!outputs/boundary_verification/a_all_phase_discrimination.csv
+!outputs/boundary_verification/b_persistence_curve.csv
+!outputs/boundary_verification/b_band_curve.csv
+!outputs/boundary_verification/c_extended_history.csv

@@ -41,6 +41,9 @@ class SlowdownGate:
     deadband: float = 0.0
     persistence_weeks: int = 0
     breadth_domains: int = 0
+    #: 지속을 셀 때 쓰는 중립대의 배수. 1.0이면 모델의 `neutral_momentum` 그대로다.
+    #: 조건 안의 다른 자유 모수이며, 트랙 21에서는 한 번도 흔들어 보지 않았다.
+    persistence_band: float = 1.0
 
     @property
     def enabled(self) -> bool:
@@ -57,6 +60,8 @@ class SlowdownGate:
             parts.append(f"persist{self.persistence_weeks}w")
         if self.breadth_domains > 0:
             parts.append(f"breadth{self.breadth_domains}")
+        if self.persistence_band != 1.0:
+            parts.append(f"band{self.persistence_band:g}")
         return "+".join(parts)
 
 
@@ -210,7 +215,9 @@ def observation_layer(
         momentum_scaled[coincident], thresholds.neutral_momentum
     )
     persistence = _persistent_positive(activity_momentum, thresholds.neutral_momentum)
-    negative_persistence = _persistent_negative(activity_momentum, thresholds.neutral_momentum)
+    negative_persistence = _persistent_negative(
+        activity_momentum, gate.persistence_band * thresholds.neutral_momentum
+    )
 
     contraction_rows: list[dict[str, float]] = []
     recovery_rows: list[dict[str, float]] = []
