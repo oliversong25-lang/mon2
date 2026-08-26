@@ -371,7 +371,8 @@ outputs/boundary_reading/*
 outputs/rotation_rerun/*
 !outputs/rotation_rerun/rotation_rerun_report.md
 !outputs/rotation_rerun/validation_summary.json
-!outputs/rotation_rerun/separability.csv
+!outputs/rotation_rerun/taxonomy_dispersion.csv
+!outputs/rotation_rerun/per_phase_discrimination.csv
 !outputs/rotation_rerun/leave_one_episode_out.csv
 !outputs/rotation_rerun/covid_dependence.csv
 !outputs/rotation_rerun/rotation.csv
