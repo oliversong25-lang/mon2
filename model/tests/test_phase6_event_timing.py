@@ -233,6 +233,12 @@ def test_no_pandemic_specific_branching() -> None:
         # 해석 확인. 2020 날짜는 NBER 침체 목록의 한 줄이고, 후퇴기 블록이 실제
         # 침체를 앞에 두었는지 세는 평가 구간이다. 국면 판정에는 쓰이지 않는다.
         ("boundary_reading", "regimes.py"),
+        # 트랙 17 재실행. 2020 날짜는 코로나 제외 표본을 만드는 평가 창이고, 트랙 17의
+        # 핵심 발견을 다시 거는 검사에 쓴다. 국면 판정에는 쓰이지 않는다.
+        ("rotation_rerun", "prespec.py"),
+        ("rotation_rerun", "report.py"),
+        ("rotation_rerun", "rerun.py"),
+        ("rotation_rerun", "__main__.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

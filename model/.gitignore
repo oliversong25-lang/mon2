@@ -365,3 +365,13 @@ outputs/boundary_reading/*
 !outputs/boundary_reading/slowdown_episodes_extended.csv
 !outputs/boundary_reading/slowdown_episodes_frozen_window.csv
 !outputs/boundary_reading/recession_coverage.csv
+
+# 트랙 17 재실행. 라벨 CSV는 1675주 x 두 경로라 크므로 제외하고, 보고서와 요약만 싣는다.
+!outputs/rotation_rerun/
+outputs/rotation_rerun/*
+!outputs/rotation_rerun/rotation_rerun_report.md
+!outputs/rotation_rerun/validation_summary.json
+!outputs/rotation_rerun/separability.csv
+!outputs/rotation_rerun/leave_one_episode_out.csv
+!outputs/rotation_rerun/covid_dependence.csv
+!outputs/rotation_rerun/rotation.csv
