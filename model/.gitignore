@@ -353,3 +353,15 @@ outputs/boundary_verification/*
 !outputs/boundary_verification/b_persistence_curve.csv
 !outputs/boundary_verification/b_band_curve.csv
 !outputs/boundary_verification/c_extended_history.csv
+
+# 해석 확인. 산출물이 작아 전부 싣는다 — 블록 목록과 침체 대응은 다음 사람이
+# 보고서만 보고도 다시 확인할 수 있어야 한다.
+!outputs/boundary_reading/
+outputs/boundary_reading/*
+!outputs/boundary_reading/boundary_reading_report.md
+!outputs/boundary_reading/validation_summary.json
+!outputs/boundary_reading/corrected_grid.csv
+!outputs/boundary_reading/consumption_split.csv
+!outputs/boundary_reading/slowdown_episodes_extended.csv
+!outputs/boundary_reading/slowdown_episodes_frozen_window.csv
+!outputs/boundary_reading/recession_coverage.csv

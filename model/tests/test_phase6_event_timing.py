@@ -230,6 +230,9 @@ def test_no_pandemic_specific_branching() -> None:
         # 후퇴기 경계 변형. 2020 날짜는 NBER 침체 구간이며 "인식이 늦어지지 않았는가"를
         # 재는 평가 창이다. 국면 점수에도 경계 게이트에도 들어가지 않는다.
         ("slowdown_boundary", "metrics.py"),
+        # 해석 확인. 2020 날짜는 NBER 침체 목록의 한 줄이고, 후퇴기 블록이 실제
+        # 침체를 앞에 두었는지 세는 평가 구간이다. 국면 판정에는 쓰이지 않는다.
+        ("boundary_reading", "regimes.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

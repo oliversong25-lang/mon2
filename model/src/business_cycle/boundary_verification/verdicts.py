@@ -152,7 +152,10 @@ def limitations(payload: dict[str, Any]) -> list[str]:
         f"{extended['slowdown_blocks']}개)에서 {extended['slowdown_discrimination']}배이고 "
         f"p={extended['slowdown_p']}다."
         + (
-            " 5% 수준에서 유의하다."
+            " 명목으로는 5% 아래지만 이것은 **격자를 쓸어 고른 최댓값의 명목 p**이며, "
+            "다음 단계(`boundary_reading`)가 보정하면 문턱을 넘지 못한다. 그 단계는 또한 "
+            "이 유의성이 1992년 이후 구간에만 있음을 보인다 — '50년 역사에서 유의'가 "
+            "아니다."
             if c["significance_reached"]
             else " **5% 문턱을 넘지 못한다 — 방향은 강하지만 통계적으로 확립되지 않았다.**"
         ),

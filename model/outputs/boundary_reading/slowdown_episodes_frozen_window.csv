@@ -1,0 +1,12 @@
+index,start,end,weeks,came_from,went_to,outcome,next_nber_recession,weeks_until_recession,near
+1,1995-04-28,1995-07-21,13,expansion,expansion,reverted,2001-03,292.0,False
+2,1998-08-28,1998-08-28,1,expansion,expansion,reverted,2001-03,130.0,False
+3,2000-07-28,2001-01-19,26,expansion,contraction,progressed,2001-03,5.0,True
+4,2005-10-21,2005-11-11,4,expansion,expansion,reverted,2007-12,107.0,False
+5,2007-09-07,2007-10-05,5,expansion,expansion,reverted,2007-12,8.0,True
+6,2008-01-18,2008-01-18,1,expansion,contraction,progressed,2020-02,628.0,False
+7,2018-12-21,2019-04-12,17,expansion,expansion,reverted,2020-02,42.0,False
+8,2019-07-05,2019-08-16,7,expansion,expansion,reverted,2020-02,24.0,True
+9,2022-07-15,2022-08-05,4,expansion,expansion,reverted,,,False
+10,2023-01-13,2023-02-03,4,expansion,expansion,reverted,,,False
+11,2025-12-05,2026-01-02,5,expansion,expansion,reverted,,,False
