@@ -1,0 +1,1268 @@
+{
+  "stage": "market_risk",
+  "frozen_model_modified": false,
+  "executed_at_utc": "2026-08-26T04:18:23+00:00",
+  "gate_under_test": "persist17w",
+  "prespecified_rule": {
+    "question": "국면이 **시장 수준의 수익과 위험**을 가르는가. 무엇을 들지가 아니라 얼마나 들지에 대한 물음이며, 횡단면 질문(트랙 17·23)과 다른 질문이다.",
+    "decision_sample": "revised_long",
+    "decision_horizon_weeks": 13,
+    "reported_but_not_deciding": [
+      "revised_overlap",
+      "real_time_overlap",
+      "revised_long_ex_covid",
+      "revised_long_ex_gfc"
+    ],
+    "why_the_threshold_differs_from_the_rotation_gate": "순환매 관문은 비용이 정했다 — 주간 회전율 0.063에 왕복 20bp면 연 1.3%가 나간다. 노출 조절은 국면이 바뀔 때만 움직이고 32년에 11에피소드다. 40%p를 왕복해도 연 20bp 언저리라 **비용은 구속 조건이 아니다.** 구속하는 것은 신뢰성이므로, 문턱을 수익이 아니라 분포 분리에 건다.",
+    "stage_one_separation": {
+      "downside_volatility_ratio_floor": 1.5,
+      "overlap_ceiling": 0.85,
+      "null_p_threshold": 0.05
+    },
+    "stage_two_robustness": {
+      "leave_one_out_floor": 1.25,
+      "both_exclusion_strengths_must_hold": true,
+      "ex_covid_retention": 0.5
+    },
+    "stage_three_term_spread": {
+      "incremental_null_p": 0.05,
+      "decisive": true
+    },
+    "observation_definitions": {
+      "large_negative_week": -0.03,
+      "downside_threshold": 0.0,
+      "market_excess_return": "Fama-French Mkt-RF. 이미 무위험 초과라 따로 빼지 않는다."
+    },
+    "what_counts_as_usable": "판정 표본·판정 지평선(13주)에서 가장 위험한 국면과 가장 안전한 국면의 전방 하방변동성 비가 1.5 이상이고, 두 분포의 겹침이 0.85 이하이고, 무작위 라벨 귀무분포에서 p<=0.05이고, 두 제외 강도 모두에서 비가 1.25 위에 남고, 2020년을 빼도 초과분의 절반이 남고, **그리고 국면이 기간 스프레드 위에 이동 귀무분포를 넘는 증분을 얹을 때.**",
+    "what_counts_as_failure": "위 중 하나라도 어긋날 때. 특히 기간 스프레드를 넘지 못하면 다른 조건과 무관하게 부정이다. 그때의 결론은 '이 모델의 쓸모는 서술과 상태 인식으로 확정된다'이며, 그것은 물러선 것이 아니라 **정해진 것**이다."
+  },
+  "weeks": 1675,
+  "first_week": "1994-07-15",
+  "last_week": "2026-08-14",
+  "episodes": {
+    "recovery": 4,
+    "expansion": 17,
+    "slowdown": 11,
+    "contraction": 5,
+    "withheld": 0
+  },
+  "contemporaneous": [
+    {
+      "phase": "recovery",
+      "weeks": 144,
+      "episodes": 4,
+      "mean_weekly": 0.004575,
+      "median_weekly": 0.006747,
+      "annualised_volatility": 0.181,
+      "annualised_downside_volatility": 0.1906,
+      "large_negative_week_frequency": 0.0833,
+      "max_drawdown_within_phase": -0.1607,
+      "worst_drawdown_starting_in_phase": -0.1907,
+      "started_on": "2002-07-05",
+      "followed_weeks": 52
+    },
+    {
+      "phase": "expansion",
+      "weeks": 1280,
+      "episodes": 17,
+      "mean_weekly": 0.00201,
+      "median_weekly": 0.002675,
+      "annualised_volatility": 0.1493,
+      "annualised_downside_volatility": 0.1539,
+      "large_negative_week_frequency": 0.0557,
+      "max_drawdown_within_phase": -0.245,
+      "worst_drawdown_starting_in_phase": -0.4698,
+      "started_on": "2007-12-14",
+      "followed_weeks": 52
+    },
+    {
+      "phase": "slowdown",
+      "weeks": 87,
+      "episodes": 11,
+      "mean_weekly": 0.001881,
+      "median_weekly": 0.006877,
+      "annualised_volatility": 0.176,
+      "annualised_downside_volatility": 0.2061,
+      "large_negative_week_frequency": 0.092,
+      "max_drawdown_within_phase": -0.1939,
+      "worst_drawdown_starting_in_phase": -0.4262,
+      "started_on": "2008-01-18",
+      "followed_weeks": 52
+    },
+    {
+      "phase": "contraction",
+      "weeks": 164,
+      "episodes": 5,
+      "mean_weekly": -0.001407,
+      "median_weekly": 0.003797,
+      "annualised_volatility": 0.3129,
+      "annualised_downside_volatility": 0.3418,
+      "large_negative_week_frequency": 0.189,
+      "max_drawdown_within_phase": -0.5065,
+      "worst_drawdown_starting_in_phase": -0.5065,
+      "started_on": "2008-05-23",
+      "followed_weeks": 52
+    }
+  ],
+  "forward": {
+    "4": [
+      {
+        "phase": "recovery",
+        "horizon_weeks": 4,
+        "weeks": 144,
+        "episodes": 4,
+        "observations": 144,
+        "mean_forward": 0.016764,
+        "median_forward": 0.022875,
+        "annualised_volatility": 0.1612,
+        "annualised_downside_volatility": 0.1794,
+        "share_negative": 0.2847,
+        "worst_forward": -0.1209,
+        "fifth_percentile": -0.0699
+      },
+      {
+        "phase": "expansion",
+        "horizon_weeks": 4,
+        "weeks": 1280,
+        "episodes": 17,
+        "observations": 1270,
+        "mean_forward": 0.007818,
+        "median_forward": 0.012956,
+        "annualised_volatility": 0.1434,
+        "annualised_downside_volatility": 0.1598,
+        "share_negative": 0.3559,
+        "worst_forward": -0.1733,
+        "fifth_percentile": -0.0634
+      },
+      {
+        "phase": "slowdown",
+        "horizon_weeks": 4,
+        "weeks": 87,
+        "episodes": 11,
+        "observations": 87,
+        "mean_forward": 0.009188,
+        "median_forward": 0.01433,
+        "annualised_volatility": 0.153,
+        "annualised_downside_volatility": 0.1537,
+        "share_negative": 0.3793,
+        "worst_forward": -0.1069,
+        "fifth_percentile": -0.0645
+      },
+      {
+        "phase": "contraction",
+        "horizon_weeks": 4,
+        "weeks": 164,
+        "episodes": 5,
+        "observations": 164,
+        "mean_forward": -0.004512,
+        "median_forward": 0.00525,
+        "annualised_volatility": 0.3011,
+        "annualised_downside_volatility": 0.351,
+        "share_negative": 0.4634,
+        "worst_forward": -0.3164,
+        "fifth_percentile": -0.1258
+      }
+    ],
+    "13": [
+      {
+        "phase": "recovery",
+        "horizon_weeks": 13,
+        "weeks": 144,
+        "episodes": 4,
+        "observations": 144,
+        "mean_forward": 0.056686,
+        "median_forward": 0.062739,
+        "annualised_volatility": 0.1289,
+        "annualised_downside_volatility": 0.1373,
+        "share_negative": 0.1667,
+        "worst_forward": -0.1846,
+        "fifth_percentile": -0.068
+      },
+      {
+        "phase": "expansion",
+        "horizon_weeks": 13,
+        "weeks": 1280,
+        "episodes": 17,
+        "observations": 1261,
+        "mean_forward": 0.026649,
+        "median_forward": 0.033316,
+        "annualised_volatility": 0.1325,
+        "annualised_downside_volatility": 0.1418,
+        "share_negative": 0.2855,
+        "worst_forward": -0.2421,
+        "fifth_percentile": -0.0953
+      },
+      {
+        "phase": "slowdown",
+        "horizon_weeks": 13,
+        "weeks": 87,
+        "episodes": 11,
+        "observations": 87,
+        "mean_forward": -0.007908,
+        "median_forward": -0.010947,
+        "annualised_volatility": 0.1658,
+        "annualised_downside_volatility": 0.177,
+        "share_negative": 0.5172,
+        "worst_forward": -0.1774,
+        "fifth_percentile": -0.1397
+      },
+      {
+        "phase": "contraction",
+        "horizon_weeks": 13,
+        "weeks": 164,
+        "episodes": 5,
+        "observations": 164,
+        "mean_forward": -0.00994,
+        "median_forward": -0.009671,
+        "annualised_volatility": 0.2836,
+        "annualised_downside_volatility": 0.2983,
+        "share_negative": 0.5183,
+        "worst_forward": -0.388,
+        "fifth_percentile": -0.2826
+      }
+    ],
+    "26": [
+      {
+        "phase": "recovery",
+        "horizon_weeks": 26,
+        "weeks": 144,
+        "episodes": 4,
+        "observations": 144,
+        "mean_forward": 0.105012,
+        "median_forward": 0.120988,
+        "annualised_volatility": 0.1373,
+        "annualised_downside_volatility": 0.0713,
+        "share_negative": 0.1944,
+        "worst_forward": -0.0983,
+        "fifth_percentile": -0.0706
+      },
+      {
+        "phase": "expansion",
+        "horizon_weeks": 26,
+        "weeks": 1280,
+        "episodes": 17,
+        "observations": 1248,
+        "mean_forward": 0.051045,
+        "median_forward": 0.059881,
+        "annualised_volatility": 0.1266,
+        "annualised_downside_volatility": 0.1318,
+        "share_negative": 0.2404,
+        "worst_forward": -0.2825,
+        "fifth_percentile": -0.1153
+      },
+      {
+        "phase": "slowdown",
+        "horizon_weeks": 26,
+        "weeks": 87,
+        "episodes": 11,
+        "observations": 87,
+        "mean_forward": 0.005254,
+        "median_forward": 0.045094,
+        "annualised_volatility": 0.1748,
+        "annualised_downside_volatility": 0.2042,
+        "share_negative": 0.4023,
+        "worst_forward": -0.2605,
+        "fifth_percentile": -0.2301
+      },
+      {
+        "phase": "contraction",
+        "horizon_weeks": 26,
+        "weeks": 164,
+        "episodes": 5,
+        "observations": 164,
+        "mean_forward": -0.001949,
+        "median_forward": -0.022267,
+        "annualised_volatility": 0.3009,
+        "annualised_downside_volatility": 0.2823,
+        "share_negative": 0.5671,
+        "worst_forward": -0.4415,
+        "fifth_percentile": -0.3603
+      }
+    ],
+    "52": [
+      {
+        "phase": "recovery",
+        "horizon_weeks": 52,
+        "weeks": 144,
+        "episodes": 4,
+        "observations": 144,
+        "mean_forward": 0.181806,
+        "median_forward": 0.161672,
+        "annualised_volatility": 0.0983,
+        "annualised_downside_volatility": null,
+        "share_negative": 0.0,
+        "worst_forward": 0.0201,
+        "fifth_percentile": 0.0626
+      },
+      {
+        "phase": "expansion",
+        "horizon_weeks": 52,
+        "weeks": 1280,
+        "episodes": 17,
+        "observations": 1227,
+        "mean_forward": 0.101799,
+        "median_forward": 0.121635,
+        "annualised_volatility": 0.1398,
+        "annualised_downside_volatility": 0.1611,
+        "share_negative": 0.1809,
+        "worst_forward": -0.4455,
+        "fifth_percentile": -0.1687
+      },
+      {
+        "phase": "slowdown",
+        "horizon_weeks": 52,
+        "weeks": 87,
+        "episodes": 11,
+        "observations": 82,
+        "mean_forward": -0.000546,
+        "median_forward": 0.069721,
+        "annualised_volatility": 0.2056,
+        "annualised_downside_volatility": 0.2239,
+        "share_negative": 0.4512,
+        "worst_forward": -0.3793,
+        "fifth_percentile": -0.3033
+      },
+      {
+        "phase": "contraction",
+        "horizon_weeks": 52,
+        "weeks": 164,
+        "episodes": 5,
+        "observations": 164,
+        "mean_forward": 0.051132,
+        "median_forward": -0.086837,
+        "annualised_volatility": 0.3174,
+        "annualised_downside_volatility": 0.2404,
+        "share_negative": 0.5305,
+        "worst_forward": -0.4568,
+        "fifth_percentile": -0.362
+      }
+    ]
+  },
+  "downside_ratio_by_horizon": {
+    "4": {
+      "ratio": 2.284,
+      "riskiest": "contraction",
+      "riskiest_downside": 0.351,
+      "riskiest_episodes": 5,
+      "safest": "slowdown",
+      "safest_downside": 0.1537,
+      "safest_episodes": 11,
+      "comparable_phases": 4
+    },
+    "13": {
+      "ratio": 2.173,
+      "riskiest": "contraction",
+      "riskiest_downside": 0.2983,
+      "riskiest_episodes": 5,
+      "safest": "recovery",
+      "safest_downside": 0.1373,
+      "safest_episodes": 4,
+      "comparable_phases": 4
+    },
+    "26": {
+      "ratio": 3.959,
+      "riskiest": "contraction",
+      "riskiest_downside": 0.2823,
+      "riskiest_episodes": 5,
+      "safest": "recovery",
+      "safest_downside": 0.0713,
+      "safest_episodes": 4,
+      "comparable_phases": 4
+    },
+    "52": {
+      "ratio": 1.492,
+      "riskiest": "contraction",
+      "riskiest_downside": 0.2404,
+      "riskiest_episodes": 5,
+      "safest": "expansion",
+      "safest_downside": 0.1611,
+      "safest_episodes": 17,
+      "comparable_phases": 3
+    }
+  },
+  "overlap_by_horizon": [
+    {
+      "first": "contraction",
+      "second": "recovery",
+      "horizon_weeks": 4,
+      "overlap_coefficient": 0.761,
+      "probability_second_exceeds_first": 0.5805,
+      "observations": [
+        164,
+        144
+      ]
+    },
+    {
+      "first": "contraction",
+      "second": "recovery",
+      "horizon_weeks": 13,
+      "overlap_coefficient": 0.5623,
+      "probability_second_exceeds_first": 0.666,
+      "observations": [
+        164,
+        144
+      ]
+    },
+    {
+      "first": "contraction",
+      "second": "recovery",
+      "horizon_weeks": 26,
+      "overlap_coefficient": 0.5513,
+      "probability_second_exceeds_first": 0.6667,
+      "observations": [
+        164,
+        144
+      ]
+    },
+    {
+      "first": "contraction",
+      "second": "recovery",
+      "horizon_weeks": 52,
+      "overlap_coefficient": 0.3281,
+      "probability_second_exceeds_first": 0.606,
+      "observations": [
+        164,
+        144
+      ]
+    }
+  ],
+  "random_label_null": {
+    "observed_ratio": 2.173,
+    "shifts_used": 393,
+    "null_median": 2.091,
+    "null_p90": 3.442,
+    "p_value": 0.467
+  },
+  "separation_gate": {
+    "downside_ratio": 2.173,
+    "downside_ratio_floor": 1.5,
+    "overlap": 0.5623,
+    "overlap_ceiling": 0.85,
+    "null_p": 0.467,
+    "conditions": {
+      "downside_volatility_ratio_is_large_enough": true,
+      "the_two_distributions_do_not_simply_overlap": true,
+      "beats_the_random_label_null": false
+    },
+    "passes": false,
+    "failed": [
+      "beats_the_random_label_null"
+    ]
+  },
+  "leave_one_episode_out": {
+    "horizon_weeks": 13,
+    "full_sample_ratio": 2.173,
+    "episodes": 37,
+    "episodes_by_phase": {
+      "recovery": 4,
+      "expansion": 17,
+      "slowdown": 11,
+      "contraction": 5
+    },
+    "rows": [
+      {
+        "phase": "recovery",
+        "episode": 1,
+        "start": "2002-07-05",
+        "end": "2002-09-06",
+        "weeks": 10,
+        "block_only": 2.471,
+        "block_only_weeks_removed": 10,
+        "event_including": 2.471,
+        "event_including_weeks_removed": 23
+      },
+      {
+        "phase": "recovery",
+        "episode": 2,
+        "start": "2003-06-27",
+        "end": "2004-02-13",
+        "weeks": 34,
+        "block_only": 2.11,
+        "block_only_weeks_removed": 34,
+        "event_including": 2.086,
+        "event_including_weeks_removed": 47
+      },
+      {
+        "phase": "recovery",
+        "episode": 3,
+        "start": "2009-06-05",
+        "end": "2010-08-06",
+        "weeks": 62,
+        "block_only": 2.104,
+        "block_only_weeks_removed": 62,
+        "event_including": 2.104,
+        "event_including_weeks_removed": 75
+      },
+      {
+        "phase": "recovery",
+        "episode": 4,
+        "start": "2020-07-03",
+        "end": "2021-03-19",
+        "weeks": 38,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 38,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 51
+      },
+      {
+        "phase": "expansion",
+        "episode": 1,
+        "start": "1994-07-15",
+        "end": "1995-04-21",
+        "weeks": 41,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 41,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 54
+      },
+      {
+        "phase": "expansion",
+        "episode": 2,
+        "start": "1995-07-28",
+        "end": "1998-08-21",
+        "weeks": 161,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 161,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 174
+      },
+      {
+        "phase": "expansion",
+        "episode": 3,
+        "start": "1998-09-04",
+        "end": "2000-07-21",
+        "weeks": 99,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 99,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 112
+      },
+      {
+        "phase": "expansion",
+        "episode": 4,
+        "start": "2002-02-01",
+        "end": "2002-06-28",
+        "weeks": 22,
+        "block_only": 2.353,
+        "block_only_weeks_removed": 22,
+        "event_including": 2.576,
+        "event_including_weeks_removed": 35
+      },
+      {
+        "phase": "expansion",
+        "episode": 5,
+        "start": "2002-09-13",
+        "end": "2003-03-07",
+        "weeks": 26,
+        "block_only": 2.515,
+        "block_only_weeks_removed": 26,
+        "event_including": 2.608,
+        "event_including_weeks_removed": 39
+      },
+      {
+        "phase": "expansion",
+        "episode": 6,
+        "start": "2003-05-23",
+        "end": "2003-06-20",
+        "weeks": 5,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 5,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 18
+      },
+      {
+        "phase": "expansion",
+        "episode": 7,
+        "start": "2004-02-20",
+        "end": "2005-10-14",
+        "weeks": 87,
+        "block_only": 2.02,
+        "block_only_weeks_removed": 87,
+        "event_including": 2.02,
+        "event_including_weeks_removed": 100
+      },
+      {
+        "phase": "expansion",
+        "episode": 8,
+        "start": "2005-11-18",
+        "end": "2007-08-31",
+        "weeks": 94,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 94,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 107
+      },
+      {
+        "phase": "expansion",
+        "episode": 9,
+        "start": "2007-10-12",
+        "end": "2008-01-11",
+        "weeks": 14,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 14,
+        "event_including": 2.206,
+        "event_including_weeks_removed": 27
+      },
+      {
+        "phase": "expansion",
+        "episode": 10,
+        "start": "2010-08-13",
+        "end": "2018-12-14",
+        "weeks": 436,
+        "block_only": 2.09,
+        "block_only_weeks_removed": 436,
+        "event_including": 2.152,
+        "event_including_weeks_removed": 449
+      },
+      {
+        "phase": "expansion",
+        "episode": 11,
+        "start": "2019-04-19",
+        "end": "2019-06-28",
+        "weeks": 11,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 11,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 24
+      },
+      {
+        "phase": "expansion",
+        "episode": 12,
+        "start": "2019-08-23",
+        "end": "2019-11-22",
+        "weeks": 14,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 14,
+        "event_including": 2.135,
+        "event_including_weeks_removed": 27
+      },
+      {
+        "phase": "expansion",
+        "episode": 13,
+        "start": "2020-03-06",
+        "end": "2020-03-06",
+        "weeks": 1,
+        "block_only": 2.167,
+        "block_only_weeks_removed": 1,
+        "event_including": 2.016,
+        "event_including_weeks_removed": 14
+      },
+      {
+        "phase": "expansion",
+        "episode": 14,
+        "start": "2021-03-26",
+        "end": "2022-07-08",
+        "weeks": 68,
+        "block_only": 2.231,
+        "block_only_weeks_removed": 68,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 81
+      },
+      {
+        "phase": "expansion",
+        "episode": 15,
+        "start": "2022-08-12",
+        "end": "2023-01-06",
+        "weeks": 22,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 22,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 35
+      },
+      {
+        "phase": "expansion",
+        "episode": 16,
+        "start": "2023-02-10",
+        "end": "2025-11-28",
+        "weeks": 147,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 147,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 160
+      },
+      {
+        "phase": "expansion",
+        "episode": 17,
+        "start": "2026-01-09",
+        "end": "2026-08-14",
+        "weeks": 32,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 32,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 32
+      },
+      {
+        "phase": "slowdown",
+        "episode": 1,
+        "start": "1995-04-28",
+        "end": "1995-07-21",
+        "weeks": 13,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 13,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 26
+      },
+      {
+        "phase": "slowdown",
+        "episode": 2,
+        "start": "1998-08-28",
+        "end": "1998-08-28",
+        "weeks": 1,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 1,
+        "event_including": 2.189,
+        "event_including_weeks_removed": 14
+      },
+      {
+        "phase": "slowdown",
+        "episode": 3,
+        "start": "2000-07-28",
+        "end": "2001-01-19",
+        "weeks": 26,
+        "block_only": 2.933,
+        "block_only_weeks_removed": 26,
+        "event_including": 3.009,
+        "event_including_weeks_removed": 39
+      },
+      {
+        "phase": "slowdown",
+        "episode": 4,
+        "start": "2005-10-21",
+        "end": "2005-11-11",
+        "weeks": 4,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 4,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 17
+      },
+      {
+        "phase": "slowdown",
+        "episode": 5,
+        "start": "2007-09-07",
+        "end": "2007-10-05",
+        "weeks": 5,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 5,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 18
+      },
+      {
+        "phase": "slowdown",
+        "episode": 6,
+        "start": "2008-01-18",
+        "end": "2008-01-18",
+        "weeks": 1,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 1,
+        "event_including": 2.216,
+        "event_including_weeks_removed": 14
+      },
+      {
+        "phase": "slowdown",
+        "episode": 7,
+        "start": "2018-12-21",
+        "end": "2019-04-12",
+        "weeks": 17,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 17,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 30
+      },
+      {
+        "phase": "slowdown",
+        "episode": 8,
+        "start": "2019-07-05",
+        "end": "2019-08-16",
+        "weeks": 7,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 7,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 20
+      },
+      {
+        "phase": "slowdown",
+        "episode": 9,
+        "start": "2022-07-15",
+        "end": "2022-08-05",
+        "weeks": 4,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 4,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 17
+      },
+      {
+        "phase": "slowdown",
+        "episode": 10,
+        "start": "2023-01-13",
+        "end": "2023-02-03",
+        "weeks": 4,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 4,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 17
+      },
+      {
+        "phase": "slowdown",
+        "episode": 11,
+        "start": "2025-12-05",
+        "end": "2026-01-02",
+        "weeks": 5,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 5,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 18
+      },
+      {
+        "phase": "contraction",
+        "episode": 1,
+        "start": "2001-01-26",
+        "end": "2002-01-25",
+        "weeks": 53,
+        "block_only": 2.526,
+        "block_only_weeks_removed": 53,
+        "event_including": 2.563,
+        "event_including_weeks_removed": 66
+      },
+      {
+        "phase": "contraction",
+        "episode": 2,
+        "start": "2003-03-14",
+        "end": "2003-05-16",
+        "weeks": 10,
+        "block_only": 2.173,
+        "block_only_weeks_removed": 10,
+        "event_including": 2.173,
+        "event_including_weeks_removed": 23
+      },
+      {
+        "phase": "contraction",
+        "episode": 3,
+        "start": "2008-01-25",
+        "end": "2009-05-29",
+        "weeks": 71,
+        "block_only": 1.693,
+        "block_only_weeks_removed": 71,
+        "event_including": 1.693,
+        "event_including_weeks_removed": 84
+      },
+      {
+        "phase": "contraction",
+        "episode": 4,
+        "start": "2019-11-29",
+        "end": "2020-02-28",
+        "weeks": 14,
+        "block_only": 2.135,
+        "block_only_weeks_removed": 14,
+        "event_including": 2.135,
+        "event_including_weeks_removed": 27
+      },
+      {
+        "phase": "contraction",
+        "episode": 5,
+        "start": "2020-03-13",
+        "end": "2020-06-26",
+        "weeks": 16,
+        "block_only": 2.019,
+        "block_only_weeks_removed": 16,
+        "event_including": 2.027,
+        "event_including_weeks_removed": 29
+      }
+    ],
+    "block_only_summary": {
+      "computable_episodes": 37,
+      "lowest": 1.693,
+      "median": 2.173,
+      "highest": 2.933,
+      "episodes_whose_removal_leaves_too_few_observations": 0,
+      "most_damaging_episode": "contraction#3 (2008-01-25)"
+    },
+    "event_including_summary": {
+      "computable_episodes": 37,
+      "lowest": 1.693,
+      "median": 2.173,
+      "highest": 3.009,
+      "episodes_whose_removal_leaves_too_few_observations": 0,
+      "most_damaging_episode": "contraction#3 (2008-01-25)"
+    },
+    "both_strengths_must_hold": true,
+    "why": "에피소드 마지막 주의 전방 관측은 에피소드가 끝난 뒤의 수익으로 만들어진다. 블록만 빼면 그 관측이 남으므로, 에피소드를 뺐다고 하면서 에피소드가 가리킨 앞날을 남겨 둔 것이 된다. 어느 강도가 더 가혹한지는 상황마다 달라서 **둘 다** 본다."
+  },
+  "ex_covid_ratio": {
+    "ratio": 2.135,
+    "riskiest": "contraction",
+    "riskiest_downside": 0.2932,
+    "riskiest_episodes": 4,
+    "safest": "recovery",
+    "safest_downside": 0.1373,
+    "safest_episodes": 4,
+    "comparable_phases": 4
+  },
+  "ex_gfc_ratio": {
+    "ratio": 1.685,
+    "riskiest": "contraction",
+    "riskiest_downside": 0.2325,
+    "riskiest_episodes": 4,
+    "safest": "expansion",
+    "safest_downside": 0.138,
+    "safest_episodes": 17,
+    "comparable_phases": 4
+  },
+  "robustness_gate": {
+    "floor": 1.25,
+    "block_only_lowest": 1.693,
+    "event_including_lowest": 1.693,
+    "ex_covid_ratio": 2.135,
+    "conditions": {
+      "block_only_stays_above_the_floor": true,
+      "event_including_stays_above_the_floor": true,
+      "survives_removing_2020": true
+    },
+    "passes": true,
+    "failed": []
+  },
+  "term_spread": {
+    "returns": {
+      "target": "forward return",
+      "weeks": 1656,
+      "usable": true,
+      "spread_only_r_squared": 0.003612,
+      "phase_only_r_squared": 0.042188,
+      "both_r_squared": 0.053563,
+      "incremental_r_squared_of_phase": 0.049951,
+      "incremental_r_squared_of_spread_over_phase": 0.011375,
+      "shifts_used": 777,
+      "null_median_increment": 0.013659,
+      "null_p90_increment": 0.044674,
+      "null_p": 0.0656
+    },
+    "variance": {
+      "target": "forward squared return (variance)",
+      "weeks": 1656,
+      "usable": true,
+      "spread_only_r_squared": 0.003536,
+      "phase_only_r_squared": 0.123582,
+      "both_r_squared": 0.123597,
+      "incremental_r_squared_of_phase": 0.120061,
+      "incremental_r_squared_of_spread_over_phase": 1.4e-05,
+      "shifts_used": 777,
+      "null_median_increment": 0.008141,
+      "null_p90_increment": 0.029457,
+      "null_p": 0.0013
+    },
+    "phase_adds_beyond_the_spread_on_returns": false,
+    "phase_adds_beyond_the_spread_on_variance": true,
+    "reading": "**국면이 스프레드 위에 수익 설명력을 얹지 못한다.** 분산 쪽에서는 얹는다 — 수익의 방향이 아니라 **흔들림의 크기**를 가른다는 뜻이고, 노출 결정이 묻는 것이 그쪽이므로 그대로 적는다."
+  },
+  "term_spread_gate": {
+    "incremental_r_squared": 0.049951,
+    "null_p": 0.0656,
+    "null_p_threshold": 0.05,
+    "passes": false,
+    "decisive": true,
+    "verdict": "**국면이 기간 스프레드를 넘어서지 못한다.** 이 용도에서도 매일 공짜로 받는 계열 하나가 모델을 대신한다는 뜻이고, 다른 조건이 몇 개 통과하든 결론은 여기서 정해진다."
+  },
+  "term_spread_without_episode": {
+    "ex_covid": {
+      "returns": {
+        "target": "forward return (ex_covid)",
+        "weeks": 1604,
+        "usable": true,
+        "spread_only_r_squared": 0.003835,
+        "phase_only_r_squared": 0.039145,
+        "both_r_squared": 0.047834,
+        "incremental_r_squared_of_phase": 0.043999,
+        "incremental_r_squared_of_spread_over_phase": 0.008689,
+        "shifts_used": 751,
+        "null_median_increment": 0.014138,
+        "null_p90_increment": 0.042476,
+        "null_p": 0.0918
+      },
+      "variance": {
+        "target": "forward variance (ex_covid)",
+        "weeks": 1604,
+        "usable": true,
+        "spread_only_r_squared": 0.008769,
+        "phase_only_r_squared": 0.085593,
+        "both_r_squared": 0.087161,
+        "incremental_r_squared_of_phase": 0.078392,
+        "incremental_r_squared_of_spread_over_phase": 0.001569,
+        "shifts_used": 751,
+        "null_median_increment": 0.006584,
+        "null_p90_increment": 0.023825,
+        "null_p": 0.0239
+      }
+    },
+    "ex_gfc": {
+      "returns": {
+        "target": "forward return (ex_gfc)",
+        "weeks": 1552,
+        "usable": true,
+        "spread_only_r_squared": 0.004497,
+        "phase_only_r_squared": 0.024297,
+        "both_r_squared": 0.039353,
+        "incremental_r_squared_of_phase": 0.034856,
+        "incremental_r_squared_of_spread_over_phase": 0.015056,
+        "shifts_used": 725,
+        "null_median_increment": 0.012688,
+        "null_p90_increment": 0.030869,
+        "null_p": 0.0826
+      },
+      "variance": {
+        "target": "forward variance (ex_gfc)",
+        "weeks": 1552,
+        "usable": true,
+        "spread_only_r_squared": 0.000147,
+        "phase_only_r_squared": 0.070081,
+        "both_r_squared": 0.071033,
+        "incremental_r_squared_of_phase": 0.070887,
+        "incremental_r_squared_of_spread_over_phase": 0.000953,
+        "shifts_used": 725,
+        "null_median_increment": 0.00821,
+        "null_p90_increment": 0.024691,
+        "null_p": 0.0014
+      }
+    }
+  },
+  "other_labellings": {
+    "v1_1_revised": {
+      "weeks": 1675,
+      "episodes": {
+        "recovery": 4,
+        "expansion": 45,
+        "slowdown": 44,
+        "contraction": 5
+      },
+      "forward": [
+        {
+          "phase": "recovery",
+          "horizon_weeks": 13,
+          "weeks": 151,
+          "episodes": 4,
+          "observations": 151,
+          "mean_forward": 0.056383,
+          "median_forward": 0.06214,
+          "annualised_volatility": 0.1283,
+          "annualised_downside_volatility": 0.1356,
+          "share_negative": 0.1656,
+          "worst_forward": -0.1846,
+          "fifth_percentile": -0.0639
+        },
+        {
+          "phase": "expansion",
+          "horizon_weeks": 13,
+          "weeks": 685,
+          "episodes": 45,
+          "observations": 671,
+          "mean_forward": 0.026687,
+          "median_forward": 0.031144,
+          "annualised_volatility": 0.1354,
+          "annualised_downside_volatility": 0.1333,
+          "share_negative": 0.307,
+          "worst_forward": -0.2421,
+          "fifth_percentile": -0.0941
+        },
+        {
+          "phase": "slowdown",
+          "horizon_weeks": 13,
+          "weeks": 677,
+          "episodes": 44,
+          "observations": 672,
+          "mean_forward": 0.021916,
+          "median_forward": 0.035289,
+          "annualised_volatility": 0.1365,
+          "annualised_downside_volatility": 0.1583,
+          "share_negative": 0.2961,
+          "worst_forward": -0.2087,
+          "fifth_percentile": -0.1121
+        },
+        {
+          "phase": "contraction",
+          "horizon_weeks": 13,
+          "weeks": 162,
+          "episodes": 5,
+          "observations": 162,
+          "mean_forward": -0.010487,
+          "median_forward": -0.009671,
+          "annualised_volatility": 0.2845,
+          "annualised_downside_volatility": 0.3,
+          "share_negative": 0.5185,
+          "worst_forward": -0.388,
+          "fifth_percentile": -0.2832
+        }
+      ],
+      "downside_ratio": {
+        "ratio": 2.251,
+        "riskiest": "contraction",
+        "riskiest_downside": 0.3,
+        "riskiest_episodes": 5,
+        "safest": "expansion",
+        "safest_downside": 0.1333,
+        "safest_episodes": 45,
+        "comparable_phases": 4
+      }
+    },
+    "real_time_overlap": {
+      "weeks": 688,
+      "episodes": {
+        "recovery": 2,
+        "expansion": 10,
+        "slowdown": 8,
+        "contraction": 3
+      },
+      "forward": [
+        {
+          "phase": "recovery",
+          "horizon_weeks": 13,
+          "weeks": 34,
+          "episodes": 2,
+          "observations": 34,
+          "mean_forward": 0.097768,
+          "median_forward": 0.085831,
+          "annualised_volatility": 0.0798,
+          "annualised_downside_volatility": null,
+          "share_negative": 0.0,
+          "worst_forward": 0.0152,
+          "fifth_percentile": 0.0538
+        },
+        {
+          "phase": "expansion",
+          "horizon_weeks": 13,
+          "weeks": 593,
+          "episodes": 10,
+          "observations": 574,
+          "mean_forward": 0.028376,
+          "median_forward": 0.036295,
+          "annualised_volatility": 0.1179,
+          "annualised_downside_volatility": 0.1367,
+          "share_negative": 0.2404,
+          "worst_forward": -0.1879,
+          "fifth_percentile": -0.0832
+        },
+        {
+          "phase": "slowdown",
+          "horizon_weeks": 13,
+          "weeks": 33,
+          "episodes": 8,
+          "observations": 33,
+          "mean_forward": -0.02178,
+          "median_forward": -0.024003,
+          "annualised_volatility": 0.2652,
+          "annualised_downside_volatility": 0.2549,
+          "share_negative": 0.6061,
+          "worst_forward": -0.2897,
+          "fifth_percentile": -0.2279
+        },
+        {
+          "phase": "contraction",
+          "horizon_weeks": 13,
+          "weeks": 18,
+          "episodes": 3,
+          "observations": 18,
+          "mean_forward": 0.110103,
+          "median_forward": 0.130218,
+          "annualised_volatility": 0.2147,
+          "annualised_downside_volatility": 0.2825,
+          "share_negative": 0.1111,
+          "worst_forward": -0.1423,
+          "fifth_percentile": -0.1405
+        }
+      ],
+      "downside_ratio": {
+        "ratio": 2.067,
+        "riskiest": "contraction",
+        "riskiest_downside": 0.2825,
+        "riskiest_episodes": 3,
+        "safest": "expansion",
+        "safest_downside": 0.1367,
+        "safest_episodes": 10,
+        "comparable_phases": 3
+      }
+    },
+    "revised_overlap": {
+      "weeks": 688,
+      "episodes": {
+        "recovery": 1,
+        "expansion": 8,
+        "slowdown": 5,
+        "contraction": 2
+      },
+      "forward": [
+        {
+          "phase": "recovery",
+          "horizon_weeks": 13,
+          "weeks": 38,
+          "episodes": 1,
+          "observations": 38,
+          "mean_forward": 0.095072,
+          "median_forward": 0.087705,
+          "annualised_volatility": 0.0801,
+          "annualised_downside_volatility": null,
+          "share_negative": 0.0,
+          "worst_forward": 0.0152,
+          "fifth_percentile": 0.0362
+        },
+        {
+          "phase": "expansion",
+          "horizon_weeks": 13,
+          "weeks": 583,
+          "episodes": 8,
+          "observations": 564,
+          "mean_forward": 0.027752,
+          "median_forward": 0.03583,
+          "annualised_volatility": 0.1168,
+          "annualised_downside_volatility": 0.1366,
+          "share_negative": 0.2411,
+          "worst_forward": -0.1879,
+          "fifth_percentile": -0.0824
+        },
+        {
+          "phase": "slowdown",
+          "horizon_weeks": 13,
+          "weeks": 37,
+          "episodes": 5,
+          "observations": 37,
+          "mean_forward": 0.019373,
+          "median_forward": 0.023012,
+          "annualised_volatility": 0.1307,
+          "annualised_downside_volatility": 0.0998,
+          "share_negative": 0.4054,
+          "worst_forward": -0.094,
+          "fifth_percentile": -0.0715
+        },
+        {
+          "phase": "contraction",
+          "horizon_weeks": 13,
+          "weeks": 30,
+          "episodes": 2,
+          "observations": 30,
+          "mean_forward": 0.028884,
+          "median_forward": 0.084375,
+          "annualised_volatility": 0.3488,
+          "annualised_downside_volatility": 0.3252,
+          "share_negative": 0.4333,
+          "worst_forward": -0.2897,
+          "fifth_percentile": -0.2306
+        }
+      ],
+      "downside_ratio": {
+        "ratio": 3.259,
+        "riskiest": "contraction",
+        "riskiest_downside": 0.3252,
+        "riskiest_episodes": 2,
+        "safest": "slowdown",
+        "safest_downside": 0.0998,
+        "safest_episodes": 5,
+        "comparable_phases": 3
+      }
+    }
+  },
+  "real_time_available": true,
+  "verdict": {
+    "usable_for_exposure": false,
+    "separation_passes": false,
+    "robustness_passes": true,
+    "beats_the_term_spread": false,
+    "phase_adds_on_variance": true,
+    "statement": "**국면은 기간 스프레드를 넘어서지 못한다.** 사전 명세가 이 조건을 결정적으로 두었으므로 여기서 결론이 난다 — 이 용도에서도 매일 공짜로 받는 계열 하나가 모델을 대신한다. 이로써 **이 모델의 쓸모는 서술과 상태 인식으로 확정된다.** 물러선 것이 아니라 정해진 것이다."
+  }
+}

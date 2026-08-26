@@ -1,0 +1,3 @@
+target,weeks,usable,spread_only_r_squared,phase_only_r_squared,both_r_squared,incremental_r_squared_of_phase,incremental_r_squared_of_spread_over_phase,shifts_used,null_median_increment,null_p90_increment,null_p
+forward return,1656,True,0.003612,0.042188,0.053563,0.049951,0.011375,777,0.013659,0.044674,0.0656
+forward squared return (variance),1656,True,0.003536,0.123582,0.123597,0.120061,1.4e-05,777,0.008141,0.029457,0.0013

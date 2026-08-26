@@ -239,6 +239,10 @@ def test_no_pandemic_specific_branching() -> None:
         ("rotation_rerun", "report.py"),
         ("rotation_rerun", "rerun.py"),
         ("rotation_rerun", "__main__.py"),
+        # 시계열 질문. 2020 날짜는 코로나 제외 표본을 만드는 평가 창이고, 기간 스프레드
+        # 대조가 그 한 해에 얹혀 있는지 보는 검사에 쓴다. 국면 판정에는 쓰이지 않는다.
+        ("market_risk", "report.py"),
+        ("market_risk", "__main__.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

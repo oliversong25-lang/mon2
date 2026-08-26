@@ -376,3 +376,14 @@ outputs/rotation_rerun/*
 !outputs/rotation_rerun/leave_one_episode_out.csv
 !outputs/rotation_rerun/covid_dependence.csv
 !outputs/rotation_rerun/rotation.csv
+
+# 시계열 질문. 산출물이 작아 전부 싣는다.
+!outputs/market_risk/
+outputs/market_risk/*
+!outputs/market_risk/market_risk_report.md
+!outputs/market_risk/validation_summary.json
+!outputs/market_risk/contemporaneous.csv
+!outputs/market_risk/forward.csv
+!outputs/market_risk/leave_one_episode_out.csv
+!outputs/market_risk/term_spread_control.csv
+!outputs/market_risk/overlap.csv
