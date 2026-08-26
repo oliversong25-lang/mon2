@@ -1,0 +1,9 @@
+target,weeks,usable,control_columns,control_only_r_squared,phase_only_r_squared,both_r_squared,incremental_r_squared_of_phase,incremental_r_squared_of_control_over_phase,phase_absorbs_the_control,shifts_used,null_median_increment,null_p90_increment,null_p
+squared forward 13-week return,1653,True,"['realised_variance_4w', 'realised_volatility_4w', 'term_spread']",0.079579,0.123426,0.146873,0.067294,0.023447,False,775,0.005409,0.019559,0.0013
+forward realised variance (sum of squared weekly returns),1653,True,"['realised_variance_4w', 'realised_volatility_4w', 'term_spread']",0.117539,0.249764,0.276422,0.158884,0.026659,False,775,0.010954,0.03541,0.0039
+"decision target, volatility only (no term spread)",1653,True,"['realised_variance_4w', 'realised_volatility_4w']",0.0777,0.123426,0.146873,0.069173,0.023447,False,775,0.005113,0.018911,0.0013
+"decision target, term spread only (Track 24)",1656,True,['term_spread'],0.003536,0.123582,0.123597,0.120061,1.4e-05,True,777,0.008141,0.029457,0.0013
+ex_covid,1601,True,"['realised_variance_4w', 'realised_volatility_4w', 'term_spread']",0.046008,0.096618,0.110603,0.064595,0.013984,False,749,0.00468,0.019067,0.0227
+ex_gfc,1549,True,"['realised_variance_4w', 'realised_volatility_4w', 'term_spread']",0.163377,0.068268,0.184644,0.021267,0.116377,False,723,0.005879,0.014763,0.0345
+v1.1 labels,1653,True,"['realised_variance_4w', 'realised_volatility_4w', 'term_spread']",0.079579,0.123226,0.148404,0.068825,0.025179,False,775,0.006149,0.016571,0.0026
+real-time labels,659,True,"['realised_variance_4w', 'realised_volatility_4w', 'term_spread']",0.343026,0.181629,0.398127,0.0551,0.216498,False,278,0.004108,0.01246,0.0036

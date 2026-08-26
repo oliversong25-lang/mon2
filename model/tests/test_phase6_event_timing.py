@@ -243,6 +243,9 @@ def test_no_pandemic_specific_branching() -> None:
         # 대조가 그 한 해에 얹혀 있는지 보는 검사에 쓴다. 국면 판정에는 쓰이지 않는다.
         ("market_risk", "report.py"),
         ("market_risk", "__main__.py"),
+        # 변동성 대조. 2020 날짜는 제외 표본을 읽는 문장에만 나오며, 국면 판정에는
+        # 쓰이지 않는다.
+        ("variance_control", "report.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):

@@ -1,0 +1,4 @@
+lookback_weeks,control_only_r_squared,phase_only_r_squared,both_r_squared,incremental_r_squared_of_phase,null_p,weeks
+4,0.079579,0.123426,0.146873,0.067294,0.0013,1653
+13,0.054473,0.122985,0.129207,0.074734,0.0039,1644
+26,0.061425,0.122578,0.129138,0.067713,0.0013,1631

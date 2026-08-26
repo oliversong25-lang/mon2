@@ -387,3 +387,12 @@ outputs/market_risk/*
 !outputs/market_risk/leave_one_episode_out.csv
 !outputs/market_risk/term_spread_control.csv
 !outputs/market_risk/overlap.csv
+
+# 변동성 대조. 산출물이 작아 전부 싣는다.
+!outputs/variance_control/
+outputs/variance_control/*
+!outputs/variance_control/variance_control_report.md
+!outputs/variance_control/validation_summary.json
+!outputs/variance_control/lookback_table.csv
+!outputs/variance_control/comparisons.csv
+!outputs/variance_control/leave_one_episode_out.csv
