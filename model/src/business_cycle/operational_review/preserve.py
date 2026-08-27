@@ -46,8 +46,24 @@ class ProtectedArtifactChanged(RuntimeError):
     """보호 대상이 바뀌었다. 이 단계는 읽기 전용이므로 즉시 멈춘다."""
 
 
+#: 등록된 보호 지문은 줄바꿈이 CRLF이던 시절에 계산됐다. 그 뒤 저장소에
+#: `.gitattributes`가 들어와 워킹 트리 줄바꿈을 LF로 고정하면서, **내용이 한 글자도
+#: 바뀌지 않은 파일의 지문이 어긋나기 시작했다.**
+#:
+#: 가드가 묻는 것은 "동결 산출물의 **내용**이 바뀌었는가"이지 "어떤 줄바꿈으로 저장돼
+#: 있는가"가 아니다. 그래서 해시 전에 줄바꿈을 CRLF로 정규화한다 — 등록된 지문이 그
+#: 형태로 계산됐기 때문이고, 내용이 실제로 바뀌면 여전히 잡힌다.
+#:
+#: 지문 상수를 LF 기준으로 다시 적지 않는 이유는, 그러면 **가드가 통과하도록 기대값을
+#: 고친 것**과 구분되지 않기 때문이다. 정규화는 어느 쪽 줄바꿈에서도 같은 값을 내므로
+#: 그 의심이 남지 않는다.
+CANONICAL_EOL: Final[bytes] = b"\r\n"
+
+
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    raw = path.read_bytes()
+    normalised = raw.replace(b"\r\n", b"\n").replace(b"\n", CANONICAL_EOL)
+    return hashlib.sha256(normalised).hexdigest()
 
 
 def measure(settings: Settings | None = None) -> dict[str, str]:
