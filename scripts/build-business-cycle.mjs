@@ -128,8 +128,34 @@ function main() {
 
   // 결론과 한계를 함께 싣지 않으면 내보내지 않는다. 화면에서 빠뜨릴 수 있는 것을
   // 애초에 데이터에서 뺄 수 없게 만든다.
-  for (const key of ["model_status", "evidence_quality", "recovery_latency_warning", "known_limitations"]) {
+  for (const key of [
+    "model_status",
+    "evidence_quality",
+    "recovery_latency_warning",
+    "known_limitations",
+    // 해석 경계는 평평한 한계 목록에도 들어 있지만, 화면이 어느 것을 국면 판독 옆에
+    // 붙여야 하는지 고르려면 구조가 있어야 한다. 목록만 남고 구조가 빠지면 B가 조용히
+    // 다른 한계 다섯 줄 사이에 묻히므로, 같은 무게로 필수 항목에 둔다.
+    "interpretation_boundaries",
+  ]) {
     if (current[key] === undefined) throw new Error(`현재상태 산출물에 ${key}가 없습니다.`);
+  }
+  if (!Array.isArray(current.interpretation_boundaries) || !current.interpretation_boundaries.length) {
+    throw new Error("해석 경계가 비어 있습니다.");
+  }
+  // 화면에 떠야 하는 경계가 실제로 하나 있는지 본다. `surface`가 전부 documentation이면
+  // 데이터는 갖춰졌는데 사용자는 아무것도 못 보는 상태가 된다.
+  const surfaced = current.interpretation_boundaries.filter((entry) => entry.surface === "app_phase_reading");
+  if (!surfaced.length) throw new Error("국면 판독 옆에 띄울 해석 경계가 없습니다.");
+  for (const entry of current.interpretation_boundaries) {
+    if (!entry.id || !entry.title || !entry.text) {
+      throw new Error(`해석 경계에 id·title·text가 모두 있어야 합니다: ${JSON.stringify(entry)}`);
+    }
+  }
+  // 폭은 집중도의 부분적 화면이다. 그 사실이 데이터에서 빠지면 화면이 좁은 폭을
+  // 아무 뜻 없는 숫자로 보여주게 된다.
+  if (!current.breadth || !current.breadth.partial_concentration_screen) {
+    throw new Error("폭에 집중도 부분 화면 설명이 없습니다.");
   }
   if (current.model_status !== "provisional") {
     throw new Error(`모델 상태가 provisional이 아닙니다: ${current.model_status}`);
@@ -214,6 +240,7 @@ function main() {
     },
     recoveryLatencyWarning: current.recovery_latency_warning,
     limitations: current.known_limitations,
+    interpretationBoundaries: current.interpretation_boundaries,
     history,
     summary: {
       weeks: history.length,
@@ -237,6 +264,7 @@ function main() {
   console.log(`  기준일 ${payload.current.asOf} · 공식 ${payload.current.official} · 증거 품질 ${payload.current.evidenceQuality}`);
   console.log(`  주간 경로 ${payload.summary.weeks}주 (${payload.summary.firstWeek} ~ ${payload.summary.lastWeek}) · 전환 ${transitions.length}회`);
   console.log(`  모델 상태 ${payload.modelStatus} · 최종 검증 아님`);
+  console.log(`  해석 경계 ${payload.interpretationBoundaries.length}건 · 화면 노출 ${surfaced.length}건`);
 }
 
 main();

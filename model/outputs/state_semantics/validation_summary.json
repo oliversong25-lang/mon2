@@ -12,7 +12,7 @@
     },
     "recovery_semantics_semantic_digest": "ec6fdb414718905bd6cccc359c24e5c6cb8aeb50a050e6472b9fc2dbe45e0f3d",
     "expected_source_commit": "81941a79c66c5bd39888ec66de9921c0e6dcb445",
-    "head_commit": "81941a79c66c5bd39888ec66de9921c0e6dcb445",
+    "head_commit": "9b453ff19dd713a613775f57970e8a51fee2e6a8",
     "protected_paths": [
       "configs/four_phase.yaml",
       "configs/four_phase_v1_1.yaml",
@@ -49,7 +49,7 @@
     "model_logic_changed": false,
     "parameter_search_run": false,
     "new_classifier_introduced": false,
-    "executed_at_utc": "2026-08-23T13:01:35+00:00"
+    "executed_at_utc": "2026-08-27T06:25:18+00:00"
   },
   "semantic_contract": {
     "source": "business_cycle.four_phase.evidence / .filter / .engine",

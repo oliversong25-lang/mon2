@@ -114,6 +114,27 @@ function num(value,digits){
   return typeof value==="number"?value.toFixed(digits==null?2:digits):"—";
 }
 
+// 모델의 주의 문장은 데이터 필드 이름으로 쓰여 있다 — 데이터 층에서는 그것이 맞다.
+// 화면은 영어 키를 노출하지 않으므로, 이 화면이 이미 쓰는 어휘로 바꿔 준다. 문장을
+// 모델 쪽에서 고치지 않는 이유는 그 문장이 가리키는 것이 화면 라벨이 아니라 필드이기
+// 때문이다.
+const SCREEN_TERMS = { confirming_coincident_domains: "확증 동행 도메인" };
+function screenText(text){
+  let out = String(text || "");
+  for (const [field, label] of Object.entries(SCREEN_TERMS)) out = out.split(field).join(label);
+  return out;
+}
+
+// 모델이 쓴 문장에는 보고서용 강조(**...**)가 들어 있다. 그대로 escape만 하면 화면에
+// 별표가 노출되고, 문장을 앱용으로 다시 쓰면 모델과 화면 두 곳이 언젠가 갈라진다.
+// 그래서 원문을 그대로 두고 강조만 옮긴다.
+//
+// 순서가 중요하다 — **먼저 escape하고 그 다음에 강조를 만든다.** 반대로 하면 내가 넣은
+// 태그까지 escape되고, 원문에 태그가 있었다면 그것이 살아난다.
+function emphasise(text){
+  return escapeHtml(String(text||"")).replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>");
+}
+
 // ── 현재 국면 ──────────────────────────────────────────────────────────────
 function nowCard(){
   const now=BusinessCycle.current();
@@ -156,6 +177,21 @@ function nowCard(){
         <div class="fact-value ${now.transitionWatch==="none"?"quiet":""}">${now.transitionWatch==="none"?"없음":escapeHtml(now.transitionWatch)}</div>
         <div class="fact-note">부차적인 표시입니다. 현재 국면을 대체하지 않아요.</div></div>
     </div>
+    ${boundaryPanel()}
+  </div>`;
+}
+
+// ── 해석 경계 ──────────────────────────────────────────────────────────────
+// 국면 이름 바로 아래에 둔다. "추세 위"를 읽은 사람이 그것이 순환적인지 구조적인지
+// 이 모델이 가르지 못한다는 사실을 **그 자리에서** 알아야 하기 때문이다. 한계 카드까지
+// 내려가야 보이면 국면 이름만 읽고 나가는 사람에게는 없는 것과 같다.
+function boundaryPanel(){
+  const boundary=BusinessCycle.phaseReadingBoundary();
+  if(!boundary)return"";
+  // 모델이 쓴 문장을 그대로 옮긴다. 화면에서 다시 쓰면 두 곳이 언젠가 갈라진다.
+  return `<div class="warn-panel" style="margin-top:var(--space-4)">
+    <h3>읽을 때의 경계 · ${escapeHtml(boundary.title)}</h3>
+    <p>${emphasise(boundary.text)}</p>
   </div>`;
 }
 
@@ -163,6 +199,9 @@ function nowCard(){
 function evidenceCard(){
   const now=BusinessCycle.current();
   const breadth=now.breadth||{};
+  // 좁은 폭을 자동으로 "구조적"이라 부르지 않는다. 모델이 쓴 주의 문장을 그대로 붙이고
+  // 판정은 읽는 사람에게 남긴다 — 계산이 아니라 경계이기 때문이다.
+  const screen=BusinessCycle.concentrationScreen();
   return `<div class="card">
     <h2>판단 근거</h2>
     <div class="card-sub">활동 수준과 모멘텀의 조합이 국면을 정하고, 폭이 그 판단을 확인합니다.</div>
@@ -183,6 +222,7 @@ function evidenceCard(){
         <div class="fact-value">${num(now.concentration)}</div>
         <div class="fact-note">한 도메인이 총량을 끌고 가는 정도예요.</div></div>
     </div>
+    ${screen?`<div class="card-note">${emphasise(screenText(screen))}</div>`:""}
   </div>`;
 }
 
@@ -261,7 +301,7 @@ function limitsCard(){
       <p>${escapeHtml(warning.meaning||"")}<br>
       달력 기준 ${warning.calendar_recovery_latency_weeks}주, 자료가용성으로 조정하면 ${warning.evidence_availability_adjusted_latency_weeks}주입니다.</p>
     </div>`:""}
-    <ul class="limits">${limits.map(item=>`<li>${escapeHtml(item)}</li>`).join("")}</ul>
+    <ul class="limits">${limits.map(item=>`<li>${emphasise(item)}</li>`).join("")}</ul>
     <div class="card-note">
       모델 상태 <b>${escapeHtml(BusinessCycle.state.data.modelStatus)}</b> · 최종 검증이 아닙니다.<br>
       동결 설정 <code>${escapeHtml(String(provenance.configHash||"").slice(0,16))}…</code> ·

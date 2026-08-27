@@ -104,6 +104,33 @@ try {
   record("데이터에 투자 판단 면책이 실려 있다",
     payload.limitations.some((item) => item.includes("투자 판단")),
     payload.limitations.join(" / ").slice(0, 60));
+
+  // ── 해석 경계 ────────────────────────────────────────────────────────────
+  // 한계와 같은 방식으로 강제한다. 비어 있으면 통과시키지 않는다 — 필드만 있고 내용이
+  // 없는 상태가 가장 조용히 지나간다.
+  const boundaries = payload.interpretationBoundaries || [];
+  record("해석 경계가 비어 있지 않다",
+    Array.isArray(boundaries) && boundaries.length >= 2, `${boundaries.length}건`);
+
+  record("해석 경계마다 제목과 본문이 비어 있지 않다",
+    boundaries.length > 0 && boundaries.every((entry) =>
+      entry && entry.id && typeof entry.title === "string" && entry.title.trim().length > 0
+      && typeof entry.text === "string" && entry.text.trim().length > 0),
+    JSON.stringify(boundaries.map((entry) => entry && entry.id)));
+
+  const shown = boundaries.filter((entry) => entry.surface === "app_phase_reading");
+  record("화면에 띄울 해석 경계가 정해져 있다", shown.length >= 1, `${shown.length}건`);
+
+  // 같은 두 문장이 평평한 한계 목록에도 있어야 한다. 목록에 걸린 기존 검사가 곧
+  // 이 항목들의 안전망이 되기 때문이다.
+  record("해석 경계가 한계 목록에도 실려 있다",
+    boundaries.every((entry) => payload.limitations.some((item) => item === entry.text)),
+    boundaries.filter((entry) => !payload.limitations.includes(entry.text)).length + "건 누락");
+
+  record("폭에 집중도 부분 화면 설명이 실려 있다",
+    typeof payload.current.breadth?.partial_concentration_screen === "string"
+      && payload.current.breadth.partial_concentration_screen.trim().length > 0,
+    String(payload.current.breadth?.partial_concentration_screen || "").slice(0, 40));
 } catch (error) {
   record("데이터 계약 검증", false, error.message);
 }
@@ -143,6 +170,29 @@ try {
 
   record("분석 탭이 최종 검증이 아님을 밝힌다",
     analysis.includes("최종 검증"), "");
+
+  // 경계 B는 한계 카드가 아니라 **국면 판독 옆**에 있어야 한다. 국면 이름만 읽고 나가는
+  // 사람에게는 카드 아래로 내려간 문장이 없는 것과 같다.
+  const surfaced = (payload.interpretationBoundaries || [])
+    .filter((entry) => entry.surface === "app_phase_reading");
+  record("분석 탭이 해석 경계를 국면 판독 옆에 보여준다",
+    surfaced.length > 0 && surfaced.every((entry) => analysis.includes(entry.title)),
+    surfaced.map((entry) => entry.title).join(" / "));
+
+  const nowIndex = analysis.indexOf("현재 국면");
+  const limitsIndex = analysis.indexOf("이 모델의 한계");
+  const boundaryIndex = surfaced.length ? analysis.indexOf(surfaced[0].title) : -1;
+  record("해석 경계가 한계 카드보다 위에 있다",
+    boundaryIndex > nowIndex && (limitsIndex === -1 || boundaryIndex < limitsIndex),
+    `현재국면 ${nowIndex} · 경계 ${boundaryIndex} · 한계 ${limitsIndex}`);
+
+  record("분석 탭이 집중도 부분 화면을 밝힌다",
+    analysis.includes("주의 표시"), "");
+
+  // 데이터 필드 이름이 화면에 새면 안 된다. 모델 문장을 그대로 옮기다 보면 가장 쉽게
+  // 새는 자리가 여기다.
+  record("분석 탭에 데이터 필드 이름이 노출되지 않는다",
+    !analysis.includes("confirming_coincident_domains"), "");
 
   record("분석 탭이 예측·투자 판단이 아님을 밝힌다",
     analysis.includes("투자 판단"), "");

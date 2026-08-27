@@ -18,7 +18,7 @@
     "candidate_i": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
     "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f"
   },
-  "payload_sha256": "07495fe55650ab290268ba662acee90ee73d8ac7820632a98490809f0492f612",
+  "payload_sha256": "2261aca179f3b59c1b8beae20c6f6c232cd708364f2eb822c55b860faec7c608",
   "immutable": true,
   "role": "thirteen_week_monitoring_baseline",
   "state_semantics_semantic_digest": "0ea6db2eaabd9adf0c20d9bbf31e633fd4c82737a36dd561550f9f693bd75c1d",
