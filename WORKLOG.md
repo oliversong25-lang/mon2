@@ -39,6 +39,19 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-08-27 — persist17w 출하와 해석 경계 둘
+
+- 작업자: Claude Code
+- 변경: 앱이 읽는 `data/business-cycle/us.json`을 **v1.1에서 v1.1+persist17w로** 바꿨습니다. 모델 쪽에 출하 번들 단계(`model/src/business_cycle/ship/`)를 만들어 persist17w 실시간 경로·현재상태·성숙도·분산 분포를 한자리에 모으고, 내보내기가 그것을 읽습니다. **어느 변형인지 payload에 별도 항목(`variant`)으로 싣습니다** — 버전 문자열 하나에 기대면 v1.1 숫자로 오해되고 그 오해는 조용합니다. 함께 트랙 27의 해석 경계 둘(총생산≠기업이익, 순환/구조 실시간 미분리)을 `known_limitations`에 넣고, 그중 B를 **국면 판독 바로 아래**에 띄웠습니다. 새 카드로 역사적 분산 분포를 **두 묶음**으로 냅니다.
+- 이유: 트랙 21·22가 확장/후퇴 경계를 다시 세웠는데 앱에는 반영되지 않고 있었습니다. 후퇴기가 실시간 경로에서 338주(49.1%)에서 33주로 줄고 전환이 72회에서 20회가 됩니다 — 애매한 주가 후퇴기로 흘러들던 것을 막은 결과입니다. 해석 경계는 모델의 계산 결함이 아니라 산출물이 무엇을 뜻할 수 있는지의 한계라, 결론과 같은 자리에 있어야 합니다.
+- 검증: `npm run test:business-cycle` **52/52**, 모델 전체 **827건** 통과. 출하 전 검증 세 숫자(현재 expansion · 전환 20회 · 후퇴기 33주)가 어긋나면 번들이 예외로 멈춥니다. 동결 v1.1 설정 해시 `e052a4f4…3265a`와 보호 지문 일곱 개 모두 그대로입니다.
+  - **검증 기준을 정정했습니다.** 지시서의 28회·49주는 persist13w 값이었고(근거: `outputs/slowdown_boundary/realtime_matrix.csv`의 boundary_only 행과 같은 실행의 `/matrix/boundary_only/gate = persist13w`), 트랙 22의 persist17w 조정으로 20회·33주가 됐습니다. 정정 이전 값과 출처를 `SUPERSEDED_EXPECTATION`으로 코드와 산출물에 남겼습니다.
+  - **동결 경로 대조가 제 분류 오류를 잡았습니다.** `evidence_quality_high`를 임계값 무관 열로 넣었다가 21주 불일치가 나왔는데, 확인해 보니 검사가 옳았습니다 — 증거 품질은 분리도 조건을 포함하고 분리도는 게이트가 바꾸는 점수에서 나옵니다. 그 21주는 `gate_dependent_changes`로 세어 싣습니다.
+  - **줄바꿈 때문에 멈춰 있던 가드도 고쳤습니다.** 보호 지문이 CRLF 시절에 계산됐는데 `.gitattributes`가 LF로 고정하면서 `development_frontier.csv` 지문이 내용 변경 없이 어긋나 `state_semantics`가 실행되지 않았습니다. 지문 상수를 다시 적지 않고 해시 전에 줄바꿈을 정규화했습니다 — 상수를 고치면 "통과하도록 기대값을 바꾼 것"과 구분되지 않습니다.
+- 남은 일: 국면 용어와 Bry-Boschan 최소 지속 규칙은 미결이라 현재 값으로 출하했습니다. 시계 위치도 홈/분석 사이 그대로입니다. **트랙 16 전이 게이트는 적용하지 않았습니다** — 경계를 고친 뒤에는 전환을 97→96으로 바꿀 뿐이고 둘을 함께 걸면 판별력과 진행률이 오히려 나빠집니다.
+- 관련 파일: `model/src/business_cycle/ship/`, `model/src/business_cycle/recovery_semantics/manifest.py`, `model/src/business_cycle/operational_review/preserve.py`, `scripts/build-business-cycle.mjs`, `scripts/test-business-cycle.mjs`, `lib/business-cycle-view.js`, `analysis.html`, `data/business-cycle/us.json`
+
+
 ### 2026-08-24 — 경기국면 모델을 앱에 통합 (홈 카드 교체 · 분석 탭 개설)
 
 - 작업자: Claude Code
