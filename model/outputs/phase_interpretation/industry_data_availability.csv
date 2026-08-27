@@ -1,0 +1,8 @@
+dimension,candidate_series,description,diagnostic_purpose,present_in_repository,configured_in_model,cached_locally,status
+payroll_employment_breadth,CES_DIFFUSION_1MO,민간 고용 확산지수(업종별 증가 비중),고용 증가가 몇 개 업종에 걸쳐 있는지,False,False,False,not_available
+manufacturing_vs_services,MANEMP / SRVPRD,제조업 고용과 서비스생산업 고용,제조와 서비스가 같은 방향인지,False,False,False,not_available
+industrial_production_breadth,IPMAN / IPMINE / IPUTIL,산업생산 시장군별 분해,생산 약세가 한 군에 몰려 있는지,False,False,False,not_available
+consumption_and_sales_breadth,RSXFS 업종별 분해,소매판매 업종별 계열,소비 둔화가 광범위한지,False,False,False,not_available
+construction_property,TTLCONS / HOUST,건설지출·주택착공,부동산·건설이 총량과 다른 신호를 내는지,False,False,False,not_available
+export_vs_domestic,EXPGS / 국내최종수요,수출 대 국내 수요,대외·대내 수요가 갈리는지,False,False,False,not_available
+contribution_concentration,(파생),산업별 기여도 집중도,총량 신호가 소수 산업에서 나온 것인지,False,False,False,not_available

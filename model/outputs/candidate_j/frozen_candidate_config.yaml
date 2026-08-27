@@ -1,0 +1,90 @@
+# 후보 J — 유계 등가중 총량 + 계층 분류 + 거리 인식 소프트 필터
+#
+# 모든 값은 개발구간(1995-01-01~2012-12-31)에서만 도출했다. 2013년 이후, 2020년,
+# 2026년 결과를 보고 정하지 않았다. 이 파일을 쓰고 해시를 기록한 뒤에는 바꾸지 않는다.
+#
+# 후보 H/H2·phase6/7/8·해석층·후보 I는 건드리지 않는다.
+
+candidate: candidate_j_hierarchical
+development_window: ["1995-01-01", "2012-12-31"]
+
+# 후보 I에서 확정된 결정을 그대로 승계한다. 다시 열지 않는다.
+inherited_decisions:
+  transformations: candidate_h_breadth_gate
+  no_additional_deflation: [RRSFS, W875RX1, CMRMTSPL, INDPRO]
+  no_scale_division: [payems_population, payems_labor_force, icsa_covered, ccsa_covered]
+  momentum_scale_method: rolling_mad
+  five_domain_grouping: true
+  xy_role: diagnostic_and_visualisation_only
+  radius_075_removed_from_transition_control: true
+
+momentum_scale:
+  method: rolling_mad
+  window_years: 10.0
+  minimum_years: 2.0
+momentum_weeks: 8
+
+# 월간 계열의 "이번 주 새 소식 없음"을 "모멘텀 0"으로 바꾸지 않는다. 새 관측이 온 주에만
+# 추정을 갱신하고 사이에는 마지막 추정을 유지한다. 개발구간 측정에서 도메인-주의
+# 60.9%에 새 관측이 없었고, 이 규칙 아래 모멘텀이 정확히 0인 도메인-주는 0건이다.
+release_carry:
+  rule: update_on_release_then_hold
+  fabricate_zero_between_releases: false
+
+# 도메인 기여 상한. 개발구간 |도메인 점수| 분포의 p99다. 한 도메인이 총량을 끌고 갈 수
+# 없지만, 여러 도메인이 함께 극단이면 총량도 상한까지 갈 수 있다.
+domain_caps:
+  level: 3.7763
+  momentum: 3.7547
+
+# 대국면 규칙. 침체는 두 경로 중 하나로 성립하며 어느 쪽도 노동시장만으로는 안 된다.
+major_thresholds:
+  # 침체 전후 26주를 뺀 개발구간 평상시 722주의 |총량| 중앙값.
+  neutral_level: 0.5030
+  neutral_momentum: 0.3903
+  # 개발구간 침체 113주 총량의 중앙값 크기 — 그 정도면 '심각'이라는 뜻.
+  level_severity: 1.7915
+  momentum_severity: 1.2954
+  # 개발구간 침체 주 동행 도메인 음수 개수의 p25.
+  level_breadth: 3
+  momentum_breadth: 3
+  # 다른 독립 도메인의 뒷받침이 없을 때 급속 악화 경로가 받는 최대 몫.
+  corroboration_weight: 0.5
+  # 진입 문턱 = 개발구간 평상시 침체증거의 p99. 오탐을 억제하는 최소선이다.
+  contraction_entry: 0.8073
+
+# 하위국면 진행도의 개발구간 3분위. 각도 구역이 아니다.
+subphase_cuts:
+  recovery: [-1.2341, -0.3847]
+  expansion: [-0.6041, -0.3169]
+  slowdown: [0.4168, 1.5009]
+  contraction: [0.1359, 0.7990]
+
+# 거리 인식 소프트 필터. 모수는 셋뿐이고 국면마다 따로 두지 않는다.
+# 개발구간 탐색에서 lambda_major 1.5는 3+ 점프 10건·최장 34주였고, 8.0까지 올려도
+# 9건으로만 줄면서 최장 연속이 44주로 늘었다. 싱크를 키우는 대가가 더 크다고 보고
+# 1.5를 골랐다. epsilon은 모든 전이를 양수로 유지하는 하한이다.
+soft_filter:
+  lambda_major: 1.5
+  lambda_subphase: 1.5
+  epsilon: 0.01
+
+# 대국면이 바뀌면 새 대국면의 하위국면은 그 주의 관측 증거로 초기화한다.
+# 무조건 early로 되돌리지 않는다(§10).
+subphase_reset_on_major_change: observation_evidence
+
+evidence_quality:
+  weak_separation: 0.10
+  concentration_flag: 0.6104
+
+# 검증 전에 잠근 채택 게이트(§12). 검증 결과를 보고 바꾸지 않는다.
+acceptance_gates:
+  recession_recall_minimum: 0.85
+  false_positive_rate_maximum: 0.05
+  three_step_or_larger_jumps_maximum: 5
+  longest_run_maximum_weeks: 104
+  late_2019_confirmed_contraction_maximum: 0
+  post_2022_confirmed_contraction_maximum: 0
+  all_phases_reachable: true
+  no_zero_transition_support: true
+  subphase_monotonic_in_all_majors: true

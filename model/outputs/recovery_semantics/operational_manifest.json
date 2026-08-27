@@ -1,0 +1,23 @@
+{
+  "model": "us_four_phase_v1",
+  "configuration": "configs/four_phase_v1_1.yaml",
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "source_commit": "4f7160445d36f2f064763afd8f1b39590aff1baa",
+  "model_status": "provisional",
+  "adoption_basis": "operational_real_time_first",
+  "not_a_retrospective_latest_vintage_validation": true,
+  "historical_v1_1_status_under_the_latest_vintage_protocol": "rejected",
+  "new_model_logic_created": false,
+  "parameters_changed": false,
+  "strict_real_time_recession_episodes": 1,
+  "strict_real_time_recession_episode_names": [
+    "recession_2020"
+  ],
+  "recovery_latency_band": "amber",
+  "recovery_latency_weeks": 11,
+  "limitation_label": "coincident-data recognition lag",
+  "decision": "provisional_operational_adoption",
+  "is_final_validation": false,
+  "is_fully_validated": false,
+  "produces_investment_recommendations": false
+}

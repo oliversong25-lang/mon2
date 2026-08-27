@@ -1,0 +1,5 @@
+first,second,horizon_weeks,overlap_coefficient,probability_second_exceeds_first,observations
+contraction,recovery,4,0.761,0.5805,"[164, 144]"
+contraction,recovery,13,0.5623,0.666,"[164, 144]"
+contraction,recovery,26,0.5513,0.6667,"[164, 144]"
+contraction,recovery,52,0.3281,0.606,"[164, 144]"

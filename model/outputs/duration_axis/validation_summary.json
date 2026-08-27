@@ -1,0 +1,1320 @@
+{
+  "stage": "duration_axis",
+  "frozen_model_modified": false,
+  "executed_at_utc": "2026-08-27T05:33:11+00:00",
+  "gate_under_test": "persist17w",
+  "prespecified_rule": {
+    "question": "업종이 잘못된 축이어서 국면이 3%밖에 조직하지 못한 것인가. 듀레이션으로 자르면 달라지는가.",
+    "mechanism": "성장주는 현금흐름이 길어 할인율 상승과 성장 기대 하락에 불균형하게 반응한다. 이익 효과가 아니라 밸류에이션 효과다. FF12는 각 통에 듀레이션을 섞으므로 찾으려는 효과를 흐린다.",
+    "prior_is_unfavourable": "듀레이션과 가치는 같은 정렬을 반대 방향으로 읽은 것이고, 가치 대 성장의 타이밍은 금융에서 가장 많이 연구됐고 가장 일관되게 실패한 전략에 든다. 여기서의 주장은 더 좁고 기계적이지만 넓은 문헌은 강한 반대 사전 확률이다. 트랙 20이 이 정렬들에 무조건부 프리미엄이 없다는 것도 이미 찾았다 — 다만 평균 0은 강한 조건부 차이와 양립하므로 이 검정을 막지는 않는다.",
+    "primary_proxy": "dividend_yield",
+    "proxies": [
+      "dividend_yield",
+      "earnings_to_price",
+      "cashflow_to_price",
+      "book_to_market"
+    ],
+    "primary_buckets": "zero group + deciles",
+    "secondary_buckets": "zero group + quintiles",
+    "comparison_axis": "Fama-French 12 industries, recomputed monthly",
+    "top_k": 3,
+    "why_the_same_ruler": "정렬 자료가 월간뿐이므로 업종 축도 월간으로 다시 계산한다. 통 수도 맞춰 무배당군+10분위 11통을 기본으로 쓴다 — 통이 적으면 천장이 기계적으로 낮아져 듀레이션 축이 불리해지고, 그것은 이 검정에서 잘못된 방향이다.",
+    "stage_one_ceiling": {
+      "must_exceed_industry_by": 1.5,
+      "floor_annual": 0.08,
+      "floor_information_ratio": 1.0,
+      "gates_everything_below": true,
+      "closes_the_line_if_it_fails": true
+    },
+    "stage_two_control": {
+      "lookbacks": [
+        4,
+        13,
+        26
+      ],
+      "selection": "highest control-only R-squared, chosen by rule not by result",
+      "keeps_the_term_spread": true,
+      "horizon_months": 3,
+      "null_p_threshold": 0.05,
+      "why_these_controls": "제안된 것이 금리 메커니즘이므로 대조도 금리와 변동성이어야 한다. 듀레이션 반응이 금리·변동성 변화만으로 설명되면 그것이 결론이고, 트랙 19·24·25가 각자의 축에서 찾은 것을 되풀이하는 셈이다."
+    },
+    "stage_three_robustness": {
+      "both_exclusion_strengths_must_hold": true,
+      "episode_exclusions": [
+        "ex_2022",
+        "ex_covid",
+        "ex_gfc"
+      ],
+      "why_2022": "2022년이 이 트랙의 명백한 단일 에피소드 의존 후보다. 트랙 17은 2020년을 빼자 무너졌고 트랙 25는 GFC 없이 효과의 3분의 2를 잃었다."
+    },
+    "multiplicity": {
+      "track20_proxies": 4,
+      "this_track_proxies": 4,
+      "project_wide_family": 8,
+      "bonferroni_alpha": 0.00625,
+      "fdr_alpha": 0.05
+    },
+    "what_counts_as_failure": "천장이 같은 자로 잰 업종 축의 1.5배에 못 미치거나 절대 문턱을 넘지 못하면, **순환매 질문은 어떤 축으로 잘라도 닫히고 이 계열은 끝난다.** 업종이 잘못된 축이어서 3%였던 것이 아니라는 뜻이기 때문이다."
+  },
+  "months": 384,
+  "first_month": "1994-07",
+  "last_month": "2026-06",
+  "industry_axis": {
+    "axis": {
+      "buckets": 12,
+      "order_long_to_short": [
+        "NoDur",
+        "Durbl",
+        "Manuf",
+        "Enrgy",
+        "Chems",
+        "BusEq",
+        "Telcm",
+        "Utils",
+        "Shops",
+        "Hlth",
+        "Money",
+        "Other"
+      ],
+      "first_month": "1994-07",
+      "last_month": "2026-06",
+      "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+    },
+    "periods": 384,
+    "buckets": 12,
+    "top_k": 3,
+    "minimum_phase_history": 12,
+    "ranking_ceiling": {
+      "strategy": "phase ranking ceiling (not achievable)",
+      "periods": 383,
+      "annualised_relative_return": 0.0464,
+      "annualised_volatility": 0.0773,
+      "information_ratio": 0.626,
+      "periods_positive": 0.5431,
+      "worst_drawdown_versus_market": -0.27
+    },
+    "oracle_ceiling": {
+      "strategy": "period oracle ceiling (no phases at all)",
+      "periods": 384,
+      "annualised_relative_return": 0.6047,
+      "annualised_volatility": 0.0863,
+      "information_ratio": 5.631,
+      "periods_positive": 1.0,
+      "worst_drawdown_versus_market": 0.0
+    },
+    "phase_share_of_the_oracle": 0.0767,
+    "achievable_rotation": {
+      "strategy": "phase rotation (expanding window)",
+      "periods": 383,
+      "annualised_relative_return": 0.0142,
+      "annualised_volatility": 0.0627,
+      "information_ratio": 0.256,
+      "periods_positive": 0.4543,
+      "worst_drawdown_versus_market": -0.2623
+    },
+    "equal_weight": {
+      "strategy": "equal weight across buckets",
+      "periods": 384,
+      "annualised_relative_return": -0.0026,
+      "annualised_volatility": 0.0407,
+      "information_ratio": -0.044,
+      "periods_positive": 0.4974,
+      "worst_drawdown_versus_market": -0.222
+    }
+  },
+  "duration_axes": {
+    "dividend_yield": {
+      "primary": {
+        "axis": {
+          "buckets": 11,
+          "order_long_to_short": [
+            "D00_zero",
+            "D01_Lo10",
+            "D02_2-Dec",
+            "D03_3-Dec",
+            "D04_4-Dec",
+            "D05_5-Dec",
+            "D06_6-Dec",
+            "D07_7-Dec",
+            "D08_8-Dec",
+            "D09_9-Dec",
+            "D10_Hi10"
+          ],
+          "first_month": "1994-07",
+          "last_month": "2026-06",
+          "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+        },
+        "periods": 384,
+        "buckets": 11,
+        "top_k": 3,
+        "minimum_phase_history": 12,
+        "ranking_ceiling": {
+          "strategy": "phase ranking ceiling (not achievable)",
+          "periods": 383,
+          "annualised_relative_return": 0.0252,
+          "annualised_volatility": 0.057,
+          "information_ratio": 0.466,
+          "periods_positive": 0.5483,
+          "worst_drawdown_versus_market": -0.1044
+        },
+        "oracle_ceiling": {
+          "strategy": "period oracle ceiling (no phases at all)",
+          "periods": 384,
+          "annualised_relative_return": 0.3644,
+          "annualised_volatility": 0.0624,
+          "information_ratio": 5.074,
+          "periods_positive": 1.0,
+          "worst_drawdown_versus_market": 0.0
+        },
+        "phase_share_of_the_oracle": 0.0692,
+        "achievable_rotation": {
+          "strategy": "phase rotation (expanding window)",
+          "periods": 383,
+          "annualised_relative_return": -0.0074,
+          "annualised_volatility": 0.044,
+          "information_ratio": -0.148,
+          "periods_positive": 0.4204,
+          "worst_drawdown_versus_market": -0.3562
+        },
+        "equal_weight": {
+          "strategy": "equal weight across buckets",
+          "periods": 384,
+          "annualised_relative_return": 0.0024,
+          "annualised_volatility": 0.0443,
+          "information_ratio": 0.076,
+          "periods_positive": 0.4896,
+          "worst_drawdown_versus_market": -0.2259
+        }
+      },
+      "secondary": {
+        "axis": {
+          "buckets": 6,
+          "order_long_to_short": [
+            "D00_zero",
+            "D01_Lo20",
+            "D02_Qnt2",
+            "D03_Qnt3",
+            "D04_Qnt4",
+            "D05_Hi20"
+          ],
+          "first_month": "1994-07",
+          "last_month": "2026-06",
+          "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+        },
+        "periods": 384,
+        "buckets": 6,
+        "top_k": 3,
+        "minimum_phase_history": 12,
+        "ranking_ceiling": {
+          "strategy": "phase ranking ceiling (not achievable)",
+          "periods": 383,
+          "annualised_relative_return": 0.0151,
+          "annualised_volatility": 0.0429,
+          "information_ratio": 0.37,
+          "periods_positive": 0.5431,
+          "worst_drawdown_versus_market": -0.1251
+        },
+        "oracle_ceiling": {
+          "strategy": "period oracle ceiling (no phases at all)",
+          "periods": 384,
+          "annualised_relative_return": 0.1972,
+          "annualised_volatility": 0.0472,
+          "information_ratio": 3.862,
+          "periods_positive": 0.9948,
+          "worst_drawdown_versus_market": -0.0004
+        },
+        "phase_share_of_the_oracle": 0.0766,
+        "achievable_rotation": {
+          "strategy": "phase rotation (expanding window)",
+          "periods": 383,
+          "annualised_relative_return": -0.003,
+          "annualised_volatility": 0.0339,
+          "information_ratio": -0.071,
+          "periods_positive": 0.4439,
+          "worst_drawdown_versus_market": -0.2668
+        },
+        "equal_weight": {
+          "strategy": "equal weight across buckets",
+          "periods": 384,
+          "annualised_relative_return": 0.0031,
+          "annualised_volatility": 0.0333,
+          "information_ratio": 0.11,
+          "periods_positive": 0.513,
+          "worst_drawdown_versus_market": -0.1636
+        }
+      }
+    },
+    "earnings_to_price": {
+      "primary": {
+        "axis": {
+          "buckets": 11,
+          "order_long_to_short": [
+            "D00_zero",
+            "D01_Lo10",
+            "D02_2-Dec",
+            "D03_3-Dec",
+            "D04_4-Dec",
+            "D05_5-Dec",
+            "D06_6-Dec",
+            "D07_7-Dec",
+            "D08_8-Dec",
+            "D09_9-Dec",
+            "D10_Hi10"
+          ],
+          "first_month": "1994-07",
+          "last_month": "2026-06",
+          "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+        },
+        "periods": 384,
+        "buckets": 11,
+        "top_k": 3,
+        "minimum_phase_history": 12,
+        "ranking_ceiling": {
+          "strategy": "phase ranking ceiling (not achievable)",
+          "periods": 383,
+          "annualised_relative_return": 0.026,
+          "annualised_volatility": 0.0581,
+          "information_ratio": 0.471,
+          "periods_positive": 0.5535,
+          "worst_drawdown_versus_market": -0.192
+        },
+        "oracle_ceiling": {
+          "strategy": "period oracle ceiling (no phases at all)",
+          "periods": 384,
+          "annualised_relative_return": 0.3527,
+          "annualised_volatility": 0.0543,
+          "information_ratio": 5.665,
+          "periods_positive": 1.0,
+          "worst_drawdown_versus_market": 0.0
+        },
+        "phase_share_of_the_oracle": 0.0737,
+        "achievable_rotation": {
+          "strategy": "phase rotation (expanding window)",
+          "periods": 383,
+          "annualised_relative_return": -0.0154,
+          "annualised_volatility": 0.0465,
+          "information_ratio": -0.309,
+          "periods_positive": 0.4256,
+          "worst_drawdown_versus_market": -0.4404
+        },
+        "equal_weight": {
+          "strategy": "equal weight across buckets",
+          "periods": 384,
+          "annualised_relative_return": 0.0075,
+          "annualised_volatility": 0.0321,
+          "information_ratio": 0.248,
+          "periods_positive": 0.5286,
+          "worst_drawdown_versus_market": -0.1579
+        }
+      },
+      "secondary": {
+        "axis": {
+          "buckets": 6,
+          "order_long_to_short": [
+            "D00_zero",
+            "D01_Lo20",
+            "D02_Qnt2",
+            "D03_Qnt3",
+            "D04_Qnt4",
+            "D05_Hi20"
+          ],
+          "first_month": "1994-07",
+          "last_month": "2026-06",
+          "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+        },
+        "periods": 384,
+        "buckets": 6,
+        "top_k": 3,
+        "minimum_phase_history": 12,
+        "ranking_ceiling": {
+          "strategy": "phase ranking ceiling (not achievable)",
+          "periods": 383,
+          "annualised_relative_return": 0.0201,
+          "annualised_volatility": 0.0486,
+          "information_ratio": 0.434,
+          "periods_positive": 0.5379,
+          "worst_drawdown_versus_market": -0.1154
+        },
+        "oracle_ceiling": {
+          "strategy": "period oracle ceiling (no phases at all)",
+          "periods": 384,
+          "annualised_relative_return": 0.2043,
+          "annualised_volatility": 0.0442,
+          "information_ratio": 4.257,
+          "periods_positive": 1.0,
+          "worst_drawdown_versus_market": 0.0
+        },
+        "phase_share_of_the_oracle": 0.0984,
+        "achievable_rotation": {
+          "strategy": "phase rotation (expanding window)",
+          "periods": 383,
+          "annualised_relative_return": -0.0124,
+          "annualised_volatility": 0.0424,
+          "information_ratio": -0.273,
+          "periods_positive": 0.4413,
+          "worst_drawdown_versus_market": -0.3549
+        },
+        "equal_weight": {
+          "strategy": "equal weight across buckets",
+          "periods": 384,
+          "annualised_relative_return": 0.0074,
+          "annualised_volatility": 0.0263,
+          "information_ratio": 0.295,
+          "periods_positive": 0.5521,
+          "worst_drawdown_versus_market": -0.1077
+        }
+      }
+    },
+    "cashflow_to_price": {
+      "primary": {
+        "axis": {
+          "buckets": 11,
+          "order_long_to_short": [
+            "D00_zero",
+            "D01_Lo10",
+            "D02_2-Dec",
+            "D03_3-Dec",
+            "D04_4-Dec",
+            "D05_5-Dec",
+            "D06_6-Dec",
+            "D07_7-Dec",
+            "D08_8-Dec",
+            "D09_9-Dec",
+            "D10_Hi10"
+          ],
+          "first_month": "1994-07",
+          "last_month": "2026-06",
+          "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+        },
+        "periods": 384,
+        "buckets": 11,
+        "top_k": 3,
+        "minimum_phase_history": 12,
+        "ranking_ceiling": {
+          "strategy": "phase ranking ceiling (not achievable)",
+          "periods": 383,
+          "annualised_relative_return": 0.0341,
+          "annualised_volatility": 0.0454,
+          "information_ratio": 0.763,
+          "periods_positive": 0.6005,
+          "worst_drawdown_versus_market": -0.0706
+        },
+        "oracle_ceiling": {
+          "strategy": "period oracle ceiling (no phases at all)",
+          "periods": 384,
+          "annualised_relative_return": 0.3563,
+          "annualised_volatility": 0.0564,
+          "information_ratio": 5.501,
+          "periods_positive": 1.0,
+          "worst_drawdown_versus_market": 0.0
+        },
+        "phase_share_of_the_oracle": 0.0957,
+        "achievable_rotation": {
+          "strategy": "phase rotation (expanding window)",
+          "periods": 383,
+          "annualised_relative_return": -0.008,
+          "annualised_volatility": 0.0476,
+          "information_ratio": -0.145,
+          "periods_positive": 0.4439,
+          "worst_drawdown_versus_market": -0.3876
+        },
+        "equal_weight": {
+          "strategy": "equal weight across buckets",
+          "periods": 384,
+          "annualised_relative_return": 0.0056,
+          "annualised_volatility": 0.0332,
+          "information_ratio": 0.184,
+          "periods_positive": 0.5339,
+          "worst_drawdown_versus_market": -0.1368
+        }
+      },
+      "secondary": {
+        "axis": {
+          "buckets": 6,
+          "order_long_to_short": [
+            "D00_zero",
+            "D01_Lo20",
+            "D02_Qnt2",
+            "D03_Qnt3",
+            "D04_Qnt4",
+            "D05_Hi20"
+          ],
+          "first_month": "1994-07",
+          "last_month": "2026-06",
+          "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+        },
+        "periods": 384,
+        "buckets": 6,
+        "top_k": 3,
+        "minimum_phase_history": 12,
+        "ranking_ceiling": {
+          "strategy": "phase ranking ceiling (not achievable)",
+          "periods": 383,
+          "annualised_relative_return": 0.0213,
+          "annualised_volatility": 0.0408,
+          "information_ratio": 0.538,
+          "periods_positive": 0.577,
+          "worst_drawdown_versus_market": -0.1556
+        },
+        "oracle_ceiling": {
+          "strategy": "period oracle ceiling (no phases at all)",
+          "periods": 384,
+          "annualised_relative_return": 0.2001,
+          "annualised_volatility": 0.0452,
+          "information_ratio": 4.084,
+          "periods_positive": 1.0,
+          "worst_drawdown_versus_market": 0.0
+        },
+        "phase_share_of_the_oracle": 0.1064,
+        "achievable_rotation": {
+          "strategy": "phase rotation (expanding window)",
+          "periods": 383,
+          "annualised_relative_return": -0.0084,
+          "annualised_volatility": 0.0359,
+          "information_ratio": -0.217,
+          "periods_positive": 0.4334,
+          "worst_drawdown_versus_market": -0.3128
+        },
+        "equal_weight": {
+          "strategy": "equal weight across buckets",
+          "periods": 384,
+          "annualised_relative_return": 0.0033,
+          "annualised_volatility": 0.0281,
+          "information_ratio": 0.131,
+          "periods_positive": 0.4948,
+          "worst_drawdown_versus_market": -0.1243
+        }
+      }
+    },
+    "book_to_market": {
+      "primary": {
+        "axis": {
+          "buckets": 11,
+          "order_long_to_short": [
+            "D00_zero",
+            "D01_Lo10",
+            "D02_2-Dec",
+            "D03_3-Dec",
+            "D04_4-Dec",
+            "D05_5-Dec",
+            "D06_6-Dec",
+            "D07_7-Dec",
+            "D08_8-Dec",
+            "D09_9-Dec",
+            "D10_Hi10"
+          ],
+          "first_month": "1994-07",
+          "last_month": "2026-06",
+          "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+        },
+        "periods": 384,
+        "buckets": 11,
+        "top_k": 3,
+        "minimum_phase_history": 12,
+        "ranking_ceiling": {
+          "strategy": "phase ranking ceiling (not achievable)",
+          "periods": 383,
+          "annualised_relative_return": 0.034,
+          "annualised_volatility": 0.0631,
+          "information_ratio": 0.562,
+          "periods_positive": 0.5196,
+          "worst_drawdown_versus_market": -0.2244
+        },
+        "oracle_ceiling": {
+          "strategy": "period oracle ceiling (no phases at all)",
+          "periods": 384,
+          "annualised_relative_return": 0.3291,
+          "annualised_volatility": 0.0624,
+          "information_ratio": 4.644,
+          "periods_positive": 0.9974,
+          "worst_drawdown_versus_market": -0.0011
+        },
+        "phase_share_of_the_oracle": 0.1033,
+        "achievable_rotation": {
+          "strategy": "phase rotation (expanding window)",
+          "periods": 383,
+          "annualised_relative_return": -0.0042,
+          "annualised_volatility": 0.0467,
+          "information_ratio": -0.066,
+          "periods_positive": 0.4308,
+          "worst_drawdown_versus_market": -0.3572
+        },
+        "equal_weight": {
+          "strategy": "equal weight across buckets",
+          "periods": 384,
+          "annualised_relative_return": 0.0057,
+          "annualised_volatility": 0.0423,
+          "information_ratio": 0.155,
+          "periods_positive": 0.5078,
+          "worst_drawdown_versus_market": -0.2258
+        }
+      },
+      "secondary": {
+        "axis": {
+          "buckets": 6,
+          "order_long_to_short": [
+            "D00_zero",
+            "D01_Lo20",
+            "D02_Qnt2",
+            "D03_Qnt3",
+            "D04_Qnt4",
+            "D05_Hi20"
+          ],
+          "first_month": "1994-07",
+          "last_month": "2026-06",
+          "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+        },
+        "periods": 384,
+        "buckets": 6,
+        "top_k": 3,
+        "minimum_phase_history": 12,
+        "ranking_ceiling": {
+          "strategy": "phase ranking ceiling (not achievable)",
+          "periods": 383,
+          "annualised_relative_return": 0.0215,
+          "annualised_volatility": 0.0494,
+          "information_ratio": 0.457,
+          "periods_positive": 0.5248,
+          "worst_drawdown_versus_market": -0.1569
+        },
+        "oracle_ceiling": {
+          "strategy": "period oracle ceiling (no phases at all)",
+          "periods": 384,
+          "annualised_relative_return": 0.1859,
+          "annualised_volatility": 0.0498,
+          "information_ratio": 3.475,
+          "periods_positive": 0.9609,
+          "worst_drawdown_versus_market": -0.0108
+        },
+        "phase_share_of_the_oracle": 0.1157,
+        "achievable_rotation": {
+          "strategy": "phase rotation (expanding window)",
+          "periods": 383,
+          "annualised_relative_return": 0.0007,
+          "annualised_volatility": 0.0371,
+          "information_ratio": 0.036,
+          "periods_positive": 0.4308,
+          "worst_drawdown_versus_market": -0.2022
+        },
+        "equal_weight": {
+          "strategy": "equal weight across buckets",
+          "periods": 384,
+          "annualised_relative_return": 0.0053,
+          "annualised_volatility": 0.0378,
+          "information_ratio": 0.159,
+          "periods_positive": 0.4948,
+          "worst_drawdown_versus_market": -0.1999
+        }
+      }
+    }
+  },
+  "ceiling_gate": {
+    "duration_ceiling_annual": 0.0252,
+    "duration_ceiling_information_ratio": 0.466,
+    "industry_ceiling_annual": 0.0464,
+    "ratio_to_industry": 0.543,
+    "conditions": {
+      "materially_higher_than_the_industry_axis": false,
+      "clears_the_absolute_floor": false,
+      "clears_the_information_ratio_floor": false
+    },
+    "passes": false,
+    "failed": [
+      "materially_higher_than_the_industry_axis",
+      "clears_the_absolute_floor",
+      "clears_the_information_ratio_floor"
+    ],
+    "verdict": "**축을 바꿔도 천장이 오르지 않는다.** 국면을 완전히 알고 국면별 최고 통까지 알아도 이만큼이므로, **순환매 질문은 어떤 축으로 잘라도 닫힌다.** 업종이 잘못된 축이어서 3%였던 것이 아니다."
+  },
+  "axis_comparison": {
+    "duration": {
+      "axis": {
+        "buckets": 11,
+        "order_long_to_short": [
+          "D00_zero",
+          "D01_Lo10",
+          "D02_2-Dec",
+          "D03_3-Dec",
+          "D04_4-Dec",
+          "D05_5-Dec",
+          "D06_6-Dec",
+          "D07_7-Dec",
+          "D08_8-Dec",
+          "D09_9-Dec",
+          "D10_Hi10"
+        ],
+        "first_month": "1994-07",
+        "last_month": "2026-06",
+        "note": "왼쪽이 긴 듀레이션이다 — 무배당(또는 무이익) 통이 맨 앞이고, 분위를 따라 지표가 높아질수록 듀레이션이 짧아진다."
+      },
+      "periods": 384,
+      "buckets": 11,
+      "top_k": 3,
+      "minimum_phase_history": 12,
+      "ranking_ceiling": {
+        "strategy": "phase ranking ceiling (not achievable)",
+        "periods": 383,
+        "annualised_relative_return": 0.0252,
+        "annualised_volatility": 0.057,
+        "information_ratio": 0.466,
+        "periods_positive": 0.5483,
+        "worst_drawdown_versus_market": -0.1044
+      },
+      "oracle_ceiling": {
+        "strategy": "period oracle ceiling (no phases at all)",
+        "periods": 384,
+        "annualised_relative_return": 0.3644,
+        "annualised_volatility": 0.0624,
+        "information_ratio": 5.074,
+        "periods_positive": 1.0,
+        "worst_drawdown_versus_market": 0.0
+      },
+      "phase_share_of_the_oracle": 0.0692,
+      "achievable_rotation": {
+        "strategy": "phase rotation (expanding window)",
+        "periods": 383,
+        "annualised_relative_return": -0.0074,
+        "annualised_volatility": 0.044,
+        "information_ratio": -0.148,
+        "periods_positive": 0.4204,
+        "worst_drawdown_versus_market": -0.3562
+      },
+      "equal_weight": {
+        "strategy": "equal weight across buckets",
+        "periods": 384,
+        "annualised_relative_return": 0.0024,
+        "annualised_volatility": 0.0443,
+        "information_ratio": 0.076,
+        "periods_positive": 0.4896,
+        "worst_drawdown_versus_market": -0.2259
+      }
+    },
+    "industry": {
+      "periods": 384,
+      "buckets": 12,
+      "top_k": 3,
+      "minimum_phase_history": 12,
+      "ranking_ceiling": {
+        "strategy": "phase ranking ceiling (not achievable)",
+        "periods": 383,
+        "annualised_relative_return": 0.0464,
+        "annualised_volatility": 0.0773,
+        "information_ratio": 0.626,
+        "periods_positive": 0.5431,
+        "worst_drawdown_versus_market": -0.27
+      },
+      "oracle_ceiling": {
+        "strategy": "period oracle ceiling (no phases at all)",
+        "periods": 384,
+        "annualised_relative_return": 0.6047,
+        "annualised_volatility": 0.0863,
+        "information_ratio": 5.631,
+        "periods_positive": 1.0,
+        "worst_drawdown_versus_market": 0.0
+      },
+      "phase_share_of_the_oracle": 0.0767,
+      "achievable_rotation": {
+        "strategy": "phase rotation (expanding window)",
+        "periods": 383,
+        "annualised_relative_return": 0.0142,
+        "annualised_volatility": 0.0627,
+        "information_ratio": 0.256,
+        "periods_positive": 0.4543,
+        "worst_drawdown_versus_market": -0.2623
+      },
+      "equal_weight": {
+        "strategy": "equal weight across buckets",
+        "periods": 384,
+        "annualised_relative_return": -0.0026,
+        "annualised_volatility": 0.0407,
+        "information_ratio": -0.044,
+        "periods_positive": 0.4974,
+        "worst_drawdown_versus_market": -0.222
+      }
+    },
+    "ceiling_ratio": 0.543,
+    "share_organised_duration": 0.0692,
+    "share_organised_industry": 0.0767,
+    "share_moved": -0.0075,
+    "reading": "같은 월간 격자에서 듀레이션 축 천장은 연 2.52%, 업종 축은 연 4.64%다(비 0.543). 국면이 조직하는 몫은 듀레이션 축에서 6.9%, 업종 축에서 7.7%다."
+  },
+  "control_target": "long minus short duration bucket, forward 3 months",
+  "control_target_was_prespecified": false,
+  "lookback_table": [
+    {
+      "lookback_weeks": 4,
+      "control_only_r_squared": 0.094124,
+      "phase_only_r_squared": 0.040498,
+      "both_r_squared": 0.122422,
+      "incremental_r_squared_of_phase": 0.028298,
+      "null_p": 0.2862,
+      "periods": 378
+    },
+    {
+      "lookback_weeks": 13,
+      "control_only_r_squared": 0.002276,
+      "phase_only_r_squared": 0.056839,
+      "both_r_squared": 0.062722,
+      "incremental_r_squared_of_phase": 0.060446,
+      "null_p": 0.0449,
+      "periods": 369
+    },
+    {
+      "lookback_weeks": 26,
+      "control_only_r_squared": 0.006448,
+      "phase_only_r_squared": 0.057858,
+      "both_r_squared": 0.066595,
+      "incremental_r_squared_of_phase": 0.060146,
+      "null_p": 0.0709,
+      "periods": 356
+    }
+  ],
+  "lookback_choice": {
+    "chosen": 4,
+    "chosen_control_only_r_squared": 0.094124,
+    "weakest": 13,
+    "weakest_control_only_r_squared": 0.002276,
+    "candidates": [
+      {
+        "lookback_weeks": 4,
+        "control_only_r_squared": 0.094124,
+        "phase_only_r_squared": 0.040498,
+        "both_r_squared": 0.122422,
+        "incremental_r_squared_of_phase": 0.028298,
+        "null_p": 0.2862,
+        "periods": 378
+      },
+      {
+        "lookback_weeks": 13,
+        "control_only_r_squared": 0.002276,
+        "phase_only_r_squared": 0.056839,
+        "both_r_squared": 0.062722,
+        "incremental_r_squared_of_phase": 0.060446,
+        "null_p": 0.0449,
+        "periods": 369
+      },
+      {
+        "lookback_weeks": 26,
+        "control_only_r_squared": 0.006448,
+        "phase_only_r_squared": 0.057858,
+        "both_r_squared": 0.066595,
+        "incremental_r_squared_of_phase": 0.060146,
+        "null_p": 0.0709,
+        "periods": 356
+      }
+    ]
+  },
+  "chosen_lookback": 4,
+  "control_comparison": {
+    "target": "long minus short, forward 3m",
+    "weeks": 378,
+    "usable": true,
+    "control_columns": [
+      "realised_variance_4m",
+      "realised_volatility_4m",
+      "term_spread"
+    ],
+    "control_only_r_squared": 0.094124,
+    "phase_only_r_squared": 0.040498,
+    "both_r_squared": 0.122422,
+    "incremental_r_squared_of_phase": 0.028298,
+    "incremental_r_squared_of_control_over_phase": 0.081924,
+    "phase_absorbs_the_control": false,
+    "shifts_used": 275,
+    "null_median_increment": 0.010652,
+    "null_p90_increment": 0.055249,
+    "null_p": 0.2862
+  },
+  "exclusions": {
+    "ex_2022": {
+      "target": "ex_2022",
+      "weeks": 366,
+      "usable": true,
+      "control_columns": [
+        "realised_variance_4m",
+        "realised_volatility_4m",
+        "term_spread"
+      ],
+      "control_only_r_squared": 0.101862,
+      "phase_only_r_squared": 0.039495,
+      "both_r_squared": 0.129128,
+      "incremental_r_squared_of_phase": 0.027266,
+      "incremental_r_squared_of_control_over_phase": 0.089633,
+      "phase_absorbs_the_control": false,
+      "shifts_used": 263,
+      "null_median_increment": 0.010382,
+      "null_p90_increment": 0.039694,
+      "null_p": 0.2083
+    },
+    "ex_covid": {
+      "target": "ex_covid",
+      "weeks": 366,
+      "usable": true,
+      "control_columns": [
+        "realised_variance_4m",
+        "realised_volatility_4m",
+        "term_spread"
+      ],
+      "control_only_r_squared": 0.068434,
+      "phase_only_r_squared": 0.024989,
+      "both_r_squared": 0.09859,
+      "incremental_r_squared_of_phase": 0.030156,
+      "incremental_r_squared_of_control_over_phase": 0.073601,
+      "phase_absorbs_the_control": false,
+      "shifts_used": 263,
+      "null_median_increment": 0.010032,
+      "null_p90_increment": 0.041327,
+      "null_p": 0.1742
+    },
+    "ex_gfc": {
+      "target": "ex_gfc",
+      "weeks": 354,
+      "usable": true,
+      "control_columns": [
+        "realised_variance_4m",
+        "realised_volatility_4m",
+        "term_spread"
+      ],
+      "control_only_r_squared": 0.058848,
+      "phase_only_r_squared": 0.032263,
+      "both_r_squared": 0.091645,
+      "incremental_r_squared_of_phase": 0.032797,
+      "incremental_r_squared_of_control_over_phase": 0.059382,
+      "phase_absorbs_the_control": false,
+      "shifts_used": 251,
+      "null_median_increment": 0.013243,
+      "null_p90_increment": 0.043048,
+      "null_p": 0.1786
+    }
+  },
+  "leave_one_episode_out": {
+    "horizon_months": 3,
+    "full_sample_increment": 0.028298,
+    "episodes": 34,
+    "episodes_by_phase": {
+      "recovery": 4,
+      "expansion": 16,
+      "slowdown": 10,
+      "contraction": 4
+    },
+    "rows": [
+      {
+        "phase": "recovery",
+        "episode": 1,
+        "start": "2002-07",
+        "end": "2002-08",
+        "months": 2,
+        "block_only": 0.030736,
+        "block_only_months_removed": 2,
+        "event_including": 0.031275,
+        "event_including_months_removed": 5
+      },
+      {
+        "phase": "recovery",
+        "episode": 2,
+        "start": "2003-06",
+        "end": "2004-01",
+        "months": 8,
+        "block_only": 0.028003,
+        "block_only_months_removed": 8,
+        "event_including": 0.027949,
+        "event_including_months_removed": 11
+      },
+      {
+        "phase": "recovery",
+        "episode": 3,
+        "start": "2009-06",
+        "end": "2010-07",
+        "months": 14,
+        "block_only": 0.032436,
+        "block_only_months_removed": 14,
+        "event_including": 0.031902,
+        "event_including_months_removed": 17
+      },
+      {
+        "phase": "recovery",
+        "episode": 4,
+        "start": "2020-07",
+        "end": "2021-02",
+        "months": 8,
+        "block_only": 0.034644,
+        "block_only_months_removed": 8,
+        "event_including": 0.034695,
+        "event_including_months_removed": 11
+      },
+      {
+        "phase": "expansion",
+        "episode": 1,
+        "start": "1994-07",
+        "end": "1995-03",
+        "months": 9,
+        "block_only": 0.028313,
+        "block_only_months_removed": 9,
+        "event_including": 0.048122,
+        "event_including_months_removed": 12
+      },
+      {
+        "phase": "expansion",
+        "episode": 2,
+        "start": "1995-07",
+        "end": "1998-07",
+        "months": 37,
+        "block_only": 0.030816,
+        "block_only_months_removed": 37,
+        "event_including": 0.035261,
+        "event_including_months_removed": 40
+      },
+      {
+        "phase": "expansion",
+        "episode": 3,
+        "start": "1998-09",
+        "end": "2000-06",
+        "months": 22,
+        "block_only": 0.031078,
+        "block_only_months_removed": 22,
+        "event_including": 0.010097,
+        "event_including_months_removed": 25
+      },
+      {
+        "phase": "expansion",
+        "episode": 4,
+        "start": "2002-02",
+        "end": "2002-06",
+        "months": 5,
+        "block_only": 0.028646,
+        "block_only_months_removed": 5,
+        "event_including": 0.03152,
+        "event_including_months_removed": 8
+      },
+      {
+        "phase": "expansion",
+        "episode": 5,
+        "start": "2002-09",
+        "end": "2003-02",
+        "months": 6,
+        "block_only": 0.028316,
+        "block_only_months_removed": 6,
+        "event_including": 0.028081,
+        "event_including_months_removed": 9
+      },
+      {
+        "phase": "expansion",
+        "episode": 6,
+        "start": "2003-05",
+        "end": "2003-05",
+        "months": 1,
+        "block_only": 0.028091,
+        "block_only_months_removed": 1,
+        "event_including": 0.028287,
+        "event_including_months_removed": 4
+      },
+      {
+        "phase": "expansion",
+        "episode": 7,
+        "start": "2004-02",
+        "end": "2005-09",
+        "months": 20,
+        "block_only": 0.027553,
+        "block_only_months_removed": 20,
+        "event_including": 0.029425,
+        "event_including_months_removed": 23
+      },
+      {
+        "phase": "expansion",
+        "episode": 8,
+        "start": "2005-11",
+        "end": "2007-08",
+        "months": 22,
+        "block_only": 0.030212,
+        "block_only_months_removed": 22,
+        "event_including": 0.035061,
+        "event_including_months_removed": 25
+      },
+      {
+        "phase": "expansion",
+        "episode": 9,
+        "start": "2007-10",
+        "end": "2007-12",
+        "months": 3,
+        "block_only": 0.02853,
+        "block_only_months_removed": 3,
+        "event_including": 0.028163,
+        "event_including_months_removed": 6
+      },
+      {
+        "phase": "expansion",
+        "episode": 10,
+        "start": "2010-08",
+        "end": "2018-11",
+        "months": 100,
+        "block_only": 0.027266,
+        "block_only_months_removed": 100,
+        "event_including": 0.032776,
+        "event_including_months_removed": 103
+      },
+      {
+        "phase": "expansion",
+        "episode": 11,
+        "start": "2019-04",
+        "end": "2019-06",
+        "months": 3,
+        "block_only": 0.028447,
+        "block_only_months_removed": 3,
+        "event_including": 0.028677,
+        "event_including_months_removed": 6
+      },
+      {
+        "phase": "expansion",
+        "episode": 12,
+        "start": "2019-08",
+        "end": "2019-10",
+        "months": 3,
+        "block_only": 0.028178,
+        "block_only_months_removed": 3,
+        "event_including": 0.027695,
+        "event_including_months_removed": 6
+      },
+      {
+        "phase": "expansion",
+        "episode": 13,
+        "start": "2021-03",
+        "end": "2022-06",
+        "months": 16,
+        "block_only": 0.033969,
+        "block_only_months_removed": 16,
+        "event_including": 0.031311,
+        "event_including_months_removed": 19
+      },
+      {
+        "phase": "expansion",
+        "episode": 14,
+        "start": "2022-08",
+        "end": "2022-12",
+        "months": 5,
+        "block_only": 0.030202,
+        "block_only_months_removed": 5,
+        "event_including": 0.031332,
+        "event_including_months_removed": 8
+      },
+      {
+        "phase": "expansion",
+        "episode": 15,
+        "start": "2023-02",
+        "end": "2025-11",
+        "months": 34,
+        "block_only": 0.024669,
+        "block_only_months_removed": 34,
+        "event_including": 0.019607,
+        "event_including_months_removed": 37
+      },
+      {
+        "phase": "expansion",
+        "episode": 16,
+        "start": "2026-01",
+        "end": "2026-06",
+        "months": 6,
+        "block_only": 0.028405,
+        "block_only_months_removed": 6,
+        "event_including": 0.028405,
+        "event_including_months_removed": 6
+      },
+      {
+        "phase": "slowdown",
+        "episode": 1,
+        "start": "1995-04",
+        "end": "1995-06",
+        "months": 3,
+        "block_only": 0.048041,
+        "block_only_months_removed": 3,
+        "event_including": 0.048645,
+        "event_including_months_removed": 6
+      },
+      {
+        "phase": "slowdown",
+        "episode": 2,
+        "start": "1998-08",
+        "end": "1998-08",
+        "months": 1,
+        "block_only": 0.032288,
+        "block_only_months_removed": 1,
+        "event_including": 0.032862,
+        "event_including_months_removed": 4
+      },
+      {
+        "phase": "slowdown",
+        "episode": 3,
+        "start": "2000-07",
+        "end": "2000-12",
+        "months": 6,
+        "block_only": 0.001802,
+        "block_only_months_removed": 6,
+        "event_including": 0.003864,
+        "event_including_months_removed": 9
+      },
+      {
+        "phase": "slowdown",
+        "episode": 4,
+        "start": "2005-10",
+        "end": "2005-10",
+        "months": 1,
+        "block_only": 0.030227,
+        "block_only_months_removed": 1,
+        "event_including": 0.030212,
+        "event_including_months_removed": 4
+      },
+      {
+        "phase": "slowdown",
+        "episode": 5,
+        "start": "2007-09",
+        "end": "2007-09",
+        "months": 1,
+        "block_only": 0.032938,
+        "block_only_months_removed": 1,
+        "event_including": 0.033179,
+        "event_including_months_removed": 4
+      },
+      {
+        "phase": "slowdown",
+        "episode": 6,
+        "start": "2018-12",
+        "end": "2019-03",
+        "months": 4,
+        "block_only": 0.035439,
+        "block_only_months_removed": 4,
+        "event_including": 0.035575,
+        "event_including_months_removed": 7
+      },
+      {
+        "phase": "slowdown",
+        "episode": 7,
+        "start": "2019-07",
+        "end": "2019-07",
+        "months": 1,
+        "block_only": 0.028601,
+        "block_only_months_removed": 1,
+        "event_including": 0.028482,
+        "event_including_months_removed": 4
+      },
+      {
+        "phase": "slowdown",
+        "episode": 8,
+        "start": "2022-07",
+        "end": "2022-07",
+        "months": 1,
+        "block_only": 0.023171,
+        "block_only_months_removed": 1,
+        "event_including": 0.025618,
+        "event_including_months_removed": 4
+      },
+      {
+        "phase": "slowdown",
+        "episode": 9,
+        "start": "2023-01",
+        "end": "2023-01",
+        "months": 1,
+        "block_only": 0.031108,
+        "block_only_months_removed": 1,
+        "event_including": 0.028751,
+        "event_including_months_removed": 4
+      },
+      {
+        "phase": "slowdown",
+        "episode": 10,
+        "start": "2025-12",
+        "end": "2025-12",
+        "months": 1,
+        "block_only": 0.02274,
+        "block_only_months_removed": 1,
+        "event_including": 0.022842,
+        "event_including_months_removed": 4
+      },
+      {
+        "phase": "contraction",
+        "episode": 1,
+        "start": "2001-01",
+        "end": "2002-01",
+        "months": 13,
+        "block_only": 0.042731,
+        "block_only_months_removed": 13,
+        "event_including": 0.042691,
+        "event_including_months_removed": 16
+      },
+      {
+        "phase": "contraction",
+        "episode": 2,
+        "start": "2003-03",
+        "end": "2003-04",
+        "months": 2,
+        "block_only": 0.028278,
+        "block_only_months_removed": 2,
+        "event_including": 0.028444,
+        "event_including_months_removed": 5
+      },
+      {
+        "phase": "contraction",
+        "episode": 3,
+        "start": "2008-01",
+        "end": "2009-05",
+        "months": 17,
+        "block_only": 0.031828,
+        "block_only_months_removed": 17,
+        "event_including": 0.031727,
+        "event_including_months_removed": 20
+      },
+      {
+        "phase": "contraction",
+        "episode": 4,
+        "start": "2019-11",
+        "end": "2020-06",
+        "months": 8,
+        "block_only": 0.029357,
+        "block_only_months_removed": 8,
+        "event_including": 0.029218,
+        "event_including_months_removed": 11
+      }
+    ],
+    "block_only_summary": {
+      "computable_episodes": 34,
+      "lowest": 0.001802,
+      "median": 0.029001,
+      "highest": 0.048041,
+      "stays_positive_everywhere": true,
+      "most_damaging_episode": "slowdown#3 (2000-07)"
+    },
+    "event_including_summary": {
+      "computable_episodes": 34,
+      "lowest": 0.003864,
+      "median": 0.029818,
+      "highest": 0.048645,
+      "stays_positive_everywhere": true,
+      "most_damaging_episode": "slowdown#3 (2000-07)"
+    },
+    "record_only": true,
+    "why_record_only": "천장 관문이 막혔으므로 이 숫자들은 판정하지 않는다. 천장 아래에서 무엇이 나오든 그것은 천장을 넘을 수 없다."
+  },
+  "multiplicity": {
+    "nominal_p": 0.2862,
+    "track20_proxies": 4,
+    "this_track_proxies": 4,
+    "family_size": 8,
+    "bonferroni_alpha": 0.00625,
+    "bonferroni_p": 1.0,
+    "survives": false,
+    "note": "트랙 20이 가치 대리변수로 검정한 넷과 여기서 검정하는 넷은 **같은 정렬을 반대 방향으로 읽은 것**이므로 한 족보로 센다. 다른 질문이라는 이유로 족보를 나누면 여덟 번 시도한 사실이 사라진다."
+  },
+  "record_only_below_the_ceiling": true,
+  "verdict": {
+    "axis_was_wrong": false,
+    "failed_conditions": [
+      "materially_higher_than_the_industry_axis",
+      "clears_the_absolute_floor",
+      "clears_the_information_ratio_floor"
+    ],
+    "duration_ceiling": 0.0252,
+    "industry_ceiling": 0.0464,
+    "ceiling_ratio": 0.543,
+    "share_organised_duration": 0.0692,
+    "share_organised_industry": 0.0767,
+    "statement": "**축을 바꿔도 천장이 오르지 않는다.** 국면을 완전히 알고 국면별 최고 통까지 알아도 이만큼이므로, **순환매 질문은 어떤 축으로 잘라도 닫힌다.** 업종이 잘못된 축이어서 3%였던 것이 아니다. **순환매 질문은 어떤 축으로 잘라도 닫히고, 이 계열은 여기서 끝난다.**"
+  }
+}

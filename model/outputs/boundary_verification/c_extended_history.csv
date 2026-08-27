@@ -1,0 +1,4 @@
+gate,persistence_weeks,persistence_band,slowdown_blocks,slowdown_discrimination,slowdown_p,slowdown_share,progression_rate,transitions,phases_shorter_than_four_weeks,contraction_delay_weeks,recovery_delay_weeks,nber_false_positive_episodes,expansion_discrimination,enough_blocks_to_call_it_a_state,weeks
+boundary:off,0,1.0,70,0.47,0.881,0.3956,0.129,162,13,0,0,12,2.142,True,2614
+persist13w,13,1.0,18,2.081,0.1043,0.0578,0.222,71,4,0,0,12,2.97,True,2614
+persist17w,17,1.0,16,3.078,0.0458,0.0455,0.25,67,6,0,0,12,2.961,True,2614

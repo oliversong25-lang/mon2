@@ -1,0 +1,5 @@
+case,phase_2026_08_14,broad,p_win,final_streak_weeks,recall,fpr,f1,phase_changes,multi_step_jumps,whipsaws
+candidate_H (기준),slowdown_late,slowdown,0.9851,133,0.8843,0.0222,0.8168,210,6,15
+no_low_radius_lock,recovery_early,recovery,0.9016,65,0.8843,0.0222,0.8168,242,32,13
+no_breadth_gate,slowdown_late,slowdown,0.8465,133,0.8843,0.0301,0.781,212,6,12
+no_lock_no_breadth,recovery_early,recovery,0.8504,65,0.8843,0.0301,0.781,246,32,14

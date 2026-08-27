@@ -1,0 +1,5 @@
+phase,weeks,episodes,mean_weekly,median_weekly,annualised_volatility,annualised_downside_volatility,large_negative_week_frequency,max_drawdown_within_phase,worst_drawdown_starting_in_phase,started_on,followed_weeks
+recovery,144,4,0.004575,0.006747,0.181,0.1906,0.0833,-0.1607,-0.1907,2002-07-05,52
+expansion,1280,17,0.00201,0.002675,0.1493,0.1539,0.0557,-0.245,-0.4698,2007-12-14,52
+slowdown,87,11,0.001881,0.006877,0.176,0.2061,0.092,-0.1939,-0.4262,2008-01-18,52
+contraction,164,5,-0.001407,0.003797,0.3129,0.3418,0.189,-0.5065,-0.5065,2008-05-23,52

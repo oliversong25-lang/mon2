@@ -1,0 +1,2327 @@
+{
+  "stage": "slowdown_boundary",
+  "frozen_model_modified": false,
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "reproduction": {
+    "weeks_compared": 1675,
+    "weeks_agreeing": 1675,
+    "reproduces": true
+  },
+  "natural_experiment": {
+    "by_phase": [
+      {
+        "phase": "recovery",
+        "gate": "breadth_and_persistence",
+        "weeks": 151,
+        "week_share": 0.0901,
+        "episodes": 4,
+        "closed_episodes": 4,
+        "median_episode_weeks": 36.5,
+        "episodes_shorter_than_four_weeks": 0,
+        "short_rate": 0.0,
+        "episodes_that_revert_to_the_previous_phase": 1,
+        "reversion_rate": 0.25
+      },
+      {
+        "phase": "expansion",
+        "gate": "none",
+        "weeks": 685,
+        "week_share": 0.409,
+        "episodes": 45,
+        "closed_episodes": 44,
+        "median_episode_weeks": 10.5,
+        "episodes_shorter_than_four_weeks": 1,
+        "short_rate": 0.023,
+        "episodes_that_revert_to_the_previous_phase": 37,
+        "reversion_rate": 0.841
+      },
+      {
+        "phase": "slowdown",
+        "gate": "none",
+        "weeks": 677,
+        "week_share": 0.4042,
+        "episodes": 44,
+        "closed_episodes": 44,
+        "median_episode_weeks": 12.0,
+        "episodes_shorter_than_four_weeks": 2,
+        "short_rate": 0.045,
+        "episodes_that_revert_to_the_previous_phase": 39,
+        "reversion_rate": 0.886
+      },
+      {
+        "phase": "contraction",
+        "gate": "breadth",
+        "weeks": 162,
+        "week_share": 0.0967,
+        "episodes": 5,
+        "closed_episodes": 5,
+        "median_episode_weeks": 15,
+        "episodes_shorter_than_four_weeks": 0,
+        "short_rate": 0.0,
+        "episodes_that_revert_to_the_previous_phase": 3,
+        "reversion_rate": 0.6
+      }
+    ],
+    "reading": {
+      "reversion_rate_by_gate": {
+        "breadth only (contraction)": 0.6,
+        "breadth + persistence (recovery)": 0.25,
+        "no gate (expansion)": 0.841,
+        "no gate (slowdown)": 0.886
+      },
+      "median_episode_weeks_by_gate": {
+        "breadth only (contraction)": 15,
+        "breadth + persistence (recovery)": 36.5,
+        "no gate (expansion)": 10.5,
+        "no gate (slowdown)": 12.0
+      },
+      "short_rate_by_gate": {
+        "breadth only (contraction)": 0.0,
+        "breadth + persistence (recovery)": 0.0,
+        "no gate (expansion)": 0.023,
+        "no gate (slowdown)": 0.045
+      },
+      "short_rate_discriminates_between_the_two_gate_kinds": false,
+      "why_not_short_rate": "게이트가 있는 두 국면 모두 4주 미만 비율이 0.0이라 이 지표로는 폭과 지속을 가를 수 없다. 그래서 되돌림과 지속 기간으로 읽는다.",
+      "gated_phases_revert_less_than_ungated": true,
+      "persistence_adds_over_breadth_alone": true,
+      "reading": "게이트가 되돌림을 줄인다 — 게이트 있는 두 국면 0.25·0.60 대 없는 두 국면 0.84·0.89. 그리고 **폭에 지속을 더하면 훨씬 더 줄어든다** — 0.60에서 0.25로, 중앙 지속은 15주에서 36.5주로. 후퇴기의 증상은 되돌림(44건 중 40건)이므로 **지속이 1순위이고 폭은 그 위에 얹는 보강이다.** 데드밴드는 지속의 값싼 근사이므로 함께 시험하되, 단독으로 채택할 근거는 이 표에 없다.",
+      "what_this_does_not_say": "회복과 침체는 게이트 말고도 다르다 — 서로 다른 경제 상태이고, 회복은 에피소드가 4건뿐이다. 그러므로 이 표는 후보를 **좁히는** 근거이지 확정하는 근거가 아니다. 확정은 2x2가 한다."
+    }
+  },
+  "selection_rule": {
+    "written_before_the_sweep": true,
+    "primary_metric": "slowdown discrimination ratio",
+    "why_primary": "비중과 진행률은 판별력 없이도 만들 수 있다 — 후퇴기를 드물게 만들면 비중은 저절로 내려간다. 판별력만이 '그 라벨이 붙은 주가 서로 닮았는가'를 직접 묻는다.",
+    "tie_break": "progression rate",
+    "target": "판별력이 1.0 이상이어야 '실제 상태가 됐다'고 부른다. 그 아래면 전이 건수가 줄어도 이름만 바꾼 것이다.",
+    "must_not_break": [
+      "침체·회복 인식이 기준선보다 늦어지지 않을 것",
+      "NBER 오탐 구간이 5건보다 늘지 않을 것",
+      "침체 폭 게이트(동행 도메인 >= 2)가 계속 성립할 것",
+      "동결 v1.1이 그대로 재현될 것"
+    ]
+  },
+  "sweep": [
+    {
+      "gate": "dead0.5",
+      "shape": {
+        "transitions": 79,
+        "phases_shorter_than_four_weeks": 7,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1043,
+          "slowdown": 323,
+          "contraction": 165
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.6227,
+          "slowdown": 0.1928,
+          "contraction": 0.0985
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1043,
+          "ratio_to_chance": 4.537,
+          "p_value": 0.0006
+        },
+        "slowdown": {
+          "weeks": 323,
+          "ratio_to_chance": 1.231,
+          "p_value": 0.3732
+        },
+        "contraction": {
+          "weeks": 165,
+          "ratio_to_chance": 2.005,
+          "p_value": 0.1399
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 34,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 31,
+        "progression_rate": 0.088,
+        "where_they_went": {
+          "expansion": 31,
+          "contraction": 3
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 123,
+        "recall": 0.918
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 229,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "dead1",
+      "shape": {
+        "transitions": 49,
+        "phases_shorter_than_four_weeks": 3,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1169,
+          "slowdown": 198,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.6979,
+          "slowdown": 0.1182,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1169,
+          "ratio_to_chance": 3.398,
+          "p_value": 0.0184
+        },
+        "slowdown": {
+          "weeks": 198,
+          "ratio_to_chance": 1.425,
+          "p_value": 0.2791
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 18,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 15,
+        "progression_rate": 0.167,
+        "where_they_went": {
+          "expansion": 15,
+          "contraction": 3
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 262,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "persist4w",
+      "shape": {
+        "transitions": 71,
+        "phases_shorter_than_four_weeks": 7,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1121,
+          "slowdown": 246,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.6693,
+          "slowdown": 0.1469,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1121,
+          "ratio_to_chance": 4.147,
+          "p_value": 0.0064
+        },
+        "slowdown": {
+          "weeks": 246,
+          "ratio_to_chance": 1.178,
+          "p_value": 0.4056
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 29,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 26,
+        "progression_rate": 0.103,
+        "where_they_went": {
+          "expansion": 26,
+          "contraction": 3
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 255,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "persist6w",
+      "shape": {
+        "transitions": 55,
+        "phases_shorter_than_four_weeks": 5,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1177,
+          "slowdown": 190,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.7027,
+          "slowdown": 0.1134,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1177,
+          "ratio_to_chance": 4.061,
+          "p_value": 0.0089
+        },
+        "slowdown": {
+          "weeks": 190,
+          "ratio_to_chance": 1.381,
+          "p_value": 0.295
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 21,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 18,
+        "progression_rate": 0.143,
+        "where_they_went": {
+          "expansion": 18,
+          "contraction": 3
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 273,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "persist9w",
+      "shape": {
+        "transitions": 43,
+        "phases_shorter_than_four_weeks": 3,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1221,
+          "slowdown": 146,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.729,
+          "slowdown": 0.0872,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1221,
+          "ratio_to_chance": 3.565,
+          "p_value": 0.0197
+        },
+        "slowdown": {
+          "weeks": 146,
+          "ratio_to_chance": 1.528,
+          "p_value": 0.246
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 15,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 12,
+        "progression_rate": 0.2,
+        "where_they_went": {
+          "expansion": 12,
+          "contraction": 3
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 284,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "persist13w",
+      "shape": {
+        "transitions": 38,
+        "phases_shorter_than_four_weeks": 4,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1260,
+          "slowdown": 107,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.7522,
+          "slowdown": 0.0639,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1260,
+          "ratio_to_chance": 3.619,
+          "p_value": 0.0235
+        },
+        "slowdown": {
+          "weeks": 107,
+          "ratio_to_chance": 2.421,
+          "p_value": 0.1214
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 12,
+        "progressed_to_contraction": 2,
+        "reverted_to_expansion": 10,
+        "progression_rate": 0.167,
+        "where_they_went": {
+          "expansion": 10,
+          "contraction": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 300,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "breadth2",
+      "shape": {
+        "transitions": 96,
+        "phases_shorter_than_four_weeks": 15,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 935,
+          "slowdown": 435,
+          "contraction": 161
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.5582,
+          "slowdown": 0.2597,
+          "contraction": 0.0961
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 935,
+          "ratio_to_chance": 3.869,
+          "p_value": 0.0057
+        },
+        "slowdown": {
+          "weeks": 435,
+          "ratio_to_chance": 0.637,
+          "p_value": 0.7959
+        },
+        "contraction": {
+          "weeks": 161,
+          "ratio_to_chance": 1.995,
+          "p_value": 0.157
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 43,
+        "progressed_to_contraction": 4,
+        "reverted_to_expansion": 39,
+        "progression_rate": 0.093,
+        "where_they_went": {
+          "expansion": 39,
+          "contraction": 4
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-03-20",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 41,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 120,
+        "recall": 0.896
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 186,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "breadth3",
+      "shape": {
+        "transitions": 73,
+        "phases_shorter_than_four_weeks": 15,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1144,
+          "slowdown": 224,
+          "contraction": 163
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.683,
+          "slowdown": 0.1337,
+          "contraction": 0.0973
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1144,
+          "ratio_to_chance": 5.702,
+          "p_value": 0.0006
+        },
+        "slowdown": {
+          "weeks": 224,
+          "ratio_to_chance": 2.179,
+          "p_value": 0.136
+        },
+        "contraction": {
+          "weeks": 163,
+          "ratio_to_chance": 2.007,
+          "p_value": 0.1488
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 30,
+        "progressed_to_contraction": 2,
+        "reverted_to_expansion": 28,
+        "progression_rate": 0.067,
+        "where_they_went": {
+          "expansion": 28,
+          "contraction": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 41,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 238,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "persist6w+breadth2",
+      "shape": {
+        "transitions": 50,
+        "phases_shorter_than_four_weeks": 4,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1191,
+          "slowdown": 176,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.711,
+          "slowdown": 0.1051,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1191,
+          "ratio_to_chance": 3.753,
+          "p_value": 0.0153
+        },
+        "slowdown": {
+          "weeks": 176,
+          "ratio_to_chance": 1.259,
+          "p_value": 0.3401
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 18,
+        "progressed_to_contraction": 2,
+        "reverted_to_expansion": 16,
+        "progression_rate": 0.111,
+        "where_they_went": {
+          "expansion": 16,
+          "contraction": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 276,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "persist9w+breadth2",
+      "shape": {
+        "transitions": 42,
+        "phases_shorter_than_four_weeks": 2,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1223,
+          "slowdown": 144,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.7301,
+          "slowdown": 0.086,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1223,
+          "ratio_to_chance": 3.586,
+          "p_value": 0.0216
+        },
+        "slowdown": {
+          "weeks": 144,
+          "ratio_to_chance": 1.478,
+          "p_value": 0.2606
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 14,
+        "progressed_to_contraction": 2,
+        "reverted_to_expansion": 12,
+        "progression_rate": 0.143,
+        "where_they_went": {
+          "expansion": 12,
+          "contraction": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 286,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "persist9w+breadth3",
+      "shape": {
+        "transitions": 46,
+        "phases_shorter_than_four_weeks": 8,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1255,
+          "slowdown": 112,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.7493,
+          "slowdown": 0.0669,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1255,
+          "ratio_to_chance": 3.991,
+          "p_value": 0.014
+        },
+        "slowdown": {
+          "weeks": 112,
+          "ratio_to_chance": 1.82,
+          "p_value": 0.1996
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 16,
+        "progressed_to_contraction": 2,
+        "reverted_to_expansion": 14,
+        "progression_rate": 0.125,
+        "where_they_went": {
+          "expansion": 14,
+          "contraction": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 300,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    },
+    {
+      "gate": "dead0.5+persist9w",
+      "shape": {
+        "transitions": 43,
+        "phases_shorter_than_four_weeks": 3,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1223,
+          "slowdown": 144,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.7301,
+          "slowdown": 0.086,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1223,
+          "ratio_to_chance": 3.593,
+          "p_value": 0.0223
+        },
+        "slowdown": {
+          "weeks": 144,
+          "ratio_to_chance": 1.534,
+          "p_value": 0.2473
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 15,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 12,
+        "progression_rate": 0.2,
+        "where_they_went": {
+          "expansion": 12,
+          "contraction": 3
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 285,
+      "current_call": "expansion",
+      "admissible": true,
+      "violations": []
+    }
+  ],
+  "ranked": [
+    "persist13w",
+    "breadth3",
+    "persist9w+breadth3",
+    "dead0.5+persist9w",
+    "persist9w",
+    "persist9w+breadth2",
+    "dead1",
+    "persist6w",
+    "persist6w+breadth2",
+    "dead0.5",
+    "persist4w",
+    "breadth2"
+  ],
+  "matrix": {
+    "baseline": {
+      "gate": "boundary:off · gate:off",
+      "shape": {
+        "transitions": 97,
+        "phases_shorter_than_four_weeks": 3,
+        "phase_weeks": {
+          "recovery": 151,
+          "expansion": 685,
+          "slowdown": 677,
+          "contraction": 162
+        },
+        "phase_shares": {
+          "recovery": 0.0901,
+          "expansion": 0.409,
+          "slowdown": 0.4042,
+          "contraction": 0.0967
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 151,
+          "ratio_to_chance": 1.862,
+          "p_value": 0.2441
+        },
+        "expansion": {
+          "weeks": 685,
+          "ratio_to_chance": 2.52,
+          "p_value": 0.0388
+        },
+        "slowdown": {
+          "weeks": 677,
+          "ratio_to_chance": 0.369,
+          "p_value": 0.9619
+        },
+        "contraction": {
+          "weeks": 162,
+          "ratio_to_chance": 2.008,
+          "p_value": 0.1532
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 44,
+        "progressed_to_contraction": 4,
+        "reverted_to_expansion": 40,
+        "progression_rate": 0.091,
+        "where_they_went": {
+          "expansion": 40,
+          "contraction": 4
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-03-20",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 120,
+        "recall": 0.896
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 144,
+      "current_call": "expansion"
+    },
+    "gate_only": {
+      "gate": "boundary:off · gate:on",
+      "shape": {
+        "transitions": 96,
+        "phases_shorter_than_four_weeks": 2,
+        "phase_weeks": {
+          "recovery": 152,
+          "expansion": 684,
+          "slowdown": 674,
+          "contraction": 165
+        },
+        "phase_shares": {
+          "recovery": 0.0907,
+          "expansion": 0.4084,
+          "slowdown": 0.4024,
+          "contraction": 0.0985
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 152,
+          "ratio_to_chance": 1.858,
+          "p_value": 0.2467
+        },
+        "expansion": {
+          "weeks": 684,
+          "ratio_to_chance": 2.528,
+          "p_value": 0.0394
+        },
+        "slowdown": {
+          "weeks": 674,
+          "ratio_to_chance": 0.338,
+          "p_value": 0.972
+        },
+        "contraction": {
+          "weeks": 165,
+          "ratio_to_chance": 2.054,
+          "p_value": 0.1386
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 43,
+        "progressed_to_contraction": 4,
+        "reverted_to_expansion": 39,
+        "progression_rate": 0.093,
+        "where_they_went": {
+          "expansion": 39,
+          "contraction": 4
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-03-20",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 45,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 120,
+        "recall": 0.896
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 143,
+      "current_call": "expansion"
+    },
+    "boundary_only": {
+      "gate": "persist13w · gate:off",
+      "shape": {
+        "transitions": 38,
+        "phases_shorter_than_four_weeks": 4,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1260,
+          "slowdown": 107,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.7522,
+          "slowdown": 0.0639,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1260,
+          "ratio_to_chance": 3.619,
+          "p_value": 0.0235
+        },
+        "slowdown": {
+          "weeks": 107,
+          "ratio_to_chance": 2.421,
+          "p_value": 0.1214
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 12,
+        "progressed_to_contraction": 2,
+        "reverted_to_expansion": 10,
+        "progression_rate": 0.167,
+        "where_they_went": {
+          "expansion": 10,
+          "contraction": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 300,
+      "current_call": "expansion"
+    },
+    "boundary_and_gate": {
+      "gate": "persist13w · gate:on",
+      "shape": {
+        "transitions": 37,
+        "phases_shorter_than_four_weeks": 3,
+        "phase_weeks": {
+          "recovery": 144,
+          "expansion": 1262,
+          "slowdown": 105,
+          "contraction": 164
+        },
+        "phase_shares": {
+          "recovery": 0.086,
+          "expansion": 0.7534,
+          "slowdown": 0.0627,
+          "contraction": 0.0979
+        },
+        "withheld_weeks": 0
+      },
+      "discrimination": {
+        "recovery": {
+          "weeks": 144,
+          "ratio_to_chance": 1.968,
+          "p_value": 0.2187
+        },
+        "expansion": {
+          "weeks": 1262,
+          "ratio_to_chance": 3.635,
+          "p_value": 0.0261
+        },
+        "slowdown": {
+          "weeks": 105,
+          "ratio_to_chance": 2.302,
+          "p_value": 0.1316
+        },
+        "contraction": {
+          "weeks": 164,
+          "ratio_to_chance": 2.022,
+          "p_value": 0.1411
+        }
+      },
+      "progression": {
+        "closed_slowdown_blocks": 11,
+        "progressed_to_contraction": 1,
+        "reverted_to_expansion": 10,
+        "progression_rate": 0.091,
+        "where_they_went": {
+          "expansion": 10,
+          "contraction": 1
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2001-03-02",
+              "variant_call": "2001-03-02",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2008-01-25",
+              "variant_call": "2008-01-25",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-03-20",
+              "variant_call": "2020-02-07",
+              "delay_weeks": -6
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2002-07-05",
+              "variant_call": "2002-07-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2009-06-05",
+              "variant_call": "2009-06-05",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-03",
+              "variant_call": "2020-07-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 42,
+        "false_positive_episodes": 5,
+        "recession_weeks_called_contraction": 122,
+        "recall": 0.91
+      },
+      "breadth_gate_holds": true,
+      "negative_level_expansion_weeks": 302,
+      "current_call": "expansion"
+    }
+  },
+  "realtime": {
+    "_reproduction": {
+      "weeks_compared": 688,
+      "weeks_agreeing": 688,
+      "reproduces": true
+    },
+    "baseline": {
+      "gate": "baseline",
+      "shape": {
+        "transitions": 72,
+        "phases_shorter_than_four_weeks": 19,
+        "phase_weeks": {
+          "recovery": 34,
+          "expansion": 288,
+          "slowdown": 338,
+          "contraction": 18
+        },
+        "phase_shares": {
+          "recovery": 0.0494,
+          "expansion": 0.4186,
+          "slowdown": 0.4913,
+          "contraction": 0.0262
+        },
+        "withheld_weeks": 10
+      },
+      "progression": {
+        "closed_slowdown_blocks": 37,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 32,
+        "progression_rate": 0.081,
+        "where_they_went": {
+          "expansion": 32,
+          "contraction": 3,
+          "": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 13,
+        "false_positive_episodes": 2,
+        "recession_weeks_called_contraction": 5,
+        "recall": 0.417
+      },
+      "breadth_gate_holds": true,
+      "current_call": "expansion"
+    },
+    "gate_only": {
+      "gate": "gate_only",
+      "shape": {
+        "transitions": 63,
+        "phases_shorter_than_four_weeks": 11,
+        "phase_weeks": {
+          "recovery": 34,
+          "expansion": 279,
+          "slowdown": 350,
+          "contraction": 15
+        },
+        "phase_shares": {
+          "recovery": 0.0494,
+          "expansion": 0.4055,
+          "slowdown": 0.5087,
+          "contraction": 0.0218
+        },
+        "withheld_weeks": 10
+      },
+      "progression": {
+        "closed_slowdown_blocks": 33,
+        "progressed_to_contraction": 1,
+        "reverted_to_expansion": 29,
+        "progression_rate": 0.03,
+        "where_they_went": {
+          "expansion": 29,
+          "contraction": 1,
+          "recovery": 1,
+          "": 2
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 11,
+        "false_positive_episodes": 1,
+        "recession_weeks_called_contraction": 4,
+        "recall": 0.333
+      },
+      "breadth_gate_holds": true,
+      "current_call": "expansion"
+    },
+    "boundary_only": {
+      "gate": "boundary_only",
+      "shape": {
+        "transitions": 28,
+        "phases_shorter_than_four_weeks": 9,
+        "phase_weeks": {
+          "recovery": 34,
+          "expansion": 577,
+          "slowdown": 49,
+          "contraction": 18
+        },
+        "phase_shares": {
+          "recovery": 0.0494,
+          "expansion": 0.8387,
+          "slowdown": 0.0712,
+          "contraction": 0.0262
+        },
+        "withheld_weeks": 10
+      },
+      "progression": {
+        "closed_slowdown_blocks": 13,
+        "progressed_to_contraction": 3,
+        "reverted_to_expansion": 9,
+        "progression_rate": 0.231,
+        "where_they_went": {
+          "expansion": 9,
+          "contraction": 3,
+          "": 1
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 13,
+        "false_positive_episodes": 2,
+        "recession_weeks_called_contraction": 5,
+        "recall": 0.417
+      },
+      "breadth_gate_holds": true,
+      "current_call": "expansion"
+    },
+    "boundary_and_gate": {
+      "gate": "boundary_and_gate",
+      "shape": {
+        "transitions": 22,
+        "phases_shorter_than_four_weeks": 6,
+        "phase_weeks": {
+          "recovery": 34,
+          "expansion": 579,
+          "slowdown": 50,
+          "contraction": 15
+        },
+        "phase_shares": {
+          "recovery": 0.0494,
+          "expansion": 0.8416,
+          "slowdown": 0.0727,
+          "contraction": 0.0218
+        },
+        "withheld_weeks": 10
+      },
+      "progression": {
+        "closed_slowdown_blocks": 10,
+        "progressed_to_contraction": 1,
+        "reverted_to_expansion": 8,
+        "progression_rate": 0.1,
+        "where_they_went": {
+          "expansion": 8,
+          "contraction": 1,
+          "": 1
+        }
+      },
+      "recognition": {
+        "contraction": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-04-03",
+              "variant_call": "2020-04-03",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        },
+        "recovery": {
+          "calls": [
+            {
+              "recession_start": "2001-03-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2007-12-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            },
+            {
+              "recession_start": "2020-02-01",
+              "baseline_call": "2020-07-17",
+              "variant_call": "2020-07-17",
+              "delay_weeks": 0
+            }
+          ],
+          "max_delay_weeks": 0,
+          "never_called_somewhere": false
+        }
+      },
+      "nber": {
+        "false_positive_weeks": 11,
+        "false_positive_episodes": 1,
+        "recession_weeks_called_contraction": 4,
+        "recall": 0.333
+      },
+      "breadth_gate_holds": true,
+      "current_call": "expansion"
+    }
+  },
+  "maturity": {
+    "before_boundary": {
+      "expansion_weeks": 685,
+      "negative_level_expansion_weeks": 144,
+      "weeks_where_the_level_condition_fired_before": 541,
+      "weeks_where_the_level_condition_fires_after": 538,
+      "negative_level_weeks_the_fix_unblocks": 43,
+      "share_of_negative_level_weeks_unblocked": 0.2986,
+      "positive_level_weeks_the_fix_removes": 46
+    },
+    "after_boundary": {
+      "expansion_weeks": 1260,
+      "negative_level_expansion_weeks": 300,
+      "weeks_where_the_level_condition_fired_before": 960,
+      "weeks_where_the_level_condition_fires_after": 881,
+      "negative_level_weeks_the_fix_unblocks": 96,
+      "share_of_negative_level_weeks_unblocked": 0.32,
+      "positive_level_weeks_the_fix_removes": 175
+    },
+    "relative_condition_was_tried_and_rejected": {
+      "why": "상대 수준 조건으로 갈아 끼우면 서술은 고쳐지지만 트랙 18의 검증이 무너진다 — 확장기 후반 적중률이 0.641에서 0.581로 내려가 경과 기간 대조군(0.610)에 진다. `level > 0`이 실제로 예측 일을 하고 있었다.",
+      "chosen_instead": "점수는 그대로 두고 서술 층에서 '정상 이하 확장'을 따로 표시한다. 결함이 애초에 서술 문제였으므로 그 층에서 고치는 것이 정확하다."
+    },
+    "current_week_reading": {
+      "stage": "초반",
+      "sub_normal": true,
+      "strength": "정상 이하",
+      "reads_as_early_but_is_weak": true,
+      "wording_prefix": "활동 수준이 정상 범위 아래에 머무는 확장기입니다. "
+    }
+  },
+  "verdict": {
+    "reproduces_v1_1": true,
+    "slowdown_became_a_real_state": true,
+    "gate_alone_moves_the_long_path": false,
+    "recommended": "persist13w",
+    "rule_mechanical_winner": "persist13w",
+    "gate_is_redundant_after_the_boundary_fix": true,
+    "statement": "후퇴기 경계가 결함이었다. persist13w 요건을 걸면 후퇴기 판별력이 0.369배에서 2.421배로 오르고 비중이 40.4%에서 6.4%로 내려가며, 침체·회복 인식은 한 주도 늦어지지 않는다. 전이 게이트는 경계를 고친 뒤에는 더할 것이 없다."
+  }
+}

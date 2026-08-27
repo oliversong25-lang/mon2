@@ -1,0 +1,13 @@
+horizon_weeks,phase,before,before_p,after,after_p,improved
+4,recovery,1.916,0.2333,2.446,0.1596,True
+4,expansion,2.65,0.0413,4.119,0.0038,True
+4,slowdown,0.453,0.9091,1.19,0.4126,True
+4,contraction,1.339,0.3325,1.482,0.2823,True
+13,recovery,1.862,0.2441,1.968,0.2187,True
+13,expansion,2.52,0.0388,3.619,0.0235,True
+13,slowdown,0.369,0.9619,2.421,0.1214,True
+13,contraction,2.008,0.1532,2.022,0.1411,True
+26,recovery,1.863,0.2467,2.039,0.2117,True
+26,expansion,2.504,0.0369,4.982,0.0006,True
+26,slowdown,0.38,0.9485,1.067,0.4603,True
+26,contraction,3.046,0.0788,3.21,0.0617,True

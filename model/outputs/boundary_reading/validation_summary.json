@@ -1,0 +1,617 @@
+{
+  "stage": "boundary_reading",
+  "frozen_model_modified": false,
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "executed_at_utc": "2026-08-26T03:13:42+00:00",
+  "chosen_gate": "persist17w",
+  "previous_gate": "persist13w",
+  "grid": [
+    "persist11w",
+    "persist13w",
+    "persist15w",
+    "persist17w",
+    "persist17w+band0.5",
+    "persist17w+band0.75",
+    "persist17w+band1.25",
+    "persist17w+band1.5",
+    "persist17w+band2",
+    "persist21w",
+    "persist5w",
+    "persist7w",
+    "persist9w"
+  ],
+  "corrected_significance": {
+    "chosen_gate": "persist17w",
+    "nominal": {
+      "observed": 0.0006261042939303298,
+      "offsets": 2511,
+      "ratio_to_chance": 3.078,
+      "nominal_p": 0.0458
+    },
+    "family_wise": {
+      "grid_size": 13,
+      "argmin_p_gate": "persist17w+band1.25",
+      "smallest_nominal_p_in_grid": 0.0307,
+      "family_wise_p": 0.0936,
+      "shift_draws": 2511,
+      "method": "min-P (격자 전체를 자기 귀무분포의 p로 옮긴 뒤 이동마다 최솟값)",
+      "note": "격자 안의 설정들은 서로 강하게 상관돼 있다. 같은 이동 오프셋을 모든 설정에 쓰므로 그 상관이 귀무분포에 보존되고, 본페로니보다 덜 보수적이면서 격자를 쓸었다는 사실을 반영한다."
+    },
+    "bonferroni": {
+      "nominal_p": 0.0458,
+      "grid_size": 13,
+      "bonferroni_p": 0.5954,
+      "survives_at_five_percent": false,
+      "note": "설정 간 상관을 전혀 인정하지 않는 상한이다. 이 격자의 설정들은 실제로 크게 겹치므로 이 값은 지나치게 보수적이며, 최댓값 보정과 함께 읽어야 한다."
+    },
+    "survives_correction": false,
+    "defences": [
+      "자연 실험이 격자를 돌리기 전에 '지속이 우선'을 가리켰다 — 지속을 흔든 것은 자료를 본 뒤의 착상이 아니다.",
+      "평탄역 판정 기준과 최소 블록 수는 격자를 돌리기 전에 코드에 있었다.",
+      "17주는 B(동결 창)에서 골랐고 C(확장 역사)는 그 뒤에 돌렸다 — C의 p가 17주를 고르게 한 것이 아니다."
+    ],
+    "statement": "확장 역사의 p=0.0458는 **지속 길이 8개와 중립대 배수 5개를 쓸어 고른 최댓값의 명목 p**다. 같은 격자를 이동 귀무분포에서도 쓸어 최솟값 p를 다시 뽑으면(min-P) 족보 전체 p는 0.0936이고, 본페로니 상한은 0.5954다. **보정하면 5% 문턱을 넘지 못한다 — '50년 역사에서 5% 유의'라고 단정해서는 안 되고, 방향이 강하다는 것까지가 이 자료가 받쳐 주는 말이다.**"
+  },
+  "grid_table": [
+    {
+      "gate": "persist17w+band1.25",
+      "discrimination": 3.456,
+      "nominal_p": 0.0307
+    },
+    {
+      "gate": "persist17w+band2",
+      "discrimination": 3.509,
+      "nominal_p": 0.0442
+    },
+    {
+      "gate": "persist17w",
+      "discrimination": 3.078,
+      "nominal_p": 0.0458
+    },
+    {
+      "gate": "persist15w",
+      "discrimination": 2.86,
+      "nominal_p": 0.049
+    },
+    {
+      "gate": "persist21w",
+      "discrimination": 3.153,
+      "nominal_p": 0.0525
+    },
+    {
+      "gate": "persist17w+band0.75",
+      "discrimination": 2.459,
+      "nominal_p": 0.0709
+    },
+    {
+      "gate": "persist17w+band0.5",
+      "discrimination": 2.166,
+      "nominal_p": 0.0999
+    },
+    {
+      "gate": "persist13w",
+      "discrimination": 2.081,
+      "nominal_p": 0.1043
+    },
+    {
+      "gate": "persist11w",
+      "discrimination": 1.578,
+      "nominal_p": 0.2337
+    },
+    {
+      "gate": "persist9w",
+      "discrimination": 1.451,
+      "nominal_p": 0.2679
+    },
+    {
+      "gate": "persist17w+band1.5",
+      "discrimination": 1.53,
+      "nominal_p": 0.2687
+    },
+    {
+      "gate": "persist7w",
+      "discrimination": 1.366,
+      "nominal_p": 0.2918
+    },
+    {
+      "gate": "persist5w",
+      "discrimination": 1.094,
+      "nominal_p": 0.4315
+    }
+  ],
+  "consumption_split": {
+    "split_at": "1992-01-01",
+    "why_here": "RRSFS가 이 시점부터라 소비 도메인 구성이 바뀐다. 앞쪽은 CMRMTSPL 하나로 서므로 **더 얇은 소비 도메인**으로 얻은 결과다.",
+    "whole": {
+      "weeks": 2614,
+      "discrimination": 3.078,
+      "p_value": 0.0458
+    },
+    "halves": [
+      {
+        "half": "pre_1992",
+        "first_week": "1976-07-16",
+        "last_week": "1991-12-27",
+        "weeks": 807,
+        "consumption_domain": "CMRMTSPL 단독",
+        "nber_recessions": [
+          "1980-01",
+          "1981-07",
+          "1990-07"
+        ],
+        "slowdown_weeks": 31,
+        "slowdown_share": 0.0384,
+        "slowdown_blocks": 4,
+        "progressed_to_contraction": 2,
+        "progression_rate": 0.5,
+        "discrimination": 1.015,
+        "p_value": 0.4922,
+        "enough_blocks_to_call_it_a_state": false
+      },
+      {
+        "half": "post_1992",
+        "first_week": "1992-01-03",
+        "last_week": "2026-08-14",
+        "weeks": 1807,
+        "consumption_domain": "CMRMTSPL + RRSFS",
+        "nber_recessions": [
+          "2001-03",
+          "2007-12",
+          "2020-02"
+        ],
+        "slowdown_weeks": 88,
+        "slowdown_share": 0.0487,
+        "slowdown_blocks": 12,
+        "progressed_to_contraction": 2,
+        "progression_rate": 0.167,
+        "discrimination": 3.555,
+        "p_value": 0.0323,
+        "enough_blocks_to_call_it_a_state": true
+      }
+    ],
+    "stronger_half": "post_1992",
+    "weaker_half": "pre_1992",
+    "carrying_halves": [
+      "post_1992"
+    ],
+    "halves_at_chance": [
+      "pre_1992"
+    ],
+    "thinner_consumption_domain_drove_the_result": false,
+    "halves_too_thin_to_call_a_state": [
+      "pre_1992"
+    ],
+    "reading": "**더 얇은 소비 도메인 쪽이 끈 것이 아니다.** 유의성은 post_1992에 있고, pre_1992는 우연과 구분되지 않는다. 그런데 그 방향은 확장 역사가 벌어 준 것이 아니다 — post_1992만 따로 보면 판별력이 전체(3.078)보다 높고, pre_1992 807주는 후퇴기 블록을 거의 더하지 못한 채 희석만 했다. **'50년 역사에서 유의'가 아니라 '1992년 이후 구간에서 유의'다.** pre_1992의 후퇴기 블록이 8개 아래라 그 반쪽의 숫자는 상태의 성질이 아니라 몇몇 구간의 성질이다."
+  },
+  "extended_episodes": [
+    {
+      "index": 1,
+      "start": "1979-10-12",
+      "end": "1979-10-26",
+      "weeks": 3,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "1980-01",
+      "weeks_until_recession": 9,
+      "near": true
+    },
+    {
+      "index": 2,
+      "start": "1982-09-10",
+      "end": "1982-09-24",
+      "weeks": 3,
+      "came_from": "expansion",
+      "went_to": "contraction",
+      "outcome": "progressed",
+      "next_nber_recession": "1990-07",
+      "weeks_until_recession": 405,
+      "near": false
+    },
+    {
+      "index": 3,
+      "start": "1989-05-26",
+      "end": "1989-09-29",
+      "weeks": 19,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "1990-07",
+      "weeks_until_recession": 39,
+      "near": false
+    },
+    {
+      "index": 4,
+      "start": "1990-07-20",
+      "end": "1990-08-24",
+      "weeks": 6,
+      "came_from": "expansion",
+      "went_to": "contraction",
+      "outcome": "progressed",
+      "next_nber_recession": "2001-03",
+      "weeks_until_recession": 548,
+      "near": false
+    },
+    {
+      "index": 5,
+      "start": "1993-05-07",
+      "end": "1993-05-21",
+      "weeks": 3,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2001-03",
+      "weeks_until_recession": 405,
+      "near": false
+    },
+    {
+      "index": 6,
+      "start": "1995-05-05",
+      "end": "1995-07-14",
+      "weeks": 11,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2001-03",
+      "weeks_until_recession": 293,
+      "near": false
+    },
+    {
+      "index": 7,
+      "start": "1998-08-28",
+      "end": "1998-08-28",
+      "weeks": 1,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2001-03",
+      "weeks_until_recession": 130,
+      "near": false
+    },
+    {
+      "index": 8,
+      "start": "2000-07-21",
+      "end": "2000-12-29",
+      "weeks": 24,
+      "came_from": "expansion",
+      "went_to": "contraction",
+      "outcome": "progressed",
+      "next_nber_recession": "2001-03",
+      "weeks_until_recession": 8,
+      "near": true
+    },
+    {
+      "index": 9,
+      "start": "2005-10-21",
+      "end": "2005-11-11",
+      "weeks": 4,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2007-12",
+      "weeks_until_recession": 107,
+      "near": false
+    },
+    {
+      "index": 10,
+      "start": "2007-09-07",
+      "end": "2007-10-05",
+      "weeks": 5,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2007-12",
+      "weeks_until_recession": 8,
+      "near": true
+    },
+    {
+      "index": 11,
+      "start": "2008-01-11",
+      "end": "2008-01-25",
+      "weeks": 3,
+      "came_from": "expansion",
+      "went_to": "contraction",
+      "outcome": "progressed",
+      "next_nber_recession": "2020-02",
+      "weeks_until_recession": 627,
+      "near": false
+    },
+    {
+      "index": 12,
+      "start": "2018-12-21",
+      "end": "2019-04-12",
+      "weeks": 17,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2020-02",
+      "weeks_until_recession": 42,
+      "near": false
+    },
+    {
+      "index": 13,
+      "start": "2019-07-05",
+      "end": "2019-08-16",
+      "weeks": 7,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2020-02",
+      "weeks_until_recession": 24,
+      "near": true
+    },
+    {
+      "index": 14,
+      "start": "2022-07-15",
+      "end": "2022-08-05",
+      "weeks": 4,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": null,
+      "weeks_until_recession": null,
+      "near": false
+    },
+    {
+      "index": 15,
+      "start": "2023-01-13",
+      "end": "2023-02-03",
+      "weeks": 4,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": null,
+      "weeks_until_recession": null,
+      "near": false
+    },
+    {
+      "index": 16,
+      "start": "2025-12-05",
+      "end": "2026-01-02",
+      "weeks": 5,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": null,
+      "weeks_until_recession": null,
+      "near": false
+    }
+  ],
+  "extended_episode_summary": {
+    "blocks": 16,
+    "closed_blocks": 16,
+    "progressed_to_contraction": 4,
+    "reverted_to_expansion": 12,
+    "reverted_but_within_six_months_of_a_recession": 3,
+    "forewarning_blocks": 7,
+    "forewarning_share": 0.438,
+    "median_weeks": 5.0,
+    "shortest_weeks": 1,
+    "longest_weeks": 24,
+    "near_recession_weeks": 26,
+    "precision_reading": "닫힌 블록의 절반 이상이 침체와 무관하게 확장기로 되돌아갔다."
+  },
+  "extended_recession_coverage": {
+    "recessions_in_window": 6,
+    "preceded_by_a_slowdown_block": 4,
+    "coverage": 0.667,
+    "lead_weeks_window": 26,
+    "detail": [
+      {
+        "recession": "1980-01",
+        "preceded_by_slowdown": true,
+        "lead_weeks": 9
+      },
+      {
+        "recession": "1981-07",
+        "preceded_by_slowdown": false,
+        "lead_weeks": null
+      },
+      {
+        "recession": "1990-07",
+        "preceded_by_slowdown": false,
+        "lead_weeks": null
+      },
+      {
+        "recession": "2001-03",
+        "preceded_by_slowdown": true,
+        "lead_weeks": 8
+      },
+      {
+        "recession": "2007-12",
+        "preceded_by_slowdown": true,
+        "lead_weeks": 8
+      },
+      {
+        "recession": "2020-02",
+        "preceded_by_slowdown": true,
+        "lead_weeks": 24
+      }
+    ]
+  },
+  "extended_definition": {
+    "precision": 0.438,
+    "recall": 0.667,
+    "reads_as_a_transition_phase": false,
+    "statement": "후퇴기는 **확장기 안의 감속**이며, 그중 일부가 침체의 전조였다. 블록 하나를 보고 침체를 말할 수는 없지만(닫힌 블록 16개 중 7개), 실제 침체는 대부분 후퇴기를 앞에 두었다(4/6회). **필요조건에 가깝고 충분조건이 아니다.** 화면 문구는 이 정의에 맞춰야 하고, 둘을 섞어 쓰면 안 된다."
+  },
+  "frozen_window_episodes": [
+    {
+      "index": 1,
+      "start": "1995-04-28",
+      "end": "1995-07-21",
+      "weeks": 13,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2001-03",
+      "weeks_until_recession": 292,
+      "near": false
+    },
+    {
+      "index": 2,
+      "start": "1998-08-28",
+      "end": "1998-08-28",
+      "weeks": 1,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2001-03",
+      "weeks_until_recession": 130,
+      "near": false
+    },
+    {
+      "index": 3,
+      "start": "2000-07-28",
+      "end": "2001-01-19",
+      "weeks": 26,
+      "came_from": "expansion",
+      "went_to": "contraction",
+      "outcome": "progressed",
+      "next_nber_recession": "2001-03",
+      "weeks_until_recession": 5,
+      "near": true
+    },
+    {
+      "index": 4,
+      "start": "2005-10-21",
+      "end": "2005-11-11",
+      "weeks": 4,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2007-12",
+      "weeks_until_recession": 107,
+      "near": false
+    },
+    {
+      "index": 5,
+      "start": "2007-09-07",
+      "end": "2007-10-05",
+      "weeks": 5,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2007-12",
+      "weeks_until_recession": 8,
+      "near": true
+    },
+    {
+      "index": 6,
+      "start": "2008-01-18",
+      "end": "2008-01-18",
+      "weeks": 1,
+      "came_from": "expansion",
+      "went_to": "contraction",
+      "outcome": "progressed",
+      "next_nber_recession": "2020-02",
+      "weeks_until_recession": 628,
+      "near": false
+    },
+    {
+      "index": 7,
+      "start": "2018-12-21",
+      "end": "2019-04-12",
+      "weeks": 17,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2020-02",
+      "weeks_until_recession": 42,
+      "near": false
+    },
+    {
+      "index": 8,
+      "start": "2019-07-05",
+      "end": "2019-08-16",
+      "weeks": 7,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": "2020-02",
+      "weeks_until_recession": 24,
+      "near": true
+    },
+    {
+      "index": 9,
+      "start": "2022-07-15",
+      "end": "2022-08-05",
+      "weeks": 4,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": null,
+      "weeks_until_recession": null,
+      "near": false
+    },
+    {
+      "index": 10,
+      "start": "2023-01-13",
+      "end": "2023-02-03",
+      "weeks": 4,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": null,
+      "weeks_until_recession": null,
+      "near": false
+    },
+    {
+      "index": 11,
+      "start": "2025-12-05",
+      "end": "2026-01-02",
+      "weeks": 5,
+      "came_from": "expansion",
+      "went_to": "expansion",
+      "outcome": "reverted",
+      "next_nber_recession": null,
+      "weeks_until_recession": null,
+      "near": false
+    }
+  ],
+  "frozen_window_episode_summary": {
+    "blocks": 11,
+    "closed_blocks": 11,
+    "progressed_to_contraction": 2,
+    "reverted_to_expansion": 9,
+    "reverted_but_within_six_months_of_a_recession": 2,
+    "forewarning_blocks": 4,
+    "forewarning_share": 0.364,
+    "median_weeks": 5.0,
+    "shortest_weeks": 1,
+    "longest_weeks": 26,
+    "near_recession_weeks": 26,
+    "precision_reading": "닫힌 블록의 절반 이상이 침체와 무관하게 확장기로 되돌아갔다."
+  },
+  "frozen_window_recession_coverage": {
+    "recessions_in_window": 3,
+    "preceded_by_a_slowdown_block": 3,
+    "coverage": 1.0,
+    "lead_weeks_window": 26,
+    "detail": [
+      {
+        "recession": "2001-03",
+        "preceded_by_slowdown": true,
+        "lead_weeks": 5
+      },
+      {
+        "recession": "2007-12",
+        "preceded_by_slowdown": true,
+        "lead_weeks": 8
+      },
+      {
+        "recession": "2020-02",
+        "preceded_by_slowdown": true,
+        "lead_weeks": 24
+      }
+    ]
+  },
+  "frozen_window_definition": {
+    "precision": 0.364,
+    "recall": 1.0,
+    "reads_as_a_transition_phase": false,
+    "statement": "후퇴기는 **확장기 안의 감속**이며, 그중 일부가 침체의 전조였다. 블록 하나를 보고 침체를 말할 수는 없지만(닫힌 블록 11개 중 4개), 실제 침체는 대부분 후퇴기를 앞에 두었다(3/3회). **필요조건에 가깝고 충분조건이 아니다.** 화면 문구는 이 정의에 맞춰야 하고, 둘을 섞어 쓰면 안 된다."
+  },
+  "extended_weeks": 2614,
+  "frozen_weeks": 1675
+}

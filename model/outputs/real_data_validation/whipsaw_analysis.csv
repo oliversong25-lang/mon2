@@ -1,0 +1,38 @@
+date,path,x,y,radius,release_count,diagnosed_cause
+1996-08-09,expansion_late -> slowdown_early -> expansion_late,0.06116268170413848,1.2283901746012993,1.2299119052559222,3,release-week step effect
+1996-08-16,slowdown_early -> expansion_late -> slowdown_early,0.12726763633896448,1.259551019865382,1.2659643845318995,3,release-week step effect
+1997-10-10,expansion_late -> slowdown_early -> expansion_late,0.051800141859722273,1.3664174921523446,1.3673989972047624,3,release-week step effect
+1998-08-14,slowdown_mid -> slowdown_late -> slowdown_mid,-1.3842312459211654,0.8989514009817293,1.6505180288356367,3,release-week step effect
+1999-05-14,slowdown_early -> slowdown_mid -> slowdown_early,-0.7304620733797804,0.8807437758977472,1.1442396774403991,3,release-week step effect
+1999-12-31,expansion_late -> expansion_mid -> expansion_late,0.7171971424251822,0.9985615596528188,1.2294295138474254,3,release-week step effect
+2001-12-07,contraction_late -> recovery_early -> contraction_late,0.234117864216469,-1.336993639279686,1.3573367915958148,2,release-week step effect
+2005-04-08,contraction_late -> recovery_early -> contraction_late,0.02852704890611655,-0.45363470961425756,0.4545307935510022,3,origin uncertainty
+2006-11-17,contraction_late -> recovery_early -> contraction_late,0.044026154613286204,-0.5100969244567174,0.511993334556452,5,origin uncertainty
+2007-04-13,recovery_early -> recovery_mid -> recovery_early,0.4185657882593174,-0.45131895713603004,0.6155372613997445,3,origin uncertainty
+2007-06-15,recovery_early -> recovery_mid -> recovery_early,0.35937767492262684,-0.43358397832770784,0.563158396452788,3,origin uncertainty
+2010-11-26,recovery_mid -> recovery_early -> recovery_mid,0.6146060571207552,-1.3954925557161568,1.5248410010583833,2,release-week step effect
+2011-09-09,recovery_mid -> recovery_early -> recovery_mid,0.31333772445428637,-0.9854440154157332,1.0340601709208581,3,release-week step effect
+2011-09-16,recovery_early -> recovery_mid -> recovery_early,0.5881972533523958,-0.9828677056518281,1.1454278395711321,3,release-week step effect
+2012-03-16,recovery_mid -> recovery_late -> recovery_mid,1.2032174604445034,-0.6240032450140985,1.3554011608769727,2,release-week step effect
+2012-09-14,contraction_late -> recovery_early -> contraction_late,0.14187711567702863,-0.7315211801748007,0.7451525702815271,3,origin uncertainty
+2013-04-12,contraction_late -> recovery_early -> contraction_late,0.05606122556983787,-0.628220913095116,0.630717350849375,3,origin uncertainty
+2014-07-11,recovery_mid -> recovery_late -> recovery_mid,0.5219383176462655,-0.29924782583084103,0.6016384867109976,3,origin uncertainty
+2014-10-10,recovery_mid -> recovery_late -> recovery_mid,0.33980973603450837,-0.2087816812364257,0.3988238296839229,3,origin uncertainty
+2015-01-16,recovery_mid -> recovery_late -> recovery_mid,0.3965150657015419,-0.15009371652482245,0.4239720758122306,3,origin uncertainty
+2015-02-13,recovery_mid -> recovery_late -> recovery_mid,0.6149275868840283,-0.13046364266462968,0.6286149053023944,3,origin uncertainty
+2016-02-05,contraction_late -> contraction_mid -> contraction_late,-0.4114510696993483,-0.34902544429391347,0.5395467945612333,2,origin uncertainty
+2016-05-06,recovery_early -> contraction_late -> recovery_early,-0.26663214441390276,-0.35021292477833627,0.4401610990496013,2,origin uncertainty
+2016-05-13,contraction_late -> recovery_early -> contraction_late,0.06671830569607168,-0.36793178438748847,0.37393198616528617,3,origin uncertainty
+2017-03-31,recovery_late -> recovery_mid -> recovery_late,0.216363754835458,-0.24668025439557778,0.3281225720903168,3,origin uncertainty
+2017-09-08,contraction_late -> contraction_mid -> contraction_late,-0.30423879532093323,-0.30525295850173295,0.4309763488318047,3,origin uncertainty
+2019-06-07,contraction_late -> contraction_mid -> contraction_late,-0.5095556501474188,-0.18618030940672034,0.542503519074246,2,origin uncertainty
+2019-06-14,contraction_mid -> contraction_late -> contraction_mid,-0.03619510096031615,-0.171963709777127,0.17573162155354807,3,origin uncertainty
+2021-03-05,recovery_mid -> recovery_early -> recovery_mid,0.3674231458117201,-0.8486009385055056,0.9247287823522123,3,release-week step effect
+2021-10-01,recovery_mid -> recovery_early -> recovery_mid,-0.07221599760199324,-0.040478012446643175,0.0827865919173008,3,origin uncertainty
+2022-07-15,slowdown_late -> slowdown_mid -> slowdown_late,-0.05761169797517137,0.17635455677052098,0.18552637935697788,2,origin uncertainty
+2022-08-12,slowdown_late -> slowdown_mid -> slowdown_late,-0.012761304273236978,0.12054678266793824,0.12122036833117308,3,origin uncertainty
+2022-08-19,slowdown_mid -> slowdown_late -> slowdown_mid,-0.14833665430731172,0.08581434833781032,0.1713705499545647,5,origin uncertainty
+2023-07-07,contraction_late -> contraction_mid -> contraction_late,-0.2477687487122687,-0.17242658419789,0.3018613585349993,2,origin uncertainty
+2024-03-08,contraction_late -> contraction_mid -> contraction_late,-0.2294060746712042,-0.17862136670630274,0.29074514568617926,3,origin uncertainty
+2025-01-10,recovery_early -> recovery_mid -> recovery_early,0.10462507336959406,-0.21557297514593382,0.23962077036613988,3,origin uncertainty
+2026-07-10,recovery_early -> contraction_late -> recovery_early,-0.10485711135137628,-0.41305992305499933,0.426161370651021,3,origin uncertainty

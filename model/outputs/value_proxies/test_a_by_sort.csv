@@ -1,0 +1,16 @@
+sort,label,family,window,months,thin,annualised,annualised_volatility,sharpe,hac_t,months_positive
+book_to_market,장부가/시가 (B/M),value,full Fama-French sample,1200,False,0.0299,0.1417,0.276,2.517,0.5058
+book_to_market,장부가/시가 (B/M),value,revised label window,384,False,0.0012,0.1245,0.072,0.346,0.5
+book_to_market,장부가/시가 (B/M),value,real-time window,157,False,-0.0239,0.1435,-0.097,-0.314,0.4268
+earnings_to_price,이익/가격 (E/P),value,full Fama-French sample,900,False,0.0368,0.1052,0.397,2.985,0.5511
+earnings_to_price,이익/가격 (E/P),value,revised label window,384,False,0.0054,0.1152,0.105,0.509,0.5156
+earnings_to_price,이익/가격 (E/P),value,real-time window,157,False,-0.0387,0.1332,-0.228,-0.845,0.4713
+cashflow_to_price,현금흐름/가격 (CF/P),value,full Fama-French sample,900,False,0.0249,0.105,0.287,2.276,0.5456
+cashflow_to_price,현금흐름/가격 (CF/P),value,revised label window,384,False,-0.0092,0.1139,-0.024,-0.128,0.5052
+cashflow_to_price,현금흐름/가격 (CF/P),value,real-time window,157,False,-0.052,0.1278,-0.353,-1.279,0.4395
+dividend_yield,배당수익률 (D/P),value,full Fama-French sample,1188,False,0.0021,0.1306,0.081,0.743,0.4949
+dividend_yield,배당수익률 (D/P),value,revised label window,384,False,-0.0142,0.1289,-0.046,-0.242,0.4688
+dividend_yield,배당수익률 (D/P),value,real-time window,157,False,-0.0502,0.1301,-0.33,-1.152,0.4331
+operating_profitability,영업이익률 (OP) — 가치 대리 변수 아님,profitability,full Fama-French sample,756,False,0.0227,0.0899,0.294,2.126,0.5238
+operating_profitability,영업이익률 (OP) — 가치 대리 변수 아님,profitability,revised label window,384,False,0.0318,0.1046,0.352,1.825,0.5521
+operating_profitability,영업이익률 (OP) — 가치 대리 변수 아님,profitability,real-time window,157,False,0.0258,0.0942,0.318,1.089,0.5987

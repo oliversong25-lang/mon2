@@ -1,0 +1,3 @@
+method,first_contraction_lag_weeks,confirmed_contraction_lag_weeks,minimum_x,minimum_y,maximum_recession_probability,multi_step_jumps,active_negative_domains,domain_absolute_contributions
+old,2.0,5.0,-23.649757776167387,-5.691025444496581,1.0,4,5,"{""weekly_bridge"": 30.84663015043379, ""consumption"": 8.74623056066432, ""production"": 10.181396065957456, ""employment"": 9.623848522308457, ""income"": 2.917390551292946}"
+robust,2.0,5.0,-15.546938641310284,-4.230559357894419,1.0000000000000002,7,5,"{""weekly_bridge"": 18.848997746864686, ""consumption"": 20.77432005325759, ""production"": 15.787677107134861, ""employment"": 15.271678543236753, ""income"": 11.84250254284681}"

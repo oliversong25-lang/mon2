@@ -1,0 +1,10 @@
+axis,buckets,periods,ranking_ceiling_annual,ranking_ceiling_ir,oracle_annual,share_organised_by_phase,achievable_annual,equal_weight_annual
+"industry (FF12, monthly)",12,384,0.0464,0.626,0.6047,0.0767,0.0142,-0.0026
+dividend_yield (primary),11,384,0.0252,0.466,0.3644,0.0692,-0.0074,0.0024
+dividend_yield (secondary),6,384,0.0151,0.37,0.1972,0.0766,-0.003,0.0031
+earnings_to_price (primary),11,384,0.026,0.471,0.3527,0.0737,-0.0154,0.0075
+earnings_to_price (secondary),6,384,0.0201,0.434,0.2043,0.0984,-0.0124,0.0074
+cashflow_to_price (primary),11,384,0.0341,0.763,0.3563,0.0957,-0.008,0.0056
+cashflow_to_price (secondary),6,384,0.0213,0.538,0.2001,0.1064,-0.0084,0.0033
+book_to_market (primary),11,384,0.034,0.562,0.3291,0.1033,-0.0042,0.0057
+book_to_market (secondary),6,384,0.0215,0.457,0.1859,0.1157,0.0007,0.0053

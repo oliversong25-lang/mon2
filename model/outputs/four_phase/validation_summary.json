@@ -1,0 +1,179 @@
+{
+  "model": "us_four_phase_v1",
+  "status": "development_locked_not_validated",
+  "frozen_config_sha256": "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027",
+  "development_window": [
+    "1995-01-01",
+    "2012-12-31"
+  ],
+  "development_weeks": 939,
+  "development_metrics": {
+    "recall": 0.654867,
+    "false_positive_rate": 0.010896,
+    "precision": 0.891566,
+    "f1": 0.755102,
+    "one_step_transitions": 72,
+    "two_step_transitions": 0,
+    "three_week_whipsaws": 10,
+    "longest_run_weeks": 62,
+    "phase_share": {
+      "expansion": 0.42279,
+      "slowdown": 0.374867,
+      "recovery": 0.113951,
+      "contraction": 0.088392
+    },
+    "phases_reached": [
+      "contraction",
+      "expansion",
+      "recovery",
+      "slowdown"
+    ]
+  },
+  "gate_feasibility": {
+    "negative_level_domains_at_least_0": {
+      "feasible": true,
+      "best_recall": 0.858407,
+      "best_false_positive_rate": 0.014528,
+      "level_threshold": -0.6,
+      "momentum_threshold": -0.65
+    },
+    "negative_level_domains_at_least_1": {
+      "feasible": true,
+      "best_recall": 0.858407,
+      "best_false_positive_rate": 0.014528,
+      "level_threshold": -0.6,
+      "momentum_threshold": -0.65
+    },
+    "negative_level_domains_at_least_2": {
+      "feasible": false
+    },
+    "negative_level_domains_at_least_3": {
+      "feasible": false
+    }
+  },
+  "gate_contradiction": true,
+  "stop_reason": "§9는 한 동행 도메인 단독 침체 선언을 금지한다. 그 금지를 지키려면 음수 동행 도메인 2개 이상을 요구해야 하는데, 개발구간에서 그 조건 아래 재현율 0.85 이상과 오탐률 0.05 이하를 동시에 만족하는 규칙이 존재하지 않는다. 임계값 선택의 문제가 아니라 정의와 게이트의 모순이다.",
+  "adoption_gates": {
+    "recession_recall_minimum": 0.85,
+    "core_recession_recall_minimum": 0.9,
+    "false_positive_rate_maximum": 0.05,
+    "two_step_transitions_maximum": 5,
+    "three_week_whipsaws_maximum": 5,
+    "gfc_first_signal_maximum_weeks": 10,
+    "pandemic_first_signal_maximum_weeks": 10,
+    "pandemic_recession_weeks_as_contraction_minimum": 1,
+    "late_2019_confirmed_contraction_maximum": 0,
+    "post_2022_confirmed_contraction_maximum": 0,
+    "all_phases_reachable": true,
+    "no_zero_transition_support": true
+  },
+  "bounded_aggregate": {
+    "level": {
+      "weeks": 1675,
+      "capped_weeks": 83,
+      "capped_share": 0.049552,
+      "capped_weeks_in_recession": 49,
+      "capped_share_in_recession": 0.404959,
+      "capped_share_normal": 0.021879,
+      "median_removed_when_capped": 0.853014,
+      "largest_domain_before_max": 37.121336,
+      "largest_domain_after_max": 3.7763,
+      "aggregate_uncapped_min": -13.792313,
+      "aggregate_bounded_min": -3.7763,
+      "correlation_with_uncapped": 0.882252
+    },
+    "momentum": {
+      "weeks": 1675,
+      "capped_weeks": 145,
+      "capped_share": 0.086567,
+      "capped_weeks_in_recession": 37,
+      "capped_share_in_recession": 0.305785,
+      "capped_share_normal": 0.069498,
+      "median_removed_when_capped": 2.33651,
+      "largest_domain_before_max": 141.752781,
+      "largest_domain_after_max": 3.7547,
+      "aggregate_uncapped_min": -71.620001,
+      "aggregate_bounded_min": -3.7547,
+      "correlation_with_uncapped": 0.557771
+    }
+  },
+  "release_carry": {
+    "domain_weeks_without_new_observation": 0.607164,
+    "domain_weeks_with_exact_zero_momentum": 0
+  },
+  "soft_filter": {
+    "lambda": 1.8,
+    "epsilon": 0.01,
+    "ergodic": true,
+    "minimum_entry": 0.02669944,
+    "matrix": [
+      [
+        0.722501,
+        0.1254,
+        0.026699,
+        0.1254
+      ],
+      [
+        0.1254,
+        0.722501,
+        0.1254,
+        0.026699
+      ],
+      [
+        0.026699,
+        0.1254,
+        0.722501,
+        0.1254
+      ],
+      [
+        0.1254,
+        0.026699,
+        0.1254,
+        0.722501
+      ]
+    ]
+  },
+  "finite_memory_convergence": {
+    "after_4_weeks": {
+      "distinct_final_states": 1,
+      "converged": true,
+      "final_states": [
+        "expansion"
+      ]
+    },
+    "after_13_weeks": {
+      "distinct_final_states": 1,
+      "converged": true,
+      "final_states": [
+        "expansion"
+      ]
+    },
+    "after_26_weeks": {
+      "distinct_final_states": 1,
+      "converged": true,
+      "final_states": [
+        "expansion"
+      ]
+    },
+    "after_52_weeks": {
+      "distinct_final_states": 1,
+      "converged": true,
+      "final_states": [
+        "expansion"
+      ]
+    }
+  },
+  "raw_official_disagreement_rate": 0.087327,
+  "longest_disagreement_run": 7,
+  "latest_vintage_validation_run": false,
+  "strict_alfred_run": false,
+  "strict_alfred_reason": "§19에 따라 최신 수정치 필수 게이트를 통과해야 실행한다. 게이트 모순으로 검증 자체를 시작하지 않았다.",
+  "adopted": false,
+  "current_reading_is_unvalidated": true,
+  "current": {
+    "as_of": "2026-08-14",
+    "official_current_phase": "expansion",
+    "raw_current_phase": "expansion",
+    "evidence_quality": "medium"
+  }
+}

@@ -1,0 +1,588 @@
+{
+  "stage": "value_proxy_sweep",
+  "frozen_model_modified": false,
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "executed_at_utc": "2026-08-25T09:20:07+00:00",
+  "frequency": "monthly",
+  "windows": {
+    "revised label window": {
+      "months": 384,
+      "first": "1994-07",
+      "last": "2026-06"
+    },
+    "real-time window": {
+      "months": 157,
+      "first": "2013-06",
+      "last": "2026-06"
+    }
+  },
+  "data_use": "Fama-French 자료는 내부 검증 전용이며 제품에 실리지 않는다.",
+  "test_a": {
+    "rule": {
+      "written_before_running": true,
+      "decision_window": "revised label window",
+      "why_this_window": "전체 Fama-French 역사에 프리미엄이 있어도 그 구간에는 우리 국면 라벨이 없어서 검정 B를 열 수 없다. 실시간 창은 681주에 침체·회복이 코로나 한 에피소드뿐이라 판정하기에 너무 짧다.",
+      "primary_sort": "Hi 30 - Lo 30 (가치가중 3분위)",
+      "secondary_sort": "Hi 10 - Lo 10 (가치가중 10분위, 참고)",
+      "passes_nominally_if": "판정 창에서 연율 스프레드가 양이고 HAC t >= 2.0",
+      "value_definitions_tested_project_wide": [
+        "book-to-market (Track 19)",
+        "earnings-to-price (Track 20)",
+        "cashflow-to-price (Track 20)",
+        "dividend yield (Track 20)"
+      ],
+      "family_size": 4,
+      "family_alpha_bonferroni": 0.0125,
+      "passes_after_multiplicity_if": "판정 창에서 연율 스프레드가 양이고 HAC t >= 2.5",
+      "operating_profitability_excluded_from_the_family": "영업이익률은 수익성 요인이지 가치 대리 변수가 아니다. 따로 싣고 가치 결론에 접어 넣지 않으며, 보정 가족에도 넣지 않는다.",
+      "monthly_hac_lags": 6,
+      "monthly_hac_lags_note": "이익/가격 등의 정렬이 일간으로 제공되지 않아 월간으로 돌렸다. 6개월 지연은 자료를 본 뒤 정했지만, 지연을 늘리면 표준오차가 넓어져 통과가 더 어려워지므로 문턱을 무르게 하지 않는다.",
+      "test_b_opens_only_if": "다중비교 보정을 통과한 대리 변수가 하나 이상 있을 때만. 없으면 B를 돌리지 않는다."
+    },
+    "sorts": [
+      {
+        "sort": "book_to_market",
+        "label": "장부가/시가 (B/M)",
+        "family": "value",
+        "is_value_proxy": true,
+        "first_month": "1926-07",
+        "profiles": [
+          {
+            "window": "full Fama-French sample",
+            "months": 1200,
+            "thin": false,
+            "annualised": 0.0299,
+            "annualised_volatility": 0.1417,
+            "sharpe": 0.276,
+            "hac_t": 2.517,
+            "months_positive": 0.5058
+          },
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": 0.0012,
+            "annualised_volatility": 0.1245,
+            "sharpe": 0.072,
+            "hac_t": 0.346,
+            "months_positive": 0.5
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": -0.0239,
+            "annualised_volatility": 0.1435,
+            "sharpe": -0.097,
+            "hac_t": -0.314,
+            "months_positive": 0.4268
+          }
+        ],
+        "secondary_profiles": [
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": 0.0028,
+            "annualised_volatility": 0.1836,
+            "sharpe": 0.107,
+            "hac_t": 0.498,
+            "months_positive": 0.4948
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": -0.0321,
+            "annualised_volatility": 0.2101,
+            "sharpe": -0.049,
+            "hac_t": -0.149,
+            "months_positive": 0.4459
+          }
+        ],
+        "legs": {
+          "revised label window": {
+            "tercile": {
+              "high_leg_versus_market": 0.0129,
+              "low_leg_versus_market": 0.008,
+              "high_minus_low": 0.0012
+            },
+            "decile": {
+              "high_leg_versus_market": 0.0203,
+              "low_leg_versus_market": 0.0086,
+              "high_minus_low": 0.0028
+            }
+          },
+          "real-time window": {
+            "tercile": {
+              "high_leg_versus_market": -0.0001,
+              "low_leg_versus_market": 0.0192,
+              "high_minus_low": -0.0239
+            },
+            "decile": {
+              "high_leg_versus_market": 0.0082,
+              "low_leg_versus_market": 0.03,
+              "high_minus_low": -0.0321
+            }
+          }
+        },
+        "decision_window_annualised": 0.0012,
+        "decision_window_hac_t": 0.346,
+        "passes_nominally": false,
+        "passes_after_multiplicity": false
+      },
+      {
+        "sort": "earnings_to_price",
+        "label": "이익/가격 (E/P)",
+        "family": "value",
+        "is_value_proxy": true,
+        "first_month": "1951-07",
+        "profiles": [
+          {
+            "window": "full Fama-French sample",
+            "months": 900,
+            "thin": false,
+            "annualised": 0.0368,
+            "annualised_volatility": 0.1052,
+            "sharpe": 0.397,
+            "hac_t": 2.985,
+            "months_positive": 0.5511
+          },
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": 0.0054,
+            "annualised_volatility": 0.1152,
+            "sharpe": 0.105,
+            "hac_t": 0.509,
+            "months_positive": 0.5156
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": -0.0387,
+            "annualised_volatility": 0.1332,
+            "sharpe": -0.228,
+            "hac_t": -0.845,
+            "months_positive": 0.4713
+          }
+        ],
+        "secondary_profiles": [
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": -0.004,
+            "annualised_volatility": 0.1624,
+            "sharpe": 0.057,
+            "hac_t": 0.299,
+            "months_positive": 0.4792
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": -0.0854,
+            "annualised_volatility": 0.1741,
+            "sharpe": -0.422,
+            "hac_t": -1.583,
+            "months_positive": 0.3822
+          }
+        ],
+        "legs": {
+          "revised label window": {
+            "tercile": {
+              "high_leg_versus_market": 0.0123,
+              "low_leg_versus_market": 0.0028,
+              "high_minus_low": 0.0054
+            },
+            "decile": {
+              "high_leg_versus_market": 0.0203,
+              "low_leg_versus_market": 0.0119,
+              "high_minus_low": -0.004
+            }
+          },
+          "real-time window": {
+            "tercile": {
+              "high_leg_versus_market": -0.0193,
+              "low_leg_versus_market": 0.0138,
+              "high_minus_low": -0.0387
+            },
+            "decile": {
+              "high_leg_versus_market": -0.0334,
+              "low_leg_versus_market": 0.0403,
+              "high_minus_low": -0.0854
+            }
+          }
+        },
+        "decision_window_annualised": 0.0054,
+        "decision_window_hac_t": 0.509,
+        "passes_nominally": false,
+        "passes_after_multiplicity": false
+      },
+      {
+        "sort": "cashflow_to_price",
+        "label": "현금흐름/가격 (CF/P)",
+        "family": "value",
+        "is_value_proxy": true,
+        "first_month": "1951-07",
+        "profiles": [
+          {
+            "window": "full Fama-French sample",
+            "months": 900,
+            "thin": false,
+            "annualised": 0.0249,
+            "annualised_volatility": 0.105,
+            "sharpe": 0.287,
+            "hac_t": 2.276,
+            "months_positive": 0.5456
+          },
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": -0.0092,
+            "annualised_volatility": 0.1139,
+            "sharpe": -0.024,
+            "hac_t": -0.128,
+            "months_positive": 0.5052
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": -0.052,
+            "annualised_volatility": 0.1278,
+            "sharpe": -0.353,
+            "hac_t": -1.279,
+            "months_positive": 0.4395
+          }
+        ],
+        "secondary_profiles": [
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": -0.0208,
+            "annualised_volatility": 0.1666,
+            "sharpe": -0.041,
+            "hac_t": -0.223,
+            "months_positive": 0.4948
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": -0.1202,
+            "annualised_volatility": 0.1908,
+            "sharpe": -0.569,
+            "hac_t": -2.245,
+            "months_positive": 0.4331
+          }
+        ],
+        "legs": {
+          "revised label window": {
+            "tercile": {
+              "high_leg_versus_market": 0.0029,
+              "low_leg_versus_market": 0.0086,
+              "high_minus_low": -0.0092
+            },
+            "decile": {
+              "high_leg_versus_market": 0.0035,
+              "low_leg_versus_market": 0.0135,
+              "high_minus_low": -0.0208
+            }
+          },
+          "real-time window": {
+            "tercile": {
+              "high_leg_versus_market": -0.0304,
+              "low_leg_versus_market": 0.0173,
+              "high_minus_low": -0.052
+            },
+            "decile": {
+              "high_leg_versus_market": -0.0618,
+              "low_leg_versus_market": 0.0495,
+              "high_minus_low": -0.1202
+            }
+          }
+        },
+        "decision_window_annualised": -0.0092,
+        "decision_window_hac_t": -0.128,
+        "passes_nominally": false,
+        "passes_after_multiplicity": false
+      },
+      {
+        "sort": "dividend_yield",
+        "label": "배당수익률 (D/P)",
+        "family": "value",
+        "is_value_proxy": true,
+        "first_month": "1927-07",
+        "profiles": [
+          {
+            "window": "full Fama-French sample",
+            "months": 1188,
+            "thin": false,
+            "annualised": 0.0021,
+            "annualised_volatility": 0.1306,
+            "sharpe": 0.081,
+            "hac_t": 0.743,
+            "months_positive": 0.4949
+          },
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": -0.0142,
+            "annualised_volatility": 0.1289,
+            "sharpe": -0.046,
+            "hac_t": -0.242,
+            "months_positive": 0.4688
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": -0.0502,
+            "annualised_volatility": 0.1301,
+            "sharpe": -0.33,
+            "hac_t": -1.152,
+            "months_positive": 0.4331
+          }
+        ],
+        "secondary_profiles": [
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": -0.024,
+            "annualised_volatility": 0.2003,
+            "sharpe": -0.021,
+            "hac_t": -0.115,
+            "months_positive": 0.5156
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": -0.0493,
+            "annualised_volatility": 0.1828,
+            "sharpe": -0.185,
+            "hac_t": -0.597,
+            "months_positive": 0.4968
+          }
+        ],
+        "legs": {
+          "revised label window": {
+            "tercile": {
+              "high_leg_versus_market": -0.0046,
+              "low_leg_versus_market": 0.0056,
+              "high_minus_low": -0.0142
+            },
+            "decile": {
+              "high_leg_versus_market": -0.008,
+              "low_leg_versus_market": 0.0045,
+              "high_minus_low": -0.024
+            }
+          },
+          "real-time window": {
+            "tercile": {
+              "high_leg_versus_market": -0.023,
+              "low_leg_versus_market": 0.0237,
+              "high_minus_low": -0.0502
+            },
+            "decile": {
+              "high_leg_versus_market": -0.0022,
+              "low_leg_versus_market": 0.0373,
+              "high_minus_low": -0.0493
+            }
+          }
+        },
+        "decision_window_annualised": -0.0142,
+        "decision_window_hac_t": -0.242,
+        "passes_nominally": false,
+        "passes_after_multiplicity": false
+      },
+      {
+        "sort": "operating_profitability",
+        "label": "영업이익률 (OP) — 가치 대리 변수 아님",
+        "family": "profitability",
+        "is_value_proxy": false,
+        "first_month": "1963-07",
+        "profiles": [
+          {
+            "window": "full Fama-French sample",
+            "months": 756,
+            "thin": false,
+            "annualised": 0.0227,
+            "annualised_volatility": 0.0899,
+            "sharpe": 0.294,
+            "hac_t": 2.126,
+            "months_positive": 0.5238
+          },
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": 0.0318,
+            "annualised_volatility": 0.1046,
+            "sharpe": 0.352,
+            "hac_t": 1.825,
+            "months_positive": 0.5521
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": 0.0258,
+            "annualised_volatility": 0.0942,
+            "sharpe": 0.318,
+            "hac_t": 1.089,
+            "months_positive": 0.5987
+          }
+        ],
+        "secondary_profiles": [
+          {
+            "window": "revised label window",
+            "months": 384,
+            "thin": false,
+            "annualised": 0.0366,
+            "annualised_volatility": 0.1752,
+            "sharpe": 0.292,
+            "hac_t": 1.517,
+            "months_positive": 0.5286
+          },
+          {
+            "window": "real-time window",
+            "months": 157,
+            "thin": false,
+            "annualised": 0.0349,
+            "annualised_volatility": 0.1743,
+            "sharpe": 0.283,
+            "hac_t": 1.038,
+            "months_positive": 0.5096
+          }
+        ],
+        "legs": {
+          "revised label window": {
+            "tercile": {
+              "high_leg_versus_market": 0.014,
+              "low_leg_versus_market": -0.0246,
+              "high_minus_low": 0.0318
+            },
+            "decile": {
+              "high_leg_versus_market": 0.0174,
+              "low_leg_versus_market": -0.0406,
+              "high_minus_low": 0.0366
+            }
+          },
+          "real-time window": {
+            "tercile": {
+              "high_leg_versus_market": 0.0143,
+              "low_leg_versus_market": -0.0174,
+              "high_minus_low": 0.0258
+            },
+            "decile": {
+              "high_leg_versus_market": 0.0205,
+              "low_leg_versus_market": -0.0377,
+              "high_minus_low": 0.0349
+            }
+          }
+        },
+        "decision_window_annualised": 0.0318,
+        "decision_window_hac_t": 1.825,
+        "passes_nominally": false,
+        "passes_after_multiplicity": false
+      }
+    ],
+    "value_proxies_tested_in_this_track": [
+      "earnings_to_price",
+      "cashflow_to_price",
+      "dividend_yield"
+    ],
+    "book_to_market_rerun_for_comparability": true,
+    "value_proxies_passing_nominally": [],
+    "value_proxies_passing_after_multiplicity": [],
+    "test_b_opens": false,
+    "statement": "어떤 가치 대리 변수도 판정 창에서 프리미엄을 보이지 않는다. 검정 B를 열지 않는다."
+  },
+  "test_b_run": false,
+  "test_b_not_run_because": "어떤 가치 대리 변수도 판정 창에서 프리미엄을 보이지 않는다. 검정 B를 열지 않는다.",
+  "recommendation": {
+    "track_findings": [
+      {
+        "track": "17 — 국면이 산업 수익률을 가르는가",
+        "result": "음",
+        "detail": "긴 역사 전체 p 0.13~0.25, 2020년을 빼면 0.47~0.59. 순환매는 우연 90분위 아래. 정답을 미리 본 상한조차 연 +4.93%."
+      },
+      {
+        "track": "18 — 국면 성숙도를 서술할 수 있는가",
+        "result": "부분적으로 양",
+        "detail": "확장기 후반만 경과 기간 대조군을 이긴다(0.785 대 0.610, 블록내 p=0.015). 후퇴기·회복기는 대조군에 진다. 침체기는 에피소드 5건이라 확인 불가."
+      },
+      {
+        "track": "19 — 가치 프리미엄이 국면에 따라 달라지는가",
+        "result": "음",
+        "detail": "장부가/시가 프리미엄이 판정 창에 없다(t=0.87). 유일한 유의 결과는 코로나 한 에피소드였고 전방창까지 빼면 사라진다."
+      },
+      {
+        "track": "20 — 다른 가치 정의로도 그런가",
+        "result": "음",
+        "detail": "이익/가격·현금흐름/가격·배당수익률 모두 판정 창에서 명목 문턱조차 넘지 못한다. '장부가/시가가 고장났다'는 설명이 사라진다."
+      }
+    ],
+    "courses": {
+      "a": {
+        "name": "한국 자료로 층 C를 추진한다",
+        "for": [
+          "주가·업종코드·재무제표가 이미 우리 손에 있다. 미국에서 층 C를 막은 자료 제약이 한국에는 없다.",
+          "층 C는 이 프로젝트가 원래 세운 주장이고, 아직 검정된 적이 없다."
+        ],
+        "against": [
+          "층 C는 A와 B 위에 선다. 한국은 **다른 시장**이므로 미국 결과가 이전되지 않고, 한국에서 A와 B를 먼저 세워야 한다.",
+          "한국용 국면 모델이 없다. 동결 v1.1은 미국 전용이고, 한국 지표로 다시 만드는 것은 여러 단계짜리 작업이다.",
+          "한국의 순환 표본도 얇다. 신뢰할 만한 재무제표 전자공시가 자리잡은 이후로 한정하면 완결된 순환이 미국보다 많지 않다."
+        ],
+        "cost": "높음 — 한국 국면 모델 + 한국 가치 요인 + A·B·C 순차 검정"
+      },
+      "b": {
+        "name": "모델의 용도를 서술과 상태 인식으로 좁힌다",
+        "for": [
+          "네 트랙 중 살아남은 양의 결과가 트랙 18의 확장기 성숙도 하나뿐이고, 그것은 수익률이 아니라 **서술**의 정확도에 관한 것이다.",
+          "앱이 이미 서술로 싣고 있다. 제품 변경이 필요 없다.",
+          "비용과 위험이 사실상 0이다."
+        ],
+        "against": [
+          "원래 세운 투자 주장을 포기하는 것이다.",
+          "층 C가 실제로 참인데 검정해 보지 않고 접는 위험이 남는다."
+        ],
+        "cost": "사실상 0"
+      },
+      "c": {
+        "name": "한국에서 **검정 A만** 먼저 돌려 (a)의 문을 연다",
+        "for": [
+          "(a)의 가장 큰 위험은 한국에서도 A가 실패하는 것이다. 그러면 국면 모델을 만들기 전에 이미 끝난다.",
+          "한국 검정 A는 국면 모델이 **필요 없다**. 가치 정렬 수익률과 시장 수익률만 있으면 되고, 둘 다 이미 있는 자료로 만들 수 있다.",
+          "미국에서 쓴 기계를 그대로 옮길 수 있다 — HAC 표준오차, 십 년 단위 분해, 한 해 제외, 사전 명세 문턱.",
+          "결과가 어느 쪽이든 다음 결정이 확정된다. 통과하면 (a), 실패하면 (b)."
+        ],
+        "against": [
+          "한국 가치 요인을 직접 만들어야 한다. Fama-French처럼 정리된 공개 계열이 없어서 정렬 구성과 생존편향 처리를 스스로 해야 한다."
+        ],
+        "cost": "중간 — 한 트랙 분량. 국면 모델은 손대지 않는다."
+      }
+    },
+    "recommendation": {
+      "immediate_position": "b",
+      "next_investigation": "c",
+      "conditional_on": "한국 검정 A가 사전 명세 문턱을 넘으면 (a)로 간다. 넘지 못하면 (b)가 최종 답이 되고 층 C는 닫힌다.",
+      "why_not_a_directly": "층 C는 A와 B 위에 서는데, 한국에서 A가 성립하는지 아직 모른다. 한국 국면 모델을 먼저 만들면 A가 실패했을 때 그 작업 전체가 버려진다. **순서를 뒤집으면 같은 정보를 훨씬 싸게 산다.**",
+      "what_b_keeps": "트랙 18의 확장기 성숙도 신호. 네 트랙에서 나온 유일한 양의 결과이며, 확장기 후반 서술에 근거가 있다. 후퇴기·회복기는 근거가 없으므로 같은 신뢰도로 내보내지 않는다."
+    },
+    "value_proxies_passing_nominally": [],
+    "value_proxies_passing_after_multiplicity": [],
+    "multiplicity_correction_had_to_do_no_work": true,
+    "statement": "즉시 취할 자세는 (b) — 용도를 서술과 상태 인식으로 좁힌다. 다음 조사는 (c) — 한국에서 검정 A만 먼저 돌린다. 그것이 통과할 때만 (a)로 간다."
+  }
+}

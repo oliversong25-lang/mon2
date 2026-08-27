@@ -1,0 +1,672 @@
+{
+  "source_commit": "ac96cfa4ceb894e77a178018cfc62c7f29f8c898",
+  "generated_at_utc": "2026-08-22T12:52:09+00:00",
+  "configuration_base": "four_phase.yaml",
+  "development_window": [
+    "1995-01-01",
+    "2012-12-31"
+  ],
+  "warmup_window": [
+    "1994-07-15",
+    "1995-01-06"
+  ],
+  "threshold_grid": {
+    "level_severity": [
+      1.4,
+      1.6,
+      1.7915,
+      2.0,
+      2.3,
+      2.6
+    ],
+    "momentum_severity": [
+      0.7,
+      0.8,
+      0.9,
+      1.0,
+      1.1,
+      1.2,
+      1.2954
+    ],
+    "level_breadth": [
+      2,
+      3,
+      4
+    ],
+    "momentum_breadth": [
+      2,
+      3,
+      4
+    ],
+    "contraction_entry": [
+      0.7,
+      0.75,
+      0.8,
+      0.8818,
+      0.92
+    ],
+    "corroboration_share": [
+      0.1,
+      0.15,
+      0.2
+    ]
+  },
+  "filter_grid": [
+    [
+      1.2,
+      0.005,
+      2,
+      0.2
+    ],
+    [
+      1.2,
+      0.005,
+      2,
+      0.3
+    ],
+    [
+      1.2,
+      0.005,
+      2,
+      0.4
+    ],
+    [
+      1.2,
+      0.005,
+      3,
+      0.2
+    ],
+    [
+      1.2,
+      0.005,
+      3,
+      0.3
+    ],
+    [
+      1.2,
+      0.005,
+      3,
+      0.4
+    ],
+    [
+      1.2,
+      0.01,
+      2,
+      0.2
+    ],
+    [
+      1.2,
+      0.01,
+      2,
+      0.3
+    ],
+    [
+      1.2,
+      0.01,
+      2,
+      0.4
+    ],
+    [
+      1.2,
+      0.01,
+      3,
+      0.2
+    ],
+    [
+      1.2,
+      0.01,
+      3,
+      0.3
+    ],
+    [
+      1.2,
+      0.01,
+      3,
+      0.4
+    ],
+    [
+      1.2,
+      0.02,
+      2,
+      0.2
+    ],
+    [
+      1.2,
+      0.02,
+      2,
+      0.3
+    ],
+    [
+      1.2,
+      0.02,
+      2,
+      0.4
+    ],
+    [
+      1.2,
+      0.02,
+      3,
+      0.2
+    ],
+    [
+      1.2,
+      0.02,
+      3,
+      0.3
+    ],
+    [
+      1.2,
+      0.02,
+      3,
+      0.4
+    ],
+    [
+      1.8,
+      0.005,
+      2,
+      0.2
+    ],
+    [
+      1.8,
+      0.005,
+      2,
+      0.3
+    ],
+    [
+      1.8,
+      0.005,
+      2,
+      0.4
+    ],
+    [
+      1.8,
+      0.005,
+      3,
+      0.2
+    ],
+    [
+      1.8,
+      0.005,
+      3,
+      0.3
+    ],
+    [
+      1.8,
+      0.005,
+      3,
+      0.4
+    ],
+    [
+      1.8,
+      0.01,
+      2,
+      0.2
+    ],
+    [
+      1.8,
+      0.01,
+      2,
+      0.3
+    ],
+    [
+      1.8,
+      0.01,
+      2,
+      0.4
+    ],
+    [
+      1.8,
+      0.01,
+      3,
+      0.2
+    ],
+    [
+      1.8,
+      0.01,
+      3,
+      0.3
+    ],
+    [
+      1.8,
+      0.01,
+      3,
+      0.4
+    ],
+    [
+      1.8,
+      0.02,
+      2,
+      0.2
+    ],
+    [
+      1.8,
+      0.02,
+      2,
+      0.3
+    ],
+    [
+      1.8,
+      0.02,
+      2,
+      0.4
+    ],
+    [
+      1.8,
+      0.02,
+      3,
+      0.2
+    ],
+    [
+      1.8,
+      0.02,
+      3,
+      0.3
+    ],
+    [
+      1.8,
+      0.02,
+      3,
+      0.4
+    ],
+    [
+      2.5,
+      0.005,
+      2,
+      0.2
+    ],
+    [
+      2.5,
+      0.005,
+      2,
+      0.3
+    ],
+    [
+      2.5,
+      0.005,
+      2,
+      0.4
+    ],
+    [
+      2.5,
+      0.005,
+      3,
+      0.2
+    ],
+    [
+      2.5,
+      0.005,
+      3,
+      0.3
+    ],
+    [
+      2.5,
+      0.005,
+      3,
+      0.4
+    ],
+    [
+      2.5,
+      0.01,
+      2,
+      0.2
+    ],
+    [
+      2.5,
+      0.01,
+      2,
+      0.3
+    ],
+    [
+      2.5,
+      0.01,
+      2,
+      0.4
+    ],
+    [
+      2.5,
+      0.01,
+      3,
+      0.2
+    ],
+    [
+      2.5,
+      0.01,
+      3,
+      0.3
+    ],
+    [
+      2.5,
+      0.01,
+      3,
+      0.4
+    ],
+    [
+      2.5,
+      0.02,
+      2,
+      0.2
+    ],
+    [
+      2.5,
+      0.02,
+      2,
+      0.3
+    ],
+    [
+      2.5,
+      0.02,
+      2,
+      0.4
+    ],
+    [
+      2.5,
+      0.02,
+      3,
+      0.2
+    ],
+    [
+      2.5,
+      0.02,
+      3,
+      0.3
+    ],
+    [
+      2.5,
+      0.02,
+      3,
+      0.4
+    ]
+  ],
+  "stage_one_filter": [
+    1.8,
+    0.01,
+    2,
+    0.3
+  ],
+  "stage_two_width": 100,
+  "stage_one_points": 5670,
+  "combinations_evaluated": 10970,
+  "rejected_by_gate": {
+    "gfc_first_official_contraction": 6048,
+    "overall_recall": 3012,
+    "core_recall": 1434,
+    "three_week_whipsaws": 4,
+    "two_step_transitions": 262,
+    "false_positive_rate": 386
+  },
+  "sole_rejection_reason": {
+    "gfc_first_official_contraction": 3035,
+    "two_step_transitions": 141,
+    "false_positive_rate": 264
+  },
+  "feasible_combinations": 4396,
+  "contradiction": false,
+  "gates": {
+    "overall_recall_minimum": 0.8,
+    "core_recall_minimum": 0.9,
+    "false_positive_rate_maximum": 0.05,
+    "two_step_transitions_maximum": 5,
+    "three_week_whipsaws_maximum": 5,
+    "gfc_first_official_contraction_maximum_weeks": 10,
+    "longest_disagreement_run_maximum": 26
+  },
+  "minimum_coincident_domains": 2,
+  "selection_rule_sha256": "71647ea8e81951229d67f1556bc504aa0f38877ca713c069b8b68a20a88cbcd0",
+  "selection_order": [
+    {
+      "key": "four_week_confirmed_false_positive_episodes",
+      "direction": "min"
+    },
+    {
+      "key": "overall_recall",
+      "direction": "max"
+    },
+    {
+      "key": "false_positive_rate",
+      "direction": "min"
+    },
+    {
+      "key": "changed_parameters",
+      "direction": "min"
+    }
+  ],
+  "selected": {
+    "lam": 1.8,
+    "epsilon": 0.01,
+    "confirmation_weeks": 3,
+    "immediate_margin": 0.3,
+    "overall_recall": 0.938053,
+    "false_positive_rate": 0.033898,
+    "precision": 0.791045,
+    "f1": 0.8583,
+    "recession_weeks": 113,
+    "first_third_weeks": 37,
+    "first_third_recall": 0.918919,
+    "middle_third_weeks": 38,
+    "middle_third_recall": 1.0,
+    "final_third_weeks": 38,
+    "final_third_recall": 0.894737,
+    "first_half_weeks": 56,
+    "first_half_recall": 0.946429,
+    "core_weeks": 38,
+    "core_recall": 1.0,
+    "recession_weeks_classified_recovery": 4,
+    "trough_adjacent_weeks": 16,
+    "trough_adjacent_classified_recovery": 4,
+    "non_trough_recession_weeks_classified_recovery": 0,
+    "false_positive_episodes": 3,
+    "longest_false_positive_episode": 11,
+    "four_week_confirmed_false_positive_episodes": 3,
+    "one_step_transitions": 48,
+    "two_step_transitions": 3,
+    "three_week_whipsaws": 0,
+    "longest_run_weeks": 71,
+    "minimum_phase_entries": 3,
+    "phases_reached": "contraction,expansion,recovery,slowdown",
+    "occupancy_recovery": 0.120341,
+    "occupancy_expansion": 0.411076,
+    "occupancy_slowdown": 0.325879,
+    "occupancy_contraction": 0.142705,
+    "entries_recovery": 3,
+    "entries_expansion": 24,
+    "entries_slowdown": 22,
+    "entries_contraction": 3,
+    "raw_official_disagreement_rate": 0.172524,
+    "longest_disagreement_run": 10,
+    "single_domain_official_contraction_weeks": 0,
+    "certainty_no_inversion": true,
+    "mean_separation_high": 0.70779,
+    "mean_separation_low": 0.221161,
+    "median_transition_delay_weeks": 2.0,
+    "maximum_transition_delay_weeks": 2,
+    "immediate_transitions": 14,
+    "confirmed_transitions": 37,
+    "recession_2001_first_recession_alert_weeks": 0.0,
+    "recession_2001_first_raw_contraction_weeks": 0.0,
+    "recession_2001_first_official_contraction_weeks": 0.0,
+    "recession_2001_four_week_confirmed_contraction_weeks": 0.0,
+    "gfc_first_recession_alert_weeks": 0.0,
+    "gfc_first_raw_contraction_weeks": 2.0,
+    "gfc_first_official_contraction_weeks": 7.0,
+    "gfc_four_week_confirmed_contraction_weeks": 7.0,
+    "level_severity": 2.6,
+    "momentum_severity": 0.7,
+    "level_breadth": 3,
+    "momentum_breadth": 2,
+    "contraction_entry": 0.75,
+    "corroboration_share": 0.15,
+    "changed_parameters": 5,
+    "stage": 2
+  },
+  "selected_rank_by_metric": {
+    "overall_recall": {
+      "value": 0.938053,
+      "rank": 1,
+      "of": 4396,
+      "best": 0.938053,
+      "worst": 0.840708
+    },
+    "core_recall": {
+      "value": 1.0,
+      "rank": 1,
+      "of": 4396,
+      "best": 1.0,
+      "worst": 1.0
+    },
+    "false_positive_rate": {
+      "value": 0.033898,
+      "rank": 1282,
+      "of": 4396,
+      "best": 0.021792,
+      "worst": 0.049637
+    },
+    "gfc_first_official_contraction_weeks": {
+      "value": 7.0,
+      "rank": 1,
+      "of": 4396,
+      "best": 7.0,
+      "worst": 10.0
+    },
+    "two_step_transitions": {
+      "value": 3,
+      "rank": 2541,
+      "of": 4396,
+      "best": 0.0,
+      "worst": 5.0
+    },
+    "three_week_whipsaws": {
+      "value": 0,
+      "rank": 1,
+      "of": 4396,
+      "best": 0.0,
+      "worst": 4.0
+    },
+    "four_week_confirmed_false_positive_episodes": {
+      "value": 3,
+      "rank": 1,
+      "of": 4396,
+      "best": 3.0,
+      "worst": 5.0
+    },
+    "median_transition_delay_weeks": {
+      "value": 2.0,
+      "rank": 3386,
+      "of": 4396,
+      "best": 0.0,
+      "worst": 2.0
+    },
+    "longest_disagreement_run": {
+      "value": 10,
+      "rank": 4070,
+      "of": 4396,
+      "best": 5.0,
+      "worst": 12.0
+    }
+  },
+  "pareto": {
+    "axes": [
+      "overall_recall",
+      "core_recall",
+      "false_positive_rate",
+      "gfc_first_official_contraction_weeks",
+      "two_step_transitions",
+      "three_week_whipsaws",
+      "four_week_confirmed_false_positive_episodes",
+      "median_transition_delay_weeks",
+      "longest_disagreement_run"
+    ],
+    "non_dominated_combinations": 147,
+    "selected_is_non_dominated": true
+  },
+  "runner_up": {
+    "lam": 1.8,
+    "epsilon": 0.01,
+    "confirmation_weeks": 3,
+    "immediate_margin": 0.3,
+    "overall_recall": 0.938053,
+    "false_positive_rate": 0.033898,
+    "precision": 0.791045,
+    "f1": 0.8583,
+    "recession_weeks": 113,
+    "first_third_weeks": 37,
+    "first_third_recall": 0.918919,
+    "middle_third_weeks": 38,
+    "middle_third_recall": 1.0,
+    "final_third_weeks": 38,
+    "final_third_recall": 0.894737,
+    "first_half_weeks": 56,
+    "first_half_recall": 0.946429,
+    "core_weeks": 38,
+    "core_recall": 1.0,
+    "recession_weeks_classified_recovery": 4,
+    "trough_adjacent_weeks": 16,
+    "trough_adjacent_classified_recovery": 4,
+    "non_trough_recession_weeks_classified_recovery": 0,
+    "false_positive_episodes": 3,
+    "longest_false_positive_episode": 11,
+    "four_week_confirmed_false_positive_episodes": 3,
+    "one_step_transitions": 48,
+    "two_step_transitions": 3,
+    "three_week_whipsaws": 0,
+    "longest_run_weeks": 71,
+    "minimum_phase_entries": 3,
+    "phases_reached": "contraction,expansion,recovery,slowdown",
+    "occupancy_recovery": 0.120341,
+    "occupancy_expansion": 0.411076,
+    "occupancy_slowdown": 0.325879,
+    "occupancy_contraction": 0.142705,
+    "entries_recovery": 3,
+    "entries_expansion": 24,
+    "entries_slowdown": 22,
+    "entries_contraction": 3,
+    "raw_official_disagreement_rate": 0.172524,
+    "longest_disagreement_run": 10,
+    "single_domain_official_contraction_weeks": 0,
+    "certainty_no_inversion": true,
+    "mean_separation_high": 0.70779,
+    "mean_separation_low": 0.221161,
+    "median_transition_delay_weeks": 2.0,
+    "maximum_transition_delay_weeks": 2,
+    "immediate_transitions": 14,
+    "confirmed_transitions": 37,
+    "recession_2001_first_recession_alert_weeks": 0.0,
+    "recession_2001_first_raw_contraction_weeks": 0.0,
+    "recession_2001_first_official_contraction_weeks": 0.0,
+    "recession_2001_four_week_confirmed_contraction_weeks": 0.0,
+    "gfc_first_recession_alert_weeks": 0.0,
+    "gfc_first_raw_contraction_weeks": 2.0,
+    "gfc_first_official_contraction_weeks": 7.0,
+    "gfc_four_week_confirmed_contraction_weeks": 7.0,
+    "level_severity": 2.6,
+    "momentum_severity": 0.7,
+    "level_breadth": 2,
+    "momentum_breadth": 2,
+    "contraction_entry": 0.75,
+    "corroboration_share": 0.15,
+    "changed_parameters": 6,
+    "stage": 2
+  },
+  "range": {
+    "overall_recall": [
+      0.840708,
+      0.938053
+    ],
+    "core_recall": [
+      1.0,
+      1.0
+    ],
+    "false_positive_rate": [
+      0.021792,
+      0.049637
+    ],
+    "f1": [
+      0.780876,
+      0.875536
+    ],
+    "gfc_first_official_contraction_weeks": [
+      7.0,
+      10.0
+    ]
+  },
+  "frontier_csv_sha256": "2390a22c2e2a877e803767a5ca894573694e92461607f2b30bf7ef666c9b2607"
+}

@@ -1,0 +1,36 @@
+{
+  "model": "us_four_phase_v1",
+  "configuration": "configs/four_phase_v1_1.yaml",
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "source_commit": "81941a79c66c5bd39888ec66de9921c0e6dcb445",
+  "model_status": "provisional",
+  "adoption_basis": "operational_real_time_first",
+  "not_a_retrospective_latest_vintage_validation": true,
+  "historical_v1_1_status_under_the_latest_vintage_protocol": "rejected",
+  "new_model_logic_created": false,
+  "parameters_changed": false,
+  "strict_real_time_recession_episodes": 1,
+  "strict_real_time_recession_episode_names": [
+    "recession_2020"
+  ],
+  "recovery_latency_band": "amber",
+  "recovery_latency_weeks": 11,
+  "limitation_label": "coincident-data recognition lag",
+  "decision": "provisional_operational_adoption",
+  "is_final_validation": false,
+  "is_fully_validated": false,
+  "produces_investment_recommendations": false,
+  "state_semantics_decision": "provisional_model_locked",
+  "state_semantics_semantic_digest": "0ea6db2eaabd9adf0c20d9bbf31e633fd4c82737a36dd561550f9f693bd75c1d",
+  "us_four_phase_model_development": "stopped",
+  "live_monitoring": "activated",
+  "current_phase_semantic_class": "low_evidence_ambiguous",
+  "current_evidence_quality": "low",
+  "disclosed_limitations": {
+    "high_evidence_both_sign_contradiction_weeks": 1,
+    "hard_rules_literally_failing": [
+      "no_high_evidence_week_contradicts_both_level_and_momentum"
+    ],
+    "recovery_latency_band": "amber"
+  }
+}

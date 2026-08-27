@@ -1,0 +1,162 @@
+{
+  "as_of_date": "2026-08-14",
+  "model_version": "0.1.0",
+  "status": "ok",
+  "current_phase": {
+    "code": "recovery_mid",
+    "label_ko": "회복기 중기",
+    "broad_phase": "recovery",
+    "broad_label_ko": "회복기"
+  },
+  "movement": {
+    "from_previous_week": "advanced",
+    "direction": "toward_recovery_late"
+  },
+  "confidence": {
+    "broad": 90.69088204851646,
+    "detail": 43.2914727577455,
+    "data": 64.58982691893979
+  },
+  "coordinates": {
+    "x_momentum": 0.28290335907253344,
+    "y_level": -0.3130972923854706,
+    "angle_degrees": 312.09982329971604,
+    "radius": 0.42197656934199046
+  },
+  "phase_probabilities": [
+    {
+      "code": "recovery_early",
+      "label_ko": "회복기 초기",
+      "probability": 0.3559002631948131
+    },
+    {
+      "code": "recovery_mid",
+      "label_ko": "회복기 중기",
+      "probability": 0.4169222851799445
+    },
+    {
+      "code": "recovery_late",
+      "label_ko": "회복기 말기",
+      "probability": 0.13408627211040705
+    },
+    {
+      "code": "expansion_early",
+      "label_ko": "확장기 초기",
+      "probability": 0.013677794735347597
+    },
+    {
+      "code": "expansion_mid",
+      "label_ko": "확장기 중기",
+      "probability": 0.0009584407566395689
+    },
+    {
+      "code": "expansion_late",
+      "label_ko": "확장기 말기",
+      "probability": 0.0001476328483454308
+    },
+    {
+      "code": "slowdown_early",
+      "label_ko": "후퇴기 초기",
+      "probability": 2.1555433743195294e-05
+    },
+    {
+      "code": "slowdown_mid",
+      "label_ko": "후퇴기 중기",
+      "probability": 3.5234039293902444e-06
+    },
+    {
+      "code": "slowdown_late",
+      "label_ko": "후퇴기 말기",
+      "probability": 3.215193641158808e-05
+    },
+    {
+      "code": "contraction_early",
+      "label_ko": "침체기 초기",
+      "probability": 0.00025283714036526336
+    },
+    {
+      "code": "contraction_mid",
+      "label_ko": "침체기 중기",
+      "probability": 0.0046249889298647946
+    },
+    {
+      "code": "contraction_late",
+      "label_ko": "침체기 말기",
+      "probability": 0.07337225433018828
+    }
+  ],
+  "runner_up": {
+    "code": "recovery_early",
+    "label_ko": "회복기 초기",
+    "probability": 0.3559002631948131,
+    "gap_percentage_points": 6.10220219851314
+  },
+  "supporting_indicators": [
+    {
+      "indicator_id": "ICSA",
+      "contribution": 0.0606
+    },
+    {
+      "indicator_id": "CCSA",
+      "contribution": 0.018
+    },
+    {
+      "indicator_id": "RRSFS",
+      "contribution": 0.0076
+    }
+  ],
+  "conflicting_indicators": [
+    {
+      "indicator_id": "INDPRO",
+      "contribution": -0.1166
+    },
+    {
+      "indicator_id": "W875RX1",
+      "contribution": -0.0885
+    },
+    {
+      "indicator_id": "PAYEMS",
+      "contribution": -0.0333
+    }
+  ],
+  "data_quality": {
+    "freshness": 0.6366944597450256,
+    "availability": 0.8571428571428571,
+    "revision_stability": null,
+    "revision_assumption": 0.4,
+    "model_agreement": 0.6438474699646236
+  },
+  "forecast_13w": {
+    "status": "not_calibrated",
+    "available_indicators": 0
+  },
+  "warnings": [
+    "본 결과는 최신 수정치 기준의 preliminary backtest이며, 당시 실제 공개정보만 사용한 real-time vintage backtest가 아닙니다.",
+    "CCSA: 실제 발표일 없음, 12일 지연으로 추정",
+    "CMRMTSPL: 실제 발표일 없음, 45일 지연으로 추정",
+    "ICSA: 실제 발표일 없음, 5일 지연으로 추정",
+    "INDPRO: 실제 발표일 없음, 16일 지연으로 추정",
+    "PAYEMS: 실제 발표일 없음, 7일 지연으로 추정",
+    "RRSFS: 실제 발표일 없음, 16일 지연으로 추정",
+    "W875RX1: 실제 발표일 없음, 28일 지연으로 추정"
+  ],
+  "metadata": {
+    "probability_sum": 0.9999999999999998,
+    "composite_model": "composite",
+    "dynamic_model": "local_linear_dynamic_factor",
+    "representative_model": "CompositeFactorModel",
+    "representative_fallback_used": false,
+    "uses_backward_smoothing": false,
+    "renormalized_weeks": 1974,
+    "duplicate_pairs": [
+      {
+        "left": "CMRMTSPL",
+        "right": "INDPRO",
+        "correlation": 0.9530698684934846
+      }
+    ],
+    "transition_jump_from_previous": 1,
+    "revision_basis": "latest_revision",
+    "release_date_basis": "actual_when_provided_else_configured_lag"
+  }
+}
