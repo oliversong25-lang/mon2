@@ -127,6 +127,60 @@ try {
     boundaries.every((entry) => payload.limitations.some((item) => item === entry.text)),
     boundaries.filter((entry) => !payload.limitations.includes(entry.text)).length + "건 누락");
 
+  // ── 변형 식별 ────────────────────────────────────────────────────────────
+  // 이 숫자를 v1.1로 오해하는 일이 가장 조용하고 되돌리기 어렵다.
+  record("어느 변형인지 payload에 있다",
+    Boolean(payload.variant && payload.variant.id), JSON.stringify(payload.variant?.id));
+
+  record("버전 문자열만으로 v1.1처럼 보이지 않는다",
+    payload.version !== "v1.1" && payload.version.includes(payload.variant.id),
+    payload.version);
+
+  record("v1.1과 다르다고 명시한다",
+    payload.variant.differs_from_v1_1 === true, String(payload.variant?.differs_from_v1_1));
+
+  record("트랙 16 전이 게이트가 적용되지 않았다",
+    payload.variant.transition_gate_applied === false,
+    String(payload.variant?.transition_gate_applied));
+
+  record("모델 쪽 검증 숫자가 통과한 번들이다",
+    payload.verification?.agrees === true && payload.verification.measured.transitions === payload.verification.expected.transitions,
+    JSON.stringify(payload.verification?.measured));
+
+  // ── 성숙도 ───────────────────────────────────────────────────────────────
+  record("성숙도 검증 범위가 네 국면을 덮는다",
+    (payload.maturity?.validation_scope || []).length === PHASES.length,
+    `${(payload.maturity?.validation_scope || []).length}건`);
+
+  record("검증된 국면이 확장기뿐이라고 데이터가 말한다",
+    JSON.stringify(payload.maturity?.validated_phases) === JSON.stringify(["expansion"]),
+    JSON.stringify(payload.maturity?.validated_phases));
+
+  record("검증 범위마다 에피소드 수와 이유가 있다",
+    (payload.maturity?.validation_scope || []).every((row) =>
+      typeof row.episodes === "number" && typeof row.why === "string" && row.why.trim().length > 0),
+    "");
+
+  // 검증되지 않은 국면에 문구가 붙으면 검증된 것처럼 보인다.
+  record("검증되지 않은 국면에는 성숙도 문구가 없다",
+    payload.maturity.current.validated === true || !payload.maturity.current.wording,
+    JSON.stringify(payload.maturity?.current));
+
+  // ── 분산 분포 ────────────────────────────────────────────────────────────
+  record("분산 분포가 두 묶음이다",
+    (payload.varianceDistribution?.groups || []).length === 2,
+    `${(payload.varianceDistribution?.groups || []).length}묶음`);
+
+  record("분산 분포 상세에 에피소드 수가 붙어 있다",
+    (payload.varianceDistribution?.detail_by_phase || []).length === PHASES.length
+      && payload.varianceDistribution.detail_by_phase.every((row) => typeof row.episodes === "number"),
+    "");
+
+  record("분산 분포가 최종 수정치 경로임을 밝힌다",
+    typeof payload.varianceDistribution?.path_note === "string"
+      && payload.varianceDistribution.path_note.includes("실시간"),
+    String(payload.varianceDistribution?.path_note || "").slice(0, 40));
+
   record("폭에 집중도 부분 화면 설명이 실려 있다",
     typeof payload.current.breadth?.partial_concentration_screen === "string"
       && payload.current.breadth.partial_concentration_screen.trim().length > 0,
@@ -188,6 +242,21 @@ try {
 
   record("분석 탭이 집중도 부분 화면을 밝힌다",
     analysis.includes("주의 표시"), "");
+
+  // 어느 변형인지 화면에서도 보여야 한다. 데이터에만 있으면 화면을 보는 사람은 모른다.
+  record("분석 탭이 변형을 밝힌다",
+    analysis.includes(payload.variant.id), payload.variant.id);
+
+  // 분산 분포는 두 묶음이 먼저 보여야 한다. 네 숫자가 나란히 있으면 순위가 만들어진다.
+  record("분석 탭이 분산 분포를 두 묶음으로 보여준다",
+    payload.varianceDistribution.groups.every((row) => analysis.includes(row.label)),
+    payload.varianceDistribution.groups.map((row) => row.label).join(" / "));
+
+  // 성숙도는 검증된 국면에서만 문구가 뜬다.
+  const maturityShown = analysis.includes("확장기에서만 검증");
+  record("성숙도 문구는 검증된 국면에서만 뜬다",
+    payload.maturity.current.validated ? maturityShown : !maturityShown,
+    `validated=${payload.maturity.current.validated} shown=${maturityShown}`);
 
   // 데이터 필드 이름이 화면에 새면 안 된다. 모델 문장을 그대로 옮기다 보면 가장 쉽게
   // 새는 자리가 여기다.

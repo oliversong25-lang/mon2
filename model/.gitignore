@@ -406,3 +406,15 @@ outputs/duration_axis/*
 !outputs/duration_axis/lookback_table.csv
 !outputs/duration_axis/control_comparison.csv
 !outputs/duration_axis/leave_one_episode_out.csv
+
+# 출하 번들. 주간 경로도 싣는다 — 내보내기가 그것을 읽고, 동결 감사 경로도 같은
+# 이유로 커밋돼 있다. 다시 만들려면 688 빈티지를 도로 돌려야 한다.
+!outputs/ship/
+outputs/ship/*
+!outputs/ship/weekly_path.csv
+!outputs/ship/current_state_output.json
+!outputs/ship/variant.json
+!outputs/ship/maturity.json
+!outputs/ship/variance_distribution.json
+!outputs/ship/verification.json
+!outputs/ship/ship_summary.json

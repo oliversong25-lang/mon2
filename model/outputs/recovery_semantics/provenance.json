@@ -10,7 +10,7 @@
     "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f"
   },
   "expected_source_commit": "4f7160445d36f2f064763afd8f1b39590aff1baa",
-  "head_commit": "4f7160445d36f2f064763afd8f1b39590aff1baa",
+  "head_commit": "fdfa325fcb97ae84ec2fbadbaa2b3019d79bc9eb",
   "protected_paths": [
     "configs/four_phase.yaml",
     "configs/four_phase_v1_1.yaml",
@@ -50,5 +50,5 @@
     "preserved": true,
     "compared_by": "decision_content_not_file_bytes"
   },
-  "executed_at_utc": "2026-08-23T11:58:18+00:00"
+  "executed_at_utc": "2026-08-27T07:01:59+00:00"
 }

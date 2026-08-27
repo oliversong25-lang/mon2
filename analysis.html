@@ -92,9 +92,11 @@ function navOptions(){
 
 function head(){
   const now=BusinessCycle.current();
+  // 버전만 적으면 v1.1 숫자로 읽힌다. 어느 변형인지 머리에서 한 번 밝힌다.
+  const version=BusinessCycle.state.status==="ready"?BusinessCycle.state.data.version:"v1.1";
   const sub=now
-    ?`미국 · 4국면 모델 v1.1 · ${escapeHtml(now.asOf)} 기준`
-    :"미국 · 4국면 모델 v1.1";
+    ?`미국 · 4국면 모델 ${escapeHtml(version)} · ${escapeHtml(now.asOf)} 기준`
+    :`미국 · 4국면 모델 ${escapeHtml(version)}`;
   return `<div class="page-head">
     <div><p class="eyebrow">경기국면</p><h1>분석</h1>
       <div class="sub">${sub}</div></div>
@@ -177,7 +179,22 @@ function nowCard(){
         <div class="fact-value ${now.transitionWatch==="none"?"quiet":""}">${now.transitionWatch==="none"?"없음":escapeHtml(now.transitionWatch)}</div>
         <div class="fact-note">부차적인 표시입니다. 현재 국면을 대체하지 않아요.</div></div>
     </div>
+    ${maturityLine()}
     ${boundaryPanel()}
+  </div>`;
+}
+
+// ── 국면 성숙도 ────────────────────────────────────────────────────────────
+// 확장기에서만 검증된 신호다. `BusinessCycle.maturity()`가 검증되지 않은 국면에서는
+// null을 주므로 화면은 범위를 다시 판정하지 않는다 — 거르는 자리가 둘이면 한쪽이
+// 언젠가 조용히 샌다.
+function maturityLine(){
+  const signal=BusinessCycle.maturity();
+  if(!signal)return"";
+  const now=signal.current;
+  return `<div class="fact-note" style="margin-top:var(--space-4)">
+    <b>국면 성숙도 · ${escapeHtml(now.stage||"")}</b> — ${escapeHtml(now.wording||"")}
+    <br>이 신호는 <b>확장기에서만</b> 검증됐습니다. 상태 서술이며 예측이 아닙니다.
   </div>`;
 }
 
@@ -288,11 +305,51 @@ function timelineCard(){
   </div>`;
 }
 
+// ── 역사적 분산 분포 ───────────────────────────────────────────────────────
+// **두 묶음이 기본이다.** 네 숫자를 나란히 놓으면 자료가 받쳐 주지 않는 순위가 보인다 —
+// 회복기 17%와 확장기 29%는 에피소드 4개와 17개에서 나온 값이라 서로 구분되지 않고,
+// 후퇴기와 침체기는 사실상 같은 값이다. 국면별 숫자는 에피소드 수를 달아 상세로만 낸다.
+function varianceCard(){
+  const data=BusinessCycle.varianceDistribution();
+  if(!data||!data.groups)return"";
+  const pct=(v)=>v==null?"—":`${Math.round(v*100)}%`;
+
+  const groups=data.groups.map(row=>`<div class="fact">
+    <div class="fact-label">${escapeHtml(row.label)}</div>
+    <div class="fact-value">${pct(row.share_negative)}</div>
+    <div class="fact-note">에피소드 ${row.episodes}개 · 관측 ${row.observations}주</div>
+  </div>`).join("");
+
+  const detail=data.detail_by_phase.map(row=>`<tr>
+    <td><b>${escapeHtml(BusinessCycle.phaseLabel(row.phase))}</b></td>
+    <td class="num">${pct(row.share_negative)}</td>
+    <td class="num">${row.episodes}</td>
+    <td class="num">${row.observations}</td>
+  </tr>`).join("");
+
+  return `<div class="card">
+    <h2>역사적 분산 분포</h2>
+    <div class="card-sub">국면을 부른 날부터 앞으로 ${data.horizon_weeks}주 동안, 시장이 마이너스였던 주의 비율입니다.</div>
+    <div class="facts" style="margin-top:var(--space-4)">${groups}</div>
+    <div class="card-note">${emphasise(data.why_two_groups)}</div>
+    <details style="margin-top:var(--space-4)">
+      <summary class="stamp">국면별 상세</summary>
+      <table class="data" style="margin-top:var(--space-3)">
+        <thead><tr><th>국면</th><th>마이너스 주</th><th>에피소드</th><th>관측</th></tr></thead>
+        <tbody>${detail}</tbody>
+      </table>
+      <div class="card-note">에피소드 수가 적은 국면의 숫자는 그 몇 번의 성질이지 국면의 성질이 아닙니다.</div>
+    </details>
+    <div class="card-note">${emphasise(data.path_note)}</div>
+  </div>`;
+}
+
 // ── 한계 ───────────────────────────────────────────────────────────────────
 function limitsCard(){
   const warning=BusinessCycle.recoveryWarning();
   const limits=BusinessCycle.limitations();
   const provenance=BusinessCycle.provenance()||{};
+  const variant=BusinessCycle.variant();
   return `<div class="card">
     <h2>이 모델의 한계</h2>
     <div class="card-sub">결론과 같은 무게로 읽어야 하는 부분입니다.</div>
@@ -304,6 +361,7 @@ function limitsCard(){
     <ul class="limits">${limits.map(item=>`<li>${emphasise(item)}</li>`).join("")}</ul>
     <div class="card-note">
       모델 상태 <b>${escapeHtml(BusinessCycle.state.data.modelStatus)}</b> · 최종 검증이 아닙니다.<br>
+      ${variant?`변형 <b>${escapeHtml(variant.id)}</b> — ${escapeHtml(variant.what_changed||"")}<br>`:""}
       동결 설정 <code>${escapeHtml(String(provenance.configHash||"").slice(0,16))}…</code> ·
       소스 커밋 <code>${escapeHtml(String(provenance.sourceCommit||"").slice(0,10))}</code>
     </div>
@@ -353,6 +411,7 @@ function render(){
     `<div style="margin-top:var(--space-4)">${evidenceCard()}</div>`,
     `<div style="margin-top:var(--space-4)">${timelineCard()}</div>`,
     `<div style="margin-top:var(--space-4)">${domainCard()}</div>`,
+    `<div style="margin-top:var(--space-4)">${varianceCard()}</div>`,
     `<div style="margin-top:var(--space-4)">${limitsCard()}</div>`,
     sourcesLine(),
   ].join(""),navOptions());

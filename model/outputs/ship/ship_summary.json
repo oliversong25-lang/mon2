@@ -1,0 +1,320 @@
+{
+  "stage": "ship",
+  "executed_at_utc": "2026-08-27T06:51:17+00:00",
+  "variant": {
+    "id": "persist17w",
+    "label": "확장·후퇴 경계 수정 (지속 17주)",
+    "differs_from_v1_1": true,
+    "what_changed": "후퇴기가 확장기와 나뉘는 자리가 모멘텀 0이었다. 그 자리를 지속 요건 17주로 옮겨, 애매한 주가 후퇴기로 흘러들지 않게 했다.",
+    "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+    "transition_gate_applied": false,
+    "why_no_transition_gate": "트랙 21의 2x2에서 그 게이트는 경계를 고친 뒤 장기 경로 전환을 97에서 96으로 바꿀 뿐이었고, 둘을 함께 걸면 판별력 2.421→2.302, 진행률 0.167→0.091로 나빠졌다. 증상 처방이었고 원인은 경계였다."
+  },
+  "verification": {
+    "expected": {
+      "current_official_phase": "expansion",
+      "transitions": 20,
+      "slowdown_weeks": 33
+    },
+    "measured": {
+      "current_official_phase": "expansion",
+      "transitions": 20,
+      "slowdown_weeks": 33
+    },
+    "agrees": true,
+    "superseded_expectation": {
+      "transitions": 28,
+      "slowdown_weeks": 49,
+      "actually_from": "persist13w",
+      "evidence": "outputs/slowdown_boundary/realtime_matrix.csv의 boundary_only 행이 전환 28·후퇴기 49주이고, 같은 실행의 validation_summary.json이 /matrix/boundary_only/gate = persist13w로 적고 있다.",
+      "why_corrected": "트랙 21이 persist13w를 권고했을 때의 실시간 수치다. 트랙 22가 평탄역(15~21주)과 블록 수를 근거로 persist17w로 조정하면서 20회·33주가 됐다."
+    }
+  },
+  "frozen_path_agreement": {
+    "weeks_compared": 688,
+    "columns_compared": [
+      "activity_level",
+      "activity_momentum",
+      "negative_level_domains",
+      "negative_momentum_domains",
+      "positive_momentum_domains",
+      "confirming_domains",
+      "concentration",
+      "recession_alert",
+      "information_lag_weeks",
+      "phase_status"
+    ],
+    "disagreeing": {},
+    "gate_dependent_changes": {
+      "official_phase": 315,
+      "raw_phase": 313,
+      "phase_separation": 649,
+      "evidence_quality_high": 21,
+      "filtered_winner": 316
+    },
+    "agrees": true,
+    "why_it_must_agree": "후퇴기 게이트는 국면 배분만 바꾼다. 수준·모멘텀·도메인 수·신선도는 게이트 이전에 정해지므로 두 경로에서 같아야 하고, 다르면 감사 코드를 옮겨 적은 쪽이 어긋난 것이다."
+  },
+  "shape": {
+    "weeks": 688,
+    "current_official_phase": "expansion",
+    "transitions": 20,
+    "phase_weeks": {
+      "recovery": 34,
+      "expansion": 593,
+      "slowdown": 33,
+      "contraction": 18
+    },
+    "withheld_weeks": 10
+  },
+  "current_state": {
+    "as_of_date": "2026-08-14",
+    "official_current_phase": "expansion",
+    "raw_current_phase": "expansion",
+    "phase_status": "official",
+    "evidence_quality": "low",
+    "phase_separation": 0.635395,
+    "activity_level": -0.247821,
+    "activity_momentum": 0.274323,
+    "transition_watch": "none",
+    "recession_alert": {
+      "level": "none",
+      "character": "absent"
+    },
+    "domain_evidence": {
+      "production": {
+        "role": "coincident",
+        "series": [
+          "INDPRO"
+        ]
+      },
+      "employment": {
+        "role": "coincident",
+        "series": [
+          "PAYEMS"
+        ]
+      },
+      "real_income": {
+        "role": "coincident",
+        "series": [
+          "W875RX1"
+        ]
+      },
+      "consumption": {
+        "role": "coincident",
+        "series": [
+          "RRSFS",
+          "CMRMTSPL"
+        ]
+      },
+      "labor_stress": {
+        "role": "bridge_only",
+        "series": [
+          "ICSA",
+          "CCSA"
+        ],
+        "level": 0.1750074360481522,
+        "momentum": 0.6488466108121292
+      }
+    },
+    "domain_freshness": {
+      "production": {
+        "weeks_since_release": 8.0,
+        "new_observation_arrived_this_week": false
+      },
+      "employment": {
+        "weeks_since_release": 5.0,
+        "new_observation_arrived_this_week": false
+      },
+      "real_income": {
+        "weeks_since_release": 6.0,
+        "new_observation_arrived_this_week": false
+      },
+      "consumption": {
+        "weeks_since_release": 4.0,
+        "new_observation_arrived_this_week": false
+      },
+      "labor_stress": {
+        "weeks_since_release": 0.0,
+        "new_observation_arrived_this_week": true
+      }
+    },
+    "breadth": {
+      "confirming_coincident_domains": 2,
+      "negative_level_domains": 2,
+      "positive_momentum_domains": 1,
+      "minimum_required_for_official_contraction": 2,
+      "partial_concentration_screen": "추세 위 판정과 함께 confirming_coincident_domains가 낮거나 폭이 좁게 나오면, 강세가 경제 전반이 아니라 일부에 몰려 있을 가능성을 함께 본다. 이것은 자동 분류가 아니라 주의 표시이며, 좁은 폭이 곧 구조적 강세라는 뜻은 아니다."
+    },
+    "concentration": 0.525839,
+    "model_status": "provisional",
+    "recovery_latency_warning": {
+      "band": "amber",
+      "calendar_recovery_latency_weeks": 11,
+      "evidence_availability_adjusted_latency_weeks": 4,
+      "limitation": "coincident-data recognition lag",
+      "meaning": "저점 이후 회복 인식이 최대 11주까지 늦을 수 있다. 이 모델은 저점을 실시간으로 짚지 못한다.",
+      "carried_from": "v1.1",
+      "why_carried": "후퇴기 게이트는 회복 게이트를 건드리지 않는다. 트랙 21·22가 실시간 경로에서 침체·회복 인식 지연이 0주 그대로임을 확인했으므로 v1.1 값을 그대로 이어받는다."
+    },
+    "known_limitations": [
+      "엄격 실시간 침체 에피소드가 하나뿐이다. 실시간 침체 성능을 일반화할 수 없다.",
+      "2020년 결과는 이미 들여다봤으므로 손대지 않은 홀드아웃이 아니다.",
+      "2013-06-14 이전에는 진짜 빈티지가 없어 실시간 경로가 존재하지 않는다.",
+      "v1.1은 최신 수정치 규약 아래에서 기각된 상태로 남아 있다.",
+      "잠정 운영이며 최종 검증이 아니다.",
+      "성장순환에서 '절대적 감소는 드물다'는 진술은 **총생산**에 대한 것이며 기업 이익에 그대로 옮겨지지 않는다. 단기에 비용이 대체로 고정돼 있어 매출이 조금 줄어도 이익은 훨씬 크게 줄고, 재무 레버리지가 그것을 더 키운다. 총생산이 줄지 않은 기간에도 총이익이 줄어든 적이 있고 상당수 개별 기업이 적자로 넘어갔다. 이익 경로와 할인율 경로가 함께 작동하며 어느 쪽이 지배적인지는 에피소드마다 다르다 — 2008~09년은 이익 주도, 2022년은 할인율 주도였다.",
+      "이 모델은 추세 위·아래를 읽지만 그 강약이 순환적인지 구조적인지 실시간으로 가르지 못한다. 추세는 이동평균이라 성장의 구조적 변화는 결국 추세에 흡수되고 '추세 위' 판독은 사라지지만, **흡수되기 전의 전환기가 바로 판독이 가장 어긋나는 때**다. 구조적 상향은 추세가 따라잡을 때까지 순환적 강세로 읽히고, 현재 끝점의 추세는 외삽된 값이라 그 자리의 전환 판정은 특히 잠정적이다. 이것은 이 모델만의 결함이 아니다 — 실시간 산출갭 오측정은 널리 기록된 정책 오류의 원인이며, 1970년대 생산성 둔화는 당시 순환적 약세로 읽혔다.",
+      "이 산출물은 투자 판단·섹터·비중·종목·매매 지시를 담지 않는다."
+    ],
+    "interpretation_boundaries": [
+      {
+        "id": "A",
+        "title": "총생산은 기업 이익이 아니다",
+        "surface": "documentation",
+        "text": "성장순환에서 '절대적 감소는 드물다'는 진술은 **총생산**에 대한 것이며 기업 이익에 그대로 옮겨지지 않는다. 단기에 비용이 대체로 고정돼 있어 매출이 조금 줄어도 이익은 훨씬 크게 줄고, 재무 레버리지가 그것을 더 키운다. 총생산이 줄지 않은 기간에도 총이익이 줄어든 적이 있고 상당수 개별 기업이 적자로 넘어갔다. 이익 경로와 할인율 경로가 함께 작동하며 어느 쪽이 지배적인지는 에피소드마다 다르다 — 2008~09년은 이익 주도, 2022년은 할인율 주도였다."
+      },
+      {
+        "id": "B",
+        "title": "순환과 구조를 실시간으로 가르지 못한다",
+        "surface": "app_phase_reading",
+        "text": "이 모델은 추세 위·아래를 읽지만 그 강약이 순환적인지 구조적인지 실시간으로 가르지 못한다. 추세는 이동평균이라 성장의 구조적 변화는 결국 추세에 흡수되고 '추세 위' 판독은 사라지지만, **흡수되기 전의 전환기가 바로 판독이 가장 어긋나는 때**다. 구조적 상향은 추세가 따라잡을 때까지 순환적 강세로 읽히고, 현재 끝점의 추세는 외삽된 값이라 그 자리의 전환 판정은 특히 잠정적이다. 이것은 이 모델만의 결함이 아니다 — 실시간 산출갭 오측정은 널리 기록된 정책 오류의 원인이며, 1970년대 생산성 둔화는 당시 순환적 약세로 읽혔다."
+      }
+    ],
+    "provenance": {
+      "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+      "source_commit": "81941a79c66c5bd39888ec66de9921c0e6dcb445",
+      "evidence_source": "strict_alfred_real_time_cache_only"
+    }
+  },
+  "maturity": {
+    "current": {
+      "week": "2026-08-14",
+      "phase": "expansion",
+      "maturity": 0.25,
+      "stage": "초반",
+      "wording": "확장기 초반의 특징이 나타납니다. 모멘텀이 아직 붙는 중입니다.",
+      "form": "state_description",
+      "validated": true
+    },
+    "validation_scope": [
+      {
+        "phase": "recovery",
+        "validated": false,
+        "episodes": 4,
+        "beats_duration_control": false,
+        "within_run_shift_p": 0.2294,
+        "successor_rate": {
+          "base": 0.2583,
+          "duration_only": 0.5882,
+          "late_signal": 0.3421
+        },
+        "why": "경과 기간 대조군 0.5882를 이기지 못한다(0.3421). 신호가 아니라 '오래됐다'가 설명한다."
+      },
+      {
+        "phase": "expansion",
+        "validated": true,
+        "episodes": 45,
+        "beats_duration_control": true,
+        "within_run_shift_p": 0.015,
+        "successor_rate": {
+          "base": 0.5971,
+          "duration_only": 0.6102,
+          "late_signal": 0.7848
+        },
+        "why": "경과 기간 대조군 0.6102를 0.7848로 이기고, 블록 안 위치 검정도 p=0.015로 통과한다."
+      },
+      {
+        "phase": "slowdown",
+        "validated": false,
+        "episodes": 44,
+        "beats_duration_control": false,
+        "within_run_shift_p": 0.5097,
+        "successor_rate": {
+          "base": 0.0532,
+          "duration_only": 0.1097,
+          "late_signal": 0.0638
+        },
+        "why": "경과 기간 대조군 0.1097를 이기지 못한다(0.0638). 신호가 아니라 '오래됐다'가 설명한다."
+      },
+      {
+        "phase": "contraction",
+        "validated": false,
+        "episodes": 5,
+        "beats_duration_control": true,
+        "within_run_shift_p": 0.5822,
+        "successor_rate": {
+          "base": 0.1605,
+          "duration_only": 0.2364,
+          "late_signal": 0.4
+        },
+        "why": "에피소드가 5개뿐이라 확인할 수 없다. 대조군을 이기는 것처럼 보이지만 블록 안 위치 검정이 p=0.5822로 우연과 구분되지 않는다."
+      }
+    ],
+    "validated_phases": [
+      "expansion"
+    ],
+    "symmetric_across_the_four_phases": false,
+    "statement": "후반부 신호는 네 국면에 대칭적으로 작동하지 않는다. 경과 기간 대조군을 이기고 블록 안 위치 검정도 통과하는 국면은 확장기뿐이다.",
+    "form": "state_description",
+    "note": "이 신호는 **확장기에서만** 검증됐다. 다른 국면에서는 화면에 문구를 만들지 않는다 — 검증되지 않은 국면에 같은 문장을 붙이면 검증된 것처럼 보인다."
+  },
+  "variance_distribution": {
+    "horizon_weeks": 13,
+    "measure": "forward_negative_week_share",
+    "path": "revised_latest_vintage",
+    "groups": [
+      {
+        "group": "lower",
+        "label": "회복기·확장기",
+        "phases": [
+          "recovery",
+          "expansion"
+        ],
+        "share_negative": 0.2733,
+        "observations": 1405,
+        "episodes": 21
+      },
+      {
+        "group": "higher",
+        "label": "후퇴기·침체기",
+        "phases": [
+          "slowdown",
+          "contraction"
+        ],
+        "share_negative": 0.5179,
+        "observations": 251,
+        "episodes": 16
+      }
+    ],
+    "detail_by_phase": [
+      {
+        "phase": "recovery",
+        "share_negative": 0.1667,
+        "observations": 144,
+        "episodes": 4
+      },
+      {
+        "phase": "expansion",
+        "share_negative": 0.2855,
+        "observations": 1261,
+        "episodes": 17
+      },
+      {
+        "phase": "slowdown",
+        "share_negative": 0.5172,
+        "observations": 87,
+        "episodes": 11
+      },
+      {
+        "phase": "contraction",
+        "share_negative": 0.5183,
+        "observations": 164,
+        "episodes": 5
+      }
+    ],
+    "detail_expanded_by_default": "expansion",
+    "why_two_groups": "네 숫자를 나란히 놓으면 자료가 받쳐 주지 않는 순위가 보인다. 회복기와 확장기는 에피소드 4개와 17개에서 나온 값이라 서로 구분되지 않고, 후퇴기와 침체기는 사실상 같은 값이다. 그래서 기본은 두 묶음이고 국면별 숫자는 에피소드 수를 달아 상세로만 낸다.",
+    "path_note": "최종 수정치 경로에서 잰 **역사적 분포**다. 실시간 경로와 섞어 읽으면 안 되고, 앞날에 대한 확률이 아니다."
+  }
+}

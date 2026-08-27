@@ -4,7 +4,7 @@
   "raw_current_phase": "expansion",
   "phase_status": "official",
   "evidence_quality": "low",
-  "phase_separation": 0.557125,
+  "phase_separation": 0.635395,
   "activity_level": -0.247821,
   "activity_momentum": 0.274323,
   "transition_watch": "none",
@@ -84,7 +84,9 @@
     "calendar_recovery_latency_weeks": 11,
     "evidence_availability_adjusted_latency_weeks": 4,
     "limitation": "coincident-data recognition lag",
-    "meaning": "저점 이후 회복 인식이 최대 11주까지 늦을 수 있다. 이 모델은 저점을 실시간으로 짚지 못한다."
+    "meaning": "저점 이후 회복 인식이 최대 11주까지 늦을 수 있다. 이 모델은 저점을 실시간으로 짚지 못한다.",
+    "carried_from": "v1.1",
+    "why_carried": "후퇴기 게이트는 회복 게이트를 건드리지 않는다. 트랙 21·22가 실시간 경로에서 침체·회복 인식 지연이 0주 그대로임을 확인했으므로 v1.1 값을 그대로 이어받는다."
   },
   "known_limitations": [
     "엄격 실시간 침체 에피소드가 하나뿐이다. 실시간 침체 성능을 일반화할 수 없다.",
@@ -112,7 +114,7 @@
   ],
   "provenance": {
     "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
-    "source_commit": "4f7160445d36f2f064763afd8f1b39590aff1baa",
+    "source_commit": "81941a79c66c5bd39888ec66de9921c0e6dcb445",
     "evidence_source": "strict_alfred_real_time_cache_only"
   }
 }

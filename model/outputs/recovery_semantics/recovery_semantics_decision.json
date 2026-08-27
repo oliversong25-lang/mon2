@@ -15,7 +15,7 @@
   "is_final_validation": false,
   "prior_v1_1_status_under_the_latest_vintage_protocol": "rejected",
   "source_commit": "4f7160445d36f2f064763afd8f1b39590aff1baa",
-  "executed_at_utc": "2026-08-23T11:58:18+00:00",
+  "executed_at_utc": "2026-08-27T07:01:59+00:00",
   "hashes": {
     "v1_1_config": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
     "v1_0_stopped_config": "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027",
@@ -25,7 +25,7 @@
     "candidate_i": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
     "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f"
   },
-  "run_digest": "def45f6cb7042a58c7fc673416352252dcbf7bbf98734aa1009884ed4d95ed1c",
+  "run_digest": "6accd15f1b5abf202efa015c23ec2a3d3a6c572eefdc6093aaa60087f59ef53b",
   "semantic_digest": "ec6fdb414718905bd6cccc359c24e5c6cb8aeb50a050e6472b9fc2dbe45e0f3d",
   "semantic_digest_covers": [
     "classification",

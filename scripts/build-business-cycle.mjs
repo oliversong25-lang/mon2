@@ -1,5 +1,6 @@
 // scripts/build-business-cycle.mjs
-// 동결된 미국 4국면 모델(v1.1)의 산출물을 앱이 읽을 수 있는 정적 JSON 하나로 옮긴다.
+// 미국 4국면 모델의 출하 번들을 앱이 읽을 수 있는 정적 JSON 하나로 옮긴다.
+// 지금 실리는 것은 **v1.1 엔진 + persist17w 경계**이며, 그 사실이 payload.variant에 있다.
 //
 // ── 왜 내보내기인가 ───────────────────────────────────────────────────────
 // 모델은 파이썬이고 앱은 정적 파일이다. 브라우저에서 모델을 돌릴 수 없으므로,
@@ -114,17 +115,60 @@ function main() {
     );
   }
 
-  const currentPath = join(outputs, "state_semantics", "current_state_output.json");
+  // 출하 번들. 여기서 나온 것이 앱에 실리며, 동결 v1.1 산출물은 읽기만 한다.
+  const ship = join(outputs, "ship");
+  const currentPath = join(ship, "current_state_output.json");
+  const variantPath = join(ship, "variant.json");
+  const maturityPath = join(ship, "maturity.json");
+  const variancePath = join(ship, "variance_distribution.json");
+  const verificationPath = join(ship, "verification.json");
+  const pathCsv = join(ship, "weekly_path.csv");
   const manifestPath = join(outputs, "state_semantics", "operational_manifest.json");
   const decisionPath = join(outputs, "state_semantics", "state_semantics_decision.json");
-  const pathCsv = join(outputs, "four_phase_v1_1", "alfred_audit", "weekly_path.csv");
-  for (const path of [currentPath, manifestPath, decisionPath, pathCsv]) {
+  for (const path of [currentPath, variantPath, maturityPath, variancePath, verificationPath, pathCsv, manifestPath, decisionPath]) {
     if (!existsSync(path)) throw new Error(`모델 산출물이 없습니다: ${path}`);
   }
 
   const current = readJson(currentPath);
   const manifest = readJson(manifestPath);
   const decision = readJson(decisionPath);
+  const variant = readJson(variantPath);
+  const maturity = readJson(maturityPath);
+  const variance = readJson(variancePath);
+  const verification = readJson(verificationPath);
+
+  // ── 변형 식별 ──────────────────────────────────────────────────────────
+  // 버전 문자열 하나에 기대지 않는다. "v1.1"만 보고 v1.1 숫자라고 읽는 사람이 생기면
+  // 그 오해는 조용하고 되돌리기 어렵다. 그래서 변형을 별도 항목으로 싣고, 없으면 멈춘다.
+  if (!variant.id) throw new Error("변형 식별자가 없습니다.");
+  if (variant.transition_gate_applied !== false) {
+    throw new Error(`트랙 16 전이 게이트가 적용된 번들입니다: ${variant.transition_gate_applied}`);
+  }
+  // 모델 쪽이 이미 검증했지만 여기서 한 번 더 본다 — 번들과 내보내기가 다른 날 돌 수 있다.
+  if (!verification.agrees) throw new Error(`모델 검증이 통과하지 않은 번들입니다: ${JSON.stringify(verification)}`);
+
+  // ── 성숙도 검증 범위 ──────────────────────────────────────────────────
+  // 범위가 데이터에 없으면 화면은 네 국면 모두에 신호를 붙인다. 산문이 아니라 항목으로
+  // 실려야 하고, 비어 있으면 멈춘다.
+  if (!Array.isArray(maturity.validation_scope) || maturity.validation_scope.length !== PHASES.length) {
+    throw new Error("성숙도 검증 범위가 네 국면을 덮지 않습니다.");
+  }
+  if (!Array.isArray(maturity.validated_phases) || !maturity.validated_phases.length) {
+    throw new Error("성숙도에서 검증된 국면이 하나도 없습니다.");
+  }
+  // 검증되지 않은 국면에 문구가 붙어 있으면 검증된 것처럼 보인다.
+  if (maturity.current && !maturity.current.validated && maturity.current.wording) {
+    throw new Error("검증되지 않은 국면에 성숙도 문구가 붙어 있습니다.");
+  }
+
+  // ── 분산 분포 ─────────────────────────────────────────────────────────
+  // 두 묶음이 기본이다. 네 숫자만 있으면 화면이 순위를 만들어 버린다.
+  if (!Array.isArray(variance.groups) || variance.groups.length !== 2) {
+    throw new Error("분산 분포가 두 묶음이 아닙니다.");
+  }
+  if (!Array.isArray(variance.detail_by_phase) || variance.detail_by_phase.some((row) => row.episodes === undefined)) {
+    throw new Error("분산 분포 상세에 에피소드 수가 없습니다.");
+  }
 
   // 결론과 한계를 함께 싣지 않으면 내보내지 않는다. 화면에서 빠뜨릴 수 있는 것을
   // 애초에 데이터에서 뺄 수 없게 만든다.
@@ -206,7 +250,11 @@ function main() {
 
   const payload = {
     model: "us_four_phase_v1",
-    version: "v1.1",
+    // 엔진과 임계값은 동결 v1.1 그대로이고 바뀐 것은 관측층의 후퇴기 경계 하나다.
+    // 그래서 버전에 둘을 다 적고, 그것과 별개로 `variant`를 따로 싣는다.
+    version: `v1.1+${variant.id}`,
+    baseVersion: "v1.1",
+    variant: variant,
     region: "US",
     modelStatus: current.model_status,
     // 잠금은 "운영에 쓸 수 있다"는 뜻이지 "검증이 끝났다"는 뜻이 아니다. 둘을 같이 싣는다.
@@ -241,6 +289,9 @@ function main() {
     recoveryLatencyWarning: current.recovery_latency_warning,
     limitations: current.known_limitations,
     interpretationBoundaries: current.interpretation_boundaries,
+    maturity: maturity,
+    varianceDistribution: variance,
+    verification: verification,
     history,
     summary: {
       weeks: history.length,
@@ -265,6 +316,8 @@ function main() {
   console.log(`  주간 경로 ${payload.summary.weeks}주 (${payload.summary.firstWeek} ~ ${payload.summary.lastWeek}) · 전환 ${transitions.length}회`);
   console.log(`  모델 상태 ${payload.modelStatus} · 최종 검증 아님`);
   console.log(`  해석 경계 ${payload.interpretationBoundaries.length}건 · 화면 노출 ${surfaced.length}건`);
+  console.log(`  변형 ${variant.id} · 전이 게이트 적용 ${variant.transition_gate_applied}`);
+  console.log(`  성숙도 검증 국면 ${maturity.validated_phases.join(",")} · 분산 분포 ${variance.groups.length}묶음`);
 }
 
 main();

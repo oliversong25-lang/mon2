@@ -1,0 +1,72 @@
+{
+  "current": {
+    "week": "2026-08-14",
+    "phase": "expansion",
+    "maturity": 0.25,
+    "stage": "초반",
+    "wording": "확장기 초반의 특징이 나타납니다. 모멘텀이 아직 붙는 중입니다.",
+    "form": "state_description",
+    "validated": true
+  },
+  "validation_scope": [
+    {
+      "phase": "recovery",
+      "validated": false,
+      "episodes": 4,
+      "beats_duration_control": false,
+      "within_run_shift_p": 0.2294,
+      "successor_rate": {
+        "base": 0.2583,
+        "duration_only": 0.5882,
+        "late_signal": 0.3421
+      },
+      "why": "경과 기간 대조군 0.5882를 이기지 못한다(0.3421). 신호가 아니라 '오래됐다'가 설명한다."
+    },
+    {
+      "phase": "expansion",
+      "validated": true,
+      "episodes": 45,
+      "beats_duration_control": true,
+      "within_run_shift_p": 0.015,
+      "successor_rate": {
+        "base": 0.5971,
+        "duration_only": 0.6102,
+        "late_signal": 0.7848
+      },
+      "why": "경과 기간 대조군 0.6102를 0.7848로 이기고, 블록 안 위치 검정도 p=0.015로 통과한다."
+    },
+    {
+      "phase": "slowdown",
+      "validated": false,
+      "episodes": 44,
+      "beats_duration_control": false,
+      "within_run_shift_p": 0.5097,
+      "successor_rate": {
+        "base": 0.0532,
+        "duration_only": 0.1097,
+        "late_signal": 0.0638
+      },
+      "why": "경과 기간 대조군 0.1097를 이기지 못한다(0.0638). 신호가 아니라 '오래됐다'가 설명한다."
+    },
+    {
+      "phase": "contraction",
+      "validated": false,
+      "episodes": 5,
+      "beats_duration_control": true,
+      "within_run_shift_p": 0.5822,
+      "successor_rate": {
+        "base": 0.1605,
+        "duration_only": 0.2364,
+        "late_signal": 0.4
+      },
+      "why": "에피소드가 5개뿐이라 확인할 수 없다. 대조군을 이기는 것처럼 보이지만 블록 안 위치 검정이 p=0.5822로 우연과 구분되지 않는다."
+    }
+  ],
+  "validated_phases": [
+    "expansion"
+  ],
+  "symmetric_across_the_four_phases": false,
+  "statement": "후반부 신호는 네 국면에 대칭적으로 작동하지 않는다. 경과 기간 대조군을 이기고 블록 안 위치 검정도 통과하는 국면은 확장기뿐이다.",
+  "form": "state_description",
+  "note": "이 신호는 **확장기에서만** 검증됐다. 다른 국면에서는 화면에 문구를 만들지 않는다 — 검증되지 않은 국면에 같은 문장을 붙이면 검증된 것처럼 보인다."
+}

@@ -1,0 +1,9 @@
+{
+  "id": "persist17w",
+  "label": "확장·후퇴 경계 수정 (지속 17주)",
+  "differs_from_v1_1": true,
+  "what_changed": "후퇴기가 확장기와 나뉘는 자리가 모멘텀 0이었다. 그 자리를 지속 요건 17주로 옮겨, 애매한 주가 후퇴기로 흘러들지 않게 했다.",
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "transition_gate_applied": false,
+  "why_no_transition_gate": "트랙 21의 2x2에서 그 게이트는 경계를 고친 뒤 장기 경로 전환을 97에서 96으로 바꿀 뿐이었고, 둘을 함께 걸면 판별력 2.421→2.302, 진행률 0.167→0.091로 나빠졌다. 증상 처방이었고 원인은 경계였다."
+}

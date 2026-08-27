@@ -1,0 +1,20 @@
+{
+  "expected": {
+    "current_official_phase": "expansion",
+    "transitions": 20,
+    "slowdown_weeks": 33
+  },
+  "measured": {
+    "current_official_phase": "expansion",
+    "transitions": 20,
+    "slowdown_weeks": 33
+  },
+  "agrees": true,
+  "superseded_expectation": {
+    "transitions": 28,
+    "slowdown_weeks": 49,
+    "actually_from": "persist13w",
+    "evidence": "outputs/slowdown_boundary/realtime_matrix.csv의 boundary_only 행이 전환 28·후퇴기 49주이고, 같은 실행의 validation_summary.json이 /matrix/boundary_only/gate = persist13w로 적고 있다.",
+    "why_corrected": "트랙 21이 persist13w를 권고했을 때의 실시간 수치다. 트랙 22가 평탄역(15~21주)과 블록 수를 근거로 persist17w로 조정하면서 20회·33주가 됐다."
+  }
+}
