@@ -396,3 +396,13 @@ outputs/variance_control/*
 !outputs/variance_control/lookback_table.csv
 !outputs/variance_control/comparisons.csv
 !outputs/variance_control/leave_one_episode_out.csv
+
+# 듀레이션 축. 산출물이 작아 전부 싣는다.
+!outputs/duration_axis/
+outputs/duration_axis/*
+!outputs/duration_axis/duration_axis_report.md
+!outputs/duration_axis/validation_summary.json
+!outputs/duration_axis/ceilings.csv
+!outputs/duration_axis/lookback_table.csv
+!outputs/duration_axis/control_comparison.csv
+!outputs/duration_axis/leave_one_episode_out.csv

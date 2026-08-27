@@ -246,6 +246,9 @@ def test_no_pandemic_specific_branching() -> None:
         # 변동성 대조. 2020 날짜는 제외 표본을 읽는 문장에만 나오며, 국면 판정에는
         # 쓰이지 않는다.
         ("variance_control", "report.py"),
+        # 듀레이션 축. 2020 날짜는 사전 명세가 미리 이름 붙인 제외 구간 목록의 한 줄이고,
+        # 국면 판정에는 쓰이지 않는다.
+        ("duration_axis", "prespec.py"),
     }
     offenders = []
     for path in root.rglob("*.py"):
