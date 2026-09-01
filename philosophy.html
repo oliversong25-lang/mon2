@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>투자 원칙</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="lib/app.css?v=20260814-1">
+  <script src="lib/supabase-config.js?v=20260811-1"></script>
+  <script src="lib/account-store.js"></script>
+  <script src="lib/auth-guard.js"></script>
+  <style>
+    /* 이 화면에는 선택지가 없다. 질문과 빈 칸뿐이다 — 우리가 보기를 주면 그 순간
+       우리의 관점이 사용자의 원칙에 들어간다. */
+    .q { margin-top:var(--space-6); }
+    .q:first-of-type { margin-top:var(--space-4); }
+    .q label { display:block; font-size:var(--font-md); font-weight:600; line-height:1.6; }
+    .q textarea { width:100%; margin-top:var(--space-3); padding:var(--space-4);
+      border:var(--border) solid var(--line); border-radius:var(--radius-md);
+      background:var(--surface-2); color:inherit; font:inherit; line-height:1.8;
+      min-height:5.5rem; resize:vertical; }
+    .q textarea:focus { outline:2px solid var(--brand-ink); outline-offset:1px; }
+    .q-note { margin-top:var(--space-2); color:var(--dim); font-size:var(--font-xs); }
+
+    .save-row { display:flex; flex-wrap:wrap; gap:var(--space-3); align-items:center;
+      margin-top:var(--space-6); }
+    .save-row input { flex:1 1 14rem; padding:var(--space-3) var(--space-4);
+      border:var(--border) solid var(--line); border-radius:var(--radius-md);
+      background:var(--surface-2); color:inherit; font:inherit; }
+    .btn { padding:var(--space-3) var(--space-5); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface-2); color:inherit;
+      font:inherit; font-weight:600; cursor:pointer; }
+    .btn:disabled { opacity:.5; cursor:default; }
+
+    .rev { padding:var(--space-4) 0; border-top:var(--border) solid var(--line); }
+    .rev:first-child { border-top:0; }
+    .rev-head { display:flex; flex-wrap:wrap; gap:var(--space-3); align-items:baseline; }
+    .rev-when { font-weight:600; font-variant-numeric:tabular-nums; }
+    .rev-reason { color:var(--muted); font-size:var(--font-sm); }
+    .rev-body { margin-top:var(--space-3); color:var(--dim); font-size:var(--font-sm); line-height:1.8; }
+    .rev-body b { color:var(--muted); font-weight:600; }
+    .soon-body { color:var(--dim); font-size:var(--font-sm); line-height:1.7; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script src="lib/session.js"></script>
+<script src="lib/shell.js?v=20260813-2"></script>
+<script src="lib/format.js"></script>
+<script src="lib/journal-store.js"></script>
+<script>
+// 투자 원칙 화면.
+//
+// ── 경계 ───────────────────────────────────────────────────────────────────
+// 우리는 **묻기만 한다.** 사용자가 답하고, 우리는 그것을 기록해 돌려준다. 원칙을
+// 제안하지 않는다. 보기를 주면 그것이 곧 우리의 관점이 되고, 예시를 적으면 예시가
+// 제안으로 읽힌다. 그래서 이 화면에는 선택지도 예시 답도 기본값도 없다.
+//
+// "무엇을 하십니까"는 물어도 되고 "무엇을 해야 합니다"는 물으면 안 된다. 아래 질문은
+// 전부 앞쪽이다.
+//
+// ── 왜 원칙이 먼저인가 ─────────────────────────────────────────────────────
+// 매도 조건은 원칙에서 나온다. 틀이 없는 상태에서 "언제 팔 것인가"만 물으면 임의로
+// 적게 되고, 임의로 적은 조건은 지켜지지 않는다.
+const { escapeHtml } = Format;
+
+// 질문 목록. **문장은 질문이고 답은 빈 칸이다.** placeholder도 두지 않는다 —
+// 흐린 글씨로 적힌 문장도 사용자에게는 답의 본보기로 읽힌다.
+const QUESTIONS = [
+  { id: "buy", text: "무엇을 보면 사기로 합니까?" },
+  { id: "sell", text: "무엇을 보면 팔기로 합니까?" },
+  { id: "position", text: "한 종목에 자산의 얼마까지 넣습니까?" },
+  { id: "horizon", text: "한 번 사면 얼마나 들고 있을 생각입니까?" },
+  { id: "loss", text: "어느 정도의 손실까지 견딜 수 있습니까?" },
+  { id: "unknown", text: "이해하지 못하는 것에도 투자합니까?" },
+];
+
+let answers = {};
+let revisions = [];
+let loaded = false;
+let error = null;
+let busy = false;
+// 불러오기가 실패했는지. 실패한 채로 저장하면 **빈 답이 기존 원칙을 덮어쓴다** —
+// 화면은 비어 있지만 서버에는 답이 있을 수 있기 때문이다. 그 경우 저장을 막는다.
+let loadFailed = false;
+
+function navOptions() {
+  const state = SessionStore.read();
+  return { assetCounts: Shell.countByGroup(state.assets) };
+}
+
+function head() {
+  return `<div class="page-head">
+    <div><p class="eyebrow">기록</p><h1>투자 원칙</h1>
+      <div class="sub">묻기만 합니다. 답은 그대로 저장되고, 바뀌면 언제 바뀌었는지가 남습니다.</div></div>
+  </div>`;
+}
+
+function formCard() {
+  const rows = QUESTIONS.map((q) => `<div class="q">
+    <label for="q-${escapeHtml(q.id)}">${escapeHtml(q.text)}</label>
+    <textarea id="q-${escapeHtml(q.id)}" data-q="${escapeHtml(q.id)}" rows="3">${escapeHtml(answers[q.id] || "")}</textarea>
+  </div>`).join("");
+
+  return `<div class="card">
+    <h2>원칙</h2>
+    <div class="card-sub">자유롭게 쓰세요. 정답은 없고, 우리도 답을 제안하지 않습니다.</div>
+    ${rows}
+    <div class="q" style="margin-top:var(--space-7)">
+      <label for="reason">이번에 무엇을 바꿨고 왜 바꿨습니까?</label>
+      <div class="save-row">
+        <input id="reason" type="text" ${loadFailed ? "disabled" : ""}>
+        <button type="button" class="btn" id="save" ${busy || loadFailed ? "disabled" : ""}>저장</button>
+      </div>
+      <div class="q-note">${loadFailed
+        ? "지금 저장하면 저장돼 있던 원칙이 빈 답으로 덮일 수 있어 잠갔습니다. 불러오기가 된 뒤에 저장하세요."
+        : "비워 두어도 저장됩니다. 적어 두면 나중에 원칙이 언제 왜 움직였는지 볼 수 있습니다."}</div>
+    </div>
+  </div>`;
+}
+
+// 이력은 해석하지 않고 그대로 보여준다. "하락장에 원칙을 고쳤다"는 판단은 사용자가
+// 자기 기록을 보고 하는 것이지 우리가 붙일 딱지가 아니다.
+function historyCard() {
+  if (!revisions.length) {
+    return `<div class="card">
+      <h2>바뀐 기록</h2>
+      <p class="soon-body" style="margin-top:var(--space-3)">아직 저장한 원칙이 없습니다. 저장하면 그때부터 바뀐 기록이 쌓입니다.</p>
+    </div>`;
+  }
+  const rows = revisions.map((rev) => {
+    const body = QUESTIONS
+      .filter((q) => (rev.answers || {})[q.id])
+      .map((q) => `<div><b>${escapeHtml(q.text)}</b><br>${escapeHtml(rev.answers[q.id])}</div>`)
+      .join("");
+    return `<div class="rev">
+      <div class="rev-head">
+        <span class="rev-when">${escapeHtml(String(rev.changed_at || "").slice(0, 10))}</span>
+        <span class="rev-reason">${rev.reason ? escapeHtml(rev.reason) : "이유를 적지 않음"}</span>
+      </div>
+      <div class="rev-body">${body || "내용 없음"}</div>
+    </div>`;
+  }).join("");
+
+  return `<div class="card">
+    <h2>바뀐 기록</h2>
+    <div class="card-sub">${revisions.length}번 저장했습니다. 지우거나 고칠 수 없습니다.</div>
+    <div style="margin-top:var(--space-4)">${rows}</div>
+  </div>`;
+}
+
+function render() {
+  if (!loaded) {
+    Shell.mount("app", "philosophy", `${head()}<div class="card"><span class="skel" style="width:60%"></span></div>`, navOptions());
+    return;
+  }
+  const problem = error
+    ? `<div class="card"><h2>불러오지 못했어요 <span class="pill warn">확인 필요</span></h2>
+       <p class="soon-body" style="margin-top:var(--space-3)">${escapeHtml(error)}</p></div>`
+    : "";
+  Shell.mount("app", "philosophy",
+    `${head()}${problem}${formCard()}<div style="margin-top:var(--space-4)">${historyCard()}</div>`,
+    navOptions());
+
+  const save = document.getElementById("save");
+  if (save) save.addEventListener("click", onSave);
+}
+
+function collect() {
+  const out = {};
+  QUESTIONS.forEach((q) => {
+    const node = document.querySelector(`[data-q="${q.id}"]`);
+    const value = node ? String(node.value || "").trim() : "";
+    if (value) out[q.id] = value;
+  });
+  return out;
+}
+
+async function onSave() {
+  // 화면만 잠그면 다른 경로로 불릴 때 뚫린다. 여기서 한 번 더 막는다.
+  if (loadFailed) return;
+  const reasonNode = document.getElementById("reason");
+  const reason = reasonNode ? String(reasonNode.value || "").trim() : "";
+  const next = collect();
+  busy = true;
+  render();
+  try {
+    await JournalStore.savePhilosophy(next, reason);
+    answers = next;
+    revisions = await JournalStore.loadRevisions();
+    error = null;
+    loadFailed = false;
+  } catch (problem) {
+    error = problem.message || "저장하지 못했습니다.";
+  } finally {
+    busy = false;
+    render();
+  }
+}
+
+(async function () {
+  render();
+  if (!(await AccountStore.bootstrapProtected())) return;
+  try {
+    const current = await JournalStore.loadPhilosophy();
+    answers = current.answers || {};
+    revisions = await JournalStore.loadRevisions();
+  } catch (problem) {
+    error = problem.message || "불러오지 못했습니다.";
+    loadFailed = true;
+  } finally {
+    loaded = true;
+    render();
+  }
+})();
+</script>
+</body>
+</html>
