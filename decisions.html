@@ -24,18 +24,6 @@
     .q textarea { min-height:5rem; resize:vertical; }
     .q-note { margin-top:var(--space-2); color:var(--dim); font-size:var(--font-xs); line-height:1.6; }
 
-    /* 네 가지가 나란히 있어야 한다. 매수·매도만 크게 두면 "안 팔기로 했다"가 작아 보이고,
-       작아 보이는 칸은 안 쓰인다. */
-    .actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));
-      gap:var(--space-3); margin-top:var(--space-3); }
-    .actions button { padding:var(--space-4) var(--space-3); border:var(--border) solid var(--line);
-      border-radius:var(--radius-md); background:var(--surface-2); color:inherit;
-      font:inherit; font-weight:600; cursor:pointer; text-align:center; }
-    .actions button[aria-pressed="true"] { border-color:var(--brand-ink); background:var(--surface-3, var(--surface-2));
-      outline:2px solid var(--brand-ink); outline-offset:-2px; }
-    .actions small { display:block; margin-top:var(--space-1); color:var(--dim);
-      font-size:var(--font-xs); font-weight:400; }
-
     .kinds { display:flex; flex-wrap:wrap; gap:var(--space-3); margin-top:var(--space-3); }
     .kinds button { padding:var(--space-2) var(--space-4); border:var(--border) solid var(--line);
       border-radius:var(--radius-md); background:var(--surface-2); color:inherit; font:inherit; cursor:pointer; }
@@ -85,17 +73,9 @@
 // 쪽으로 재구성된다.
 //
 // ── 마찰이 유일한 실패 원인이다 ────────────────────────────────────────────
-// 한 건에 10분이 걸리면 아무도 쓰지 않는다. 그래서 사용자가 타자로 치는 것은 **네 칸**
+// 한 건에 10분이 걸리면 아무도 쓰지 않는다. 그래서 사용자가 타자로 치는 것은 **다섯 칸**
 // 뿐이고, 날짜·종목·수량·단가·비중·환율·주가지수·금리·경기국면은 앱이 채운다.
 const { escapeHtml, won } = Format;
-
-// 네 가지 전부가 결정이다. 보류와 안 하기로 함을 빼면 이것은 거래 기록부가 된다.
-const ACTIONS = [
-  { id: "buy", label: "샀다", note: "새로 사거나 더 샀다" },
-  { id: "sell", label: "팔았다", note: "일부 또는 전부" },
-  { id: "hold", label: "그대로 뒀다", note: "팔지 않기로 한 결정" },
-  { id: "skip", label: "안 하기로 했다", note: "사려다 사지 않은 것" },
-];
 
 // 사용자가 실제로 타자로 치는 칸. 이 넷이 근거의 전부다.
 const QUESTIONS = [
@@ -145,16 +125,16 @@ function selectedRow() {
 }
 
 function actionCard() {
-  const buttons = ACTIONS.map((item) => `<button type="button" data-action="${item.id}"
-    aria-pressed="${action === item.id}">${escapeHtml(item.label)}<small>${escapeHtml(item.note)}</small></button>`).join("");
-
   const options = ['<option value="">보유와 무관한 결정</option>']
     .concat(rows.map((row) => `<option value="${escapeHtml(String(row.id))}" ${String(row.id) === String(holdingId) ? "selected" : ""}>${escapeHtml(row.name)}</option>`))
     .join("");
 
   return `<div class="card">
-    <h2>무엇을 했습니까?</h2>
-    <div class="actions">${buttons}</div>
+    <div class="q" style="margin-top:0">
+      <label for="action-input">무엇을 했습니까?</label>
+      <input id="action-input" type="text" maxlength="120" value="${escapeHtml(action)}" autocomplete="off">
+      <div class="q-note" id="action-help">선택지 없이 한 문장으로 직접 기록합니다.</div>
+    </div>
     <div class="q">
       <label for="holding">어느 자산에 대한 결정입니까?</label>
       <select id="holding">${options}</select>
@@ -229,7 +209,7 @@ function formCard() {
 
   return `<div class="card">
     <h2>근거</h2>
-    <div class="card-sub">타자로 칠 칸은 <b>${QUESTIONS.length}개</b>입니다. 나머지는 앱이 채웁니다.</div>
+    <div class="card-sub">직접 입력할 칸은 <b>${QUESTIONS.length + 1}개</b>입니다. 나머지는 앱이 채웁니다.</div>
     ${fields}
     ${autoCard()}
     <div style="margin-top:var(--space-6)">
@@ -244,6 +224,7 @@ function recordCard() {
     return `<div class="card"><h2>지난 기록</h2>
       <p class="soon-body" style="margin-top:var(--space-3)">아직 기록이 없습니다.</p></div>`;
   }
+  // 기존 네 가지 선택값으로 저장된 기록도 사람이 읽던 문구로 계속 보여준다.
   const label = { buy: "샀다", sell: "팔았다", hold: "그대로 뒀다", skip: "안 하기로 했다" };
   const items = records.map((rec) => {
     const ctx = rec.context || {};
@@ -280,9 +261,9 @@ function render() {
     `${head()}${actionCard()}<div style="margin-top:var(--space-4)">${formCard()}</div><div style="margin-top:var(--space-4)">${recordCard()}</div>`,
     navOptions());
 
-  document.querySelectorAll("[data-action]").forEach((node) => {
-    node.addEventListener("click", () => { action = node.dataset.action; render(); });
-  });
+  const actionInput = document.getElementById("action-input");
+  // 입력 중 DOM을 다시 그리지 않는다. 한글 조합과 커서가 끊기지 않아야 한다.
+  if (actionInput) actionInput.addEventListener("input", () => { action = actionInput.value; });
   document.querySelectorAll("[data-kind]").forEach((node) => {
     node.addEventListener("click", () => { kind = node.dataset.kind; render(); });
   });
@@ -323,7 +304,14 @@ function collectRule() {
 }
 
 async function onSave() {
-  if (!action) { notice = "무엇을 했는지 먼저 골라 주세요."; render(); return; }
+  action = String((document.getElementById("action-input") || {}).value || action).trim();
+  if (!action) {
+    const input = document.getElementById("action-input");
+    const help = document.getElementById("action-help");
+    if (help) help.textContent = "무엇을 했는지 직접 입력해 주세요.";
+    if (input) input.focus();
+    return;
+  }
   // **화면을 다시 그리기 전에 다 읽는다.** `render()`가 DOM을 통째로 새로 만들기 때문에,
   // 그 뒤에 읽으면 빈 칸을 읽게 된다 — 숫자 조건 값이 매번 조용히 0으로 저장되고 있었다.
   const typed = collect();

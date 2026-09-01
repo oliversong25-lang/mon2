@@ -69,19 +69,19 @@ create index if not exists user_philosophy_revisions_user_time
 
 -- 의사결정 기록.
 --
--- `action`에 hold와 skip이 들어 있는 것이 핵심이다. 매수·매도만 받으면 이것은 거래
--- 기록부가 되고, 정작 남겨야 할 "안 팔기로 했다"와 "안 사기로 했다"가 사라진다.
+-- `action`은 사용자가 당시 행동을 자기 말로 남긴다. 미리 정한 분류에 맞추게 하면
+-- "안 팔기로 했다"처럼 중요한 결정의 맥락이 선택지 바깥에서 사라진다.
 --
 -- `holding_id`는 null을 허용한다. 사지 않기로 한 결정에는 붙일 보유 자산이 없다.
 -- `holding_label`을 따로 두는 이유는 자산이 나중에 지워져도 기록이 읽혀야 하기 때문이다.
 --
--- `context`는 앱이 채운다. 사용자가 타자로 치는 것은 근거 네 칸과 반증 조건뿐이다 —
+-- `context`는 앱이 채운다. 사용자가 타자로 치는 것은 행동 한 칸과 근거 네 칸뿐이다 —
 -- 마찰이 의사결정 기록이 실패하는 유일한 이유이고, 한 건에 10분이 걸리면 아무도 쓰지 않는다.
 create table if not exists public.user_decision_records (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   decided_at timestamptz not null default now(),
-  action text not null check (action in ('buy', 'sell', 'hold', 'skip')),
+  action text not null,
   reasoning text not null default '',
   expectation text not null default '',
   uncertainty text not null default '',
@@ -100,6 +100,10 @@ create index if not exists user_decision_records_user_time
   on public.user_decision_records (user_id, decided_at desc);
 create index if not exists user_decision_records_holding
   on public.user_decision_records (user_id, holding_id);
+
+-- 초기 버전의 네 가지 선택 제한을 이미 만든 프로젝트에서도 제거한다.
+alter table public.user_decision_records
+  drop constraint if exists user_decision_records_action_check;
 
 alter table public.user_investment_philosophy enable row level security;
 alter table public.user_investment_philosophy force row level security;

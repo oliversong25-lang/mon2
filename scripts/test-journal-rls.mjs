@@ -85,7 +85,7 @@ record("A도 자기 원칙 이력을 지울 수 없다", await blocked(call(`/re
 const made = await call("/rest/v1/user_decision_records", {
   method: "POST", headers: auth(a.access_token, { Prefer: "return=representation" }),
   body: JSON.stringify({
-    user_id: a.user.id, action: "hold", reasoning: `rls-${stamp}`,
+    user_id: a.user.id, action: "그대로 보유했다", reasoning: `rls-${stamp}`,
     falsification_kind: "machine", falsification_text: "테스트",
     falsification_rule: { metric: "price", op: "lte", value: 1 },
     holding_id: null, holding_label: "", context: { businessCycle: { phase: "expansion" } },
@@ -93,7 +93,7 @@ const made = await call("/rest/v1/user_decision_records", {
 });
 const ownRec = await call(`/rest/v1/user_decision_records?select=id,action,falsification_kind&user_id=eq.${a.user.id}&reasoning=eq.rls-${stamp}`, { headers: auth(a.access_token) });
 const crossRec = await call(`/rest/v1/user_decision_records?select=id&user_id=eq.${a.user.id}`, { headers: auth(b.access_token) });
-record("A가 자기 결정 기록을 본다", ownRec.length === 1 && ownRec[0].action === "hold", JSON.stringify(ownRec));
+record("A가 자기 결정 기록을 본다", ownRec.length === 1 && ownRec[0].action === "그대로 보유했다", JSON.stringify(ownRec));
 record("보유 자산 없이도 기록이 저장된다", made[0].holding_id === null, JSON.stringify(made[0]?.holding_id));
 record("반증 조건의 종류가 구분돼 저장된다", ownRec[0].falsification_kind === "machine", ownRec[0]?.falsification_kind);
 record("B가 A의 결정 기록을 보지 못한다", crossRec.length === 0, `${crossRec.length}건`);
@@ -104,11 +104,6 @@ record("B가 A의 결정 기록을 지우지 못한다", await blocked(call(`/re
   method: "DELETE", headers: auth(b.access_token),
 })) || (await call(`/rest/v1/user_decision_records?select=id&id=eq.${made[0].id}`, { headers: auth(a.access_token) })).length === 1,
   "행이 사라졌습니다");
-
-// 잘못된 action은 스키마가 막아야 한다. 넷이 아닌 값이 들어오면 기록의 뜻이 흐려진다.
-record("정해진 넷 밖의 action은 거부된다", await blocked(call("/rest/v1/user_decision_records", {
-  method: "POST", headers: auth(a.access_token), body: JSON.stringify({ user_id: a.user.id, action: "watch", reasoning: "x" }),
-})), "허용되지 않은 action이 들어갔습니다");
 
 // 정리. 남겨 두면 다음 실행이 이전 흔적을 자기 것으로 센다.
 await call(`/rest/v1/user_decision_records?id=eq.${made[0].id}`, { method: "DELETE", headers: auth(a.access_token) });

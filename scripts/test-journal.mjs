@@ -64,9 +64,9 @@ try {
       && !revisionGrant.includes("update") && !revisionGrant.includes("delete"),
     revisionGrant);
 
-  // 보류와 안 하기로 함이 1급이어야 한다. 매수·매도만 받으면 거래 기록부가 된다.
-  record("action이 네 가지를 모두 받는다",
-    ["'buy'", "'sell'", "'hold'", "'skip'"].every((value) => sql.includes(value)), "");
+  // 무엇을 했는지는 사용자의 문장이다. 정해진 네 값으로 제한하면 직접 입력 UI와 저장이 갈라진다.
+  record("무엇을 했는지 자유 문장으로 저장할 수 있다",
+    /action text not null,/.test(sql) && !/action in\s*\(/.test(sql), "action 선택 제한이 남아 있음");
 
   record("보유 자산 없이도 기록할 수 있다",
     /holding_id text,/.test(sql) && !/holding_id text not null/.test(sql), "holding_id가 not null입니다");
@@ -143,17 +143,18 @@ try {
   await page.waitForTimeout(900);
   const journal = await page.innerText("body");
 
-  for (const label of ["샀다", "팔았다", "그대로 뒀다", "안 하기로 했다"]) {
-    record(`결정 종류에 "${label}"가 있다`, journal.includes(label), "");
-  }
+  record("무엇을 했는지 직접 입력한다",
+    await page.locator('#action-input[type="text"]').count() === 1, "직접 입력 필드가 없음");
+  record("무엇을 했는지 고르는 선택 버튼이 없다",
+    await page.locator("[data-action]").count() === 0, "선택 버튼이 남아 있음");
 
-  // 타자로 쳐야 하는 칸의 수. 늘어나면 기록이 안 쌓인다.
-  const typed = await page.locator("[data-f]").count();
-  record("사용자가 타자로 치는 칸이 네 개다", typed === 4, `${typed}개`);
-  record("화면이 그 수를 밝힌다", journal.includes("4개"), "");
+  // 행동 한 문장과 근거 네 칸을 직접 입력한다.
+  const typed = await page.locator("#action-input, [data-f]").count();
+  record("사용자가 직접 입력하는 칸이 다섯 개다", typed === 5, `${typed}개`);
+  record("화면이 그 수를 밝힌다", journal.includes("5개"), "");
 
   const autofilled = await page.evaluate(() => window.DecisionContext.AUTOFILLED_FIELDS.length);
-  record("앱이 채우는 칸이 사용자가 치는 칸보다 많다", autofilled > 4, `${autofilled}개`);
+  record("앱이 채우는 칸이 사용자가 치는 칸보다 많다", autofilled > 5, `${autofilled}개`);
 
   // 자동 채움이 실제로 값을 채웠는지. 목록만 있고 값이 비면 자동 채움이 아니다.
   const filled = await page.evaluate(async () => {
@@ -279,13 +280,13 @@ try {
   await round.goto(`http://127.0.0.1:${PORT}/decisions.html`, { waitUntil: "networkidle" });
   await round.waitForTimeout(900);
 
-  // 무엇을 했는지 고르지 않으면 저장되지 않아야 한다. 빈 action은 기록의 뜻을 지운다.
+  // 무엇을 했는지 쓰지 않으면 저장되지 않아야 한다. 빈 action은 기록의 뜻을 지운다.
   await round.click("#save");
   await round.waitForTimeout(400);
-  record("결정 종류를 고르지 않으면 저장하지 않는다",
-    (await round.innerText("body")).includes("먼저 골라"), "");
+  record("무엇을 했는지 쓰지 않으면 저장하지 않는다",
+    (await round.innerText("body")).includes("직접 입력해"), "");
 
-  await round.click('[data-action="hold"]');
+  await round.fill("#action-input", "그대로 보유했다");
   await round.fill('[data-f="reasoning"]', "값이 내렸지만 산 이유는 그대로다");
   await round.fill('[data-f="expectation"]', "2년 안에 이익이 회복되기를 기대");
   await round.fill('[data-f="uncertainty"]', "경쟁사 진입 속도를 모른다");
@@ -296,7 +297,7 @@ try {
   const afterRecord = await round.innerText("body");
   record("결정 기록이 저장되고 목록에 나온다",
     afterRecord.includes("값이 내렸지만 산 이유는 그대로다"), "");
-  record("보류도 결정으로 기록된다", afterRecord.includes("그대로 뒀다"), "");
+  record("직접 입력한 행동이 기록된다", afterRecord.includes("그대로 보유했다"), "");
   record("보유 자산 없이 기록해도 목록에 나온다", afterRecord.includes("보유와 무관"), "");
   record("저장 뒤 안내가 뜬다", afterRecord.includes("기록했습니다"), "");
 
@@ -312,7 +313,7 @@ try {
 
   // 숫자로 확인되는 조건은 구조로 저장돼야 한다. 본문에만 남으면 트랙 30이 자동 확인과
   // 사람 판단을 가를 수 없다.
-  await round.click('[data-action="sell"]');
+  await round.fill("#action-input", "일부 매도했다");
   await round.click('[data-kind="machine"]');
   await round.waitForTimeout(300);
   await round.fill("#rule-value", "12000");
