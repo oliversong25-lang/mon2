@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>의사결정 기록</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="lib/app.css?v=20260814-1">
+  <script src="lib/supabase-config.js?v=20260811-1"></script>
+  <script src="lib/account-store.js"></script>
+  <script src="lib/auth-guard.js"></script>
+  <style>
+    .q { margin-top:var(--space-6); }
+    .q label { display:block; font-size:var(--font-md); font-weight:600; line-height:1.6; }
+    .q textarea, .q input, .q select { width:100%; margin-top:var(--space-3);
+      padding:var(--space-3) var(--space-4); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface-2); color:inherit;
+      font:inherit; line-height:1.8; }
+    .q textarea { min-height:5rem; resize:vertical; }
+    .q-note { margin-top:var(--space-2); color:var(--dim); font-size:var(--font-xs); line-height:1.6; }
+
+    /* 네 가지가 나란히 있어야 한다. 매수·매도만 크게 두면 "안 팔기로 했다"가 작아 보이고,
+       작아 보이는 칸은 안 쓰인다. */
+    .actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));
+      gap:var(--space-3); margin-top:var(--space-3); }
+    .actions button { padding:var(--space-4) var(--space-3); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface-2); color:inherit;
+      font:inherit; font-weight:600; cursor:pointer; text-align:center; }
+    .actions button[aria-pressed="true"] { border-color:var(--brand-ink); background:var(--surface-3, var(--surface-2));
+      outline:2px solid var(--brand-ink); outline-offset:-2px; }
+    .actions small { display:block; margin-top:var(--space-1); color:var(--dim);
+      font-size:var(--font-xs); font-weight:400; }
+
+    .kinds { display:flex; flex-wrap:wrap; gap:var(--space-3); margin-top:var(--space-3); }
+    .kinds button { padding:var(--space-2) var(--space-4); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface-2); color:inherit; font:inherit; cursor:pointer; }
+    .kinds button[aria-pressed="true"] { border-color:var(--brand-ink); font-weight:600; }
+    .rule { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-3); margin-top:var(--space-3); }
+
+    .auto { margin-top:var(--space-4); padding:var(--space-4); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface-2); }
+    .auto h3 { margin:0 0 var(--space-2); font-size:var(--font-sm); }
+    .auto dl { display:grid; grid-template-columns:auto 1fr; gap:var(--space-2) var(--space-4);
+      margin:0; color:var(--muted); font-size:var(--font-sm); }
+    .auto dt { color:var(--dim); }
+    .auto dd { margin:0; font-variant-numeric:tabular-nums; }
+
+    .btn { padding:var(--space-3) var(--space-5); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface-2); color:inherit;
+      font:inherit; font-weight:600; cursor:pointer; }
+    .btn:disabled { opacity:.5; cursor:default; }
+
+    .rec { padding:var(--space-4) 0; border-top:var(--border) solid var(--line); }
+    .rec:first-child { border-top:0; }
+    .rec-head { display:flex; flex-wrap:wrap; gap:var(--space-3); align-items:baseline; }
+    .rec-when { font-weight:600; font-variant-numeric:tabular-nums; }
+    .rec-body { margin-top:var(--space-3); color:var(--muted); font-size:var(--font-sm); line-height:1.8; }
+    .rec-body b { color:var(--dim); font-weight:600; }
+    .rec-ctx { margin-top:var(--space-3); color:var(--dim); font-size:var(--font-xs); line-height:1.7; }
+    .soon-body { color:var(--dim); font-size:var(--font-sm); line-height:1.7; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script src="lib/fetch-data.js?v=20260815-1"></script>
+<script src="lib/session.js"></script>
+<script src="lib/shell.js?v=20260813-2"></script>
+<script src="lib/format.js"></script>
+<script src="lib/valuation.js"></script>
+<script src="lib/portfolio.js"></script>
+<script src="lib/journal-store.js"></script>
+<script src="lib/decision-context.js"></script>
+<script>
+// 의사결정 기록.
+//
+// ── 목적 ───────────────────────────────────────────────────────────────────
+// 결과를 채점하지 않는다. 좋은 결정이 나쁜 결과를 낳고 나쁜 결정이 좋은 결과를 낳으므로,
+// 결과로 판단력을 매기면 틀린 것을 배운다. 목적은 **결정 당시의 근거를 되찾을 수 있게**
+// 하는 것이다. 사람은 결과를 알기 전에 무엇을 생각했는지 기억하지 못하고, 기억은 결과
+// 쪽으로 재구성된다.
+//
+// ── 마찰이 유일한 실패 원인이다 ────────────────────────────────────────────
+// 한 건에 10분이 걸리면 아무도 쓰지 않는다. 그래서 사용자가 타자로 치는 것은 **네 칸**
+// 뿐이고, 날짜·종목·수량·단가·비중·환율·주가지수·금리·경기국면은 앱이 채운다.
+const { escapeHtml, won } = Format;
+
+// 네 가지 전부가 결정이다. 보류와 안 하기로 함을 빼면 이것은 거래 기록부가 된다.
+const ACTIONS = [
+  { id: "buy", label: "샀다", note: "새로 사거나 더 샀다" },
+  { id: "sell", label: "팔았다", note: "일부 또는 전부" },
+  { id: "hold", label: "그대로 뒀다", note: "팔지 않기로 한 결정" },
+  { id: "skip", label: "안 하기로 했다", note: "사려다 사지 않은 것" },
+];
+
+// 사용자가 실제로 타자로 치는 칸. 이 넷이 근거의 전부다.
+const QUESTIONS = [
+  { id: "reasoning", label: "왜 그렇게 했습니까?" },
+  { id: "expectation", label: "무엇을 기대했습니까?" },
+  { id: "uncertainty", label: "무엇이 불확실합니까?" },
+  { id: "falsificationText", label: "무엇을 보면 이 판단이 틀린 것입니까?" },
+];
+
+// 기계가 확인할 수 있는 반증 조건의 재료. 트랙 30이 자동 확인과 주기적 검토를 가르려면
+// 이 구분이 데이터에 있어야 한다.
+const METRICS = [
+  { id: "price", label: "현재가" },
+  { id: "valueKrw", label: "평가금액(원)" },
+  { id: "shareOfTotal", label: "자산 내 비중" },
+];
+const OPS = [
+  { id: "lte", label: "이하로 내려가면" },
+  { id: "gte", label: "이상으로 오르면" },
+];
+
+let rows = [];
+let total = 0;
+let records = [];
+let context = null;
+let action = "";
+let holdingId = "";
+let kind = "human";
+let loaded = false;
+let busy = false;
+let notice = "";
+
+function navOptions() {
+  const state = SessionStore.read();
+  return { assetCounts: Shell.countByGroup(state.assets) };
+}
+
+function head() {
+  return `<div class="page-head">
+    <div><p class="eyebrow">기록</p><h1>의사결정 기록</h1>
+      <div class="sub">결과를 채점하지 않습니다. 그때 무엇을 생각했는지를 남깁니다.</div></div>
+  </div>`;
+}
+
+function selectedRow() {
+  return rows.find((row) => String(row.id) === String(holdingId)) || null;
+}
+
+function actionCard() {
+  const buttons = ACTIONS.map((item) => `<button type="button" data-action="${item.id}"
+    aria-pressed="${action === item.id}">${escapeHtml(item.label)}<small>${escapeHtml(item.note)}</small></button>`).join("");
+
+  const options = ['<option value="">보유와 무관한 결정</option>']
+    .concat(rows.map((row) => `<option value="${escapeHtml(String(row.id))}" ${String(row.id) === String(holdingId) ? "selected" : ""}>${escapeHtml(row.name)}</option>`))
+    .join("");
+
+  return `<div class="card">
+    <h2>무엇을 했습니까?</h2>
+    <div class="actions">${buttons}</div>
+    <div class="q">
+      <label for="holding">어느 자산에 대한 결정입니까?</label>
+      <select id="holding">${options}</select>
+      <div class="q-note">사지 않기로 한 결정처럼 보유 자산이 없는 것도 그대로 저장됩니다.</div>
+    </div>
+  </div>`;
+}
+
+// 자동 채움을 **보여준다.** 무엇이 함께 저장되는지 모르면 기록을 믿을 수 없다.
+function autoCard() {
+  if (!context) return "";
+  const holding = context.holding;
+  const cycle = context.businessCycle || {};
+  const market = context.market || {};
+  const fx = market.fx || {};
+  const rates = market.rates || {};
+  const equity = market.koreanEquityIndex;
+
+  const lines = [
+    ["날짜", new Date(context.capturedAt).toISOString().slice(0, 10)],
+    ["자산", holding ? holding.name : "—"],
+    ["수량", holding && holding.quantity != null ? `${holding.quantity}${holding.unitLabel || ""}` : "—"],
+    ["단가", holding && holding.unitPrice != null ? String(holding.unitPrice) : "—"],
+    ["평가금액", holding && holding.valueKrw != null ? won(holding.valueKrw) : "—"],
+    ["자산 내 비중", holding && holding.shareOfTotal != null ? `${(holding.shareOfTotal * 100).toFixed(1)}%` : "—"],
+    ["환율(USD)", fx.usdkrw ? `${Math.round(fx.usdkrw).toLocaleString()}원` : "—"],
+    [equity ? equity.label : "주가지수", equity ? `${equity.value.toFixed(1)} (${equity.period})` : "—"],
+    ["미 국채 3개월", rates.us3m ? `${rates.us3m.value}%` : "—"],
+    ["미 국채 10년", rates.us10y ? `${rates.us10y.value}%` : "—"],
+    ["경기국면", cycle.phaseKo ? `${cycle.phaseKo} (${cycle.asOf} 기준)` : "—"],
+  ];
+
+  return `<div class="auto">
+    <h3>앱이 함께 저장하는 것 — 입력하지 않아도 됩니다</h3>
+    <dl>${lines.map(([k, v]) => `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(String(v))}</dd>`).join("")}</dl>
+    <div class="q-note">경기국면은 <b>맥락</b>으로 남깁니다. 무엇을 하라는 신호가 아닙니다 — 검증이 지지한 이 모델의 용도는 서술과 상태 인식뿐입니다.</div>
+  </div>`;
+}
+
+function ruleFields() {
+  if (kind !== "machine") return "";
+  const holding = selectedRow();
+  const metricOptions = METRICS.map((m) => `<option value="${m.id}">${escapeHtml(m.label)}</option>`).join("");
+  const opOptions = OPS.map((o) => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join("");
+  return `<div class="rule">
+    <select id="rule-metric" aria-label="무엇을">${metricOptions}</select>
+    <select id="rule-op" aria-label="어떻게">${opOptions}</select>
+    <input id="rule-value" type="number" step="any" aria-label="얼마">
+  </div>
+  <div class="q-note">${holding ? "이 자산에 대해 자동으로 확인할 수 있는 조건입니다." : "자동 확인 조건은 자산이 붙어 있을 때만 확인할 수 있습니다. 지금은 조건만 저장됩니다."}</div>`;
+}
+
+function formCard() {
+  const fields = QUESTIONS.map((q) => {
+    if (q.id !== "falsificationText") {
+      return `<div class="q">
+        <label for="f-${q.id}">${escapeHtml(q.label)}</label>
+        <textarea id="f-${q.id}" data-f="${q.id}" rows="3"></textarea>
+      </div>`;
+    }
+    return `<div class="q">
+      <label for="f-${q.id}">${escapeHtml(q.label)}</label>
+      <div class="kinds">
+        <button type="button" data-kind="human" aria-pressed="${kind === "human"}">사람이 판단할 조건</button>
+        <button type="button" data-kind="machine" aria-pressed="${kind === "machine"}">숫자로 확인되는 조건</button>
+      </div>
+      ${ruleFields()}
+      <textarea id="f-${q.id}" data-f="${q.id}" rows="3"></textarea>
+      <div class="q-note">두 가지를 구분해 저장합니다. 숫자 조건은 나중에 자동으로 확인할 수 있고, 사람이 판단할 조건은 직접 돌아봐야 합니다.</div>
+    </div>`;
+  }).join("");
+
+  return `<div class="card">
+    <h2>근거</h2>
+    <div class="card-sub">타자로 칠 칸은 <b>${QUESTIONS.length}개</b>입니다. 나머지는 앱이 채웁니다.</div>
+    ${fields}
+    ${autoCard()}
+    <div style="margin-top:var(--space-6)">
+      <button type="button" class="btn" id="save" ${busy ? "disabled" : ""}>기록하기</button>
+      ${notice ? `<span class="q-note" style="margin-left:var(--space-4)">${escapeHtml(notice)}</span>` : ""}
+    </div>
+  </div>`;
+}
+
+function recordCard() {
+  if (!records.length) {
+    return `<div class="card"><h2>지난 기록</h2>
+      <p class="soon-body" style="margin-top:var(--space-3)">아직 기록이 없습니다.</p></div>`;
+  }
+  const label = { buy: "샀다", sell: "팔았다", hold: "그대로 뒀다", skip: "안 하기로 했다" };
+  const items = records.map((rec) => {
+    const ctx = rec.context || {};
+    const cycle = ctx.businessCycle || {};
+    return `<div class="rec">
+      <div class="rec-head">
+        <span class="rec-when">${escapeHtml(String(rec.decided_at || "").slice(0, 10))}</span>
+        <span class="pill">${escapeHtml(label[rec.action] || rec.action)}</span>
+        <span class="rec-reason">${escapeHtml(rec.holding_label || "보유와 무관")}</span>
+      </div>
+      <div class="rec-body">
+        <div><b>왜</b> ${escapeHtml(rec.reasoning || "—")}</div>
+        <div><b>기대</b> ${escapeHtml(rec.expectation || "—")}</div>
+        <div><b>불확실</b> ${escapeHtml(rec.uncertainty || "—")}</div>
+        <div><b>틀렸다고 볼 조건</b> ${escapeHtml(rec.falsification_text || "—")}
+          <span class="pill">${rec.falsification_kind === "machine" ? "숫자 확인" : "사람 판단"}</span></div>
+      </div>
+      <div class="rec-ctx">그때: ${escapeHtml(cycle.phaseKo || "국면 기록 없음")}${
+        ctx.holding && ctx.holding.shareOfTotal != null ? ` · 비중 ${(ctx.holding.shareOfTotal * 100).toFixed(1)}%` : ""
+      }${ctx.market && ctx.market.fx && ctx.market.fx.usdkrw ? ` · 환율 ${Math.round(ctx.market.fx.usdkrw).toLocaleString()}원` : ""}</div>
+    </div>`;
+  }).join("");
+  return `<div class="card"><h2>지난 기록</h2>
+    <div class="card-sub">${records.length}건. 결과로 채점하지 않습니다.</div>
+    <div style="margin-top:var(--space-4)">${items}</div></div>`;
+}
+
+function render() {
+  if (!loaded) {
+    Shell.mount("app", "journal", `${head()}<div class="card"><span class="skel" style="width:60%"></span></div>`, navOptions());
+    return;
+  }
+  Shell.mount("app", "journal",
+    `${head()}${actionCard()}<div style="margin-top:var(--space-4)">${formCard()}</div><div style="margin-top:var(--space-4)">${recordCard()}</div>`,
+    navOptions());
+
+  document.querySelectorAll("[data-action]").forEach((node) => {
+    node.addEventListener("click", () => { action = node.dataset.action; render(); });
+  });
+  document.querySelectorAll("[data-kind]").forEach((node) => {
+    node.addEventListener("click", () => { kind = node.dataset.kind; render(); });
+  });
+  const select = document.getElementById("holding");
+  if (select) select.addEventListener("change", async () => {
+    holdingId = select.value;
+    context = await DecisionContext.build({ holding: selectedRow(), totalKrw: total });
+    render();
+  });
+  const save = document.getElementById("save");
+  if (save) save.addEventListener("click", onSave);
+}
+
+function collect() {
+  const out = {};
+  QUESTIONS.forEach((q) => {
+    const node = document.querySelector(`[data-f="${q.id}"]`);
+    out[q.id] = node ? String(node.value || "").trim() : "";
+  });
+  return out;
+}
+
+function collectRule() {
+  if (kind !== "machine") return null;
+  const metric = document.getElementById("rule-metric");
+  const op = document.getElementById("rule-op");
+  const value = document.getElementById("rule-value");
+  const parsed = value ? Number(value.value) : NaN;
+  if (!Number.isFinite(parsed)) return null;
+  return {
+    metric: metric ? metric.value : "price",
+    op: op ? op.value : "lte",
+    value: parsed,
+    // 어느 자산에 대한 조건인지 없으면 나중에 확인할 수 없다.
+    holdingId: holdingId || null,
+    checkable: Boolean(holdingId),
+  };
+}
+
+async function onSave() {
+  if (!action) { notice = "무엇을 했는지 먼저 골라 주세요."; render(); return; }
+  const typed = collect();
+  busy = true; notice = ""; render();
+  try {
+    const holding = selectedRow();
+    const fresh = await DecisionContext.build({ holding: holding, totalKrw: total });
+    await JournalStore.saveRecord({
+      action: action,
+      reasoning: typed.reasoning,
+      expectation: typed.expectation,
+      uncertainty: typed.uncertainty,
+      falsificationKind: kind,
+      falsificationText: typed.falsificationText,
+      falsificationRule: collectRule(),
+      holdingId: holdingId || null,
+      holdingLabel: holding ? holding.name : "",
+      context: fresh,
+    });
+    records = await JournalStore.loadRecords();
+    notice = "기록했습니다.";
+    action = "";
+  } catch (problem) {
+    notice = problem.message || "저장하지 못했습니다.";
+  } finally {
+    busy = false;
+    render();
+  }
+}
+
+(async function () {
+  render();
+  if (!(await AccountStore.bootstrapProtected())) return;
+  // 평가금액과 비중을 채우려면 시세가 있어야 한다. 못 받아도 기록 자체는 쓸 수 있어야
+  // 하므로 실패를 삼키고 진행한다 — 맥락 한 조각 때문에 근거를 못 적게 만들면 본말이 뒤집힌다.
+  try { await Valuation.load(); }
+  catch (error) { console.error("[결정 기록] 시세를 읽지 못했습니다:", error); }
+  const state = SessionStore.read();
+  try {
+    const summary = Portfolio.summarize(state.assets || []);
+    rows = summary.rows || [];
+    total = summary.total || 0;
+  } catch (error) {
+    console.error("[결정 기록] 보유 자산을 읽지 못했습니다:", error);
+  }
+  try {
+    context = await DecisionContext.build({ holding: null, totalKrw: total });
+    records = await JournalStore.loadRecords();
+  } catch (problem) {
+    notice = problem.message || "불러오지 못했습니다.";
+  } finally {
+    loaded = true;
+    render();
+  }
+})();
+</script>
+</body>
+</html>

@@ -12,14 +12,16 @@
     "test:home": "node scripts/test-home.mjs",
     "test:auth": "node scripts/test-auth-flow.mjs",
     "test:rls": "node scripts/test-rls.mjs",
-    "test": "npm run test:focus && npm run test:numeric && npm run test:groups && npm run test:quotes-mock && npm run test:tickers-mock && npm run test:quotes-integration && npm run test:indicators-mock && npm run test:home && npm run test:business-cycle",
+    "test": "npm run test:focus && npm run test:numeric && npm run test:groups && npm run test:quotes-mock && npm run test:tickers-mock && npm run test:quotes-integration && npm run test:indicators-mock && npm run test:home && npm run test:business-cycle && npm run test:journal",
     "build:tickers": "node scripts/build-tickers.mjs",
     "build:quotes": "node scripts/build-quotes.mjs",
     "test:indicators-mock": "node scripts/test-indicators-mock.mjs",
     "build:indicators": "node scripts/build-indicators.mjs",
     "build:daily-rates": "node scripts/build-daily-rates.mjs",
     "build:business-cycle": "node scripts/build-business-cycle.mjs",
-    "test:business-cycle": "node scripts/test-business-cycle.mjs"
+    "test:business-cycle": "node scripts/test-business-cycle.mjs",
+    "test:journal-rls": "node scripts/test-journal-rls.mjs",
+    "test:journal": "node scripts/test-journal.mjs"
   },
   "devDependencies": {
     "playwright": "^1.62.1"
