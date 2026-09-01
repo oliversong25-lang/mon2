@@ -39,6 +39,15 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-09-01 — Track 29 내비게이션 캐시 갱신
+
+- 작업자: Codex
+- 변경: 공통 셸을 쓰는 일곱 화면의 `lib/shell.js` 버전을 하나로 올리고, 모든 화면이 같은 최신 버전을 읽는지 자동 검사를 추가했습니다.
+- 이유: Track 29 화면과 내비게이션 코드는 배포됐지만 기존 캐시 주소가 유지되어, 이미 방문한 브라우저에서는 **투자 원칙**과 **의사결정 기록** 메뉴가 보이지 않을 수 있었습니다.
+- 검증: `npm run test:journal` **76/76**, `npm run test:business-cycle` **52/52** 통과. 일곱 화면의 셸 버전 일치와 투자 원칙·의사결정 기록의 화면·저장·새로고침 흐름을 실제 브라우저로 확인했습니다.
+- 남은 일: 실제 Supabase 프로젝트에는 기록용 테이블 세 개가 아직 없습니다. `supabase/schema.sql`을 프로젝트 SQL Editor에서 적용한 뒤 두 계정 RLS 시험을 실행해야 실제 계정 저장을 완료로 판정할 수 있습니다.
+- 관련 파일: `home.html`, `assets.html`, `settings.html`, `analysis.html`, `indicators.html`, `philosophy.html`, `decisions.html`, `scripts/test-journal.mjs`, `WORKLOG.md`
+
 ### 2026-08-27 — 투자 원칙과 의사결정 기록
 
 - 작업자: Claude Code

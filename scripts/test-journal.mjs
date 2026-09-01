@@ -23,6 +23,19 @@ const record = (label, ok, detail) => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${label}${ok ? "" : `  — ${detail}`}`);
 };
 
+// 셸 내용만 바꾸고 URL을 그대로 두면 이미 방문한 사용자는 예전 내비게이션을 계속 본다.
+// 공통 셸을 쓰는 모든 화면이 같은 배포 버전을 가리키는지 계약으로 고정한다.
+const SHELL_VERSION = "20260901-1";
+const shellPages = [
+  "home.html", "assets.html", "settings.html", "analysis.html",
+  "indicators.html", "philosophy.html", "decisions.html",
+];
+for (const pageName of shellPages) {
+  const source = await readFile(resolve(ROOT, pageName), "utf8");
+  record(`${pageName}이 최신 공통 내비게이션을 읽는다`,
+    source.includes(`lib/shell.js?v=${SHELL_VERSION}`), "셸 버전이 다름");
+}
+
 // ── 1. 스키마 계약 ─────────────────────────────────────────────────────────
 try {
   const sql = await readFile(resolve(ROOT, "supabase", "schema.sql"), "utf8");
