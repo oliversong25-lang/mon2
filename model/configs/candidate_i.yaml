@@ -1,0 +1,64 @@
+# 후보 I — 도메인 기반 현재상태 분류기 + 유계 소프트 안정화
+#
+# 이 문서의 값은 전부 개발구간(1995-01-01~2012-12-31)에서만 도출했다. 2013년 이후와
+# 2020·2026년 결과를 보고 정하지 않았다. 검증을 시작한 뒤에는 바꾸지 않는다.
+#
+# 후보 H/H2는 건드리지 않는다. 이것은 별도 이름·별도 설정·별도 산출물이다.
+
+candidate: candidate_i_current_state
+development_window: ["1995-01-01", "2012-12-31"]
+
+# 일곱 계열의 변환·추세·1차 표준화는 후보 H와 동일하다. §3 정규화 감사에서 인구·경활·
+# 보험고용 척도조정판이 275주 저반지름 구간을 그대로 재현하고 F1도 떨어뜨린다는 것이
+# 확인됐다. log_cycle이 3년 단측 EMA 추세 대비 로그편차이므로 매끄러운 분모는 이미
+# 추세에 흡수된다. 그래서 기존 변환을 유지한다.
+normalization:
+  inherit_from: candidate_h_breadth_gate
+  rejected_variants:
+    - payems_over_population
+    - payems_over_labor_force
+    - icsa_over_covered_employment
+    - ccsa_over_covered_employment
+    - additional_inflation_adjustment
+
+# 모멘텀 척도. 기존 10년 rolling 표준편차를 쓰지 않는다 — 2020년 충격이 창에 남아
+# X 척도를 5.5배로 부풀렸고 2028년까지 단위를 지배한다.
+# 개발구간 비교에서 rolling_mad만 두 핵심 요구를 통과했다: 충격기 척도 상승 없음
+# (0.944배), 2년 뒤 잔존 4.6%. rolling_std 1.112/1.153, rolling_iqr 0.975/1.150,
+# bounded_influence 1.095/1.228.
+momentum_scale:
+  method: rolling_mad
+  window_years: 10.0
+  minimum_years: 2.0
+momentum_weeks: 8
+
+thresholds:
+  # 침체 전후 26주를 뺀 개발구간 '평상시' 722주의 |총량| 중앙값.
+  neutral_level: 0.5250
+  neutral_momentum: 0.3849
+  # 개발구간 NBER 침체 113주에서 관측된 활동수준의 최댓값(가장 약한 침체 주).
+  contraction_level: -0.2873
+  # 동행 도메인 4개(생산·고용·실질소득·소비) 중 몇 개가 음수여야 하는가.
+  # 개발구간 침체 주의 89%(수준)·80%(모멘텀)가 3개 이상이었다.
+  # 노동시장 스트레스는 동행 도메인이 아니므로 단독으로 침체를 선언할 수 없다.
+  contraction_level_domains: 3
+  contraction_momentum_domains: 3
+  # 개발구간 도메인 집중도 p95. 넘으면 증거의 질을 낮추는 표시일 뿐 판정을 바꾸지 않는다.
+  concentration_flag: 0.6104
+  # 대국면별 진행도의 개발구간 3분위. 하위국면은 각도가 아니라 이 값으로 나뉜다.
+  progression_cuts:
+    recovery: [-0.9369, -0.3446]
+    expansion: [-0.5012, -0.2841]
+    slowdown: [-0.1579, 0.7594]
+    contraction: [1.4052, 1.9523]
+
+# 유계 소프트 안정화. 직전 국면에 유한한 여유만 준다. 어떤 국면도 0이 되지 않고,
+# 점수 차이가 여유를 넘으면 그 주에 바뀐다. 강제 이탈 타이머는 없다.
+# 여유 = 개발구간 1·2순위 점수 차이의 주간 절대변화 중앙값.
+stabilizer:
+  method: bounded_margin
+  margin: 0.0212
+
+# 반지름은 시각화·진단·증거 품질 입력으로만 쓴다. 전이확률을 0으로 만들거나 도달 가능한
+# 국면을 정하지 않는다. low_radius_jump_constraint는 이 후보의 공식 경로에 없다.
+radius_role: visualization_and_evidence_only

@@ -1,0 +1,776 @@
+{
+  "stage": "variance_control",
+  "frozen_model_modified": false,
+  "executed_at_utc": "2026-08-26T07:26:16+00:00",
+  "gate_under_test": "persist17w",
+  "prespecified_rule": {
+    "question": "트랙 24가 남긴 분산 결과가 국면의 정보인가, 아니면 **변동성 군집을 거시 렌즈로 다시 본 것**인가.",
+    "decision_sample": "revised_long",
+    "decision_horizon_weeks": 13,
+    "decision_target": "squared forward 13-week return",
+    "decision_statistic": "incremental R-squared of phase over the volatility control",
+    "secondary_target": "forward realised variance (sum of squared weekly returns)",
+    "secondary_cannot_overturn": true,
+    "control": {
+      "lookbacks": [
+        4,
+        13,
+        26
+      ],
+      "selection": "highest control-only R-squared on the decision target",
+      "takes_both_level_and_root": true,
+      "keeps_the_term_spread": true,
+      "why_not_weaken_it": "창 하나만 고르거나 함수 형태를 하나만 주면 대조를 약화시켜 결과를 만들 수 있다. 셋을 다 계산해 **가장 강한** 것을 쓰고, 수준과 제곱근을 함께 준다."
+    },
+    "reported_but_not_deciding": [
+      "real_time_overlap",
+      "v1_1_revised"
+    ],
+    "what_counts_as_usable": "판정 표본·13주 지평선에서 국면이 변동성 대조 위에 양의 증분을 얹고 라벨 이동 귀무분포에서 p<=0.05이며, 두 제외 강도 모두에서 증분이 양수로 남고, 2020년을 뺀 표본과 2008~09년을 뺀 표본 각각에서도 귀무를 넘을 때.",
+    "what_counts_as_failure": "위 중 하나라도 어긋날 때. 그때의 결론은 '트랙 24의 분산 결과는 거시 렌즈를 통해 본 변동성 군집이며, 이 모델의 쓸모는 서술과 상태 인식으로 확정된다'이고, **이 계열의 검정은 여기서 끝난다.**",
+    "this_is_the_last_test_in_this_line": true,
+    "if_it_fails_do_not": [
+      "다른 대조를 찾지 않는다",
+      "다른 지평선을 찾지 않는다",
+      "다른 분산 정의를 찾지 않는다",
+      "다른 통계량을 찾지 않는다"
+    ],
+    "product_form_if_it_passes": {
+      "permitted": "이 국면에서는 역사적으로 전방 13주 음수 주 비율이 52%였습니다",
+      "forbidden": [
+        "노출을 바꾸라는 어떤 지시도",
+        "읽는 사람의 보유 자산에 대한 어떤 언급도",
+        "앞날에 대한 어떤 확률 주장도"
+      ],
+      "note": "통과해도 제품 형태는 이미 정해져 있고 좁다. 결과가 좋았다는 이유로 넓히지 않는다."
+    }
+  },
+  "weeks": 1675,
+  "first_week": "1994-07-15",
+  "last_week": "2026-08-14",
+  "episodes": {
+    "recovery": 4,
+    "expansion": 17,
+    "slowdown": 11,
+    "contraction": 5,
+    "withheld": 0
+  },
+  "lookback_table": [
+    {
+      "lookback_weeks": 4,
+      "control_only_r_squared": 0.079579,
+      "phase_only_r_squared": 0.123426,
+      "both_r_squared": 0.146873,
+      "incremental_r_squared_of_phase": 0.067294,
+      "null_p": 0.0013,
+      "weeks": 1653
+    },
+    {
+      "lookback_weeks": 13,
+      "control_only_r_squared": 0.054473,
+      "phase_only_r_squared": 0.122985,
+      "both_r_squared": 0.129207,
+      "incremental_r_squared_of_phase": 0.074734,
+      "null_p": 0.0039,
+      "weeks": 1644
+    },
+    {
+      "lookback_weeks": 26,
+      "control_only_r_squared": 0.061425,
+      "phase_only_r_squared": 0.122578,
+      "both_r_squared": 0.129138,
+      "incremental_r_squared_of_phase": 0.067713,
+      "null_p": 0.0013,
+      "weeks": 1631
+    }
+  ],
+  "lookback_choice": {
+    "chosen": 4,
+    "chosen_control_only_r_squared": 0.079579,
+    "weakest": 13,
+    "weakest_control_only_r_squared": 0.054473,
+    "candidates": [
+      {
+        "lookback_weeks": 4,
+        "control_only_r_squared": 0.079579,
+        "phase_only_r_squared": 0.123426,
+        "both_r_squared": 0.146873,
+        "incremental_r_squared_of_phase": 0.067294,
+        "null_p": 0.0013,
+        "weeks": 1653
+      },
+      {
+        "lookback_weeks": 13,
+        "control_only_r_squared": 0.054473,
+        "phase_only_r_squared": 0.122985,
+        "both_r_squared": 0.129207,
+        "incremental_r_squared_of_phase": 0.074734,
+        "null_p": 0.0039,
+        "weeks": 1644
+      },
+      {
+        "lookback_weeks": 26,
+        "control_only_r_squared": 0.061425,
+        "phase_only_r_squared": 0.122578,
+        "both_r_squared": 0.129138,
+        "incremental_r_squared_of_phase": 0.067713,
+        "null_p": 0.0013,
+        "weeks": 1631
+      }
+    ],
+    "rule": "highest control-only R-squared on the decision target",
+    "note": "가장 강한 창을 대조로 쓴다. 가장 약한 창을 골랐다면 국면 증분이 더 커 보였을 것이다 — 그렇게 고르는 것은 대조를 약화시켜 결과를 만드는 일이다."
+  },
+  "chosen_lookback_weeks": 4,
+  "decision": {
+    "target": "squared forward 13-week return",
+    "weeks": 1653,
+    "usable": true,
+    "control_columns": [
+      "realised_variance_4w",
+      "realised_volatility_4w",
+      "term_spread"
+    ],
+    "control_only_r_squared": 0.079579,
+    "phase_only_r_squared": 0.123426,
+    "both_r_squared": 0.146873,
+    "incremental_r_squared_of_phase": 0.067294,
+    "incremental_r_squared_of_control_over_phase": 0.023447,
+    "phase_absorbs_the_control": false,
+    "shifts_used": 775,
+    "null_median_increment": 0.005409,
+    "null_p90_increment": 0.019559,
+    "null_p": 0.0013
+  },
+  "secondary": {
+    "target": "forward realised variance (sum of squared weekly returns)",
+    "weeks": 1653,
+    "usable": true,
+    "control_columns": [
+      "realised_variance_4w",
+      "realised_volatility_4w",
+      "term_spread"
+    ],
+    "control_only_r_squared": 0.117539,
+    "phase_only_r_squared": 0.249764,
+    "both_r_squared": 0.276422,
+    "incremental_r_squared_of_phase": 0.158884,
+    "incremental_r_squared_of_control_over_phase": 0.026659,
+    "phase_absorbs_the_control": false,
+    "shifts_used": 775,
+    "null_median_increment": 0.010954,
+    "null_p90_increment": 0.03541,
+    "null_p": 0.0039
+  },
+  "volatility_only_control": {
+    "target": "decision target, volatility only (no term spread)",
+    "weeks": 1653,
+    "usable": true,
+    "control_columns": [
+      "realised_variance_4w",
+      "realised_volatility_4w"
+    ],
+    "control_only_r_squared": 0.0777,
+    "phase_only_r_squared": 0.123426,
+    "both_r_squared": 0.146873,
+    "incremental_r_squared_of_phase": 0.069173,
+    "incremental_r_squared_of_control_over_phase": 0.023447,
+    "phase_absorbs_the_control": false,
+    "shifts_used": 775,
+    "null_median_increment": 0.005113,
+    "null_p90_increment": 0.018911,
+    "null_p": 0.0013
+  },
+  "track24_spread_only_control": {
+    "target": "decision target, term spread only (Track 24)",
+    "weeks": 1656,
+    "usable": true,
+    "control_columns": [
+      "term_spread"
+    ],
+    "control_only_r_squared": 0.003536,
+    "phase_only_r_squared": 0.123582,
+    "both_r_squared": 0.123597,
+    "incremental_r_squared_of_phase": 0.120061,
+    "incremental_r_squared_of_control_over_phase": 1.4e-05,
+    "phase_absorbs_the_control": true,
+    "shifts_used": 777,
+    "null_median_increment": 0.008141,
+    "null_p90_increment": 0.029457,
+    "null_p": 0.0013
+  },
+  "exclusions": {
+    "ex_covid": {
+      "target": "ex_covid",
+      "weeks": 1601,
+      "usable": true,
+      "control_columns": [
+        "realised_variance_4w",
+        "realised_volatility_4w",
+        "term_spread"
+      ],
+      "control_only_r_squared": 0.046008,
+      "phase_only_r_squared": 0.096618,
+      "both_r_squared": 0.110603,
+      "incremental_r_squared_of_phase": 0.064595,
+      "incremental_r_squared_of_control_over_phase": 0.013984,
+      "phase_absorbs_the_control": false,
+      "shifts_used": 749,
+      "null_median_increment": 0.00468,
+      "null_p90_increment": 0.019067,
+      "null_p": 0.0227
+    },
+    "ex_gfc": {
+      "target": "ex_gfc",
+      "weeks": 1549,
+      "usable": true,
+      "control_columns": [
+        "realised_variance_4w",
+        "realised_volatility_4w",
+        "term_spread"
+      ],
+      "control_only_r_squared": 0.163377,
+      "phase_only_r_squared": 0.068268,
+      "both_r_squared": 0.184644,
+      "incremental_r_squared_of_phase": 0.021267,
+      "incremental_r_squared_of_control_over_phase": 0.116377,
+      "phase_absorbs_the_control": false,
+      "shifts_used": 723,
+      "null_median_increment": 0.005879,
+      "null_p90_increment": 0.014763,
+      "null_p": 0.0345
+    }
+  },
+  "leave_one_episode_out": {
+    "horizon_weeks": 13,
+    "full_sample_increment": 0.067294,
+    "episodes": 37,
+    "episodes_by_phase": {
+      "recovery": 4,
+      "expansion": 17,
+      "slowdown": 11,
+      "contraction": 5
+    },
+    "rows": [
+      {
+        "phase": "recovery",
+        "episode": 1,
+        "start": "2002-07-05",
+        "end": "2002-09-06",
+        "weeks": 10,
+        "block_only": 0.066423,
+        "block_only_weeks_removed": 10,
+        "event_including": 0.065954,
+        "event_including_weeks_removed": 23
+      },
+      {
+        "phase": "recovery",
+        "episode": 2,
+        "start": "2003-06-27",
+        "end": "2004-02-13",
+        "weeks": 34,
+        "block_only": 0.067665,
+        "block_only_weeks_removed": 34,
+        "event_including": 0.066871,
+        "event_including_weeks_removed": 47
+      },
+      {
+        "phase": "recovery",
+        "episode": 3,
+        "start": "2009-06-05",
+        "end": "2010-08-06",
+        "weeks": 62,
+        "block_only": 0.067127,
+        "block_only_weeks_removed": 62,
+        "event_including": 0.068856,
+        "event_including_weeks_removed": 75
+      },
+      {
+        "phase": "recovery",
+        "episode": 4,
+        "start": "2020-07-03",
+        "end": "2021-03-19",
+        "weeks": 38,
+        "block_only": 0.06863,
+        "block_only_weeks_removed": 38,
+        "event_including": 0.068579,
+        "event_including_weeks_removed": 51
+      },
+      {
+        "phase": "expansion",
+        "episode": 1,
+        "start": "1994-07-15",
+        "end": "1995-04-21",
+        "weeks": 41,
+        "block_only": 0.066842,
+        "block_only_weeks_removed": 41,
+        "event_including": 0.066791,
+        "event_including_weeks_removed": 54
+      },
+      {
+        "phase": "expansion",
+        "episode": 2,
+        "start": "1995-07-28",
+        "end": "1998-08-21",
+        "weeks": 161,
+        "block_only": 0.073406,
+        "block_only_weeks_removed": 161,
+        "event_including": 0.08419,
+        "event_including_weeks_removed": 174
+      },
+      {
+        "phase": "expansion",
+        "episode": 3,
+        "start": "1998-09-04",
+        "end": "2000-07-21",
+        "weeks": 99,
+        "block_only": 0.072301,
+        "block_only_weeks_removed": 99,
+        "event_including": 0.071993,
+        "event_including_weeks_removed": 112
+      },
+      {
+        "phase": "expansion",
+        "episode": 4,
+        "start": "2002-02-01",
+        "end": "2002-06-28",
+        "weeks": 22,
+        "block_only": 0.074961,
+        "block_only_weeks_removed": 22,
+        "event_including": 0.074024,
+        "event_including_weeks_removed": 35
+      },
+      {
+        "phase": "expansion",
+        "episode": 5,
+        "start": "2002-09-13",
+        "end": "2003-03-07",
+        "weeks": 26,
+        "block_only": 0.067956,
+        "block_only_weeks_removed": 26,
+        "event_including": 0.065763,
+        "event_including_weeks_removed": 39
+      },
+      {
+        "phase": "expansion",
+        "episode": 6,
+        "start": "2003-05-23",
+        "end": "2003-06-20",
+        "weeks": 5,
+        "block_only": 0.067132,
+        "block_only_weeks_removed": 5,
+        "event_including": 0.067211,
+        "event_including_weeks_removed": 18
+      },
+      {
+        "phase": "expansion",
+        "episode": 7,
+        "start": "2004-02-20",
+        "end": "2005-10-14",
+        "weeks": 87,
+        "block_only": 0.065319,
+        "block_only_weeks_removed": 87,
+        "event_including": 0.065408,
+        "event_including_weeks_removed": 100
+      },
+      {
+        "phase": "expansion",
+        "episode": 8,
+        "start": "2005-11-18",
+        "end": "2007-08-31",
+        "weeks": 94,
+        "block_only": 0.067311,
+        "block_only_weeks_removed": 94,
+        "event_including": 0.067724,
+        "event_including_weeks_removed": 107
+      },
+      {
+        "phase": "expansion",
+        "episode": 9,
+        "start": "2007-10-12",
+        "end": "2008-01-11",
+        "weeks": 14,
+        "block_only": 0.067901,
+        "block_only_weeks_removed": 14,
+        "event_including": 0.078983,
+        "event_including_weeks_removed": 27
+      },
+      {
+        "phase": "expansion",
+        "episode": 10,
+        "start": "2010-08-13",
+        "end": "2018-12-14",
+        "weeks": 436,
+        "block_only": 0.061573,
+        "block_only_weeks_removed": 436,
+        "event_including": 0.062663,
+        "event_including_weeks_removed": 449
+      },
+      {
+        "phase": "expansion",
+        "episode": 11,
+        "start": "2019-04-19",
+        "end": "2019-06-28",
+        "weeks": 11,
+        "block_only": 0.067162,
+        "block_only_weeks_removed": 11,
+        "event_including": 0.067484,
+        "event_including_weeks_removed": 24
+      },
+      {
+        "phase": "expansion",
+        "episode": 12,
+        "start": "2019-08-23",
+        "end": "2019-11-22",
+        "weeks": 14,
+        "block_only": 0.067316,
+        "block_only_weeks_removed": 14,
+        "event_including": 0.050996,
+        "event_including_weeks_removed": 27
+      },
+      {
+        "phase": "expansion",
+        "episode": 13,
+        "start": "2020-03-06",
+        "end": "2020-03-06",
+        "weeks": 1,
+        "block_only": 0.06709,
+        "block_only_weeks_removed": 1,
+        "event_including": 0.069054,
+        "event_including_weeks_removed": 14
+      },
+      {
+        "phase": "expansion",
+        "episode": 14,
+        "start": "2021-03-26",
+        "end": "2022-07-08",
+        "weeks": 68,
+        "block_only": 0.066754,
+        "block_only_weeks_removed": 68,
+        "event_including": 0.065724,
+        "event_including_weeks_removed": 81
+      },
+      {
+        "phase": "expansion",
+        "episode": 15,
+        "start": "2022-08-12",
+        "end": "2023-01-06",
+        "weeks": 22,
+        "block_only": 0.065743,
+        "block_only_weeks_removed": 22,
+        "event_including": 0.066086,
+        "event_including_weeks_removed": 35
+      },
+      {
+        "phase": "expansion",
+        "episode": 16,
+        "start": "2023-02-10",
+        "end": "2025-11-28",
+        "weeks": 147,
+        "block_only": 0.072831,
+        "block_only_weeks_removed": 147,
+        "event_including": 0.07292,
+        "event_including_weeks_removed": 160
+      },
+      {
+        "phase": "expansion",
+        "episode": 17,
+        "start": "2026-01-09",
+        "end": "2026-08-14",
+        "weeks": 32,
+        "block_only": 0.067799,
+        "block_only_weeks_removed": 32,
+        "event_including": 0.067799,
+        "event_including_weeks_removed": 32
+      },
+      {
+        "phase": "slowdown",
+        "episode": 1,
+        "start": "1995-04-28",
+        "end": "1995-07-21",
+        "weeks": 13,
+        "block_only": 0.06724,
+        "block_only_weeks_removed": 13,
+        "event_including": 0.067235,
+        "event_including_weeks_removed": 26
+      },
+      {
+        "phase": "slowdown",
+        "episode": 2,
+        "start": "1998-08-28",
+        "end": "1998-08-28",
+        "weeks": 1,
+        "block_only": 0.067451,
+        "block_only_weeks_removed": 1,
+        "event_including": 0.076464,
+        "event_including_weeks_removed": 14
+      },
+      {
+        "phase": "slowdown",
+        "episode": 3,
+        "start": "2000-07-28",
+        "end": "2001-01-19",
+        "weeks": 26,
+        "block_only": 0.067776,
+        "block_only_weeks_removed": 26,
+        "event_including": 0.079836,
+        "event_including_weeks_removed": 39
+      },
+      {
+        "phase": "slowdown",
+        "episode": 4,
+        "start": "2005-10-21",
+        "end": "2005-11-11",
+        "weeks": 4,
+        "block_only": 0.067378,
+        "block_only_weeks_removed": 4,
+        "event_including": 0.067358,
+        "event_including_weeks_removed": 17
+      },
+      {
+        "phase": "slowdown",
+        "episode": 5,
+        "start": "2007-09-07",
+        "end": "2007-10-05",
+        "weeks": 5,
+        "block_only": 0.06744,
+        "block_only_weeks_removed": 5,
+        "event_including": 0.068099,
+        "event_including_weeks_removed": 18
+      },
+      {
+        "phase": "slowdown",
+        "episode": 6,
+        "start": "2008-01-18",
+        "end": "2008-01-18",
+        "weeks": 1,
+        "block_only": 0.067245,
+        "block_only_weeks_removed": 1,
+        "event_including": 0.079011,
+        "event_including_weeks_removed": 14
+      },
+      {
+        "phase": "slowdown",
+        "episode": 7,
+        "start": "2018-12-21",
+        "end": "2019-04-12",
+        "weeks": 17,
+        "block_only": 0.068451,
+        "block_only_weeks_removed": 17,
+        "event_including": 0.068432,
+        "event_including_weeks_removed": 30
+      },
+      {
+        "phase": "slowdown",
+        "episode": 8,
+        "start": "2019-07-05",
+        "end": "2019-08-16",
+        "weeks": 7,
+        "block_only": 0.067614,
+        "block_only_weeks_removed": 7,
+        "event_including": 0.067642,
+        "event_including_weeks_removed": 20
+      },
+      {
+        "phase": "slowdown",
+        "episode": 9,
+        "start": "2022-07-15",
+        "end": "2022-08-05",
+        "weeks": 4,
+        "block_only": 0.067273,
+        "block_only_weeks_removed": 4,
+        "event_including": 0.066278,
+        "event_including_weeks_removed": 17
+      },
+      {
+        "phase": "slowdown",
+        "episode": 10,
+        "start": "2023-01-13",
+        "end": "2023-02-03",
+        "weeks": 4,
+        "block_only": 0.067561,
+        "block_only_weeks_removed": 4,
+        "event_including": 0.067607,
+        "event_including_weeks_removed": 17
+      },
+      {
+        "phase": "slowdown",
+        "episode": 11,
+        "start": "2025-12-05",
+        "end": "2026-01-02",
+        "weeks": 5,
+        "block_only": 0.067348,
+        "block_only_weeks_removed": 5,
+        "event_including": 0.067857,
+        "event_including_weeks_removed": 18
+      },
+      {
+        "phase": "contraction",
+        "episode": 1,
+        "start": "2001-01-26",
+        "end": "2002-01-25",
+        "weeks": 53,
+        "block_only": 0.113015,
+        "block_only_weeks_removed": 53,
+        "event_including": 0.117795,
+        "event_including_weeks_removed": 66
+      },
+      {
+        "phase": "contraction",
+        "episode": 2,
+        "start": "2003-03-14",
+        "end": "2003-05-16",
+        "weeks": 10,
+        "block_only": 0.065164,
+        "block_only_weeks_removed": 10,
+        "event_including": 0.065073,
+        "event_including_weeks_removed": 23
+      },
+      {
+        "phase": "contraction",
+        "episode": 3,
+        "start": "2008-01-25",
+        "end": "2009-05-29",
+        "weeks": 71,
+        "block_only": 0.021356,
+        "block_only_weeks_removed": 71,
+        "event_including": 0.021078,
+        "event_including_weeks_removed": 84
+      },
+      {
+        "phase": "contraction",
+        "episode": 4,
+        "start": "2019-11-29",
+        "end": "2020-02-28",
+        "weeks": 14,
+        "block_only": 0.052026,
+        "block_only_weeks_removed": 14,
+        "event_including": 0.051163,
+        "event_including_weeks_removed": 27
+      },
+      {
+        "phase": "contraction",
+        "episode": 5,
+        "start": "2020-03-13",
+        "end": "2020-06-26",
+        "weeks": 16,
+        "block_only": 0.070293,
+        "block_only_weeks_removed": 16,
+        "event_including": 0.070579,
+        "event_including_weeks_removed": 29
+      }
+    ],
+    "block_only_summary": {
+      "computable_episodes": 37,
+      "lowest": 0.021356,
+      "median": 0.067348,
+      "highest": 0.113015,
+      "stays_positive_everywhere": true,
+      "most_damaging_episode": "contraction#3 (2008-01-25)"
+    },
+    "event_including_summary": {
+      "computable_episodes": 37,
+      "lowest": 0.021078,
+      "median": 0.067642,
+      "highest": 0.117795,
+      "stays_positive_everywhere": true,
+      "most_damaging_episode": "contraction#3 (2008-01-25)"
+    },
+    "both_strengths_must_hold": true,
+    "why": "에피소드 마지막 주의 전방 목표는 에피소드가 끝난 뒤의 수익으로 만들어진다. 블록만 빼면 그 관측이 남는다. 어느 강도가 더 가혹한지는 상황마다 달라서 **둘 다** 본다 — 트랙 19에서는 강한 쪽이, 트랙 23에서는 약한 쪽이 가혹했다."
+  },
+  "other_labellings": {
+    "v1_1_revised": {
+      "target": "v1.1 labels",
+      "weeks": 1653,
+      "usable": true,
+      "control_columns": [
+        "realised_variance_4w",
+        "realised_volatility_4w",
+        "term_spread"
+      ],
+      "control_only_r_squared": 0.079579,
+      "phase_only_r_squared": 0.123226,
+      "both_r_squared": 0.148404,
+      "incremental_r_squared_of_phase": 0.068825,
+      "incremental_r_squared_of_control_over_phase": 0.025179,
+      "phase_absorbs_the_control": false,
+      "shifts_used": 775,
+      "null_median_increment": 0.006149,
+      "null_p90_increment": 0.016571,
+      "null_p": 0.0026
+    },
+    "real_time_overlap": {
+      "target": "real-time labels",
+      "weeks": 659,
+      "usable": true,
+      "control_columns": [
+        "realised_variance_4w",
+        "realised_volatility_4w",
+        "term_spread"
+      ],
+      "control_only_r_squared": 0.343026,
+      "phase_only_r_squared": 0.181629,
+      "both_r_squared": 0.398127,
+      "incremental_r_squared_of_phase": 0.0551,
+      "incremental_r_squared_of_control_over_phase": 0.216498,
+      "phase_absorbs_the_control": false,
+      "shifts_used": 278,
+      "null_median_increment": 0.004108,
+      "null_p90_increment": 0.01246,
+      "null_p": 0.0036
+    }
+  },
+  "decision_gate": {
+    "increment": 0.067294,
+    "null_p": 0.0013,
+    "conditions": {
+      "phase_adds_over_the_volatility_control": true,
+      "block_only_exclusion_keeps_it_positive": true,
+      "event_including_exclusion_keeps_it_positive": true,
+      "holds_without_2020": true,
+      "holds_without_the_gfc": true
+    },
+    "passes": true,
+    "failed": [],
+    "verdict": "국면이 과거 실현변동성 위에 분산 설명력을 얹는다. 변동성 군집만으로 설명되지 않는 것이 남아 있다."
+  },
+  "real_time_available": true,
+  "verdict": {
+    "phase_adds_over_realised_volatility": true,
+    "failed_conditions": [],
+    "track24_increment_over_the_spread_alone": 0.120061,
+    "increment_over_the_volatility_control": 0.067294,
+    "statement": "국면이 과거 실현변동성 위에 분산 설명력을 얹는다. 변동성 군집만으로 설명되지 않는 것이 남아 있다. 제품 형태는 사전 명세가 이미 좁게 묶어 두었다."
+  },
+  "display_wording": {
+    "drafted": true,
+    "lines": [
+      {
+        "phase": "recovery",
+        "wording": "회복기: 역사적으로 이 국면에서 전방 13주 음수 주 비율은 17%였습니다 (에피소드 4개, 1994~2026)."
+      },
+      {
+        "phase": "expansion",
+        "wording": "확장기: 역사적으로 이 국면에서 전방 13주 음수 주 비율은 29%였습니다 (에피소드 17개, 1994~2026)."
+      },
+      {
+        "phase": "slowdown",
+        "wording": "후퇴기: 역사적으로 이 국면에서 전방 13주 음수 주 비율은 52%였습니다 (에피소드 11개, 1994~2026)."
+      },
+      {
+        "phase": "contraction",
+        "wording": "침체기: 역사적으로 이 국면에서 전방 13주 음수 주 비율은 52%였습니다 (에피소드 5개, 1994~2026)."
+      }
+    ],
+    "constraint": {
+      "permitted": "이 국면에서는 역사적으로 전방 13주 음수 주 비율이 52%였습니다",
+      "forbidden": [
+        "노출을 바꾸라는 어떤 지시도",
+        "읽는 사람의 보유 자산에 대한 어떤 언급도",
+        "앞날에 대한 어떤 확률 주장도"
+      ],
+      "note": "통과해도 제품 형태는 이미 정해져 있고 좁다. 결과가 좋았다는 이유로 넓히지 않는다."
+    }
+  }
+}

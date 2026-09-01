@@ -1,0 +1,208 @@
+baseline_name: candidate_h_breadth_gate
+indicators:
+  constraints:
+    duplicate_correlation: 0.85
+    max_domain_weight: 0.3
+    max_indicator_weight: 0.2
+    minimum_availability: 0.55
+  indicators:
+    CCSA:
+      direction: -1
+      domain: weekly_bridge
+      frequency: weekly
+      max_age_weeks: 4
+      release_lag_days: 12
+      transform: claims_4w_log
+      weight: 0.07
+    CMRMTSPL:
+      direction: 1
+      domain: consumption
+      frequency: monthly
+      max_age_weeks: 14
+      release_lag_days: 45
+      transform: log_cycle
+      weight: 0.1
+    ICSA:
+      direction: -1
+      domain: weekly_bridge
+      frequency: weekly
+      max_age_weeks: 3
+      release_lag_days: 5
+      transform: claims_4w_log
+      weight: 0.08
+    INDPRO:
+      direction: 1
+      domain: production
+      frequency: monthly
+      max_age_weeks: 8
+      release_lag_days: 16
+      transform: log_cycle
+      weight: 0.2
+    PAYEMS:
+      direction: 1
+      domain: employment
+      frequency: monthly
+      max_age_weeks: 8
+      release_lag_days: 7
+      transform: log_cycle
+      weight: 0.25
+    RRSFS:
+      direction: 1
+      domain: consumption
+      frequency: monthly
+      max_age_weeks: 8
+      release_lag_days: 16
+      transform: log_cycle
+      weight: 0.1
+    W875RX1:
+      direction: 1
+      domain: income
+      frequency: monthly
+      max_age_weeks: 10
+      release_lag_days: 28
+      transform: log_cycle
+      weight: 0.2
+  leading:
+    ANFCI:
+      direction: -1
+      transform: level_change
+    AWHMAN:
+      direction: 1
+      transform: level_change
+    NEWORDER:
+      direction: 1
+      transform: log_cycle
+    PERMIT:
+      direction: 1
+      transform: log_cycle
+    T10Y3M:
+      direction: 1
+      transform: level_change
+model:
+  confidence:
+    conservative_revision_default: 0.4
+    data_availability: 0.25
+    data_freshness: 0.35
+    data_model_agreement: 0.2
+    data_revision_stability: 0.2
+    detail_agreement: 0.05
+    detail_boundary: 0.15
+    detail_gap: 0.2
+    detail_persistence: 0.05
+    detail_probability: 0.4
+    detail_radius: 0.15
+  contraction_breadth_gate:
+    enabled: true
+    minimum_domains: 4.0
+  contraction_level_gate: true
+  contraction_level_scale: 0.75
+  coordinate_full_history_years: 5.0
+  coordinate_standardization_horizon_years: 10.0
+  coordinate_standardization_method: scale_only
+  coordinate_standardization_min_history_years: 2.0
+  dynamic_factor:
+    initial_variance: 10.0
+    level_process_variance: 0.025
+    observation_variance: 0.65
+    slope_process_variance: 0.0025
+  forecast_13w:
+    status: not_calibrated
+  low_radius_jump_constraint: true
+  low_radius_jump_scale: 0.75
+  maturity:
+    enabled: true
+    exclude_years: 5.0
+    full_weight_years: 10.0
+  minimum_training_weeks: 104
+  momentum_weeks: 8
+  phase_emission_sigma_degrees: 22.0
+  phase_origin_scale: 0.75
+  phase_origin_sigma_multiplier: 2.0
+  random_seed: 42
+  standardization_horizon_years: 10.0
+  standardization_method: rolling_mean_std
+  standardization_min_history_years: 5.0
+  standardization_min_periods: 26
+  trend_horizon_years: 3.0
+  version: 0.1.0
+model_version: 0.1.0
+source_commit: efc324ae8305fc2d3164a4805b00d6483134b4d3
+transitions:
+  phases:
+  - broad: recovery
+    broad_label_ko: 회복기
+    code: recovery_early
+    end: 300
+    label_ko: 회복기 초기
+    start: 270
+  - broad: recovery
+    broad_label_ko: 회복기
+    code: recovery_mid
+    end: 330
+    label_ko: 회복기 중기
+    start: 300
+  - broad: recovery
+    broad_label_ko: 회복기
+    code: recovery_late
+    end: 360
+    label_ko: 회복기 말기
+    start: 330
+  - broad: expansion
+    broad_label_ko: 확장기
+    code: expansion_early
+    end: 30
+    label_ko: 확장기 초기
+    start: 0
+  - broad: expansion
+    broad_label_ko: 확장기
+    code: expansion_mid
+    end: 60
+    label_ko: 확장기 중기
+    start: 30
+  - broad: expansion
+    broad_label_ko: 확장기
+    code: expansion_late
+    end: 90
+    label_ko: 확장기 말기
+    start: 60
+  - broad: slowdown
+    broad_label_ko: 후퇴기
+    code: slowdown_early
+    end: 120
+    label_ko: 후퇴기 초기
+    start: 90
+  - broad: slowdown
+    broad_label_ko: 후퇴기
+    code: slowdown_mid
+    end: 150
+    label_ko: 후퇴기 중기
+    start: 120
+  - broad: slowdown
+    broad_label_ko: 후퇴기
+    code: slowdown_late
+    end: 180
+    label_ko: 후퇴기 말기
+    start: 150
+  - broad: contraction
+    broad_label_ko: 침체기
+    code: contraction_early
+    end: 210
+    label_ko: 침체기 초기
+    start: 180
+  - broad: contraction
+    broad_label_ko: 침체기
+    code: contraction_mid
+    end: 240
+    label_ko: 침체기 중기
+    start: 210
+  - broad: contraction
+    broad_label_ko: 침체기
+    code: contraction_late
+    end: 270
+    label_ko: 침체기 말기
+    start: 240
+  transition:
+    jump_mass: 0.03
+    next: 0.22
+    previous: 0.09
+    stay: 0.66

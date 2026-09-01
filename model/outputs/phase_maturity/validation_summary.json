@@ -1,0 +1,1291 @@
+{
+  "stage": "phase_maturity",
+  "frozen_model_modified": false,
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "executed_at_utc": "2026-08-25T05:15:02+00:00",
+  "change_weeks": 8,
+  "late_threshold": 0.6666666666666666,
+  "horizon_weeks": 13,
+  "inputs": {
+    "expansion": [
+      "level",
+      "d_momentum",
+      "d_breadth"
+    ],
+    "slowdown": [
+      "d_level",
+      "momentum",
+      "d_negative_momentum_domains"
+    ],
+    "contraction": [
+      "level",
+      "d_momentum",
+      "d_breadth"
+    ],
+    "recovery": [
+      "level",
+      "momentum",
+      "d_momentum"
+    ]
+  },
+  "gap_inputs": {
+    "expansion": [
+      "capacity_gap",
+      "unemployment_gap"
+    ],
+    "slowdown": [],
+    "contraction": [
+      "claims_off_peak"
+    ],
+    "recovery": []
+  },
+  "gap_coverage": {
+    "capacity_gap": {
+      "weeks_with_a_value": 1675,
+      "first_week": "1994-07-15"
+    },
+    "unemployment_gap": {
+      "weeks_with_a_value": 1675,
+      "first_week": "1994-07-15"
+    },
+    "claims_off_peak": {
+      "weeks_with_a_value": 1663,
+      "first_week": "1994-10-07"
+    }
+  },
+  "cycle_order": {
+    "by_phase": {
+      "recovery": {
+        "transitions": 4,
+        "to_the_expected_successor": 3,
+        "share": 0.75,
+        "where_it_went_instead": {
+          "slowdown": 1
+        }
+      },
+      "expansion": {
+        "transitions": 44,
+        "to_the_expected_successor": 41,
+        "share": 0.932,
+        "where_it_went_instead": {
+          "recovery": 2,
+          "contraction": 1
+        }
+      },
+      "slowdown": {
+        "transitions": 44,
+        "to_the_expected_successor": 4,
+        "share": 0.091,
+        "where_it_went_instead": {
+          "expansion": 40
+        }
+      },
+      "contraction": {
+        "transitions": 5,
+        "to_the_expected_successor": 2,
+        "share": 0.4,
+        "where_it_went_instead": {
+          "slowdown": 2,
+          "expansion": 1
+        }
+      }
+    },
+    "transitions": 97,
+    "following_the_cycle_order": 50,
+    "share_following_the_cycle_order": 0.515
+  },
+  "existing_values_only": {
+    "by_phase": [
+      {
+        "phase": "recovery",
+        "expected_successor": "expansion",
+        "weeks": 151,
+        "episodes": 4,
+        "late_weeks": 76,
+        "late_share": 0.5033,
+        "late_weeks_followed_by_the_successor": 26,
+        "late_weeks_not_followed_by_the_successor": 50,
+        "duration_cutoff_weeks": 29.0,
+        "successor_rate": {
+          "base": 0.2583,
+          "duration_only": 0.5882,
+          "late_signal": 0.3421
+        },
+        "exit_rate": {
+          "base": 0.3444,
+          "duration_only": 0.5882,
+          "late_signal": 0.3816
+        },
+        "late_signal_beats_duration_on_successor": false,
+        "late_signal_beats_duration_on_exit": false,
+        "within_run_shift_p_successor": 0.2294,
+        "within_run_shift_p_exit": 0.1959,
+        "where_the_phase_actually_went": {
+          "expansion": 3,
+          "slowdown": 1
+        }
+      },
+      {
+        "phase": "expansion",
+        "expected_successor": "slowdown",
+        "weeks": 685,
+        "episodes": 45,
+        "late_weeks": 418,
+        "late_share": 0.6102,
+        "late_weeks_followed_by_the_successor": 268,
+        "late_weeks_not_followed_by_the_successor": 150,
+        "duration_cutoff_weeks": 15.0,
+        "successor_rate": {
+          "base": 0.5971,
+          "duration_only": 0.6102,
+          "late_signal": 0.6411
+        },
+        "exit_rate": {
+          "base": 0.6263,
+          "duration_only": 0.6102,
+          "late_signal": 0.6411
+        },
+        "late_signal_beats_duration_on_successor": true,
+        "late_signal_beats_duration_on_exit": true,
+        "within_run_shift_p_successor": 0.0535,
+        "within_run_shift_p_exit": 0.0535,
+        "where_the_phase_actually_went": {
+          "slowdown": 41,
+          "recovery": 2,
+          "contraction": 1,
+          "": 1
+        }
+      },
+      {
+        "phase": "slowdown",
+        "expected_successor": "contraction",
+        "weeks": 677,
+        "episodes": 44,
+        "late_weeks": 517,
+        "late_share": 0.7637,
+        "late_weeks_followed_by_the_successor": 33,
+        "late_weeks_not_followed_by_the_successor": 484,
+        "duration_cutoff_weeks": 15.0,
+        "successor_rate": {
+          "base": 0.0532,
+          "duration_only": 0.1097,
+          "late_signal": 0.0638
+        },
+        "exit_rate": {
+          "base": 0.6248,
+          "duration_only": 0.5992,
+          "late_signal": 0.5474
+        },
+        "late_signal_beats_duration_on_successor": false,
+        "late_signal_beats_duration_on_exit": false,
+        "within_run_shift_p_successor": 0.5097,
+        "within_run_shift_p_exit": 1.0,
+        "where_the_phase_actually_went": {
+          "expansion": 40,
+          "contraction": 4
+        }
+      },
+      {
+        "phase": "contraction",
+        "expected_successor": "recovery",
+        "weeks": 162,
+        "episodes": 5,
+        "late_weeks": 108,
+        "late_share": 0.6667,
+        "late_weeks_followed_by_the_successor": 26,
+        "late_weeks_not_followed_by_the_successor": 82,
+        "duration_cutoff_weeks": 35.0,
+        "successor_rate": {
+          "base": 0.1605,
+          "duration_only": 0.2364,
+          "late_signal": 0.2407
+        },
+        "exit_rate": {
+          "base": 0.3889,
+          "duration_only": 0.4727,
+          "late_signal": 0.463
+        },
+        "late_signal_beats_duration_on_successor": true,
+        "late_signal_beats_duration_on_exit": false,
+        "within_run_shift_p_successor": 0.0035,
+        "within_run_shift_p_exit": 0.0585,
+        "where_the_phase_actually_went": {
+          "slowdown": 2,
+          "recovery": 2,
+          "expansion": 1
+        }
+      }
+    ],
+    "duration_independence": [
+      {
+        "phase": "recovery",
+        "young_weeks": 100,
+        "late_and_young_weeks": 42,
+        "successor_rate_all_young": 0.09,
+        "successor_rate_late_and_young": 0.0952,
+        "signal_survives_holding_duration_fixed": true,
+        "median_elapsed_weeks_when_late": 26.0,
+        "median_elapsed_weeks_in_phase": 20.0
+      },
+      {
+        "phase": "expansion",
+        "young_weeks": 449,
+        "late_and_young_weeks": 260,
+        "successor_rate_all_young": 0.5902,
+        "successor_rate_late_and_young": 0.6154,
+        "signal_survives_holding_duration_fixed": true,
+        "median_elapsed_weeks_when_late": 10.0,
+        "median_elapsed_weeks_in_phase": 9.0
+      },
+      {
+        "phase": "slowdown",
+        "young_weeks": 440,
+        "late_and_young_weeks": 337,
+        "successor_rate_all_young": 0.0227,
+        "successor_rate_late_and_young": 0.0208,
+        "signal_survives_holding_duration_fixed": false,
+        "median_elapsed_weeks_when_late": 9.0,
+        "median_elapsed_weeks_in_phase": 10.0
+      },
+      {
+        "phase": "contraction",
+        "young_weeks": 107,
+        "late_and_young_weeks": 75,
+        "successor_rate_all_young": 0.1215,
+        "successor_rate_late_and_young": 0.1733,
+        "signal_survives_holding_duration_fixed": true,
+        "median_elapsed_weeks_when_late": 18.0,
+        "median_elapsed_weeks_in_phase": 21.5
+      }
+    ],
+    "threshold_sweep": [
+      {
+        "phase": "recovery",
+        "threshold": 0.0,
+        "weeks": 151,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.2583,
+        "predeclared": false
+      },
+      {
+        "phase": "recovery",
+        "threshold": 0.333,
+        "weeks": 151,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.2583,
+        "predeclared": false
+      },
+      {
+        "phase": "recovery",
+        "threshold": 0.667,
+        "weeks": 76,
+        "share_of_phase": 0.5033,
+        "successor_rate": 0.3421,
+        "predeclared": true
+      },
+      {
+        "phase": "recovery",
+        "threshold": 1.0,
+        "weeks": 0,
+        "share_of_phase": 0.0,
+        "successor_rate": null,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.0,
+        "weeks": 677,
+        "share_of_phase": 0.9883,
+        "successor_rate": 0.6041,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.333,
+        "weeks": 631,
+        "share_of_phase": 0.9212,
+        "successor_rate": 0.626,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.667,
+        "weeks": 418,
+        "share_of_phase": 0.6102,
+        "successor_rate": 0.6411,
+        "predeclared": true
+      },
+      {
+        "phase": "expansion",
+        "threshold": 1.0,
+        "weeks": 31,
+        "share_of_phase": 0.0453,
+        "successor_rate": 0.8387,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.0,
+        "weeks": 677,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.0532,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.333,
+        "weeks": 587,
+        "share_of_phase": 0.8671,
+        "successor_rate": 0.0596,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.667,
+        "weeks": 517,
+        "share_of_phase": 0.7637,
+        "successor_rate": 0.0638,
+        "predeclared": true
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 1.0,
+        "weeks": 255,
+        "share_of_phase": 0.3767,
+        "successor_rate": 0.0627,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.0,
+        "weeks": 162,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.1605,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.333,
+        "weeks": 162,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.1605,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.667,
+        "weeks": 108,
+        "share_of_phase": 0.6667,
+        "successor_rate": 0.2407,
+        "predeclared": true
+      },
+      {
+        "phase": "contraction",
+        "threshold": 1.0,
+        "weeks": 8,
+        "share_of_phase": 0.0494,
+        "successor_rate": 0.125,
+        "predeclared": false
+      }
+    ],
+    "late_weeks_total": 1119
+  },
+  "with_gap_transforms": {
+    "by_phase": [
+      {
+        "phase": "recovery",
+        "expected_successor": "expansion",
+        "weeks": 151,
+        "episodes": 4,
+        "late_weeks": 76,
+        "late_share": 0.5033,
+        "late_weeks_followed_by_the_successor": 26,
+        "late_weeks_not_followed_by_the_successor": 50,
+        "duration_cutoff_weeks": 29.0,
+        "successor_rate": {
+          "base": 0.2583,
+          "duration_only": 0.5882,
+          "late_signal": 0.3421
+        },
+        "exit_rate": {
+          "base": 0.3444,
+          "duration_only": 0.5882,
+          "late_signal": 0.3816
+        },
+        "late_signal_beats_duration_on_successor": false,
+        "late_signal_beats_duration_on_exit": false,
+        "within_run_shift_p_successor": 0.2294,
+        "within_run_shift_p_exit": 0.1959,
+        "where_the_phase_actually_went": {
+          "expansion": 3,
+          "slowdown": 1
+        }
+      },
+      {
+        "phase": "expansion",
+        "expected_successor": "slowdown",
+        "weeks": 685,
+        "episodes": 45,
+        "late_weeks": 237,
+        "late_share": 0.346,
+        "late_weeks_followed_by_the_successor": 186,
+        "late_weeks_not_followed_by_the_successor": 51,
+        "duration_cutoff_weeks": 15.0,
+        "successor_rate": {
+          "base": 0.5971,
+          "duration_only": 0.6102,
+          "late_signal": 0.7848
+        },
+        "exit_rate": {
+          "base": 0.6263,
+          "duration_only": 0.6102,
+          "late_signal": 0.7848
+        },
+        "late_signal_beats_duration_on_successor": true,
+        "late_signal_beats_duration_on_exit": true,
+        "within_run_shift_p_successor": 0.015,
+        "within_run_shift_p_exit": 0.015,
+        "where_the_phase_actually_went": {
+          "slowdown": 41,
+          "recovery": 2,
+          "contraction": 1,
+          "": 1
+        }
+      },
+      {
+        "phase": "slowdown",
+        "expected_successor": "contraction",
+        "weeks": 677,
+        "episodes": 44,
+        "late_weeks": 517,
+        "late_share": 0.7637,
+        "late_weeks_followed_by_the_successor": 33,
+        "late_weeks_not_followed_by_the_successor": 484,
+        "duration_cutoff_weeks": 15.0,
+        "successor_rate": {
+          "base": 0.0532,
+          "duration_only": 0.1097,
+          "late_signal": 0.0638
+        },
+        "exit_rate": {
+          "base": 0.6248,
+          "duration_only": 0.5992,
+          "late_signal": 0.5474
+        },
+        "late_signal_beats_duration_on_successor": false,
+        "late_signal_beats_duration_on_exit": false,
+        "within_run_shift_p_successor": 0.5097,
+        "within_run_shift_p_exit": 1.0,
+        "where_the_phase_actually_went": {
+          "expansion": 40,
+          "contraction": 4
+        }
+      },
+      {
+        "phase": "contraction",
+        "expected_successor": "recovery",
+        "weeks": 162,
+        "episodes": 5,
+        "late_weeks": 20,
+        "late_share": 0.1235,
+        "late_weeks_followed_by_the_successor": 8,
+        "late_weeks_not_followed_by_the_successor": 12,
+        "duration_cutoff_weeks": 35.0,
+        "successor_rate": {
+          "base": 0.1605,
+          "duration_only": 0.2364,
+          "late_signal": 0.4
+        },
+        "exit_rate": {
+          "base": 0.3889,
+          "duration_only": 0.4727,
+          "late_signal": 0.75
+        },
+        "late_signal_beats_duration_on_successor": true,
+        "late_signal_beats_duration_on_exit": true,
+        "within_run_shift_p_successor": 0.5822,
+        "within_run_shift_p_exit": 0.1254,
+        "where_the_phase_actually_went": {
+          "slowdown": 2,
+          "recovery": 2,
+          "expansion": 1
+        }
+      }
+    ],
+    "duration_independence": [
+      {
+        "phase": "recovery",
+        "young_weeks": 100,
+        "late_and_young_weeks": 42,
+        "successor_rate_all_young": 0.09,
+        "successor_rate_late_and_young": 0.0952,
+        "signal_survives_holding_duration_fixed": true,
+        "median_elapsed_weeks_when_late": 26.0,
+        "median_elapsed_weeks_in_phase": 20.0
+      },
+      {
+        "phase": "expansion",
+        "young_weeks": 449,
+        "late_and_young_weeks": 172,
+        "successor_rate_all_young": 0.5902,
+        "successor_rate_late_and_young": 0.7267,
+        "signal_survives_holding_duration_fixed": true,
+        "median_elapsed_weeks_when_late": 9.0,
+        "median_elapsed_weeks_in_phase": 9.0
+      },
+      {
+        "phase": "slowdown",
+        "young_weeks": 440,
+        "late_and_young_weeks": 337,
+        "successor_rate_all_young": 0.0227,
+        "successor_rate_late_and_young": 0.0208,
+        "signal_survives_holding_duration_fixed": false,
+        "median_elapsed_weeks_when_late": 9.0,
+        "median_elapsed_weeks_in_phase": 10.0
+      },
+      {
+        "phase": "contraction",
+        "young_weeks": 107,
+        "late_and_young_weeks": 16,
+        "successor_rate_all_young": 0.1215,
+        "successor_rate_late_and_young": 0.5,
+        "signal_survives_holding_duration_fixed": true,
+        "median_elapsed_weeks_when_late": 13.0,
+        "median_elapsed_weeks_in_phase": 21.5
+      }
+    ],
+    "threshold_sweep": [
+      {
+        "phase": "recovery",
+        "threshold": 0.0,
+        "weeks": 151,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.2583,
+        "predeclared": false
+      },
+      {
+        "phase": "recovery",
+        "threshold": 0.333,
+        "weeks": 151,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.2583,
+        "predeclared": false
+      },
+      {
+        "phase": "recovery",
+        "threshold": 0.667,
+        "weeks": 76,
+        "share_of_phase": 0.5033,
+        "successor_rate": 0.3421,
+        "predeclared": true
+      },
+      {
+        "phase": "recovery",
+        "threshold": 1.0,
+        "weeks": 0,
+        "share_of_phase": 0.0,
+        "successor_rate": null,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.0,
+        "weeks": 677,
+        "share_of_phase": 0.9883,
+        "successor_rate": 0.6041,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.333,
+        "weeks": 529,
+        "share_of_phase": 0.7723,
+        "successor_rate": 0.6767,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.667,
+        "weeks": 237,
+        "share_of_phase": 0.346,
+        "successor_rate": 0.7848,
+        "predeclared": true
+      },
+      {
+        "phase": "expansion",
+        "threshold": 1.0,
+        "weeks": 22,
+        "share_of_phase": 0.0321,
+        "successor_rate": 0.9091,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.0,
+        "weeks": 677,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.0532,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.333,
+        "weeks": 587,
+        "share_of_phase": 0.8671,
+        "successor_rate": 0.0596,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.667,
+        "weeks": 517,
+        "share_of_phase": 0.7637,
+        "successor_rate": 0.0638,
+        "predeclared": true
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 1.0,
+        "weeks": 255,
+        "share_of_phase": 0.3767,
+        "successor_rate": 0.0627,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.0,
+        "weeks": 162,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.1605,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.333,
+        "weeks": 108,
+        "share_of_phase": 0.6667,
+        "successor_rate": 0.2407,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.667,
+        "weeks": 20,
+        "share_of_phase": 0.1235,
+        "successor_rate": 0.4,
+        "predeclared": true
+      },
+      {
+        "phase": "contraction",
+        "threshold": 1.0,
+        "weeks": 2,
+        "share_of_phase": 0.0123,
+        "successor_rate": 0.5,
+        "predeclared": false
+      }
+    ],
+    "late_weeks_total": 850
+  },
+  "real_time": {
+    "by_phase": [
+      {
+        "phase": "recovery",
+        "expected_successor": "expansion",
+        "weeks": 34,
+        "episodes": 2,
+        "late_weeks": 16,
+        "late_share": 0.4706,
+        "late_weeks_followed_by_the_successor": 1,
+        "late_weeks_not_followed_by_the_successor": 15,
+        "duration_cutoff_weeks": 18.0,
+        "successor_rate": {
+          "base": 0.1471,
+          "duration_only": 0.0,
+          "late_signal": 0.0625
+        },
+        "exit_rate": {
+          "base": 0.5294,
+          "duration_only": 1.0,
+          "late_signal": 0.8125
+        },
+        "late_signal_beats_duration_on_successor": true,
+        "late_signal_beats_duration_on_exit": false,
+        "within_run_shift_p_successor": 1.0,
+        "within_run_shift_p_exit": 0.1549,
+        "where_the_phase_actually_went": {
+          "slowdown": 1,
+          "expansion": 1
+        }
+      },
+      {
+        "phase": "expansion",
+        "expected_successor": "slowdown",
+        "weeks": 288,
+        "episodes": 33,
+        "late_weeks": 191,
+        "late_share": 0.6632,
+        "late_weeks_followed_by_the_successor": 156,
+        "late_weeks_not_followed_by_the_successor": 35,
+        "duration_cutoff_weeks": 8.0,
+        "successor_rate": {
+          "base": 0.8229,
+          "duration_only": 0.8455,
+          "late_signal": 0.8168
+        },
+        "exit_rate": {
+          "base": 0.8333,
+          "duration_only": 0.8455,
+          "late_signal": 0.8272
+        },
+        "late_signal_beats_duration_on_successor": false,
+        "late_signal_beats_duration_on_exit": false,
+        "within_run_shift_p_successor": 0.5332,
+        "within_run_shift_p_exit": 0.5332,
+        "where_the_phase_actually_went": {
+          "slowdown": 31,
+          "recovery": 1,
+          "": 1
+        }
+      },
+      {
+        "phase": "slowdown",
+        "expected_successor": "contraction",
+        "weeks": 338,
+        "episodes": 37,
+        "late_weeks": 278,
+        "late_share": 0.8225,
+        "late_weeks_followed_by_the_successor": 19,
+        "late_weeks_not_followed_by_the_successor": 259,
+        "duration_cutoff_weeks": 10.0,
+        "successor_rate": {
+          "base": 0.0621,
+          "duration_only": 0.1074,
+          "late_signal": 0.0683
+        },
+        "exit_rate": {
+          "base": 0.716,
+          "duration_only": 0.5785,
+          "late_signal": 0.705
+        },
+        "late_signal_beats_duration_on_successor": false,
+        "late_signal_beats_duration_on_exit": true,
+        "within_run_shift_p_successor": 0.2989,
+        "within_run_shift_p_exit": 0.6017,
+        "where_the_phase_actually_went": {
+          "expansion": 32,
+          "contraction": 3,
+          "": 2
+        }
+      },
+      {
+        "phase": "contraction",
+        "expected_successor": "recovery",
+        "weeks": 18,
+        "episodes": 3,
+        "late_weeks": 17,
+        "late_share": 0.9444,
+        "late_weeks_followed_by_the_successor": 12,
+        "late_weeks_not_followed_by_the_successor": 5,
+        "duration_cutoff_weeks": 9.3,
+        "successor_rate": {
+          "base": 0.7222,
+          "duration_only": 1.0,
+          "late_signal": 0.7059
+        },
+        "exit_rate": {
+          "base": 0.8889,
+          "duration_only": 1.0,
+          "late_signal": 0.8824
+        },
+        "late_signal_beats_duration_on_successor": false,
+        "late_signal_beats_duration_on_exit": false,
+        "within_run_shift_p_successor": 1.0,
+        "within_run_shift_p_exit": 1.0,
+        "where_the_phase_actually_went": {
+          "slowdown": 2,
+          "recovery": 1
+        }
+      }
+    ],
+    "duration_independence": [
+      {
+        "phase": "recovery",
+        "young_weeks": 22,
+        "late_and_young_weeks": 5,
+        "successor_rate_all_young": 0.2273,
+        "successor_rate_late_and_young": 0.2,
+        "signal_survives_holding_duration_fixed": false,
+        "median_elapsed_weeks_when_late": 20.5,
+        "median_elapsed_weeks_in_phase": 12.5
+      },
+      {
+        "phase": "expansion",
+        "young_weeks": 178,
+        "late_and_young_weeks": 103,
+        "successor_rate_all_young": 0.809,
+        "successor_rate_late_and_young": 0.8155,
+        "signal_survives_holding_duration_fixed": true,
+        "median_elapsed_weeks_when_late": 7.0,
+        "median_elapsed_weeks_in_phase": 6.0
+      },
+      {
+        "phase": "slowdown",
+        "young_weeks": 217,
+        "late_and_young_weeks": 185,
+        "successor_rate_all_young": 0.0369,
+        "successor_rate_late_and_young": 0.0324,
+        "signal_survives_holding_duration_fixed": false,
+        "median_elapsed_weeks_when_late": 6.0,
+        "median_elapsed_weeks_in_phase": 6.0
+      },
+      {
+        "phase": "contraction",
+        "young_weeks": 12,
+        "late_and_young_weeks": 11,
+        "successor_rate_all_young": 0.5833,
+        "successor_rate_late_and_young": 0.5455,
+        "signal_survives_holding_duration_fixed": false,
+        "median_elapsed_weeks_when_late": 7.0,
+        "median_elapsed_weeks_in_phase": 6.5
+      }
+    ],
+    "threshold_sweep": [
+      {
+        "phase": "recovery",
+        "threshold": 0.0,
+        "weeks": 34,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.1471,
+        "predeclared": false
+      },
+      {
+        "phase": "recovery",
+        "threshold": 0.333,
+        "weeks": 34,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.1471,
+        "predeclared": false
+      },
+      {
+        "phase": "recovery",
+        "threshold": 0.667,
+        "weeks": 16,
+        "share_of_phase": 0.4706,
+        "successor_rate": 0.0625,
+        "predeclared": true
+      },
+      {
+        "phase": "recovery",
+        "threshold": 1.0,
+        "weeks": 0,
+        "share_of_phase": 0.0,
+        "successor_rate": null,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.0,
+        "weeks": 282,
+        "share_of_phase": 0.9792,
+        "successor_rate": 0.8191,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.333,
+        "weeks": 269,
+        "share_of_phase": 0.934,
+        "successor_rate": 0.8216,
+        "predeclared": false
+      },
+      {
+        "phase": "expansion",
+        "threshold": 0.667,
+        "weeks": 191,
+        "share_of_phase": 0.6632,
+        "successor_rate": 0.8168,
+        "predeclared": true
+      },
+      {
+        "phase": "expansion",
+        "threshold": 1.0,
+        "weeks": 20,
+        "share_of_phase": 0.0694,
+        "successor_rate": 0.8,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.0,
+        "weeks": 336,
+        "share_of_phase": 0.9941,
+        "successor_rate": 0.0625,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.333,
+        "weeks": 321,
+        "share_of_phase": 0.9497,
+        "successor_rate": 0.0623,
+        "predeclared": false
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 0.667,
+        "weeks": 278,
+        "share_of_phase": 0.8225,
+        "successor_rate": 0.0683,
+        "predeclared": true
+      },
+      {
+        "phase": "slowdown",
+        "threshold": 1.0,
+        "weeks": 131,
+        "share_of_phase": 0.3876,
+        "successor_rate": 0.0763,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.0,
+        "weeks": 18,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.7222,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.333,
+        "weeks": 18,
+        "share_of_phase": 1.0,
+        "successor_rate": 0.7222,
+        "predeclared": false
+      },
+      {
+        "phase": "contraction",
+        "threshold": 0.667,
+        "weeks": 17,
+        "share_of_phase": 0.9444,
+        "successor_rate": 0.7059,
+        "predeclared": true
+      },
+      {
+        "phase": "contraction",
+        "threshold": 1.0,
+        "weeks": 3,
+        "share_of_phase": 0.1667,
+        "successor_rate": 0.6667,
+        "predeclared": false
+      }
+    ],
+    "late_weeks_total": 502
+  },
+  "change_window_sensitivity": [
+    {
+      "change_weeks": 4,
+      "predeclared": false,
+      "phase": "recovery",
+      "late_weeks": 82,
+      "successor_rate_base": 0.2583,
+      "successor_rate_duration_only": 0.5882,
+      "successor_rate_late_signal": 0.3293,
+      "beats_duration": false
+    },
+    {
+      "change_weeks": 4,
+      "predeclared": false,
+      "phase": "expansion",
+      "late_weeks": 227,
+      "successor_rate_base": 0.5971,
+      "successor_rate_duration_only": 0.6102,
+      "successor_rate_late_signal": 0.8238,
+      "beats_duration": true
+    },
+    {
+      "change_weeks": 4,
+      "predeclared": false,
+      "phase": "slowdown",
+      "late_weeks": 419,
+      "successor_rate_base": 0.0532,
+      "successor_rate_duration_only": 0.1097,
+      "successor_rate_late_signal": 0.0811,
+      "beats_duration": false
+    },
+    {
+      "change_weeks": 4,
+      "predeclared": false,
+      "phase": "contraction",
+      "late_weeks": 18,
+      "successor_rate_base": 0.1605,
+      "successor_rate_duration_only": 0.2364,
+      "successor_rate_late_signal": 0.3333,
+      "beats_duration": true
+    },
+    {
+      "change_weeks": 8,
+      "predeclared": true,
+      "phase": "recovery",
+      "late_weeks": 76,
+      "successor_rate_base": 0.2583,
+      "successor_rate_duration_only": 0.5882,
+      "successor_rate_late_signal": 0.3421,
+      "beats_duration": false
+    },
+    {
+      "change_weeks": 8,
+      "predeclared": true,
+      "phase": "expansion",
+      "late_weeks": 237,
+      "successor_rate_base": 0.5971,
+      "successor_rate_duration_only": 0.6102,
+      "successor_rate_late_signal": 0.7848,
+      "beats_duration": true
+    },
+    {
+      "change_weeks": 8,
+      "predeclared": true,
+      "phase": "slowdown",
+      "late_weeks": 517,
+      "successor_rate_base": 0.0532,
+      "successor_rate_duration_only": 0.1097,
+      "successor_rate_late_signal": 0.0638,
+      "beats_duration": false
+    },
+    {
+      "change_weeks": 8,
+      "predeclared": true,
+      "phase": "contraction",
+      "late_weeks": 20,
+      "successor_rate_base": 0.1605,
+      "successor_rate_duration_only": 0.2364,
+      "successor_rate_late_signal": 0.4,
+      "beats_duration": true
+    },
+    {
+      "change_weeks": 13,
+      "predeclared": false,
+      "phase": "recovery",
+      "late_weeks": 70,
+      "successor_rate_base": 0.2583,
+      "successor_rate_duration_only": 0.5882,
+      "successor_rate_late_signal": 0.3286,
+      "beats_duration": false
+    },
+    {
+      "change_weeks": 13,
+      "predeclared": false,
+      "phase": "expansion",
+      "late_weeks": 226,
+      "successor_rate_base": 0.5971,
+      "successor_rate_duration_only": 0.6102,
+      "successor_rate_late_signal": 0.8142,
+      "beats_duration": true
+    },
+    {
+      "change_weeks": 13,
+      "predeclared": false,
+      "phase": "slowdown",
+      "late_weeks": 526,
+      "successor_rate_base": 0.0532,
+      "successor_rate_duration_only": 0.1097,
+      "successor_rate_late_signal": 0.0646,
+      "beats_duration": false
+    },
+    {
+      "change_weeks": 13,
+      "predeclared": false,
+      "phase": "contraction",
+      "late_weeks": 16,
+      "successor_rate_base": 0.1605,
+      "successor_rate_duration_only": 0.2364,
+      "successor_rate_late_signal": 0.5,
+      "beats_duration": true
+    }
+  ],
+  "wording_drafts": [
+    {
+      "phase": "recovery",
+      "maturity": 0.0,
+      "stage": "초반",
+      "wording": "회복기 초반의 특징이 나타납니다. 저점을 지난 신호가 나타나기 시작했습니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "recovery",
+      "maturity": 0.5,
+      "stage": "중반",
+      "wording": "회복기의 특징이 이어지고 있습니다. 반등이 진행 중입니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "recovery",
+      "maturity": 1.0,
+      "stage": "후반",
+      "wording": "회복기 후반의 특징이 나타납니다. 활동 수준이 정상 범위로 돌아왔고 반등의 기울기가 완만해지고 있습니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "expansion",
+      "maturity": 0.0,
+      "stage": "초반",
+      "wording": "확장기 초반의 특징이 나타납니다. 모멘텀이 아직 붙는 중입니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "expansion",
+      "maturity": 0.5,
+      "stage": "중반",
+      "wording": "확장기의 특징이 이어지고 있습니다. 수준과 모멘텀이 함께 유지되고 있습니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "expansion",
+      "maturity": 1.0,
+      "stage": "후반",
+      "wording": "확장기 후반의 특징이 나타납니다. 활동 수준은 여전히 높은 편이지만 모멘텀이 둔화되고 있고, 확장을 확인해 주는 지표의 수가 줄고 있습니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "slowdown",
+      "maturity": 0.0,
+      "stage": "초반",
+      "wording": "후퇴기 초반의 특징이 나타납니다. 둔화가 아직 일부 부문에 머물러 있습니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "slowdown",
+      "maturity": 0.5,
+      "stage": "중반",
+      "wording": "후퇴기의 특징이 이어지고 있습니다. 모멘텀이 둔화된 상태입니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "slowdown",
+      "maturity": 1.0,
+      "stage": "후반",
+      "wording": "후퇴기 후반의 특징이 나타납니다. 활동 수준이 내려가는 중이고 약화가 여러 부문으로 번지고 있습니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "contraction",
+      "maturity": 0.0,
+      "stage": "초반",
+      "wording": "침체기 초반의 특징이 나타납니다. 악화가 계속되고 있습니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "contraction",
+      "maturity": 0.5,
+      "stage": "중반",
+      "wording": "침체기의 특징이 이어지고 있습니다. 활동 수준이 낮은 상태입니다.",
+      "form": "state_description"
+    },
+    {
+      "phase": "contraction",
+      "maturity": 1.0,
+      "stage": "후반",
+      "wording": "침체기 후반의 특징이 나타납니다. 활동 수준은 아직 낮지만 악화 속도가 줄고 있고, 개선을 보이는 부문이 늘고 있습니다.",
+      "form": "state_description"
+    }
+  ],
+  "current": {
+    "week": "2026-08-14",
+    "phase": "expansion",
+    "maturity": 0.25,
+    "stage": "초반",
+    "wording": "확장기 초반의 특징이 나타납니다. 모멘텀이 아직 붙는 중입니다.",
+    "form": "state_description"
+  },
+  "verdict": {
+    "existing_values_only": {
+      "recovery": {
+        "beats_duration_on_successor": false,
+        "within_run_shift_p": 0.2294,
+        "successor_rate": {
+          "base": 0.2583,
+          "duration_only": 0.5882,
+          "late_signal": 0.3421
+        },
+        "episodes": 4
+      },
+      "expansion": {
+        "beats_duration_on_successor": true,
+        "within_run_shift_p": 0.0535,
+        "successor_rate": {
+          "base": 0.5971,
+          "duration_only": 0.6102,
+          "late_signal": 0.6411
+        },
+        "episodes": 45
+      },
+      "slowdown": {
+        "beats_duration_on_successor": false,
+        "within_run_shift_p": 0.5097,
+        "successor_rate": {
+          "base": 0.0532,
+          "duration_only": 0.1097,
+          "late_signal": 0.0638
+        },
+        "episodes": 44
+      },
+      "contraction": {
+        "beats_duration_on_successor": true,
+        "within_run_shift_p": 0.0035,
+        "successor_rate": {
+          "base": 0.1605,
+          "duration_only": 0.2364,
+          "late_signal": 0.2407
+        },
+        "episodes": 5
+      }
+    },
+    "with_gap_transforms": {
+      "recovery": {
+        "beats_duration_on_successor": false,
+        "within_run_shift_p": 0.2294,
+        "successor_rate": {
+          "base": 0.2583,
+          "duration_only": 0.5882,
+          "late_signal": 0.3421
+        },
+        "episodes": 4
+      },
+      "expansion": {
+        "beats_duration_on_successor": true,
+        "within_run_shift_p": 0.015,
+        "successor_rate": {
+          "base": 0.5971,
+          "duration_only": 0.6102,
+          "late_signal": 0.7848
+        },
+        "episodes": 45
+      },
+      "slowdown": {
+        "beats_duration_on_successor": false,
+        "within_run_shift_p": 0.5097,
+        "successor_rate": {
+          "base": 0.0532,
+          "duration_only": 0.1097,
+          "late_signal": 0.0638
+        },
+        "episodes": 44
+      },
+      "contraction": {
+        "beats_duration_on_successor": true,
+        "within_run_shift_p": 0.5822,
+        "successor_rate": {
+          "base": 0.1605,
+          "duration_only": 0.2364,
+          "late_signal": 0.4
+        },
+        "episodes": 5
+      }
+    },
+    "phases_where_the_late_signal_beats_the_duration_control": [
+      "expansion"
+    ],
+    "symmetric_across_the_four_phases": false,
+    "statement": "후반부 신호는 네 국면에 대칭적으로 작동하지 않는다. 경과 기간 대조군을 이기고 블록 안 위치 검정도 통과하는 국면은 확장기뿐이다."
+  }
+}

@@ -1,0 +1,5 @@
+sample,rotation_annualised,information_ratio,equal_weight_annualised,full_sample_ceiling,null_median,null_p90,p_value,average_weekly_turnover
+revised_long,0.0109,0.2,-0.0031,0.0493,-0.0009,0.0159,0.1501,0.063
+revised_overlap,-0.009,-0.117,-0.0186,0.0839,0.0077,0.0267,0.863,0.0957
+real_time_overlap,0.0147,0.216,-0.0186,0.1049,0.0074,0.0262,0.3425,0.1192
+real_time_gated,0.0032,0.08,-0.0186,0.0959,0.0071,0.0263,0.5753,0.0986

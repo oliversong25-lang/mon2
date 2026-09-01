@@ -1,0 +1,74 @@
+{
+  "as_of": "2026-08-14",
+  "raw_major_phase": "recovery",
+  "official_major_phase": "slowdown",
+  "raw_subphase": "early",
+  "official_subphase": "early",
+  "official_current_phase": "slowdown_early",
+  "phase_status": "official",
+  "activity_level": -0.247821,
+  "activity_momentum": 0.274323,
+  "negative_level_domains": 2,
+  "negative_momentum_domains": 1,
+  "contribution_concentration": 0.525839,
+  "phase_separation": 0.083982,
+  "major_scores": {
+    "recovery": 0.415162,
+    "expansion": 0.253657,
+    "slowdown": 0.33118,
+    "contraction": 1e-06
+  },
+  "contraction_evidence": {
+    "broad_level_route": 0.0,
+    "rapid_deterioration_route": 0.0,
+    "contraction_evidence": 0.0,
+    "level_severity": 0.138331,
+    "momentum_severity": 0.0,
+    "level_breadth": 0.0,
+    "momentum_breadth": 0.0,
+    "corroboration": 0.5
+  },
+  "domains": [
+    {
+      "domain": "production",
+      "level": 1.109905,
+      "momentum": -0.009654,
+      "weeks_since_release": 8.0
+    },
+    {
+      "domain": "employment",
+      "level": -0.51914,
+      "momentum": -0.439616,
+      "weeks_since_release": 5.0
+    },
+    {
+      "domain": "real_income",
+      "level": -2.043402,
+      "momentum": 1.181924,
+      "weeks_since_release": 6.0
+    },
+    {
+      "domain": "consumption",
+      "level": 0.038526,
+      "momentum": -0.009884,
+      "weeks_since_release": 4.0
+    },
+    {
+      "domain": "labor_stress",
+      "level": 0.175007,
+      "momentum": 0.648847,
+      "weeks_since_release": 0.0
+    }
+  ],
+  "coordinates_for_visualisation": {
+    "x": 0.274323,
+    "y": -0.247821,
+    "angle": 317.905692,
+    "radius": 0.369687
+  },
+  "filter_effect": {
+    "raw_major_differs": true,
+    "raw_subphase_differs": false
+  },
+  "legacy_recession_alert": "slowdown_late"
+}

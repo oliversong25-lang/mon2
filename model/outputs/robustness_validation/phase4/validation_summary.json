@@ -1,0 +1,92 @@
+{
+  "stage_a2_passed": false,
+  "checks": {
+    "calendar_consistent_trend_horizons": true,
+    "native_frequency_preprocessing": true,
+    "ten_year_causal_rolling_standardization": true,
+    "rolling_scale_fallbacks_documented": true,
+    "explicit_minimum_history_handling": true,
+    "warmup_2001_shift_at_most_8_weeks": false,
+    "preprocessing_identical_after_full_maturity": true,
+    "state_initialization_decays_within_burn_in": true,
+    "single_indicator_removal_does_not_collapse": true,
+    "recall_at_least_85pct": false,
+    "false_positive_rate_at_most_10pct": true,
+    "jumps_not_worse_than_legacy": true,
+    "whipsaws_not_worse_than_legacy": true
+  },
+  "measurements": {
+    "corrected_recall": 0.8429752066115702,
+    "corrected_false_positive_rate": 0.026814911706998037,
+    "corrected_multi_step_jumps": 4,
+    "corrected_three_week_whipsaws": 13,
+    "corrected_2020_entry_lag_weeks": 4.0,
+    "warmup_2001_shift_weeks": {
+      "corrected_baseline": 31.0,
+      "corrected_baseline_full_maturity": NaN,
+      "corrected_baseline_mature_coordinates": 21.0,
+      "corrected_baseline_rolling_coordinates": 30.0,
+      "legacy_benchmark": 44.0
+    },
+    "phase_disagreement_after_maturity": {
+      "legacy_benchmark": 0.15055762081784388,
+      "corrected_baseline": 0.11338289962825279,
+      "corrected_baseline_rolling_coordinates": 0.024163568773234202,
+      "corrected_baseline_mature_coordinates": 0.024163568773234202,
+      "corrected_baseline_full_maturity": 0.024163568773234202
+    },
+    "state_initialization_weeks_below_1e6": 117,
+    "state_initialization_distance_at_104w": 3.0870356525960346e-06,
+    "minimum_training_weeks": 104,
+    "leave_one_out_min_recall": 0.7933884297520661,
+    "leave_one_out_broad_phases": [
+      "slowdown"
+    ]
+  },
+  "ablation_attribution": {
+    "recession_recall": {
+      "legacy": 0.9338842975206612,
+      "final": 0.8181818181818182,
+      "total_change": -0.11570247933884292,
+      "frequency_only": -0.04132231404958675,
+      "maturity_only": 0.0,
+      "robust6_only": 0.008264462809917328,
+      "interaction_residual": -0.0826446280991735
+    },
+    "multi_step_jumps": {
+      "legacy": 4.0,
+      "final": 7.0,
+      "total_change": 3.0,
+      "frequency_only": 3.0,
+      "maturity_only": 2.0,
+      "robust6_only": 5.0,
+      "interaction_residual": -7.0
+    },
+    "three_week_whipsaws": {
+      "legacy": 20.0,
+      "final": 30.0,
+      "total_change": 10.0,
+      "frequency_only": -3.0,
+      "maturity_only": -7.0,
+      "robust6_only": 3.0,
+      "interaction_residual": 17.0
+    },
+    "false_positive_2022_plus": {
+      "legacy": 5.0,
+      "final": 11.0,
+      "total_change": 6.0,
+      "frequency_only": -5.0,
+      "maturity_only": 1.0,
+      "robust6_only": -5.0,
+      "interaction_residual": 15.0
+    }
+  },
+  "corrected_baseline_config": "corrected_baseline",
+  "converged_candidate_config": "corrected_baseline_mature_coordinates",
+  "claims_decision": "no adjustment adopted",
+  "frozen_hash": null,
+  "default_config_changed": false,
+  "alfred_started": false,
+  "alfred_reason": "Stage A-2 failed",
+  "revision_basis": "latest_revision_preliminary"
+}

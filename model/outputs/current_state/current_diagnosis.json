@@ -1,0 +1,65 @@
+{
+  "as_of": "2026-08-14",
+  "raw_current_phase": "expansion_late",
+  "official_current_phase": "slowdown_middle",
+  "phase_status": "official",
+  "activity_level": 0.038526,
+  "activity_momentum": 0.0,
+  "negative_level_domains": 1,
+  "negative_momentum_domains": 1,
+  "contribution_concentration": 0.525839,
+  "coordinates_for_visualisation": {
+    "x": 0.0,
+    "y": 0.038526,
+    "angle": 90.0,
+    "radius": 0.038526
+  },
+  "domains": [
+    {
+      "domain": "production",
+      "level_scaled": 1.109905,
+      "momentum_scaled": 0.0
+    },
+    {
+      "domain": "employment",
+      "level_scaled": -0.51914,
+      "momentum_scaled": -0.30269
+    },
+    {
+      "domain": "real_income",
+      "level_scaled": -2.043402,
+      "momentum_scaled": 0.604358
+    },
+    {
+      "domain": "consumption",
+      "level_scaled": 0.038526,
+      "momentum_scaled": -0.427869
+    },
+    {
+      "domain": "labor_stress",
+      "level_scaled": 0.175007,
+      "momentum_scaled": 0.648847
+    }
+  ],
+  "top_scores": {
+    "expansion_late": 0.241535,
+    "slowdown_middle": 0.225556,
+    "recovery_late": 0.188997,
+    "slowdown_late": 0.171543,
+    "slowdown_early": 0.1029
+  },
+  "evidence_quality": "low",
+  "evidence_reasons": [
+    "activity level and momentum both inside the neutral band",
+    "phases are not strongly separated"
+  ],
+  "phase_separation": 0.015979,
+  "freshness_weeks": {
+    "production": 8.0,
+    "employment": 5.0,
+    "real_income": 6.0,
+    "consumption": 4.0,
+    "labor_stress": 0.0
+  },
+  "calibrated": false
+}

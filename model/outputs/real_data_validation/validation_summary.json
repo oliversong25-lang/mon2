@@ -1,0 +1,961 @@
+{
+  "one_line_summary": "공식 FRED 최신 수정치에서 8주 최소 조정은 점프를 줄이고 침체 재현율을 94.2%로 높였지만, 오탐률 22.9%·정밀도 24.6%라 현재 모델은 운영 판정용으로 부족하다.",
+  "run_at": "2026-08-16T14:05:36.089672+00:00",
+  "git_commit_before_validation": "d2930d318582e37406e5019369aad22b2e31d8d2",
+  "source": {
+    "provider": "Federal Reserve Bank of St. Louis FRED",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv"
+  },
+  "collection": [
+    {
+      "indicator_id": "PAYEMS",
+      "status": "fresh_cache",
+      "source": "FRED_cache",
+      "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+      "observation_start": "1985-01-01",
+      "observation_end": "2026-07-01",
+      "observation_count": 499,
+      "attempts": 0,
+      "error": null
+    },
+    {
+      "indicator_id": "W875RX1",
+      "status": "fresh_cache",
+      "source": "FRED_cache",
+      "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+      "observation_start": "1985-01-01",
+      "observation_end": "2026-06-01",
+      "observation_count": 498,
+      "attempts": 0,
+      "error": null
+    },
+    {
+      "indicator_id": "INDPRO",
+      "status": "fresh_cache",
+      "source": "FRED_cache",
+      "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+      "observation_start": "1985-01-01",
+      "observation_end": "2026-06-01",
+      "observation_count": 498,
+      "attempts": 0,
+      "error": null
+    },
+    {
+      "indicator_id": "CMRMTSPL",
+      "status": "fresh_cache",
+      "source": "FRED_cache",
+      "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+      "observation_start": "1985-01-01",
+      "observation_end": "2026-05-01",
+      "observation_count": 497,
+      "attempts": 0,
+      "error": null
+    },
+    {
+      "indicator_id": "RRSFS",
+      "status": "fresh_cache",
+      "source": "FRED_cache",
+      "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+      "observation_start": "1992-01-01",
+      "observation_end": "2026-07-01",
+      "observation_count": 414,
+      "attempts": 0,
+      "error": null
+    },
+    {
+      "indicator_id": "ICSA",
+      "status": "fresh_cache",
+      "source": "FRED_cache",
+      "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+      "observation_start": "1985-01-05",
+      "observation_end": "2026-08-08",
+      "observation_count": 2171,
+      "attempts": 0,
+      "error": null
+    },
+    {
+      "indicator_id": "CCSA",
+      "status": "fresh_cache",
+      "source": "FRED_cache",
+      "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+      "observation_start": "1985-01-05",
+      "observation_end": "2026-08-01",
+      "observation_count": 2170,
+      "attempts": 0,
+      "error": null
+    },
+    {
+      "indicator_id": "USREC",
+      "status": "fresh_cache",
+      "source": "FRED_cache",
+      "fetched_at": "2026-08-16T14:05:10.944746+00:00",
+      "observation_start": "1985-01-01",
+      "observation_end": "2026-07-01",
+      "observation_count": 499,
+      "attempts": 0,
+      "error": null
+    }
+  ],
+  "collection_warnings": [],
+  "data_period": {
+    "requested_start": "1995-01-01",
+    "collection_start_for_warmup": "1985-01-01",
+    "requested_end": "2026-08-14",
+    "model_start": "1995-01-06",
+    "model_end": "2026-08-14",
+    "indicator_last_observation": {
+      "CCSA": "2026-08-01",
+      "CMRMTSPL": "2026-05-01",
+      "ICSA": "2026-08-08",
+      "INDPRO": "2026-06-01",
+      "PAYEMS": "2026-07-01",
+      "RRSFS": "2026-07-01",
+      "W875RX1": "2026-06-01"
+    }
+  },
+  "representative_model": "CompositeFactorModel",
+  "comparison_model": "DynamicFactorModel",
+  "baseline_momentum_weeks": 4,
+  "adjusted_momentum_weeks": 8,
+  "adjustment_adopted": true,
+  "baseline": {
+    "weeks": 1650,
+    "phase_transitions": 424,
+    "multi_step_jumps": 21,
+    "boundary_whipsaws": 40,
+    "average_phase_duration_weeks": 3.8823529411764706,
+    "weekly_phase_volatility": 0.25712553062462096,
+    "nber": {
+      "recession_recall": 0.8842975206611571,
+      "recession_false_positive_rate": 0.24264224983649443,
+      "recession_precision": 0.22384937238493724,
+      "recession_accuracy": 0.7666666666666667,
+      "true_positive_weeks": 107,
+      "false_negative_weeks": 14,
+      "false_positive_weeks": 371,
+      "true_negative_weeks": 1158,
+      "episodes": [
+        {
+          "official_start_week": "2001-04-06",
+          "official_end_week": "2001-11-30",
+          "model_entry_week": "2000-12-22",
+          "entry_lead_lag_weeks": -15.0,
+          "model_exit_week": "2001-11-09",
+          "exit_lead_lag_weeks": -3.0,
+          "slowdown_seen_prior_26w": true,
+          "dominant_phase_during_recession": "contraction"
+        },
+        {
+          "official_start_week": "2008-01-04",
+          "official_end_week": "2009-06-26",
+          "model_entry_week": "2007-11-02",
+          "entry_lead_lag_weeks": -9.0,
+          "model_exit_week": "2009-05-08",
+          "exit_lead_lag_weeks": -7.0,
+          "slowdown_seen_prior_26w": false,
+          "dominant_phase_during_recession": "contraction"
+        },
+        {
+          "official_start_week": "2020-03-06",
+          "official_end_week": "2020-04-24",
+          "model_entry_week": "2020-03-20",
+          "entry_lead_lag_weeks": 2.0,
+          "model_exit_week": "2020-05-22",
+          "exit_lead_lag_weeks": 4.0,
+          "slowdown_seen_prior_26w": false,
+          "dominant_phase_during_recession": "contraction"
+        }
+      ],
+      "source": "FRED USREC",
+      "note": "NBER는 침체/비침체 평가에만 사용했고 12개 세부국면 정확도는 계산하지 않음"
+    },
+    "confidence_diagnostics": {
+      "top_quartile_gap_next_4w_stability": 0.49878934624697335,
+      "median_top_two_gap": 0.16856072444899414,
+      "bottom_quartile_gap_next_4w_transition_rate": 0.8058252427184466
+    },
+    "note": "NBER는 침체/비침체 비교에만 사용했으며 12국면 정확도는 계산하지 않았습니다.",
+    "broad_phase_changes": 175,
+    "minimum_available_indicator_share": 0.8571428571428571,
+    "weeks_below_minimum_availability": 0,
+    "pipeline_metadata": {
+      "walk_forward": true,
+      "random_seed": 42,
+      "revision_basis": "latest_revision_preliminary",
+      "common_start": "1995-01-06",
+      "common_end": "2026-08-14",
+      "model_comparison": {
+        "composite_available_weeks": 1650,
+        "dynamic_available_weeks": 1650,
+        "correlation": 0.7870170292077433
+      },
+      "settings": {
+        "indicators": {
+          "indicators": {
+            "PAYEMS": {
+              "domain": "employment",
+              "frequency": "monthly",
+              "weight": 0.25,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 7,
+              "max_age_weeks": 8
+            },
+            "W875RX1": {
+              "domain": "income",
+              "frequency": "monthly",
+              "weight": 0.2,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 28,
+              "max_age_weeks": 10
+            },
+            "INDPRO": {
+              "domain": "production",
+              "frequency": "monthly",
+              "weight": 0.2,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 16,
+              "max_age_weeks": 8
+            },
+            "CMRMTSPL": {
+              "domain": "consumption",
+              "frequency": "monthly",
+              "weight": 0.1,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 45,
+              "max_age_weeks": 14
+            },
+            "RRSFS": {
+              "domain": "consumption",
+              "frequency": "monthly",
+              "weight": 0.1,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 16,
+              "max_age_weeks": 8
+            },
+            "ICSA": {
+              "domain": "weekly_bridge",
+              "frequency": "weekly",
+              "weight": 0.08,
+              "direction": -1,
+              "transform": "claims_4w_log",
+              "release_lag_days": 5,
+              "max_age_weeks": 3
+            },
+            "CCSA": {
+              "domain": "weekly_bridge",
+              "frequency": "weekly",
+              "weight": 0.07,
+              "direction": -1,
+              "transform": "claims_4w_log",
+              "release_lag_days": 12,
+              "max_age_weeks": 4
+            }
+          },
+          "leading": {
+            "PERMIT": {
+              "direction": 1,
+              "transform": "log_cycle"
+            },
+            "NEWORDER": {
+              "direction": 1,
+              "transform": "log_cycle"
+            },
+            "AWHMAN": {
+              "direction": 1,
+              "transform": "level_change"
+            },
+            "T10Y3M": {
+              "direction": 1,
+              "transform": "level_change"
+            },
+            "ANFCI": {
+              "direction": -1,
+              "transform": "level_change"
+            }
+          },
+          "constraints": {
+            "max_indicator_weight": 0.2,
+            "max_domain_weight": 0.3,
+            "duplicate_correlation": 0.85,
+            "minimum_availability": 0.55
+          }
+        },
+        "model": {
+          "version": "0.1.0",
+          "random_seed": 42,
+          "minimum_training_weeks": 104,
+          "trend_span_weeks": 156,
+          "standardization_min_periods": 26,
+          "momentum_weeks": 4,
+          "phase_emission_sigma_degrees": 22.0,
+          "phase_origin_sigma_multiplier": 2.0,
+          "phase_origin_scale": 0.75,
+          "dynamic_factor": {
+            "level_process_variance": 0.025,
+            "slope_process_variance": 0.0025,
+            "observation_variance": 0.65,
+            "initial_variance": 10.0
+          },
+          "confidence": {
+            "detail_probability": 0.4,
+            "detail_gap": 0.2,
+            "detail_boundary": 0.15,
+            "detail_radius": 0.15,
+            "detail_agreement": 0.05,
+            "detail_persistence": 0.05,
+            "data_freshness": 0.35,
+            "data_availability": 0.25,
+            "data_revision_stability": 0.2,
+            "data_model_agreement": 0.2,
+            "conservative_revision_default": 0.4
+          },
+          "forecast_13w": {
+            "status": "not_calibrated"
+          }
+        },
+        "transitions": {
+          "phases": [
+            {
+              "code": "recovery_early",
+              "label_ko": "회복기 초기",
+              "broad": "recovery",
+              "broad_label_ko": "회복기",
+              "start": 270,
+              "end": 300
+            },
+            {
+              "code": "recovery_mid",
+              "label_ko": "회복기 중기",
+              "broad": "recovery",
+              "broad_label_ko": "회복기",
+              "start": 300,
+              "end": 330
+            },
+            {
+              "code": "recovery_late",
+              "label_ko": "회복기 말기",
+              "broad": "recovery",
+              "broad_label_ko": "회복기",
+              "start": 330,
+              "end": 360
+            },
+            {
+              "code": "expansion_early",
+              "label_ko": "확장기 초기",
+              "broad": "expansion",
+              "broad_label_ko": "확장기",
+              "start": 0,
+              "end": 30
+            },
+            {
+              "code": "expansion_mid",
+              "label_ko": "확장기 중기",
+              "broad": "expansion",
+              "broad_label_ko": "확장기",
+              "start": 30,
+              "end": 60
+            },
+            {
+              "code": "expansion_late",
+              "label_ko": "확장기 말기",
+              "broad": "expansion",
+              "broad_label_ko": "확장기",
+              "start": 60,
+              "end": 90
+            },
+            {
+              "code": "slowdown_early",
+              "label_ko": "후퇴기 초기",
+              "broad": "slowdown",
+              "broad_label_ko": "후퇴기",
+              "start": 90,
+              "end": 120
+            },
+            {
+              "code": "slowdown_mid",
+              "label_ko": "후퇴기 중기",
+              "broad": "slowdown",
+              "broad_label_ko": "후퇴기",
+              "start": 120,
+              "end": 150
+            },
+            {
+              "code": "slowdown_late",
+              "label_ko": "후퇴기 말기",
+              "broad": "slowdown",
+              "broad_label_ko": "후퇴기",
+              "start": 150,
+              "end": 180
+            },
+            {
+              "code": "contraction_early",
+              "label_ko": "침체기 초기",
+              "broad": "contraction",
+              "broad_label_ko": "침체기",
+              "start": 180,
+              "end": 210
+            },
+            {
+              "code": "contraction_mid",
+              "label_ko": "침체기 중기",
+              "broad": "contraction",
+              "broad_label_ko": "침체기",
+              "start": 210,
+              "end": 240
+            },
+            {
+              "code": "contraction_late",
+              "label_ko": "침체기 말기",
+              "broad": "contraction",
+              "broad_label_ko": "침체기",
+              "start": 240,
+              "end": 270
+            }
+          ],
+          "transition": {
+            "stay": 0.66,
+            "next": 0.22,
+            "previous": 0.09,
+            "jump_mass": 0.03
+          }
+        }
+      }
+    }
+  },
+  "adjusted": {
+    "weeks": 1650,
+    "phase_transitions": 332,
+    "multi_step_jumps": 7,
+    "boundary_whipsaws": 37,
+    "average_phase_duration_weeks": 4.954954954954955,
+    "weekly_phase_volatility": 0.20133414190418436,
+    "nber": {
+      "recession_recall": 0.9421487603305785,
+      "recession_false_positive_rate": 0.2289077828646174,
+      "recession_precision": 0.24568965517241378,
+      "recession_accuracy": 0.7836363636363637,
+      "true_positive_weeks": 114,
+      "false_negative_weeks": 7,
+      "false_positive_weeks": 350,
+      "true_negative_weeks": 1179,
+      "episodes": [
+        {
+          "official_start_week": "2001-04-06",
+          "official_end_week": "2001-11-30",
+          "model_entry_week": "2000-12-22",
+          "entry_lead_lag_weeks": -15.0,
+          "model_exit_week": "2001-12-07",
+          "exit_lead_lag_weeks": 1.0,
+          "slowdown_seen_prior_26w": true,
+          "dominant_phase_during_recession": "contraction"
+        },
+        {
+          "official_start_week": "2008-01-04",
+          "official_end_week": "2009-06-26",
+          "model_entry_week": "2007-07-13",
+          "entry_lead_lag_weeks": -25.0,
+          "model_exit_week": "2009-05-29",
+          "exit_lead_lag_weeks": -4.0,
+          "slowdown_seen_prior_26w": false,
+          "dominant_phase_during_recession": "contraction"
+        },
+        {
+          "official_start_week": "2020-03-06",
+          "official_end_week": "2020-04-24",
+          "model_entry_week": "2020-03-20",
+          "entry_lead_lag_weeks": 2.0,
+          "model_exit_week": "2020-06-12",
+          "exit_lead_lag_weeks": 7.0,
+          "slowdown_seen_prior_26w": false,
+          "dominant_phase_during_recession": "contraction"
+        }
+      ],
+      "source": "FRED USREC",
+      "note": "NBER는 침체/비침체 평가에만 사용했고 12개 세부국면 정확도는 계산하지 않음"
+    },
+    "confidence_diagnostics": {
+      "top_quartile_gap_next_4w_stability": 0.6561743341404358,
+      "median_top_two_gap": 0.1639087786780275,
+      "bottom_quartile_gap_next_4w_transition_rate": 0.7761557177615572
+    },
+    "note": "NBER는 침체/비침체 비교에만 사용했으며 12국면 정확도는 계산하지 않았습니다.",
+    "broad_phase_changes": 117,
+    "minimum_available_indicator_share": 0.8571428571428571,
+    "weeks_below_minimum_availability": 0,
+    "pipeline_metadata": {
+      "walk_forward": true,
+      "random_seed": 42,
+      "revision_basis": "latest_revision_preliminary",
+      "common_start": "1995-01-06",
+      "common_end": "2026-08-14",
+      "model_comparison": {
+        "composite_available_weeks": 1650,
+        "dynamic_available_weeks": 1650,
+        "correlation": 0.7870170292077433
+      },
+      "settings": {
+        "indicators": {
+          "indicators": {
+            "PAYEMS": {
+              "domain": "employment",
+              "frequency": "monthly",
+              "weight": 0.25,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 7,
+              "max_age_weeks": 8
+            },
+            "W875RX1": {
+              "domain": "income",
+              "frequency": "monthly",
+              "weight": 0.2,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 28,
+              "max_age_weeks": 10
+            },
+            "INDPRO": {
+              "domain": "production",
+              "frequency": "monthly",
+              "weight": 0.2,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 16,
+              "max_age_weeks": 8
+            },
+            "CMRMTSPL": {
+              "domain": "consumption",
+              "frequency": "monthly",
+              "weight": 0.1,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 45,
+              "max_age_weeks": 14
+            },
+            "RRSFS": {
+              "domain": "consumption",
+              "frequency": "monthly",
+              "weight": 0.1,
+              "direction": 1,
+              "transform": "log_cycle",
+              "release_lag_days": 16,
+              "max_age_weeks": 8
+            },
+            "ICSA": {
+              "domain": "weekly_bridge",
+              "frequency": "weekly",
+              "weight": 0.08,
+              "direction": -1,
+              "transform": "claims_4w_log",
+              "release_lag_days": 5,
+              "max_age_weeks": 3
+            },
+            "CCSA": {
+              "domain": "weekly_bridge",
+              "frequency": "weekly",
+              "weight": 0.07,
+              "direction": -1,
+              "transform": "claims_4w_log",
+              "release_lag_days": 12,
+              "max_age_weeks": 4
+            }
+          },
+          "leading": {
+            "PERMIT": {
+              "direction": 1,
+              "transform": "log_cycle"
+            },
+            "NEWORDER": {
+              "direction": 1,
+              "transform": "log_cycle"
+            },
+            "AWHMAN": {
+              "direction": 1,
+              "transform": "level_change"
+            },
+            "T10Y3M": {
+              "direction": 1,
+              "transform": "level_change"
+            },
+            "ANFCI": {
+              "direction": -1,
+              "transform": "level_change"
+            }
+          },
+          "constraints": {
+            "max_indicator_weight": 0.2,
+            "max_domain_weight": 0.3,
+            "duplicate_correlation": 0.85,
+            "minimum_availability": 0.55
+          }
+        },
+        "model": {
+          "version": "0.1.0",
+          "random_seed": 42,
+          "minimum_training_weeks": 104,
+          "trend_span_weeks": 156,
+          "standardization_min_periods": 26,
+          "momentum_weeks": 8,
+          "phase_emission_sigma_degrees": 22.0,
+          "phase_origin_sigma_multiplier": 2.0,
+          "phase_origin_scale": 0.75,
+          "dynamic_factor": {
+            "level_process_variance": 0.025,
+            "slope_process_variance": 0.0025,
+            "observation_variance": 0.65,
+            "initial_variance": 10.0
+          },
+          "confidence": {
+            "detail_probability": 0.4,
+            "detail_gap": 0.2,
+            "detail_boundary": 0.15,
+            "detail_radius": 0.15,
+            "detail_agreement": 0.05,
+            "detail_persistence": 0.05,
+            "data_freshness": 0.35,
+            "data_availability": 0.25,
+            "data_revision_stability": 0.2,
+            "data_model_agreement": 0.2,
+            "conservative_revision_default": 0.4
+          },
+          "forecast_13w": {
+            "status": "not_calibrated"
+          }
+        },
+        "transitions": {
+          "phases": [
+            {
+              "code": "recovery_early",
+              "label_ko": "회복기 초기",
+              "broad": "recovery",
+              "broad_label_ko": "회복기",
+              "start": 270,
+              "end": 300
+            },
+            {
+              "code": "recovery_mid",
+              "label_ko": "회복기 중기",
+              "broad": "recovery",
+              "broad_label_ko": "회복기",
+              "start": 300,
+              "end": 330
+            },
+            {
+              "code": "recovery_late",
+              "label_ko": "회복기 말기",
+              "broad": "recovery",
+              "broad_label_ko": "회복기",
+              "start": 330,
+              "end": 360
+            },
+            {
+              "code": "expansion_early",
+              "label_ko": "확장기 초기",
+              "broad": "expansion",
+              "broad_label_ko": "확장기",
+              "start": 0,
+              "end": 30
+            },
+            {
+              "code": "expansion_mid",
+              "label_ko": "확장기 중기",
+              "broad": "expansion",
+              "broad_label_ko": "확장기",
+              "start": 30,
+              "end": 60
+            },
+            {
+              "code": "expansion_late",
+              "label_ko": "확장기 말기",
+              "broad": "expansion",
+              "broad_label_ko": "확장기",
+              "start": 60,
+              "end": 90
+            },
+            {
+              "code": "slowdown_early",
+              "label_ko": "후퇴기 초기",
+              "broad": "slowdown",
+              "broad_label_ko": "후퇴기",
+              "start": 90,
+              "end": 120
+            },
+            {
+              "code": "slowdown_mid",
+              "label_ko": "후퇴기 중기",
+              "broad": "slowdown",
+              "broad_label_ko": "후퇴기",
+              "start": 120,
+              "end": 150
+            },
+            {
+              "code": "slowdown_late",
+              "label_ko": "후퇴기 말기",
+              "broad": "slowdown",
+              "broad_label_ko": "후퇴기",
+              "start": 150,
+              "end": 180
+            },
+            {
+              "code": "contraction_early",
+              "label_ko": "침체기 초기",
+              "broad": "contraction",
+              "broad_label_ko": "침체기",
+              "start": 180,
+              "end": 210
+            },
+            {
+              "code": "contraction_mid",
+              "label_ko": "침체기 중기",
+              "broad": "contraction",
+              "broad_label_ko": "침체기",
+              "start": 210,
+              "end": 240
+            },
+            {
+              "code": "contraction_late",
+              "label_ko": "침체기 말기",
+              "broad": "contraction",
+              "broad_label_ko": "침체기",
+              "start": 240,
+              "end": 270
+            }
+          ],
+          "transition": {
+            "stay": 0.66,
+            "next": 0.22,
+            "previous": 0.09,
+            "jump_mass": 0.03
+          }
+        }
+      }
+    }
+  },
+  "current": {
+    "as_of_date": "2026-08-14",
+    "model_version": "0.1.0",
+    "status": "ok",
+    "current_phase": {
+      "code": "recovery_mid",
+      "label_ko": "회복기 중기",
+      "broad_phase": "recovery",
+      "broad_label_ko": "회복기"
+    },
+    "movement": {
+      "from_previous_week": "advanced",
+      "direction": "toward_recovery_late"
+    },
+    "confidence": {
+      "broad": 90.69088204851646,
+      "detail": 43.2914727577455,
+      "data": 64.58982691893979
+    },
+    "coordinates": {
+      "x_momentum": 0.28290335907253344,
+      "y_level": -0.3130972923854706,
+      "angle_degrees": 312.09982329971604,
+      "radius": 0.42197656934199046
+    },
+    "phase_probabilities": [
+      {
+        "code": "recovery_early",
+        "label_ko": "회복기 초기",
+        "probability": 0.3559002631948131
+      },
+      {
+        "code": "recovery_mid",
+        "label_ko": "회복기 중기",
+        "probability": 0.4169222851799445
+      },
+      {
+        "code": "recovery_late",
+        "label_ko": "회복기 말기",
+        "probability": 0.13408627211040705
+      },
+      {
+        "code": "expansion_early",
+        "label_ko": "확장기 초기",
+        "probability": 0.013677794735347597
+      },
+      {
+        "code": "expansion_mid",
+        "label_ko": "확장기 중기",
+        "probability": 0.0009584407566395689
+      },
+      {
+        "code": "expansion_late",
+        "label_ko": "확장기 말기",
+        "probability": 0.0001476328483454308
+      },
+      {
+        "code": "slowdown_early",
+        "label_ko": "후퇴기 초기",
+        "probability": 2.1555433743195294e-05
+      },
+      {
+        "code": "slowdown_mid",
+        "label_ko": "후퇴기 중기",
+        "probability": 3.5234039293902444e-06
+      },
+      {
+        "code": "slowdown_late",
+        "label_ko": "후퇴기 말기",
+        "probability": 3.215193641158808e-05
+      },
+      {
+        "code": "contraction_early",
+        "label_ko": "침체기 초기",
+        "probability": 0.00025283714036526336
+      },
+      {
+        "code": "contraction_mid",
+        "label_ko": "침체기 중기",
+        "probability": 0.0046249889298647946
+      },
+      {
+        "code": "contraction_late",
+        "label_ko": "침체기 말기",
+        "probability": 0.07337225433018828
+      }
+    ],
+    "runner_up": {
+      "code": "recovery_early",
+      "label_ko": "회복기 초기",
+      "probability": 0.3559002631948131,
+      "gap_percentage_points": 6.10220219851314
+    },
+    "supporting_indicators": [
+      {
+        "indicator_id": "ICSA",
+        "contribution": 0.0606
+      },
+      {
+        "indicator_id": "CCSA",
+        "contribution": 0.018
+      },
+      {
+        "indicator_id": "RRSFS",
+        "contribution": 0.0076
+      }
+    ],
+    "conflicting_indicators": [
+      {
+        "indicator_id": "INDPRO",
+        "contribution": -0.1166
+      },
+      {
+        "indicator_id": "W875RX1",
+        "contribution": -0.0885
+      },
+      {
+        "indicator_id": "PAYEMS",
+        "contribution": -0.0333
+      }
+    ],
+    "data_quality": {
+      "freshness": 0.6366944597450256,
+      "availability": 0.8571428571428571,
+      "revision_stability": null,
+      "revision_assumption": 0.4,
+      "model_agreement": 0.6438474699646236
+    },
+    "forecast_13w": {
+      "status": "not_calibrated",
+      "available_indicators": 0
+    },
+    "warnings": [
+      "본 결과는 최신 수정치 기준의 preliminary backtest이며, 당시 실제 공개정보만 사용한 real-time vintage backtest가 아닙니다.",
+      "CCSA: 실제 발표일 없음, 12일 지연으로 추정",
+      "CMRMTSPL: 실제 발표일 없음, 45일 지연으로 추정",
+      "ICSA: 실제 발표일 없음, 5일 지연으로 추정",
+      "INDPRO: 실제 발표일 없음, 16일 지연으로 추정",
+      "PAYEMS: 실제 발표일 없음, 7일 지연으로 추정",
+      "RRSFS: 실제 발표일 없음, 16일 지연으로 추정",
+      "W875RX1: 실제 발표일 없음, 28일 지연으로 추정"
+    ],
+    "metadata": {
+      "probability_sum": 0.9999999999999998,
+      "composite_model": "composite",
+      "dynamic_model": "local_linear_dynamic_factor",
+      "representative_model": "CompositeFactorModel",
+      "representative_fallback_used": false,
+      "uses_backward_smoothing": false,
+      "renormalized_weeks": 1974,
+      "duplicate_pairs": [
+        {
+          "left": "CMRMTSPL",
+          "right": "INDPRO",
+          "correlation": 0.9530698684934846
+        }
+      ],
+      "transition_jump_from_previous": 1,
+      "revision_basis": "latest_revision",
+      "release_date_basis": "actual_when_provided_else_configured_lag"
+    }
+  },
+  "model_comparison": {
+    "factor_correlation": 0.7870170292077433,
+    "broad_phase_agreement": 0.5139393939393939
+  },
+  "segments": [
+    {
+      "segment": "development",
+      "start": "1995-01-06",
+      "end": "2012-12-28",
+      "weeks": 939,
+      "phase_changes": 158,
+      "broad_changes": 61,
+      "contraction_false_positive_weeks": 150,
+      "mean_detail_confidence": 59.657616670684774
+    },
+    {
+      "segment": "stability",
+      "start": "2013-01-04",
+      "end": "2019-12-27",
+      "weeks": 365,
+      "phase_changes": 101,
+      "broad_changes": 27,
+      "contraction_false_positive_weeks": 111,
+      "mean_detail_confidence": 43.1002579445313
+    },
+    {
+      "segment": "pandemic_stress",
+      "start": "2020-01-03",
+      "end": "2020-12-25",
+      "weeks": 52,
+      "phase_changes": 10,
+      "broad_changes": 3,
+      "contraction_false_positive_weeks": 12,
+      "mean_detail_confidence": 65.01224496544287
+    },
+    {
+      "segment": "recent",
+      "start": "2021-01-01",
+      "end": "2026-08-14",
+      "weeks": 294,
+      "phase_changes": 62,
+      "broad_changes": 26,
+      "contraction_false_positive_weeks": 77,
+      "mean_detail_confidence": 41.712747699950604
+    }
+  ],
+  "jump_count_detailed": 7,
+  "whipsaw_count_detailed": 37,
+  "jump_assessment_counts": {
+    "model instability review": 7
+  },
+  "whipsaw_cause_counts": {
+    "origin uncertainty": 25,
+    "release-week step effect": 12
+  },
+  "warnings": [
+    "본 결과는 최신 수정치 기준의 preliminary backtest이며, 당시 실제 공개정보만 사용한 real-time vintage backtest가 아닙니다.",
+    "실제 발표일이 없는 FRED graph CSV는 설정된 보수적 발표지연을 사용함",
+    "12개 세부국면에는 공식 정답 라벨이 없음"
+  ]
+}

@@ -1,0 +1,4 @@
+window,weeks,annualised,annualised_volatility,sharpe,hac_t,weeks_positive
+full Fama-French sample,5217,0.0353,0.1082,0.375,3.232,0.5104
+revised label window,1668,0.0127,0.1196,0.165,0.873,0.4928
+real-time window,681,-0.0158,0.1364,-0.049,-0.179,0.4714

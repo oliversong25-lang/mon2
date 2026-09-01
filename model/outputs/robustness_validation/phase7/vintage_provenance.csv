@@ -1,0 +1,8 @@
+series_id,earliest_observation_date,earliest_vintage_date,latest_vintage_date,vintage_count,realtime_observation_rows,first_date_usable_in_the_frozen_model,vintage_endpoint,observation_endpoint,retrieved_at
+PAYEMS,1985-01-01,1955-05-06,2026-08-07,858,13685,2013-06-14,fred/series/vintagedates,fred/series/observations?realtime_start=1776-07-04&realtime_end=9999-12-31,2026-08-18T04:09:01+00:00
+W875RX1,1985-01-01,2010-05-28,2026-07-30,194,6210,2013-06-14,fred/series/vintagedates,fred/series/observations?realtime_start=1776-07-04&realtime_end=9999-12-31,2026-08-18T04:09:01+00:00
+INDPRO,1985-01-01,1927-01-26,2026-07-17,1221,39350,2013-06-14,fred/series/vintagedates,fred/series/observations?realtime_start=1776-07-04&realtime_end=9999-12-31,2026-08-18T04:09:01+00:00
+CMRMTSPL,1985-01-01,2013-06-14,2026-07-30,156,4010,2013-06-14,fred/series/vintagedates,fred/series/observations?realtime_start=1776-07-04&realtime_end=9999-12-31,2026-08-18T04:09:01+00:00
+RRSFS,1992-01-01,2001-06-15,2026-08-14,493,6713,2013-06-14,fred/series/vintagedates,fred/series/observations?realtime_start=1776-07-04&realtime_end=9999-12-31,2026-08-18T04:09:01+00:00
+ICSA,1985-01-05,2009-05-28,2026-08-13,893,7783,2013-06-14,fred/series/vintagedates,fred/series/observations?realtime_start=1776-07-04&realtime_end=9999-12-31,2026-08-18T04:09:01+00:00
+CCSA,1985-01-05,2009-09-10,2026-08-13,874,8358,2013-06-14,fred/series/vintagedates,fred/series/observations?realtime_start=1776-07-04&realtime_end=9999-12-31,2026-08-18T04:09:01+00:00

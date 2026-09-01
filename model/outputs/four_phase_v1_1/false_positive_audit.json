@@ -1,0 +1,198 @@
+{
+  "false_positive_weeks": 50,
+  "episodes": 5,
+  "by_kind": {
+    "four_week_confirmed": 5
+  },
+  "longest_episode_weeks": 13,
+  "four_week_confirmed_episodes": 5,
+  "in_late_2019": 1,
+  "after_2022": 0,
+  "detail": [
+    {
+      "start_date": "2001-01-26",
+      "end_date": "2001-03-30",
+      "duration_weeks": 10,
+      "kind": "four_week_confirmed",
+      "first_raw_contraction_date": "2001-01-26",
+      "first_official_contraction_date": "2001-01-26",
+      "four_week_confirmation_date": "2001-02-16",
+      "peak_week": "2001-03-30",
+      "activity_level_at_peak": -1.0935,
+      "activity_momentum_at_peak": -1.767,
+      "raw_scores_at_peak": {
+        "recovery": 0.0083,
+        "expansion": 0.0009,
+        "slowdown": 0.1129,
+        "contraction": 0.8779
+      },
+      "negative_level_domains": 2,
+      "negative_momentum_domains": 4,
+      "confirming_domains": 4,
+      "concentration": 0.5505,
+      "dominant_domains": [
+        {
+          "domain": "labor_stress",
+          "share": 0.5505
+        },
+        {
+          "domain": "consumption",
+          "share": 0.1784
+        }
+      ],
+      "recession_alert": "high",
+      "recession_alert_character": "broad_and_confirmed",
+      "weeks_to_nearest_nber_recession": 10,
+      "in_late_2019": false,
+      "after_2022": false
+    },
+    {
+      "start_date": "2001-12-07",
+      "end_date": "2002-01-18",
+      "duration_weeks": 7,
+      "kind": "four_week_confirmed",
+      "first_raw_contraction_date": "2001-12-07",
+      "first_official_contraction_date": "2001-12-07",
+      "four_week_confirmation_date": "2001-12-28",
+      "peak_week": "2001-12-21",
+      "activity_level_at_peak": -2.1094,
+      "activity_momentum_at_peak": -0.7697,
+      "raw_scores_at_peak": {
+        "recovery": 0.1005,
+        "expansion": 0.0015,
+        "slowdown": 0.0134,
+        "contraction": 0.8846
+      },
+      "negative_level_domains": 4,
+      "negative_momentum_domains": 3,
+      "confirming_domains": 4,
+      "concentration": 0.3937,
+      "dominant_domains": [
+        {
+          "domain": "labor_stress",
+          "share": 0.3937
+        },
+        {
+          "domain": "employment",
+          "share": 0.2407
+        }
+      ],
+      "recession_alert": "high",
+      "recession_alert_character": "broad_and_confirmed",
+      "weeks_to_nearest_nber_recession": 7,
+      "in_late_2019": false,
+      "after_2022": false
+    },
+    {
+      "start_date": "2003-03-14",
+      "end_date": "2003-05-23",
+      "duration_weeks": 11,
+      "kind": "four_week_confirmed",
+      "first_raw_contraction_date": "2003-03-14",
+      "first_official_contraction_date": "2003-03-14",
+      "four_week_confirmation_date": "2003-04-04",
+      "peak_week": "2003-03-21",
+      "activity_level_at_peak": -1.419,
+      "activity_momentum_at_peak": -0.9221,
+      "raw_scores_at_peak": {
+        "recovery": 0.0674,
+        "expansion": 0.004,
+        "slowdown": 0.0522,
+        "contraction": 0.8764
+      },
+      "negative_level_domains": 4,
+      "negative_momentum_domains": 3,
+      "confirming_domains": 4,
+      "concentration": 0.2826,
+      "dominant_domains": [
+        {
+          "domain": "employment",
+          "share": 0.2826
+        },
+        {
+          "domain": "consumption",
+          "share": 0.2314
+        }
+      ],
+      "recession_alert": "high",
+      "recession_alert_character": "broad_and_confirmed",
+      "weeks_to_nearest_nber_recession": 77,
+      "in_late_2019": false,
+      "after_2022": false
+    },
+    {
+      "start_date": "2019-11-29",
+      "end_date": "2020-02-21",
+      "duration_weeks": 13,
+      "kind": "four_week_confirmed",
+      "first_raw_contraction_date": "2019-11-29",
+      "first_official_contraction_date": "2019-11-29",
+      "four_week_confirmation_date": "2019-12-20",
+      "peak_week": "2020-01-17",
+      "activity_level_at_peak": -1.0454,
+      "activity_momentum_at_peak": -2.15,
+      "raw_scores_at_peak": {
+        "recovery": 0.0031,
+        "expansion": 0.0004,
+        "slowdown": 0.1172,
+        "contraction": 0.8793
+      },
+      "negative_level_domains": 2,
+      "negative_momentum_domains": 3,
+      "confirming_domains": 3,
+      "concentration": 0.5333,
+      "dominant_domains": [
+        {
+          "domain": "labor_stress",
+          "share": 0.5333
+        },
+        {
+          "domain": "production",
+          "share": 0.1983
+        }
+      ],
+      "recession_alert": "high",
+      "recession_alert_character": "broad_and_confirmed",
+      "weeks_to_nearest_nber_recession": 9,
+      "in_late_2019": true,
+      "after_2022": false
+    },
+    {
+      "start_date": "2020-05-01",
+      "end_date": "2020-06-26",
+      "duration_weeks": 9,
+      "kind": "four_week_confirmed",
+      "first_raw_contraction_date": "2020-05-01",
+      "first_official_contraction_date": "2020-05-01",
+      "four_week_confirmation_date": "2020-05-22",
+      "peak_week": "2020-05-01",
+      "activity_level_at_peak": -3.7763,
+      "activity_momentum_at_peak": -3.7547,
+      "raw_scores_at_peak": {
+        "recovery": 0.0001,
+        "expansion": 0.0,
+        "slowdown": 0.0005,
+        "contraction": 0.9994
+      },
+      "negative_level_domains": 4,
+      "negative_momentum_domains": 4,
+      "confirming_domains": 4,
+      "concentration": 0.4453,
+      "dominant_domains": [
+        {
+          "domain": "labor_stress",
+          "share": 0.4453
+        },
+        {
+          "domain": "consumption",
+          "share": 0.1848
+        }
+      ],
+      "recession_alert": "high",
+      "recession_alert_character": "broad_and_confirmed",
+      "weeks_to_nearest_nber_recession": 8,
+      "in_late_2019": false,
+      "after_2022": false
+    }
+  ]
+}

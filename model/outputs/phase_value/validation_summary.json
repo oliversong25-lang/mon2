@@ -1,0 +1,6416 @@
+{
+  "stage": "phase_value_premium",
+  "frozen_model_modified": false,
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "executed_at_utc": "2026-08-25T08:42:18+00:00",
+  "horizons": [
+    26,
+    52,
+    104
+  ],
+  "term_spread_series": "T10Y3M",
+  "data_use": "Fama-French 자료는 내부 검증 전용이며 제품에 실리지 않는다.",
+  "test_a": {
+    "profiles": [
+      {
+        "window": "full Fama-French sample",
+        "weeks": 5217,
+        "annualised": 0.0353,
+        "annualised_volatility": 0.1082,
+        "sharpe": 0.375,
+        "hac_t": 3.232,
+        "weeks_positive": 0.5104
+      },
+      {
+        "window": "revised label window",
+        "weeks": 1668,
+        "annualised": 0.0127,
+        "annualised_volatility": 0.1196,
+        "sharpe": 0.165,
+        "hac_t": 0.873,
+        "weeks_positive": 0.4928
+      },
+      {
+        "window": "real-time window",
+        "weeks": 681,
+        "annualised": -0.0158,
+        "annualised_volatility": 0.1364,
+        "sharpe": -0.049,
+        "hac_t": -0.179,
+        "weeks_positive": 0.4714
+      }
+    ],
+    "by_decade": [
+      {
+        "window": "1920s",
+        "weeks": 183,
+        "annualised": 0.0247,
+        "annualised_volatility": 0.0764,
+        "sharpe": 0.357,
+        "hac_t": 0.579,
+        "weeks_positive": 0.4809,
+        "thin": false
+      },
+      {
+        "window": "1930s",
+        "weeks": 521,
+        "annualised": -0.0135,
+        "annualised_volatility": 0.2025,
+        "sharpe": 0.032,
+        "hac_t": 0.086,
+        "weeks_positive": 0.4376,
+        "thin": false
+      },
+      {
+        "window": "1940s",
+        "weeks": 522,
+        "annualised": 0.0959,
+        "annualised_volatility": 0.0801,
+        "sharpe": 1.184,
+        "hac_t": 3.437,
+        "weeks_positive": 0.5632,
+        "thin": false
+      },
+      {
+        "window": "1950s",
+        "weeks": 521,
+        "annualised": 0.0327,
+        "annualised_volatility": 0.0585,
+        "sharpe": 0.58,
+        "hac_t": 1.505,
+        "weeks_positive": 0.5067,
+        "thin": false
+      },
+      {
+        "window": "1960s",
+        "weeks": 522,
+        "annualised": 0.0343,
+        "annualised_volatility": 0.0559,
+        "sharpe": 0.632,
+        "hac_t": 1.575,
+        "weeks_positive": 0.546,
+        "thin": false
+      },
+      {
+        "window": "1970s",
+        "weeks": 522,
+        "annualised": 0.0805,
+        "annualised_volatility": 0.0735,
+        "sharpe": 1.092,
+        "hac_t": 2.531,
+        "weeks_positive": 0.5326,
+        "thin": false
+      },
+      {
+        "window": "1980s",
+        "weeks": 522,
+        "annualised": 0.0615,
+        "annualised_volatility": 0.0873,
+        "sharpe": 0.728,
+        "hac_t": 1.934,
+        "weeks_positive": 0.5498,
+        "thin": false
+      },
+      {
+        "window": "1990s",
+        "weeks": 522,
+        "annualised": -0.0006,
+        "annualised_volatility": 0.0748,
+        "sharpe": 0.029,
+        "hac_t": 0.067,
+        "weeks_positive": 0.477,
+        "thin": false
+      },
+      {
+        "window": "2000s",
+        "weeks": 521,
+        "annualised": 0.0816,
+        "annualised_volatility": 0.1279,
+        "sharpe": 0.677,
+        "hac_t": 1.934,
+        "weeks_positive": 0.5451,
+        "thin": false
+      },
+      {
+        "window": "2010s",
+        "weeks": 522,
+        "annualised": -0.027,
+        "annualised_volatility": 0.0793,
+        "sharpe": -0.306,
+        "hac_t": -0.945,
+        "weeks_positive": 0.4349,
+        "thin": false
+      },
+      {
+        "window": "2020s",
+        "weeks": 339,
+        "annualised": 0.011,
+        "annualised_volatility": 0.1748,
+        "sharpe": 0.149,
+        "hac_t": 0.391,
+        "weeks_positive": 0.528,
+        "thin": false
+      }
+    ],
+    "leave_one_year_out": {
+      "revised label window": {
+        "full_sample_annualised": 0.0127,
+        "range_low": 0.0003,
+        "range_high": 0.0251,
+        "year_whose_removal_lowers_it_most": "2000",
+        "year_whose_removal_raises_it_most": "2020",
+        "sign_flips_when_any_single_year_is_removed": false,
+        "rows": [
+          {
+            "year_removed": "1994",
+            "annualised": 0.015
+          },
+          {
+            "year_removed": "1995",
+            "annualised": 0.0119
+          },
+          {
+            "year_removed": "1996",
+            "annualised": 0.0109
+          },
+          {
+            "year_removed": "1997",
+            "annualised": 0.0082
+          },
+          {
+            "year_removed": "1998",
+            "annualised": 0.0168
+          },
+          {
+            "year_removed": "1999",
+            "annualised": 0.0214
+          },
+          {
+            "year_removed": "2000",
+            "annualised": 0.0003
+          },
+          {
+            "year_removed": "2001",
+            "annualised": 0.0083
+          },
+          {
+            "year_removed": "2002",
+            "annualised": 0.0098
+          },
+          {
+            "year_removed": "2003",
+            "annualised": 0.0119
+          },
+          {
+            "year_removed": "2004",
+            "annualised": 0.0109
+          },
+          {
+            "year_removed": "2005",
+            "annualised": 0.0103
+          },
+          {
+            "year_removed": "2006",
+            "annualised": 0.0099
+          },
+          {
+            "year_removed": "2007",
+            "annualised": 0.0188
+          },
+          {
+            "year_removed": "2008",
+            "annualised": 0.0118
+          },
+          {
+            "year_removed": "2009",
+            "annualised": 0.0134
+          },
+          {
+            "year_removed": "2010",
+            "annualised": 0.0143
+          },
+          {
+            "year_removed": "2011",
+            "annualised": 0.0157
+          },
+          {
+            "year_removed": "2012",
+            "annualised": 0.0104
+          },
+          {
+            "year_removed": "2013",
+            "annualised": 0.0124
+          },
+          {
+            "year_removed": "2014",
+            "annualised": 0.014
+          },
+          {
+            "year_removed": "2015",
+            "annualised": 0.0161
+          },
+          {
+            "year_removed": "2016",
+            "annualised": 0.0072
+          },
+          {
+            "year_removed": "2017",
+            "annualised": 0.0168
+          },
+          {
+            "year_removed": "2018",
+            "annualised": 0.0167
+          },
+          {
+            "year_removed": "2019",
+            "annualised": 0.0163
+          },
+          {
+            "year_removed": "2020",
+            "annualised": 0.0251
+          },
+          {
+            "year_removed": "2021",
+            "annualised": 0.0065
+          },
+          {
+            "year_removed": "2022",
+            "annualised": 0.0049
+          },
+          {
+            "year_removed": "2023",
+            "annualised": 0.0169
+          },
+          {
+            "year_removed": "2024",
+            "annualised": 0.0161
+          },
+          {
+            "year_removed": "2025",
+            "annualised": 0.0106
+          },
+          {
+            "year_removed": "2026",
+            "annualised": 0.0092
+          }
+        ]
+      },
+      "real-time window": {
+        "full_sample_annualised": -0.0158,
+        "range_low": -0.0374,
+        "range_high": 0.0133,
+        "year_whose_removal_lowers_it_most": "2022",
+        "year_whose_removal_raises_it_most": "2020",
+        "sign_flips_when_any_single_year_is_removed": true,
+        "rows": [
+          {
+            "year_removed": "2013",
+            "annualised": -0.0151
+          },
+          {
+            "year_removed": "2014",
+            "annualised": -0.0148
+          },
+          {
+            "year_removed": "2015",
+            "annualised": -0.0094
+          },
+          {
+            "year_removed": "2016",
+            "annualised": -0.0318
+          },
+          {
+            "year_removed": "2017",
+            "annualised": -0.0078
+          },
+          {
+            "year_removed": "2018",
+            "annualised": -0.0081
+          },
+          {
+            "year_removed": "2019",
+            "annualised": -0.009
+          },
+          {
+            "year_removed": "2020",
+            "annualised": 0.0133
+          },
+          {
+            "year_removed": "2021",
+            "annualised": -0.0336
+          },
+          {
+            "year_removed": "2022",
+            "annualised": -0.0374
+          },
+          {
+            "year_removed": "2023",
+            "annualised": -0.0076
+          },
+          {
+            "year_removed": "2024",
+            "annualised": -0.0097
+          },
+          {
+            "year_removed": "2025",
+            "annualised": -0.0232
+          },
+          {
+            "year_removed": "2026",
+            "annualised": -0.0253
+          }
+        ]
+      }
+    },
+    "decomposition": {
+      "revised label window": {
+        "tercile": {
+          "value_leg_versus_market": 0.003,
+          "growth_leg_versus_market": 0.007,
+          "value_minus_growth": -0.0076,
+          "hac_t_on_value_minus_growth": -0.052
+        },
+        "decile": {
+          "value_leg_versus_market": 0.0206,
+          "growth_leg_versus_market": 0.0074,
+          "value_minus_growth": 0.0041,
+          "hac_t_on_value_minus_growth": 0.628
+        }
+      },
+      "real-time window": {
+        "tercile": {
+          "value_leg_versus_market": -0.0153,
+          "growth_leg_versus_market": 0.0178,
+          "value_minus_growth": -0.037,
+          "hac_t_on_value_minus_growth": -0.926
+        },
+        "decile": {
+          "value_leg_versus_market": 0.0069,
+          "growth_leg_versus_market": 0.0287,
+          "value_minus_growth": -0.0318,
+          "hac_t_on_value_minus_growth": -0.16
+        }
+      }
+    },
+    "value_premium_is_positive_in_the_label_window": false,
+    "statement": "가치 프리미엄은 국면 라벨이 존재하는 창에서 양이라고 말할 수 없다."
+  },
+  "test_b": [
+    {
+      "labelling": "revised",
+      "horizon_weeks": 26,
+      "by_phase": [
+        {
+          "phase": "recovery",
+          "weeks": 151,
+          "episodes": 4,
+          "observations": 151,
+          "mean_forward_value_return": 0.035038,
+          "versus_all_weeks": 0.023788,
+          "share_positive": 0.6424
+        },
+        {
+          "phase": "expansion",
+          "weeks": 685,
+          "episodes": 45,
+          "observations": 667,
+          "mean_forward_value_return": 0.007423,
+          "versus_all_weeks": -0.003827,
+          "share_positive": 0.5457
+        },
+        {
+          "phase": "slowdown",
+          "weeks": 677,
+          "episodes": 44,
+          "observations": 663,
+          "mean_forward_value_return": 0.011366,
+          "versus_all_weeks": 0.000117,
+          "share_positive": 0.5158
+        },
+        {
+          "phase": "contraction",
+          "weeks": 162,
+          "episodes": 5,
+          "observations": 162,
+          "mean_forward_value_return": 0.004355,
+          "versus_all_weeks": -0.006894,
+          "share_positive": 0.6667
+        }
+      ],
+      "shift_test": {
+        "shifts_used": 1572,
+        "overall_mean": 0.01125,
+        "cells": [
+          {
+            "phase": "recovery",
+            "weeks": 151,
+            "effect_versus_all_weeks": 0.023788,
+            "p_value": 0.3598
+          },
+          {
+            "phase": "expansion",
+            "weeks": 685,
+            "effect_versus_all_weeks": -0.003827,
+            "p_value": 0.7661
+          },
+          {
+            "phase": "slowdown",
+            "weeks": 677,
+            "effect_versus_all_weeks": 0.000117,
+            "p_value": 0.9905
+          },
+          {
+            "phase": "contraction",
+            "weeks": 162,
+            "effect_versus_all_weeks": -0.006894,
+            "p_value": 0.8544
+          }
+        ],
+        "dispersion": 6.1605e-05,
+        "dispersion_p_value": 0.85
+      },
+      "rate_control": {
+        "usable": true,
+        "observations": 1630,
+        "models": {
+          "spread": {
+            "r_squared": 0.0004,
+            "coefficients": {
+              "intercept": 0.011058,
+              "term_spread": 0.000324,
+              "term_spread_change": -0.004025
+            }
+          },
+          "phase": {
+            "r_squared": 0.00605,
+            "coefficients": {
+              "intercept": 0.00813,
+              "phase[recovery]": 0.026908,
+              "phase[slowdown]": 0.003236,
+              "phase[contraction]": -0.003774
+            }
+          },
+          "both": {
+            "r_squared": 0.0067,
+            "coefficients": {
+              "intercept": 0.010217,
+              "phase[recovery]": 0.029199,
+              "phase[slowdown]": 0.002005,
+              "phase[contraction]": -0.001154,
+              "term_spread": -0.001611,
+              "term_spread_change": -0.003329
+            }
+          }
+        },
+        "phase_coefficients_without_the_rate_control": {
+          "intercept": 0.00813,
+          "phase[recovery]": 0.026908,
+          "phase[slowdown]": 0.003236,
+          "phase[contraction]": -0.003774
+        },
+        "phase_coefficients_with_the_rate_control": {
+          "phase[recovery]": 0.029199,
+          "phase[slowdown]": 0.002005,
+          "phase[contraction]": -0.001154
+        },
+        "incremental_r_squared_of_phase_over_the_term_spread": 0.0063,
+        "incremental_r_squared_null_median": 0.02171,
+        "incremental_r_squared_p_value": 0.8639,
+        "phase_adds_something_beyond_the_term_spread": false
+      },
+      "coefficient_shrinkage": {
+        "usable": true,
+        "rows": [
+          {
+            "term": "phase[recovery]",
+            "without_control": 0.026908,
+            "with_control": 0.029199,
+            "retained_share": 1.085,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[slowdown]",
+            "without_control": 0.003236,
+            "with_control": 0.002005,
+            "retained_share": 0.62,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[contraction]",
+            "without_control": -0.003774,
+            "with_control": -0.001154,
+            "retained_share": 0.306,
+            "sign_flips": false
+          }
+        ]
+      },
+      "leave_one_episode_out_phase_means": {
+        "recovery": {
+          "episodes": 4,
+          "full_sample_mean": 0.035038,
+          "range_low": 0.008239,
+          "range_high": 0.065253,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2002-07-05",
+              "end": "2002-10-18",
+              "weeks": 16,
+              "mean_without_it": 0.042494
+            },
+            {
+              "episode": 2,
+              "start": "2003-06-27",
+              "end": "2004-02-20",
+              "weeks": 35,
+              "mean_without_it": 0.029284
+            },
+            {
+              "episode": 3,
+              "start": "2009-06-05",
+              "end": "2010-08-06",
+              "weeks": 62,
+              "mean_without_it": 0.065253
+            },
+            {
+              "episode": 4,
+              "start": "2020-07-03",
+              "end": "2021-03-19",
+              "weeks": 38,
+              "mean_without_it": 0.008239
+            }
+          ]
+        },
+        "expansion": {
+          "episodes": 45,
+          "full_sample_mean": 0.007423,
+          "range_low": 0.003099,
+          "range_high": 0.012481,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "1994-07-15",
+              "end": "1995-02-17",
+              "weeks": 32,
+              "mean_without_it": 0.007754
+            },
+            {
+              "episode": 2,
+              "start": "1995-09-22",
+              "end": "1995-11-10",
+              "weeks": 8,
+              "mean_without_it": 0.007824
+            },
+            {
+              "episode": 3,
+              "start": "1996-03-22",
+              "end": "1996-08-23",
+              "weeks": 23,
+              "mean_without_it": 0.005411
+            },
+            {
+              "episode": 4,
+              "start": "1996-12-13",
+              "end": "1997-01-17",
+              "weeks": 6,
+              "mean_without_it": 0.006934
+            },
+            {
+              "episode": 5,
+              "start": "1997-02-21",
+              "end": "1997-05-02",
+              "weeks": 11,
+              "mean_without_it": 0.007402
+            },
+            {
+              "episode": 6,
+              "start": "1997-07-18",
+              "end": "1998-03-06",
+              "weeks": 34,
+              "mean_without_it": 0.005446
+            },
+            {
+              "episode": 7,
+              "start": "1998-04-24",
+              "end": "1998-06-19",
+              "weeks": 9,
+              "mean_without_it": 0.008456
+            },
+            {
+              "episode": 8,
+              "start": "1998-09-18",
+              "end": "1998-11-20",
+              "weeks": 10,
+              "mean_without_it": 0.009265
+            },
+            {
+              "episode": 9,
+              "start": "1999-03-12",
+              "end": "1999-04-16",
+              "weeks": 6,
+              "mean_without_it": 0.007925
+            },
+            {
+              "episode": 10,
+              "start": "1999-07-30",
+              "end": "1999-08-20",
+              "weeks": 4,
+              "mean_without_it": 0.008894
+            },
+            {
+              "episode": 11,
+              "start": "1999-11-19",
+              "end": "2000-02-11",
+              "weeks": 13,
+              "mean_without_it": 0.006497
+            },
+            {
+              "episode": 12,
+              "start": "2000-03-24",
+              "end": "2000-05-19",
+              "weeks": 9,
+              "mean_without_it": 0.005137
+            },
+            {
+              "episode": 13,
+              "start": "2002-02-15",
+              "end": "2002-04-19",
+              "weeks": 10,
+              "mean_without_it": 0.006874
+            },
+            {
+              "episode": 14,
+              "start": "2002-06-14",
+              "end": "2002-06-28",
+              "weeks": 3,
+              "mean_without_it": 0.0076
+            },
+            {
+              "episode": 15,
+              "start": "2002-12-06",
+              "end": "2003-03-07",
+              "weeks": 14,
+              "mean_without_it": 0.008005
+            },
+            {
+              "episode": 16,
+              "start": "2003-05-30",
+              "end": "2003-06-20",
+              "weeks": 4,
+              "mean_without_it": 0.007172
+            },
+            {
+              "episode": 17,
+              "start": "2004-02-27",
+              "end": "2005-03-11",
+              "weeks": 55,
+              "mean_without_it": 0.003603
+            },
+            {
+              "episode": 18,
+              "start": "2005-05-13",
+              "end": "2005-09-09",
+              "weeks": 18,
+              "mean_without_it": 0.007096
+            },
+            {
+              "episode": 19,
+              "start": "2005-11-18",
+              "end": "2006-05-12",
+              "weeks": 26,
+              "mean_without_it": 0.005063
+            },
+            {
+              "episode": 20,
+              "start": "2007-01-05",
+              "end": "2007-03-09",
+              "weeks": 10,
+              "mean_without_it": 0.008709
+            },
+            {
+              "episode": 21,
+              "start": "2007-04-13",
+              "end": "2007-07-06",
+              "weeks": 13,
+              "mean_without_it": 0.009937
+            },
+            {
+              "episode": 22,
+              "start": "2010-08-13",
+              "end": "2011-05-27",
+              "weeks": 42,
+              "mean_without_it": 0.011019
+            },
+            {
+              "episode": 23,
+              "start": "2011-07-15",
+              "end": "2012-05-11",
+              "weeks": 44,
+              "mean_without_it": 0.007109
+            },
+            {
+              "episode": 24,
+              "start": "2012-11-16",
+              "end": "2013-02-08",
+              "weeks": 13,
+              "mean_without_it": 0.0066
+            },
+            {
+              "episode": 25,
+              "start": "2013-06-28",
+              "end": "2013-08-02",
+              "weeks": 6,
+              "mean_without_it": 0.00782
+            },
+            {
+              "episode": 26,
+              "start": "2013-10-04",
+              "end": "2013-11-15",
+              "weeks": 7,
+              "mean_without_it": 0.007077
+            },
+            {
+              "episode": 27,
+              "start": "2014-01-03",
+              "end": "2014-02-07",
+              "weeks": 6,
+              "mean_without_it": 0.007101
+            },
+            {
+              "episode": 28,
+              "start": "2014-03-21",
+              "end": "2015-02-06",
+              "weeks": 47,
+              "mean_without_it": 0.012481
+            },
+            {
+              "episode": 29,
+              "start": "2016-07-22",
+              "end": "2016-11-25",
+              "weeks": 19,
+              "mean_without_it": 0.005624
+            },
+            {
+              "episode": 30,
+              "start": "2017-01-13",
+              "end": "2017-07-14",
+              "weeks": 27,
+              "mean_without_it": 0.009375
+            },
+            {
+              "episode": 31,
+              "start": "2017-10-20",
+              "end": "2018-02-09",
+              "weeks": 17,
+              "mean_without_it": 0.009087
+            },
+            {
+              "episode": 32,
+              "start": "2018-05-11",
+              "end": "2018-10-05",
+              "weeks": 22,
+              "mean_without_it": 0.009039
+            },
+            {
+              "episode": 33,
+              "start": "2019-09-13",
+              "end": "2019-10-04",
+              "weeks": 4,
+              "mean_without_it": 0.00883
+            },
+            {
+              "episode": 34,
+              "start": "2021-03-26",
+              "end": "2021-09-10",
+              "weeks": 25,
+              "mean_without_it": 0.00372
+            },
+            {
+              "episode": 35,
+              "start": "2021-10-29",
+              "end": "2022-01-28",
+              "weeks": 14,
+              "mean_without_it": 0.003099
+            },
+            {
+              "episode": 36,
+              "start": "2022-03-25",
+              "end": "2022-04-15",
+              "weeks": 4,
+              "mean_without_it": 0.007269
+            },
+            {
+              "episode": 37,
+              "start": "2022-09-02",
+              "end": "2022-11-11",
+              "weeks": 11,
+              "mean_without_it": 0.008722
+            },
+            {
+              "episode": 38,
+              "start": "2023-02-17",
+              "end": "2023-03-24",
+              "weeks": 6,
+              "mean_without_it": 0.008404
+            },
+            {
+              "episode": 39,
+              "start": "2023-09-01",
+              "end": "2023-10-27",
+              "weeks": 9,
+              "mean_without_it": 0.007024
+            },
+            {
+              "episode": 40,
+              "start": "2024-07-05",
+              "end": "2024-07-26",
+              "weeks": 4,
+              "mean_without_it": 0.007608
+            },
+            {
+              "episode": 41,
+              "start": "2025-01-03",
+              "end": "2025-02-28",
+              "weeks": 9,
+              "mean_without_it": 0.007469
+            },
+            {
+              "episode": 42,
+              "start": "2025-04-25",
+              "end": "2025-05-23",
+              "weeks": 5,
+              "mean_without_it": 0.007605
+            },
+            {
+              "episode": 43,
+              "start": "2025-08-22",
+              "end": "2025-10-10",
+              "weeks": 8,
+              "mean_without_it": 0.006065
+            },
+            {
+              "episode": 44,
+              "start": "2026-03-13",
+              "end": "2026-06-19",
+              "weeks": 15,
+              "mean_without_it": 0.007423
+            },
+            {
+              "episode": 45,
+              "start": "2026-07-31",
+              "end": "2026-08-14",
+              "weeks": 3,
+              "mean_without_it": 0.007423
+            }
+          ]
+        },
+        "slowdown": {
+          "episodes": 44,
+          "full_sample_mean": 0.011366,
+          "range_low": -0.006239,
+          "range_high": 0.016537,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": true,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "1995-02-24",
+              "end": "1995-09-15",
+              "weeks": 30,
+              "mean_without_it": 0.0115
+            },
+            {
+              "episode": 2,
+              "start": "1995-11-17",
+              "end": "1996-03-15",
+              "weeks": 18,
+              "mean_without_it": 0.011832
+            },
+            {
+              "episode": 3,
+              "start": "1996-08-30",
+              "end": "1996-12-06",
+              "weeks": 15,
+              "mean_without_it": 0.009106
+            },
+            {
+              "episode": 4,
+              "start": "1997-01-24",
+              "end": "1997-02-14",
+              "weeks": 4,
+              "mean_without_it": 0.01108
+            },
+            {
+              "episode": 5,
+              "start": "1997-05-09",
+              "end": "1997-07-11",
+              "weeks": 10,
+              "mean_without_it": 0.010526
+            },
+            {
+              "episode": 6,
+              "start": "1998-03-13",
+              "end": "1998-04-17",
+              "weeks": 6,
+              "mean_without_it": 0.011384
+            },
+            {
+              "episode": 7,
+              "start": "1998-06-26",
+              "end": "1998-09-11",
+              "weeks": 12,
+              "mean_without_it": 0.013686
+            },
+            {
+              "episode": 8,
+              "start": "1998-11-27",
+              "end": "1999-03-05",
+              "weeks": 15,
+              "mean_without_it": 0.012386
+            },
+            {
+              "episode": 9,
+              "start": "1999-04-23",
+              "end": "1999-07-23",
+              "weeks": 14,
+              "mean_without_it": 0.014981
+            },
+            {
+              "episode": 10,
+              "start": "1999-08-27",
+              "end": "1999-11-12",
+              "weeks": 12,
+              "mean_without_it": 0.014363
+            },
+            {
+              "episode": 11,
+              "start": "2000-02-18",
+              "end": "2000-03-17",
+              "weeks": 5,
+              "mean_without_it": 0.009815
+            },
+            {
+              "episode": 12,
+              "start": "2000-05-26",
+              "end": "2001-01-19",
+              "weeks": 35,
+              "mean_without_it": -0.006239
+            },
+            {
+              "episode": 13,
+              "start": "2002-01-25",
+              "end": "2002-02-08",
+              "weeks": 3,
+              "mean_without_it": 0.011186
+            },
+            {
+              "episode": 14,
+              "start": "2002-04-26",
+              "end": "2002-06-07",
+              "weeks": 7,
+              "mean_without_it": 0.011932
+            },
+            {
+              "episode": 15,
+              "start": "2002-10-25",
+              "end": "2002-11-29",
+              "weeks": 6,
+              "mean_without_it": 0.011549
+            },
+            {
+              "episode": 16,
+              "start": "2005-03-18",
+              "end": "2005-05-06",
+              "weeks": 8,
+              "mean_without_it": 0.011074
+            },
+            {
+              "episode": 17,
+              "start": "2005-09-16",
+              "end": "2005-11-11",
+              "weeks": 9,
+              "mean_without_it": 0.011237
+            },
+            {
+              "episode": 18,
+              "start": "2006-05-19",
+              "end": "2006-12-29",
+              "weeks": 33,
+              "mean_without_it": 0.011787
+            },
+            {
+              "episode": 19,
+              "start": "2007-03-16",
+              "end": "2007-04-06",
+              "weeks": 4,
+              "mean_without_it": 0.012029
+            },
+            {
+              "episode": 20,
+              "start": "2007-07-13",
+              "end": "2008-01-18",
+              "weeks": 28,
+              "mean_without_it": 0.012619
+            },
+            {
+              "episode": 21,
+              "start": "2011-06-03",
+              "end": "2011-07-08",
+              "weeks": 6,
+              "mean_without_it": 0.011827
+            },
+            {
+              "episode": 22,
+              "start": "2012-05-18",
+              "end": "2012-11-09",
+              "weeks": 26,
+              "mean_without_it": 0.008684
+            },
+            {
+              "episode": 23,
+              "start": "2013-02-15",
+              "end": "2013-06-21",
+              "weeks": 19,
+              "mean_without_it": 0.011723
+            },
+            {
+              "episode": 24,
+              "start": "2013-08-09",
+              "end": "2013-09-27",
+              "weeks": 8,
+              "mean_without_it": 0.011666
+            },
+            {
+              "episode": 25,
+              "start": "2013-11-22",
+              "end": "2013-12-27",
+              "weeks": 6,
+              "mean_without_it": 0.0112
+            },
+            {
+              "episode": 26,
+              "start": "2014-02-14",
+              "end": "2014-03-14",
+              "weeks": 5,
+              "mean_without_it": 0.011167
+            },
+            {
+              "episode": 27,
+              "start": "2015-02-13",
+              "end": "2016-07-15",
+              "weeks": 75,
+              "mean_without_it": 0.010582
+            },
+            {
+              "episode": 28,
+              "start": "2016-12-02",
+              "end": "2017-01-06",
+              "weeks": 6,
+              "mean_without_it": 0.0125
+            },
+            {
+              "episode": 29,
+              "start": "2017-07-21",
+              "end": "2017-10-13",
+              "weeks": 13,
+              "mean_without_it": 0.011698
+            },
+            {
+              "episode": 30,
+              "start": "2018-02-16",
+              "end": "2018-05-04",
+              "weeks": 12,
+              "mean_without_it": 0.012904
+            },
+            {
+              "episode": 31,
+              "start": "2018-10-12",
+              "end": "2019-09-06",
+              "weeks": 48,
+              "mean_without_it": 0.016537
+            },
+            {
+              "episode": 32,
+              "start": "2019-10-11",
+              "end": "2019-11-22",
+              "weeks": 7,
+              "mean_without_it": 0.014459
+            },
+            {
+              "episode": 33,
+              "start": "2020-02-28",
+              "end": "2020-03-13",
+              "weeks": 3,
+              "mean_without_it": 0.012238
+            },
+            {
+              "episode": 34,
+              "start": "2021-09-17",
+              "end": "2021-10-22",
+              "weeks": 6,
+              "mean_without_it": 0.00965
+            },
+            {
+              "episode": 35,
+              "start": "2022-02-04",
+              "end": "2022-03-18",
+              "weeks": 7,
+              "mean_without_it": 0.011746
+            },
+            {
+              "episode": 36,
+              "start": "2022-04-22",
+              "end": "2022-08-26",
+              "weeks": 19,
+              "mean_without_it": 0.010681
+            },
+            {
+              "episode": 37,
+              "start": "2022-11-18",
+              "end": "2023-02-10",
+              "weeks": 13,
+              "mean_without_it": 0.014833
+            },
+            {
+              "episode": 38,
+              "start": "2023-03-31",
+              "end": "2023-08-25",
+              "weeks": 22,
+              "mean_without_it": 0.010832
+            },
+            {
+              "episode": 39,
+              "start": "2023-11-03",
+              "end": "2024-06-28",
+              "weeks": 35,
+              "mean_without_it": 0.012828
+            },
+            {
+              "episode": 40,
+              "start": "2024-08-02",
+              "end": "2024-12-27",
+              "weeks": 22,
+              "mean_without_it": 0.010965
+            },
+            {
+              "episode": 41,
+              "start": "2025-03-07",
+              "end": "2025-04-18",
+              "weeks": 7,
+              "mean_without_it": 0.011902
+            },
+            {
+              "episode": 42,
+              "start": "2025-05-30",
+              "end": "2025-08-15",
+              "weeks": 12,
+              "mean_without_it": 0.010291
+            },
+            {
+              "episode": 43,
+              "start": "2025-10-17",
+              "end": "2026-03-06",
+              "weeks": 21,
+              "mean_without_it": 0.009595
+            },
+            {
+              "episode": 44,
+              "start": "2026-06-26",
+              "end": "2026-07-24",
+              "weeks": 5,
+              "mean_without_it": 0.011366
+            }
+          ]
+        },
+        "contraction": {
+          "episodes": 5,
+          "full_sample_mean": 0.004355,
+          "range_low": -0.032676,
+          "range_high": 0.026817,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": true,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2001-01-26",
+              "end": "2002-01-18",
+              "weeks": 52,
+              "mean_without_it": -0.032676
+            },
+            {
+              "episode": 2,
+              "start": "2003-03-14",
+              "end": "2003-05-23",
+              "weeks": 11,
+              "mean_without_it": 0.002704
+            },
+            {
+              "episode": 3,
+              "start": "2008-01-25",
+              "end": "2009-05-29",
+              "weeks": 71,
+              "mean_without_it": 0.003475
+            },
+            {
+              "episode": 4,
+              "start": "2019-11-29",
+              "end": "2020-02-21",
+              "weeks": 13,
+              "mean_without_it": 0.026817
+            },
+            {
+              "episode": 5,
+              "start": "2020-03-20",
+              "end": "2020-06-26",
+              "weeks": 15,
+              "mean_without_it": 0.011539
+            }
+          ]
+        }
+      },
+      "leave_one_macro_window_out": [
+        {
+          "window_removed": "dot-com bust (2000-03 ~ 2002-12)",
+          "weeks_removed": 174,
+          "weeks_left": 1501,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 135,
+            "expansion": 646,
+            "slowdown": 610,
+            "contraction": 110
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.042494,
+            "expansion": 0.003853,
+            "slowdown": -0.005436,
+            "contraction": -0.032676
+          },
+          "incremental_r_squared_without_it": 0.02676,
+          "p_value_without_it": 0.4601,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "global financial crisis (2007-07 ~ 2009-12)",
+          "weeks_removed": 156,
+          "weeks_left": 1519,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 121,
+            "expansion": 662,
+            "slowdown": 645,
+            "contraction": 91
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.031362,
+            "expansion": 0.011288,
+            "slowdown": 0.013319,
+            "contraction": 0.003475
+          },
+          "incremental_r_squared_without_it": 0.00483,
+          "p_value_without_it": 0.9337,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "covid (2020-01 ~ 2021-12)",
+          "weeks_removed": 131,
+          "weeks_left": 1544,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 113,
+            "expansion": 646,
+            "slowdown": 651,
+            "contraction": 134
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.008239,
+            "expansion": 0.000724,
+            "slowdown": 0.014536,
+            "contraction": 0.037212
+          },
+          "incremental_r_squared_without_it": 0.01526,
+          "p_value_without_it": 0.7144,
+          "still_adds_something": false
+        }
+      ]
+    },
+    {
+      "labelling": "revised",
+      "horizon_weeks": 52,
+      "by_phase": [
+        {
+          "phase": "recovery",
+          "weeks": 151,
+          "episodes": 4,
+          "observations": 151,
+          "mean_forward_value_return": 0.050756,
+          "versus_all_weeks": 0.028554,
+          "share_positive": 0.5563
+        },
+        {
+          "phase": "expansion",
+          "weeks": 685,
+          "episodes": 45,
+          "observations": 659,
+          "mean_forward_value_return": 0.023374,
+          "versus_all_weeks": 0.001171,
+          "share_positive": 0.5478
+        },
+        {
+          "phase": "slowdown",
+          "weeks": 677,
+          "episodes": 44,
+          "observations": 645,
+          "mean_forward_value_return": 0.009743,
+          "versus_all_weeks": -0.01246,
+          "share_positive": 0.5178
+        },
+        {
+          "phase": "contraction",
+          "weeks": 162,
+          "episodes": 5,
+          "observations": 162,
+          "mean_forward_value_return": 0.040432,
+          "versus_all_weeks": 0.018229,
+          "share_positive": 0.6358
+        }
+      ],
+      "shift_test": {
+        "shifts_used": 1572,
+        "overall_mean": 0.022203,
+        "cells": [
+          {
+            "phase": "recovery",
+            "weeks": 151,
+            "effect_versus_all_weeks": 0.028554,
+            "p_value": 0.5372
+          },
+          {
+            "phase": "expansion",
+            "weeks": 685,
+            "effect_versus_all_weeks": 0.001171,
+            "p_value": 0.9504
+          },
+          {
+            "phase": "slowdown",
+            "weeks": 677,
+            "effect_versus_all_weeks": -0.01246,
+            "p_value": 0.5118
+          },
+          {
+            "phase": "contraction",
+            "weeks": 162,
+            "effect_versus_all_weeks": 0.018229,
+            "p_value": 0.8004
+          }
+        ],
+        "dispersion": 0.000168945,
+        "dispersion_p_value": 0.9186
+      },
+      "rate_control": {
+        "usable": true,
+        "observations": 1604,
+        "models": {
+          "spread": {
+            "r_squared": 0.00047,
+            "coefficients": {
+              "intercept": 0.020319,
+              "term_spread": 0.001743,
+              "term_spread_change": 0.004234
+            }
+          },
+          "phase": {
+            "r_squared": 0.00723,
+            "coefficients": {
+              "intercept": 0.02428,
+              "phase[recovery]": 0.026476,
+              "phase[slowdown]": -0.014537,
+              "phase[contraction]": 0.016151
+            }
+          },
+          "both": {
+            "r_squared": 0.0079,
+            "coefficients": {
+              "intercept": 0.029909,
+              "phase[recovery]": 0.030446,
+              "phase[slowdown]": -0.017419,
+              "phase[contraction]": 0.017089,
+              "term_spread": -0.003676,
+              "term_spread_change": 0.000967
+            }
+          }
+        },
+        "phase_coefficients_without_the_rate_control": {
+          "intercept": 0.02428,
+          "phase[recovery]": 0.026476,
+          "phase[slowdown]": -0.014537,
+          "phase[contraction]": 0.016151
+        },
+        "phase_coefficients_with_the_rate_control": {
+          "phase[recovery]": 0.030446,
+          "phase[slowdown]": -0.017419,
+          "phase[contraction]": 0.017089
+        },
+        "incremental_r_squared_of_phase_over_the_term_spread": 0.00743,
+        "incremental_r_squared_null_median": 0.02813,
+        "incremental_r_squared_p_value": 0.8495,
+        "phase_adds_something_beyond_the_term_spread": false
+      },
+      "coefficient_shrinkage": {
+        "usable": true,
+        "rows": [
+          {
+            "term": "phase[recovery]",
+            "without_control": 0.026476,
+            "with_control": 0.030446,
+            "retained_share": 1.15,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[slowdown]",
+            "without_control": -0.014537,
+            "with_control": -0.017419,
+            "retained_share": 1.198,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[contraction]",
+            "without_control": 0.016151,
+            "with_control": 0.017089,
+            "retained_share": 1.058,
+            "sign_flips": false
+          }
+        ]
+      },
+      "leave_one_episode_out_phase_means": {
+        "recovery": {
+          "episodes": 4,
+          "full_sample_mean": 0.050756,
+          "range_low": -0.002944,
+          "range_high": 0.119707,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": true,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2002-07-05",
+              "end": "2002-10-18",
+              "weeks": 16,
+              "mean_without_it": 0.060521
+            },
+            {
+              "episode": 2,
+              "start": "2003-06-27",
+              "end": "2004-02-20",
+              "weeks": 35,
+              "mean_without_it": 0.038802
+            },
+            {
+              "episode": 3,
+              "start": "2009-06-05",
+              "end": "2010-08-06",
+              "weeks": 62,
+              "mean_without_it": 0.119707
+            },
+            {
+              "episode": 4,
+              "start": "2020-07-03",
+              "end": "2021-03-19",
+              "weeks": 38,
+              "mean_without_it": -0.002944
+            }
+          ]
+        },
+        "expansion": {
+          "episodes": 45,
+          "full_sample_mean": 0.023374,
+          "range_low": 0.014535,
+          "range_high": 0.03263,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "1994-07-15",
+              "end": "1995-02-17",
+              "weeks": 32,
+              "mean_without_it": 0.024132
+            },
+            {
+              "episode": 2,
+              "start": "1995-09-22",
+              "end": "1995-11-10",
+              "weeks": 8,
+              "mean_without_it": 0.023518
+            },
+            {
+              "episode": 3,
+              "start": "1996-03-22",
+              "end": "1996-08-23",
+              "weeks": 23,
+              "mean_without_it": 0.018679
+            },
+            {
+              "episode": 4,
+              "start": "1996-12-13",
+              "end": "1997-01-17",
+              "weeks": 6,
+              "mean_without_it": 0.022187
+            },
+            {
+              "episode": 5,
+              "start": "1997-02-21",
+              "end": "1997-05-02",
+              "weeks": 11,
+              "mean_without_it": 0.022654
+            },
+            {
+              "episode": 6,
+              "start": "1997-07-18",
+              "end": "1998-03-06",
+              "weeks": 34,
+              "mean_without_it": 0.024992
+            },
+            {
+              "episode": 7,
+              "start": "1998-04-24",
+              "end": "1998-06-19",
+              "weeks": 9,
+              "mean_without_it": 0.025516
+            },
+            {
+              "episode": 8,
+              "start": "1998-09-18",
+              "end": "1998-11-20",
+              "weeks": 10,
+              "mean_without_it": 0.026562
+            },
+            {
+              "episode": 9,
+              "start": "1999-03-12",
+              "end": "1999-04-16",
+              "weeks": 6,
+              "mean_without_it": 0.025571
+            },
+            {
+              "episode": 10,
+              "start": "1999-07-30",
+              "end": "1999-08-20",
+              "weeks": 4,
+              "mean_without_it": 0.024136
+            },
+            {
+              "episode": 11,
+              "start": "1999-11-19",
+              "end": "2000-02-11",
+              "weeks": 13,
+              "mean_without_it": 0.015702
+            },
+            {
+              "episode": 12,
+              "start": "2000-03-24",
+              "end": "2000-05-19",
+              "weeks": 9,
+              "mean_without_it": 0.015258
+            },
+            {
+              "episode": 13,
+              "start": "2002-02-15",
+              "end": "2002-04-19",
+              "weeks": 10,
+              "mean_without_it": 0.023736
+            },
+            {
+              "episode": 14,
+              "start": "2002-06-14",
+              "end": "2002-06-28",
+              "weeks": 3,
+              "mean_without_it": 0.023722
+            },
+            {
+              "episode": 15,
+              "start": "2002-12-06",
+              "end": "2003-03-07",
+              "weeks": 14,
+              "mean_without_it": 0.02262
+            },
+            {
+              "episode": 16,
+              "start": "2003-05-30",
+              "end": "2003-06-20",
+              "weeks": 4,
+              "mean_without_it": 0.023121
+            },
+            {
+              "episode": 17,
+              "start": "2004-02-27",
+              "end": "2005-03-11",
+              "weeks": 55,
+              "mean_without_it": 0.016808
+            },
+            {
+              "episode": 18,
+              "start": "2005-05-13",
+              "end": "2005-09-09",
+              "weeks": 18,
+              "mean_without_it": 0.021408
+            },
+            {
+              "episode": 19,
+              "start": "2005-11-18",
+              "end": "2006-05-12",
+              "weeks": 26,
+              "mean_without_it": 0.02121
+            },
+            {
+              "episode": 20,
+              "start": "2007-01-05",
+              "end": "2007-03-09",
+              "weeks": 10,
+              "mean_without_it": 0.025729
+            },
+            {
+              "episode": 21,
+              "start": "2007-04-13",
+              "end": "2007-07-06",
+              "weeks": 13,
+              "mean_without_it": 0.026192
+            },
+            {
+              "episode": 22,
+              "start": "2010-08-13",
+              "end": "2011-05-27",
+              "weeks": 42,
+              "mean_without_it": 0.030391
+            },
+            {
+              "episode": 23,
+              "start": "2011-07-15",
+              "end": "2012-05-11",
+              "weeks": 44,
+              "mean_without_it": 0.020308
+            },
+            {
+              "episode": 24,
+              "start": "2012-11-16",
+              "end": "2013-02-08",
+              "weeks": 13,
+              "mean_without_it": 0.023413
+            },
+            {
+              "episode": 25,
+              "start": "2013-06-28",
+              "end": "2013-08-02",
+              "weeks": 6,
+              "mean_without_it": 0.023569
+            },
+            {
+              "episode": 26,
+              "start": "2013-10-04",
+              "end": "2013-11-15",
+              "weeks": 7,
+              "mean_without_it": 0.023685
+            },
+            {
+              "episode": 27,
+              "start": "2014-01-03",
+              "end": "2014-02-07",
+              "weeks": 6,
+              "mean_without_it": 0.023855
+            },
+            {
+              "episode": 28,
+              "start": "2014-03-21",
+              "end": "2015-02-06",
+              "weeks": 47,
+              "mean_without_it": 0.03263
+            },
+            {
+              "episode": 29,
+              "start": "2016-07-22",
+              "end": "2016-11-25",
+              "weeks": 19,
+              "mean_without_it": 0.023845
+            },
+            {
+              "episode": 30,
+              "start": "2017-01-13",
+              "end": "2017-07-14",
+              "weeks": 27,
+              "mean_without_it": 0.02717
+            },
+            {
+              "episode": 31,
+              "start": "2017-10-20",
+              "end": "2018-02-09",
+              "weeks": 17,
+              "mean_without_it": 0.026449
+            },
+            {
+              "episode": 32,
+              "start": "2018-05-11",
+              "end": "2018-10-05",
+              "weeks": 22,
+              "mean_without_it": 0.028263
+            },
+            {
+              "episode": 33,
+              "start": "2019-09-13",
+              "end": "2019-10-04",
+              "weeks": 4,
+              "mean_without_it": 0.025495
+            },
+            {
+              "episode": 34,
+              "start": "2021-03-26",
+              "end": "2021-09-10",
+              "weeks": 25,
+              "mean_without_it": 0.014535
+            },
+            {
+              "episode": 35,
+              "start": "2021-10-29",
+              "end": "2022-01-28",
+              "weeks": 14,
+              "mean_without_it": 0.018793
+            },
+            {
+              "episode": 36,
+              "start": "2022-03-25",
+              "end": "2022-04-15",
+              "weeks": 4,
+              "mean_without_it": 0.023721
+            },
+            {
+              "episode": 37,
+              "start": "2022-09-02",
+              "end": "2022-11-11",
+              "weeks": 11,
+              "mean_without_it": 0.025785
+            },
+            {
+              "episode": 38,
+              "start": "2023-02-17",
+              "end": "2023-03-24",
+              "weeks": 6,
+              "mean_without_it": 0.02435
+            },
+            {
+              "episode": 39,
+              "start": "2023-09-01",
+              "end": "2023-10-27",
+              "weeks": 9,
+              "mean_without_it": 0.023414
+            },
+            {
+              "episode": 40,
+              "start": "2024-07-05",
+              "end": "2024-07-26",
+              "weeks": 4,
+              "mean_without_it": 0.023494
+            },
+            {
+              "episode": 41,
+              "start": "2025-01-03",
+              "end": "2025-02-28",
+              "weeks": 9,
+              "mean_without_it": 0.022336
+            },
+            {
+              "episode": 42,
+              "start": "2025-04-25",
+              "end": "2025-05-23",
+              "weeks": 5,
+              "mean_without_it": 0.022871
+            },
+            {
+              "episode": 43,
+              "start": "2025-08-22",
+              "end": "2025-10-10",
+              "weeks": 8,
+              "mean_without_it": 0.023374
+            },
+            {
+              "episode": 44,
+              "start": "2026-03-13",
+              "end": "2026-06-19",
+              "weeks": 15,
+              "mean_without_it": 0.023374
+            },
+            {
+              "episode": 45,
+              "start": "2026-07-31",
+              "end": "2026-08-14",
+              "weeks": 3,
+              "mean_without_it": 0.023374
+            }
+          ]
+        },
+        "slowdown": {
+          "episodes": 44,
+          "full_sample_mean": 0.009743,
+          "range_low": -0.016425,
+          "range_high": 0.02651,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": true,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "1995-02-24",
+              "end": "1995-09-15",
+              "weeks": 30,
+              "mean_without_it": 0.010315
+            },
+            {
+              "episode": 2,
+              "start": "1995-11-17",
+              "end": "1996-03-15",
+              "weeks": 18,
+              "mean_without_it": 0.007857
+            },
+            {
+              "episode": 3,
+              "start": "1996-08-30",
+              "end": "1996-12-06",
+              "weeks": 15,
+              "mean_without_it": 0.006866
+            },
+            {
+              "episode": 4,
+              "start": "1997-01-24",
+              "end": "1997-02-14",
+              "weeks": 4,
+              "mean_without_it": 0.009023
+            },
+            {
+              "episode": 5,
+              "start": "1997-05-09",
+              "end": "1997-07-11",
+              "weeks": 10,
+              "mean_without_it": 0.008184
+            },
+            {
+              "episode": 6,
+              "start": "1998-03-13",
+              "end": "1998-04-17",
+              "weeks": 6,
+              "mean_without_it": 0.011042
+            },
+            {
+              "episode": 7,
+              "start": "1998-06-26",
+              "end": "1998-09-11",
+              "weeks": 12,
+              "mean_without_it": 0.01261
+            },
+            {
+              "episode": 8,
+              "start": "1998-11-27",
+              "end": "1999-03-05",
+              "weeks": 15,
+              "mean_without_it": 0.015517
+            },
+            {
+              "episode": 9,
+              "start": "1999-04-23",
+              "end": "1999-07-23",
+              "weeks": 14,
+              "mean_without_it": 0.013531
+            },
+            {
+              "episode": 10,
+              "start": "1999-08-27",
+              "end": "1999-11-12",
+              "weeks": 12,
+              "mean_without_it": 0.009832
+            },
+            {
+              "episode": 11,
+              "start": "2000-02-18",
+              "end": "2000-03-17",
+              "weeks": 5,
+              "mean_without_it": 0.003812
+            },
+            {
+              "episode": 12,
+              "start": "2000-05-26",
+              "end": "2001-01-19",
+              "weeks": 35,
+              "mean_without_it": -0.016425
+            },
+            {
+              "episode": 13,
+              "start": "2002-01-25",
+              "end": "2002-02-08",
+              "weeks": 3,
+              "mean_without_it": 0.009508
+            },
+            {
+              "episode": 14,
+              "start": "2002-04-26",
+              "end": "2002-06-07",
+              "weeks": 7,
+              "mean_without_it": 0.010411
+            },
+            {
+              "episode": 15,
+              "start": "2002-10-25",
+              "end": "2002-11-29",
+              "weeks": 6,
+              "mean_without_it": 0.009609
+            },
+            {
+              "episode": 16,
+              "start": "2005-03-18",
+              "end": "2005-05-06",
+              "weeks": 8,
+              "mean_without_it": 0.009198
+            },
+            {
+              "episode": 17,
+              "start": "2005-09-16",
+              "end": "2005-11-11",
+              "weeks": 9,
+              "mean_without_it": 0.008879
+            },
+            {
+              "episode": 18,
+              "start": "2006-05-19",
+              "end": "2006-12-29",
+              "weeks": 33,
+              "mean_without_it": 0.014561
+            },
+            {
+              "episode": 19,
+              "start": "2007-03-16",
+              "end": "2007-04-06",
+              "weeks": 4,
+              "mean_without_it": 0.01051
+            },
+            {
+              "episode": 20,
+              "start": "2007-07-13",
+              "end": "2008-01-18",
+              "weeks": 28,
+              "mean_without_it": 0.008945
+            },
+            {
+              "episode": 21,
+              "start": "2011-06-03",
+              "end": "2011-07-08",
+              "weeks": 6,
+              "mean_without_it": 0.010236
+            },
+            {
+              "episode": 22,
+              "start": "2012-05-18",
+              "end": "2012-11-09",
+              "weeks": 26,
+              "mean_without_it": 0.005685
+            },
+            {
+              "episode": 23,
+              "start": "2013-02-15",
+              "end": "2013-06-21",
+              "weeks": 19,
+              "mean_without_it": 0.00948
+            },
+            {
+              "episode": 24,
+              "start": "2013-08-09",
+              "end": "2013-09-27",
+              "weeks": 8,
+              "mean_without_it": 0.0097
+            },
+            {
+              "episode": 25,
+              "start": "2013-11-22",
+              "end": "2013-12-27",
+              "weeks": 6,
+              "mean_without_it": 0.010143
+            },
+            {
+              "episode": 26,
+              "start": "2014-02-14",
+              "end": "2014-03-14",
+              "weeks": 5,
+              "mean_without_it": 0.01022
+            },
+            {
+              "episode": 27,
+              "start": "2015-02-13",
+              "end": "2016-07-15",
+              "weeks": 75,
+              "mean_without_it": 0.004627
+            },
+            {
+              "episode": 28,
+              "start": "2016-12-02",
+              "end": "2017-01-06",
+              "weeks": 6,
+              "mean_without_it": 0.010785
+            },
+            {
+              "episode": 29,
+              "start": "2017-07-21",
+              "end": "2017-10-13",
+              "weeks": 13,
+              "mean_without_it": 0.01155
+            },
+            {
+              "episode": 30,
+              "start": "2018-02-16",
+              "end": "2018-05-04",
+              "weeks": 12,
+              "mean_without_it": 0.012345
+            },
+            {
+              "episode": 31,
+              "start": "2018-10-12",
+              "end": "2019-09-06",
+              "weeks": 48,
+              "mean_without_it": 0.02651
+            },
+            {
+              "episode": 32,
+              "start": "2019-10-11",
+              "end": "2019-11-22",
+              "weeks": 7,
+              "mean_without_it": 0.013368
+            },
+            {
+              "episode": 33,
+              "start": "2020-02-28",
+              "end": "2020-03-13",
+              "weeks": 3,
+              "mean_without_it": 0.01006
+            },
+            {
+              "episode": 34,
+              "start": "2021-09-17",
+              "end": "2021-10-22",
+              "weeks": 6,
+              "mean_without_it": 0.007638
+            },
+            {
+              "episode": 35,
+              "start": "2022-02-04",
+              "end": "2022-03-18",
+              "weeks": 7,
+              "mean_without_it": 0.009642
+            },
+            {
+              "episode": 36,
+              "start": "2022-04-22",
+              "end": "2022-08-26",
+              "weeks": 19,
+              "mean_without_it": 0.013807
+            },
+            {
+              "episode": 37,
+              "start": "2022-11-18",
+              "end": "2023-02-10",
+              "weeks": 13,
+              "mean_without_it": 0.012277
+            },
+            {
+              "episode": 38,
+              "start": "2023-03-31",
+              "end": "2023-08-25",
+              "weeks": 22,
+              "mean_without_it": 0.009217
+            },
+            {
+              "episode": 39,
+              "start": "2023-11-03",
+              "end": "2024-06-28",
+              "weeks": 35,
+              "mean_without_it": 0.010733
+            },
+            {
+              "episode": 40,
+              "start": "2024-08-02",
+              "end": "2024-12-27",
+              "weeks": 22,
+              "mean_without_it": 0.009668
+            },
+            {
+              "episode": 41,
+              "start": "2025-03-07",
+              "end": "2025-04-18",
+              "weeks": 7,
+              "mean_without_it": 0.008984
+            },
+            {
+              "episode": 42,
+              "start": "2025-05-30",
+              "end": "2025-08-15",
+              "weeks": 12,
+              "mean_without_it": 0.008442
+            },
+            {
+              "episode": 43,
+              "start": "2025-10-17",
+              "end": "2026-03-06",
+              "weeks": 21,
+              "mean_without_it": 0.009743
+            },
+            {
+              "episode": 44,
+              "start": "2026-06-26",
+              "end": "2026-07-24",
+              "weeks": 5,
+              "mean_without_it": 0.009743
+            }
+          ]
+        },
+        "contraction": {
+          "episodes": 5,
+          "full_sample_mean": 0.040432,
+          "range_low": -0.003195,
+          "range_high": 0.069524,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": true,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2001-01-26",
+              "end": "2002-01-18",
+              "weeks": 52,
+              "mean_without_it": -0.003195
+            },
+            {
+              "episode": 2,
+              "start": "2003-03-14",
+              "end": "2003-05-23",
+              "weeks": 11,
+              "mean_without_it": 0.037105
+            },
+            {
+              "episode": 3,
+              "start": "2008-01-25",
+              "end": "2009-05-29",
+              "weeks": 71,
+              "mean_without_it": 0.069524
+            },
+            {
+              "episode": 4,
+              "start": "2019-11-29",
+              "end": "2020-02-21",
+              "weeks": 13,
+              "mean_without_it": 0.066939
+            },
+            {
+              "episode": 5,
+              "start": "2020-03-20",
+              "end": "2020-06-26",
+              "weeks": 15,
+              "mean_without_it": 0.031617
+            }
+          ]
+        }
+      },
+      "leave_one_macro_window_out": [
+        {
+          "window_removed": "dot-com bust (2000-03 ~ 2002-12)",
+          "weeks_removed": 200,
+          "weeks_left": 1475,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 135,
+            "expansion": 636,
+            "slowdown": 594,
+            "contraction": 110
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.060521,
+            "expansion": 0.010473,
+            "slowdown": -0.020203,
+            "contraction": -0.003195
+          },
+          "incremental_r_squared_without_it": 0.01731,
+          "p_value_without_it": 0.7727,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "global financial crisis (2007-07 ~ 2009-12)",
+          "weeks_removed": 182,
+          "weeks_left": 1493,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 121,
+            "expansion": 662,
+            "slowdown": 619,
+            "contraction": 91
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.065156,
+            "expansion": 0.028639,
+            "slowdown": 0.01466,
+            "contraction": 0.069524
+          },
+          "incremental_r_squared_without_it": 0.01338,
+          "p_value_without_it": 0.7902,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "covid (2020-01 ~ 2021-12)",
+          "weeks_removed": 157,
+          "weeks_left": 1518,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 113,
+            "expansion": 646,
+            "slowdown": 625,
+            "contraction": 134
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": -0.002944,
+            "expansion": 0.01231,
+            "slowdown": 0.026424,
+            "contraction": 0.060236
+          },
+          "incremental_r_squared_without_it": 0.01258,
+          "p_value_without_it": 0.8416,
+          "still_adds_something": false
+        }
+      ]
+    },
+    {
+      "labelling": "revised",
+      "horizon_weeks": 104,
+      "by_phase": [
+        {
+          "phase": "recovery",
+          "weeks": 151,
+          "episodes": 4,
+          "observations": 151,
+          "mean_forward_value_return": 0.114754,
+          "versus_all_weeks": 0.070502,
+          "share_positive": 0.6159
+        },
+        {
+          "phase": "expansion",
+          "weeks": 685,
+          "episodes": 45,
+          "observations": 642,
+          "mean_forward_value_return": 0.019494,
+          "versus_all_weeks": -0.024758,
+          "share_positive": 0.5093
+        },
+        {
+          "phase": "slowdown",
+          "weeks": 677,
+          "episodes": 44,
+          "observations": 610,
+          "mean_forward_value_return": 0.040548,
+          "versus_all_weeks": -0.003704,
+          "share_positive": 0.5475
+        },
+        {
+          "phase": "contraction",
+          "weeks": 162,
+          "episodes": 5,
+          "observations": 162,
+          "mean_forward_value_return": 0.090599,
+          "versus_all_weeks": 0.046348,
+          "share_positive": 0.7654
+        }
+      ],
+      "shift_test": {
+        "shifts_used": 1572,
+        "overall_mean": 0.044252,
+        "cells": [
+          {
+            "phase": "recovery",
+            "weeks": 151,
+            "effect_versus_all_weeks": 0.070502,
+            "p_value": 0.4418
+          },
+          {
+            "phase": "expansion",
+            "weeks": 685,
+            "effect_versus_all_weeks": -0.024758,
+            "p_value": 0.4107
+          },
+          {
+            "phase": "slowdown",
+            "weeks": 677,
+            "effect_versus_all_weeks": -0.003704,
+            "p_value": 0.9072
+          },
+          {
+            "phase": "contraction",
+            "weeks": 162,
+            "effect_versus_all_weeks": 0.046348,
+            "p_value": 0.6745
+          }
+        ],
+        "dispersion": 0.000912066,
+        "dispersion_p_value": 0.7381
+      },
+      "rate_control": {
+        "usable": true,
+        "observations": 1552,
+        "models": {
+          "spread": {
+            "r_squared": 0.00228,
+            "coefficients": {
+              "intercept": 0.054366,
+              "term_spread": -0.006591,
+              "term_spread_change": 0.018438
+            }
+          },
+          "phase": {
+            "r_squared": 0.01845,
+            "coefficients": {
+              "intercept": 0.019849,
+              "phase[recovery]": 0.094905,
+              "phase[slowdown]": 0.020699,
+              "phase[contraction]": 0.07075
+            }
+          },
+          "both": {
+            "r_squared": 0.02363,
+            "coefficients": {
+              "intercept": 0.044044,
+              "phase[recovery]": 0.110345,
+              "phase[slowdown]": 0.009208,
+              "phase[contraction]": 0.072756,
+              "term_spread": -0.015216,
+              "term_spread_change": 0.005996
+            }
+          }
+        },
+        "phase_coefficients_without_the_rate_control": {
+          "intercept": 0.019849,
+          "phase[recovery]": 0.094905,
+          "phase[slowdown]": 0.020699,
+          "phase[contraction]": 0.07075
+        },
+        "phase_coefficients_with_the_rate_control": {
+          "phase[recovery]": 0.110345,
+          "phase[slowdown]": 0.009208,
+          "phase[contraction]": 0.072756
+        },
+        "incremental_r_squared_of_phase_over_the_term_spread": 0.02135,
+        "incremental_r_squared_null_median": 0.02669,
+        "incremental_r_squared_p_value": 0.5883,
+        "phase_adds_something_beyond_the_term_spread": false
+      },
+      "coefficient_shrinkage": {
+        "usable": true,
+        "rows": [
+          {
+            "term": "phase[recovery]",
+            "without_control": 0.094905,
+            "with_control": 0.110345,
+            "retained_share": 1.163,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[slowdown]",
+            "without_control": 0.020699,
+            "with_control": 0.009208,
+            "retained_share": 0.445,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[contraction]",
+            "without_control": 0.07075,
+            "with_control": 0.072756,
+            "retained_share": 1.028,
+            "sign_flips": false
+          }
+        ]
+      },
+      "leave_one_episode_out_phase_means": {
+        "recovery": {
+          "episodes": 4,
+          "full_sample_mean": 0.114754,
+          "range_low": 0.004038,
+          "range_high": 0.279452,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2002-07-05",
+              "end": "2002-10-18",
+              "weeks": 16,
+              "mean_without_it": 0.119052
+            },
+            {
+              "episode": 2,
+              "start": "2003-06-27",
+              "end": "2004-02-20",
+              "weeks": 35,
+              "mean_without_it": 0.091241
+            },
+            {
+              "episode": 3,
+              "start": "2009-06-05",
+              "end": "2010-08-06",
+              "weeks": 62,
+              "mean_without_it": 0.279452
+            },
+            {
+              "episode": 4,
+              "start": "2020-07-03",
+              "end": "2021-03-19",
+              "weeks": 38,
+              "mean_without_it": 0.004038
+            }
+          ]
+        },
+        "expansion": {
+          "episodes": 45,
+          "full_sample_mean": 0.019494,
+          "range_low": 0.004163,
+          "range_high": 0.033317,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "1994-07-15",
+              "end": "1995-02-17",
+              "weeks": 32,
+              "mean_without_it": 0.017971
+            },
+            {
+              "episode": 2,
+              "start": "1995-09-22",
+              "end": "1995-11-10",
+              "weeks": 8,
+              "mean_without_it": 0.01782
+            },
+            {
+              "episode": 3,
+              "start": "1996-03-22",
+              "end": "1996-08-23",
+              "weeks": 23,
+              "mean_without_it": 0.010816
+            },
+            {
+              "episode": 4,
+              "start": "1996-12-13",
+              "end": "1997-01-17",
+              "weeks": 6,
+              "mean_without_it": 0.019232
+            },
+            {
+              "episode": 5,
+              "start": "1997-02-21",
+              "end": "1997-05-02",
+              "weeks": 11,
+              "mean_without_it": 0.020938
+            },
+            {
+              "episode": 6,
+              "start": "1997-07-18",
+              "end": "1998-03-06",
+              "weeks": 34,
+              "mean_without_it": 0.031558
+            },
+            {
+              "episode": 7,
+              "start": "1998-04-24",
+              "end": "1998-06-19",
+              "weeks": 9,
+              "mean_without_it": 0.023601
+            },
+            {
+              "episode": 8,
+              "start": "1998-09-18",
+              "end": "1998-11-20",
+              "weeks": 10,
+              "mean_without_it": 0.022044
+            },
+            {
+              "episode": 9,
+              "start": "1999-03-12",
+              "end": "1999-04-16",
+              "weeks": 6,
+              "mean_without_it": 0.016231
+            },
+            {
+              "episode": 10,
+              "start": "1999-07-30",
+              "end": "1999-08-20",
+              "weeks": 4,
+              "mean_without_it": 0.017028
+            },
+            {
+              "episode": 11,
+              "start": "1999-11-19",
+              "end": "2000-02-11",
+              "weeks": 13,
+              "mean_without_it": 0.004632
+            },
+            {
+              "episode": 12,
+              "start": "2000-03-24",
+              "end": "2000-05-19",
+              "weeks": 9,
+              "mean_without_it": 0.007432
+            },
+            {
+              "episode": 13,
+              "start": "2002-02-15",
+              "end": "2002-04-19",
+              "weeks": 10,
+              "mean_without_it": 0.018225
+            },
+            {
+              "episode": 14,
+              "start": "2002-06-14",
+              "end": "2002-06-28",
+              "weeks": 3,
+              "mean_without_it": 0.019529
+            },
+            {
+              "episode": 15,
+              "start": "2002-12-06",
+              "end": "2003-03-07",
+              "weeks": 14,
+              "mean_without_it": 0.017087
+            },
+            {
+              "episode": 16,
+              "start": "2003-05-30",
+              "end": "2003-06-20",
+              "weeks": 4,
+              "mean_without_it": 0.018356
+            },
+            {
+              "episode": 17,
+              "start": "2004-02-27",
+              "end": "2005-03-11",
+              "weeks": 55,
+              "mean_without_it": 0.004163
+            },
+            {
+              "episode": 18,
+              "start": "2005-05-13",
+              "end": "2005-09-09",
+              "weeks": 18,
+              "mean_without_it": 0.018557
+            },
+            {
+              "episode": 19,
+              "start": "2005-11-18",
+              "end": "2006-05-12",
+              "weeks": 26,
+              "mean_without_it": 0.022841
+            },
+            {
+              "episode": 20,
+              "start": "2007-01-05",
+              "end": "2007-03-09",
+              "weeks": 10,
+              "mean_without_it": 0.023176
+            },
+            {
+              "episode": 21,
+              "start": "2007-04-13",
+              "end": "2007-07-06",
+              "weeks": 13,
+              "mean_without_it": 0.023164
+            },
+            {
+              "episode": 22,
+              "start": "2010-08-13",
+              "end": "2011-05-27",
+              "weeks": 42,
+              "mean_without_it": 0.021375
+            },
+            {
+              "episode": 23,
+              "start": "2011-07-15",
+              "end": "2012-05-11",
+              "weeks": 44,
+              "mean_without_it": 0.012253
+            },
+            {
+              "episode": 24,
+              "start": "2012-11-16",
+              "end": "2013-02-08",
+              "weeks": 13,
+              "mean_without_it": 0.02008
+            },
+            {
+              "episode": 25,
+              "start": "2013-06-28",
+              "end": "2013-08-02",
+              "weeks": 6,
+              "mean_without_it": 0.020795
+            },
+            {
+              "episode": 26,
+              "start": "2013-10-04",
+              "end": "2013-11-15",
+              "weeks": 7,
+              "mean_without_it": 0.020616
+            },
+            {
+              "episode": 27,
+              "start": "2014-01-03",
+              "end": "2014-02-07",
+              "weeks": 6,
+              "mean_without_it": 0.020583
+            },
+            {
+              "episode": 28,
+              "start": "2014-03-21",
+              "end": "2015-02-06",
+              "weeks": 47,
+              "mean_without_it": 0.02516
+            },
+            {
+              "episode": 29,
+              "start": "2016-07-22",
+              "end": "2016-11-25",
+              "weeks": 19,
+              "mean_without_it": 0.022275
+            },
+            {
+              "episode": 30,
+              "start": "2017-01-13",
+              "end": "2017-07-14",
+              "weeks": 27,
+              "mean_without_it": 0.028242
+            },
+            {
+              "episode": 31,
+              "start": "2017-10-20",
+              "end": "2018-02-09",
+              "weeks": 17,
+              "mean_without_it": 0.025194
+            },
+            {
+              "episode": 32,
+              "start": "2018-05-11",
+              "end": "2018-10-05",
+              "weeks": 22,
+              "mean_without_it": 0.033317
+            },
+            {
+              "episode": 33,
+              "start": "2019-09-13",
+              "end": "2019-10-04",
+              "weeks": 4,
+              "mean_without_it": 0.020963
+            },
+            {
+              "episode": 34,
+              "start": "2021-03-26",
+              "end": "2021-09-10",
+              "weeks": 25,
+              "mean_without_it": 0.015722
+            },
+            {
+              "episode": 35,
+              "start": "2021-10-29",
+              "end": "2022-01-28",
+              "weeks": 14,
+              "mean_without_it": 0.018065
+            },
+            {
+              "episode": 36,
+              "start": "2022-03-25",
+              "end": "2022-04-15",
+              "weeks": 4,
+              "mean_without_it": 0.019908
+            },
+            {
+              "episode": 37,
+              "start": "2022-09-02",
+              "end": "2022-11-11",
+              "weeks": 11,
+              "mean_without_it": 0.021671
+            },
+            {
+              "episode": 38,
+              "start": "2023-02-17",
+              "end": "2023-03-24",
+              "weeks": 6,
+              "mean_without_it": 0.020232
+            },
+            {
+              "episode": 39,
+              "start": "2023-09-01",
+              "end": "2023-10-27",
+              "weeks": 9,
+              "mean_without_it": 0.019398
+            },
+            {
+              "episode": 40,
+              "start": "2024-07-05",
+              "end": "2024-07-26",
+              "weeks": 4,
+              "mean_without_it": 0.019226
+            },
+            {
+              "episode": 41,
+              "start": "2025-01-03",
+              "end": "2025-02-28",
+              "weeks": 9,
+              "mean_without_it": 0.019494
+            },
+            {
+              "episode": 42,
+              "start": "2025-04-25",
+              "end": "2025-05-23",
+              "weeks": 5,
+              "mean_without_it": 0.019494
+            },
+            {
+              "episode": 43,
+              "start": "2025-08-22",
+              "end": "2025-10-10",
+              "weeks": 8,
+              "mean_without_it": 0.019494
+            },
+            {
+              "episode": 44,
+              "start": "2026-03-13",
+              "end": "2026-06-19",
+              "weeks": 15,
+              "mean_without_it": 0.019494
+            },
+            {
+              "episode": 45,
+              "start": "2026-07-31",
+              "end": "2026-08-14",
+              "weeks": 3,
+              "mean_without_it": 0.019494
+            }
+          ]
+        },
+        "slowdown": {
+          "episodes": 44,
+          "full_sample_mean": 0.040548,
+          "range_low": 0.004213,
+          "range_high": 0.066289,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "1995-02-24",
+              "end": "1995-09-15",
+              "weeks": 30,
+              "mean_without_it": 0.035203
+            },
+            {
+              "episode": 2,
+              "start": "1995-11-17",
+              "end": "1996-03-15",
+              "weeks": 18,
+              "mean_without_it": 0.035541
+            },
+            {
+              "episode": 3,
+              "start": "1996-08-30",
+              "end": "1996-12-06",
+              "weeks": 15,
+              "mean_without_it": 0.037164
+            },
+            {
+              "episode": 4,
+              "start": "1997-01-24",
+              "end": "1997-02-14",
+              "weeks": 4,
+              "mean_without_it": 0.040783
+            },
+            {
+              "episode": 5,
+              "start": "1997-05-09",
+              "end": "1997-07-11",
+              "weeks": 10,
+              "mean_without_it": 0.041902
+            },
+            {
+              "episode": 6,
+              "start": "1998-03-13",
+              "end": "1998-04-17",
+              "weeks": 6,
+              "mean_without_it": 0.044101
+            },
+            {
+              "episode": 7,
+              "start": "1998-06-26",
+              "end": "1998-09-11",
+              "weeks": 12,
+              "mean_without_it": 0.04635
+            },
+            {
+              "episode": 8,
+              "start": "1998-11-27",
+              "end": "1999-03-05",
+              "weeks": 15,
+              "mean_without_it": 0.038164
+            },
+            {
+              "episode": 9,
+              "start": "1999-04-23",
+              "end": "1999-07-23",
+              "weeks": 14,
+              "mean_without_it": 0.03376
+            },
+            {
+              "episode": 10,
+              "start": "1999-08-27",
+              "end": "1999-11-12",
+              "weeks": 12,
+              "mean_without_it": 0.031221
+            },
+            {
+              "episode": 11,
+              "start": "2000-02-18",
+              "end": "2000-03-17",
+              "weeks": 5,
+              "mean_without_it": 0.032583
+            },
+            {
+              "episode": 12,
+              "start": "2000-05-26",
+              "end": "2001-01-19",
+              "weeks": 35,
+              "mean_without_it": 0.004213
+            },
+            {
+              "episode": 13,
+              "start": "2002-01-25",
+              "end": "2002-02-08",
+              "weeks": 3,
+              "mean_without_it": 0.040103
+            },
+            {
+              "episode": 14,
+              "start": "2002-04-26",
+              "end": "2002-06-07",
+              "weeks": 7,
+              "mean_without_it": 0.040947
+            },
+            {
+              "episode": 15,
+              "start": "2002-10-25",
+              "end": "2002-11-29",
+              "weeks": 6,
+              "mean_without_it": 0.03987
+            },
+            {
+              "episode": 16,
+              "start": "2005-03-18",
+              "end": "2005-05-06",
+              "weeks": 8,
+              "mean_without_it": 0.039589
+            },
+            {
+              "episode": 17,
+              "start": "2005-09-16",
+              "end": "2005-11-11",
+              "weeks": 9,
+              "mean_without_it": 0.041775
+            },
+            {
+              "episode": 18,
+              "start": "2006-05-19",
+              "end": "2006-12-29",
+              "weeks": 33,
+              "mean_without_it": 0.048048
+            },
+            {
+              "episode": 19,
+              "start": "2007-03-16",
+              "end": "2007-04-06",
+              "weeks": 4,
+              "mean_without_it": 0.042281
+            },
+            {
+              "episode": 20,
+              "start": "2007-07-13",
+              "end": "2008-01-18",
+              "weeks": 28,
+              "mean_without_it": 0.04258
+            },
+            {
+              "episode": 21,
+              "start": "2011-06-03",
+              "end": "2011-07-08",
+              "weeks": 6,
+              "mean_without_it": 0.040065
+            },
+            {
+              "episode": 22,
+              "start": "2012-05-18",
+              "end": "2012-11-09",
+              "weeks": 26,
+              "mean_without_it": 0.03724
+            },
+            {
+              "episode": 23,
+              "start": "2013-02-15",
+              "end": "2013-06-21",
+              "weeks": 19,
+              "mean_without_it": 0.044219
+            },
+            {
+              "episode": 24,
+              "start": "2013-08-09",
+              "end": "2013-09-27",
+              "weeks": 8,
+              "mean_without_it": 0.042546
+            },
+            {
+              "episode": 25,
+              "start": "2013-11-22",
+              "end": "2013-12-27",
+              "weeks": 6,
+              "mean_without_it": 0.042029
+            },
+            {
+              "episode": 26,
+              "start": "2014-02-14",
+              "end": "2014-03-14",
+              "weeks": 5,
+              "mean_without_it": 0.0415
+            },
+            {
+              "episode": 27,
+              "start": "2015-02-13",
+              "end": "2016-07-15",
+              "weeks": 75,
+              "mean_without_it": 0.041437
+            },
+            {
+              "episode": 28,
+              "start": "2016-12-02",
+              "end": "2017-01-06",
+              "weeks": 6,
+              "mean_without_it": 0.042824
+            },
+            {
+              "episode": 29,
+              "start": "2017-07-21",
+              "end": "2017-10-13",
+              "weeks": 13,
+              "mean_without_it": 0.045382
+            },
+            {
+              "episode": 30,
+              "start": "2018-02-16",
+              "end": "2018-05-04",
+              "weeks": 12,
+              "mean_without_it": 0.047765
+            },
+            {
+              "episode": 31,
+              "start": "2018-10-12",
+              "end": "2019-09-06",
+              "weeks": 48,
+              "mean_without_it": 0.066289
+            },
+            {
+              "episode": 32,
+              "start": "2019-10-11",
+              "end": "2019-11-22",
+              "weeks": 7,
+              "mean_without_it": 0.043091
+            },
+            {
+              "episode": 33,
+              "start": "2020-02-28",
+              "end": "2020-03-13",
+              "weeks": 3,
+              "mean_without_it": 0.039872
+            },
+            {
+              "episode": 34,
+              "start": "2021-09-17",
+              "end": "2021-10-22",
+              "weeks": 6,
+              "mean_without_it": 0.040009
+            },
+            {
+              "episode": 35,
+              "start": "2022-02-04",
+              "end": "2022-03-18",
+              "weeks": 7,
+              "mean_without_it": 0.041999
+            },
+            {
+              "episode": 36,
+              "start": "2022-04-22",
+              "end": "2022-08-26",
+              "weeks": 19,
+              "mean_without_it": 0.044999
+            },
+            {
+              "episode": 37,
+              "start": "2022-11-18",
+              "end": "2023-02-10",
+              "weeks": 13,
+              "mean_without_it": 0.04467
+            },
+            {
+              "episode": 38,
+              "start": "2023-03-31",
+              "end": "2023-08-25",
+              "weeks": 22,
+              "mean_without_it": 0.0411
+            },
+            {
+              "episode": 39,
+              "start": "2023-11-03",
+              "end": "2024-06-28",
+              "weeks": 35,
+              "mean_without_it": 0.038375
+            },
+            {
+              "episode": 40,
+              "start": "2024-08-02",
+              "end": "2024-12-27",
+              "weeks": 22,
+              "mean_without_it": 0.040548
+            },
+            {
+              "episode": 41,
+              "start": "2025-03-07",
+              "end": "2025-04-18",
+              "weeks": 7,
+              "mean_without_it": 0.040548
+            },
+            {
+              "episode": 42,
+              "start": "2025-05-30",
+              "end": "2025-08-15",
+              "weeks": 12,
+              "mean_without_it": 0.040548
+            },
+            {
+              "episode": 43,
+              "start": "2025-10-17",
+              "end": "2026-03-06",
+              "weeks": 21,
+              "mean_without_it": 0.040548
+            },
+            {
+              "episode": 44,
+              "start": "2026-06-26",
+              "end": "2026-07-24",
+              "weeks": 5,
+              "mean_without_it": 0.040548
+            }
+          ]
+        },
+        "contraction": {
+          "episodes": 5,
+          "full_sample_mean": 0.090599,
+          "range_low": 0.058809,
+          "range_high": 0.153693,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2001-01-26",
+              "end": "2002-01-18",
+              "weeks": 52,
+              "mean_without_it": 0.075281
+            },
+            {
+              "episode": 2,
+              "start": "2003-03-14",
+              "end": "2003-05-23",
+              "weeks": 11,
+              "mean_without_it": 0.082654
+            },
+            {
+              "episode": 3,
+              "start": "2008-01-25",
+              "end": "2009-05-29",
+              "weeks": 71,
+              "mean_without_it": 0.153693
+            },
+            {
+              "episode": 4,
+              "start": "2019-11-29",
+              "end": "2020-02-21",
+              "weeks": 13,
+              "mean_without_it": 0.10279
+            },
+            {
+              "episode": 5,
+              "start": "2020-03-20",
+              "end": "2020-06-26",
+              "weeks": 15,
+              "mean_without_it": 0.058809
+            }
+          ]
+        }
+      },
+      "leave_one_macro_window_out": [
+        {
+          "window_removed": "dot-com bust (2000-03 ~ 2002-12)",
+          "weeks_removed": 252,
+          "weeks_left": 1423,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 135,
+            "expansion": 616,
+            "slowdown": 562,
+            "contraction": 110
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.119052,
+            "expansion": -0.010459,
+            "slowdown": -0.023241,
+            "contraction": 0.075281
+          },
+          "incremental_r_squared_without_it": 0.05571,
+          "p_value_without_it": 0.3965,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "global financial crisis (2007-07 ~ 2009-12)",
+          "weeks_removed": 234,
+          "weeks_left": 1441,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 121,
+            "expansion": 626,
+            "slowdown": 603,
+            "contraction": 91
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.167615,
+            "expansion": 0.030977,
+            "slowdown": 0.054163,
+            "contraction": 0.153693
+          },
+          "incremental_r_squared_without_it": 0.03689,
+          "p_value_without_it": 0.3906,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "covid (2020-01 ~ 2021-12)",
+          "weeks_removed": 209,
+          "weeks_left": 1466,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 113,
+            "expansion": 618,
+            "slowdown": 601,
+            "contraction": 134
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.004038,
+            "expansion": 0.032618,
+            "slowdown": 0.077214,
+            "contraction": 0.06928
+          },
+          "incremental_r_squared_without_it": 0.01036,
+          "p_value_without_it": 0.9025,
+          "still_adds_something": false
+        }
+      ]
+    },
+    {
+      "labelling": "real-time",
+      "horizon_weeks": 26,
+      "by_phase": [
+        {
+          "phase": "recovery",
+          "weeks": 34,
+          "episodes": 2,
+          "observations": 34,
+          "mean_forward_value_return": 0.117792,
+          "versus_all_weeks": 0.121838,
+          "share_positive": 0.8235
+        },
+        {
+          "phase": "expansion",
+          "weeks": 288,
+          "episodes": 33,
+          "observations": 265,
+          "mean_forward_value_return": 0.002062,
+          "versus_all_weeks": 0.006108,
+          "share_positive": 0.4113
+        },
+        {
+          "phase": "slowdown",
+          "weeks": 338,
+          "episodes": 37,
+          "observations": 330,
+          "mean_forward_value_return": -0.02042,
+          "versus_all_weeks": -0.016374,
+          "share_positive": 0.403
+        },
+        {
+          "phase": "contraction",
+          "weeks": 18,
+          "episodes": 3,
+          "observations": 18,
+          "mean_forward_value_return": -0.079091,
+          "versus_all_weeks": -0.075045,
+          "share_positive": 0.1667
+        }
+      ],
+      "shift_test": {
+        "shifts_used": 585,
+        "overall_mean": -0.004046,
+        "cells": [
+          {
+            "phase": "recovery",
+            "weeks": 34,
+            "effect_versus_all_weeks": 0.121838,
+            "p_value": 0.0375
+          },
+          {
+            "phase": "expansion",
+            "weeks": 288,
+            "effect_versus_all_weeks": 0.006108,
+            "p_value": 0.6945
+          },
+          {
+            "phase": "slowdown",
+            "weeks": 338,
+            "effect_versus_all_weeks": -0.016374,
+            "p_value": 0.1502
+          },
+          {
+            "phase": "contraction",
+            "weeks": 18,
+            "effect_versus_all_weeks": -0.075045,
+            "p_value": 0.2167
+          }
+        ],
+        "dispersion": 0.00104344,
+        "dispersion_p_value": 0.1126
+      },
+      "rate_control": {
+        "usable": true,
+        "observations": 647,
+        "models": {
+          "spread": {
+            "r_squared": 0.00904,
+            "coefficients": {
+              "intercept": -0.011475,
+              "term_spread": 0.0072,
+              "term_spread_change": 0.006577
+            }
+          },
+          "phase": {
+            "r_squared": 0.10487,
+            "coefficients": {
+              "intercept": 0.002062,
+              "phase[recovery]": 0.115729,
+              "phase[slowdown]": -0.022483,
+              "phase[contraction]": -0.081153
+            }
+          },
+          "both": {
+            "r_squared": 0.10863,
+            "coefficients": {
+              "intercept": -0.00431,
+              "phase[recovery]": 0.117568,
+              "phase[slowdown]": -0.019358,
+              "phase[contraction]": -0.077205,
+              "term_spread": 0.005358,
+              "term_spread_change": -0.000357
+            }
+          }
+        },
+        "phase_coefficients_without_the_rate_control": {
+          "intercept": 0.002062,
+          "phase[recovery]": 0.115729,
+          "phase[slowdown]": -0.022483,
+          "phase[contraction]": -0.081153
+        },
+        "phase_coefficients_with_the_rate_control": {
+          "phase[recovery]": 0.117568,
+          "phase[slowdown]": -0.019358,
+          "phase[contraction]": -0.077205
+        },
+        "incremental_r_squared_of_phase_over_the_term_spread": 0.09959,
+        "incremental_r_squared_null_median": 0.02944,
+        "incremental_r_squared_p_value": 0.0881,
+        "phase_adds_something_beyond_the_term_spread": false
+      },
+      "coefficient_shrinkage": {
+        "usable": true,
+        "rows": [
+          {
+            "term": "phase[recovery]",
+            "without_control": 0.115729,
+            "with_control": 0.117568,
+            "retained_share": 1.016,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[slowdown]",
+            "without_control": -0.022483,
+            "with_control": -0.019358,
+            "retained_share": 0.861,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[contraction]",
+            "without_control": -0.081153,
+            "with_control": -0.077205,
+            "retained_share": 0.951,
+            "sign_flips": false
+          }
+        ]
+      },
+      "leave_one_episode_out_phase_means": {
+        "recovery": {
+          "episodes": 2,
+          "full_sample_mean": 0.117792,
+          "range_low": 0.141618,
+          "range_high": 0.141618,
+          "episodes_whose_removal_leaves_too_few_observations": 1,
+          "removing_one_episode_makes_this_phase_uncomputable": true,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2020-07-17",
+              "end": "2021-01-29",
+              "weeks": 29,
+              "mean_without_it": null
+            },
+            {
+              "episode": 2,
+              "start": "2021-03-12",
+              "end": "2021-04-09",
+              "weeks": 5,
+              "mean_without_it": 0.141618
+            }
+          ]
+        },
+        "expansion": {
+          "episodes": 33,
+          "full_sample_mean": 0.002062,
+          "range_low": -0.012514,
+          "range_high": 0.008634,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": true,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2013-06-21",
+              "end": "2013-07-26",
+              "weeks": 6,
+              "mean_without_it": 0.002843
+            },
+            {
+              "episode": 2,
+              "start": "2013-09-27",
+              "end": "2013-11-22",
+              "weeks": 9,
+              "mean_without_it": 0.000777
+            },
+            {
+              "episode": 3,
+              "start": "2013-12-20",
+              "end": "2014-02-07",
+              "weeks": 8,
+              "mean_without_it": 0.000933
+            },
+            {
+              "episode": 4,
+              "start": "2014-04-18",
+              "end": "2014-09-19",
+              "weeks": 23,
+              "mean_without_it": 0.008634
+            },
+            {
+              "episode": 5,
+              "start": "2014-10-03",
+              "end": "2015-02-20",
+              "weeks": 21,
+              "mean_without_it": 0.006978
+            },
+            {
+              "episode": 6,
+              "start": "2015-06-26",
+              "end": "2015-07-24",
+              "weeks": 5,
+              "mean_without_it": 0.002647
+            },
+            {
+              "episode": 7,
+              "start": "2015-09-18",
+              "end": "2015-10-09",
+              "weeks": 4,
+              "mean_without_it": 0.001931
+            },
+            {
+              "episode": 8,
+              "start": "2015-12-04",
+              "end": "2015-12-04",
+              "weeks": 1,
+              "mean_without_it": 0.002021
+            },
+            {
+              "episode": 9,
+              "start": "2016-03-25",
+              "end": "2016-04-08",
+              "weeks": 3,
+              "mean_without_it": 0.001922
+            },
+            {
+              "episode": 10,
+              "start": "2016-08-05",
+              "end": "2016-09-23",
+              "weeks": 8,
+              "mean_without_it": -0.001374
+            },
+            {
+              "episode": 11,
+              "start": "2016-11-18",
+              "end": "2016-12-09",
+              "weeks": 4,
+              "mean_without_it": 0.003407
+            },
+            {
+              "episode": 12,
+              "start": "2017-03-03",
+              "end": "2017-03-31",
+              "weeks": 5,
+              "mean_without_it": 0.003367
+            },
+            {
+              "episode": 13,
+              "start": "2017-05-12",
+              "end": "2017-07-28",
+              "weeks": 12,
+              "mean_without_it": 0.00174
+            },
+            {
+              "episode": 14,
+              "start": "2017-08-18",
+              "end": "2017-09-08",
+              "weeks": 4,
+              "mean_without_it": 0.002079
+            },
+            {
+              "episode": 15,
+              "start": "2017-11-17",
+              "end": "2018-02-09",
+              "weeks": 13,
+              "mean_without_it": 0.005531
+            },
+            {
+              "episode": 16,
+              "start": "2018-03-16",
+              "end": "2018-03-23",
+              "weeks": 2,
+              "mean_without_it": 0.002634
+            },
+            {
+              "episode": 17,
+              "start": "2018-04-20",
+              "end": "2018-10-12",
+              "weeks": 26,
+              "mean_without_it": 0.00711
+            },
+            {
+              "episode": 18,
+              "start": "2021-02-19",
+              "end": "2021-03-05",
+              "weeks": 3,
+              "mean_without_it": 0.001799
+            },
+            {
+              "episode": 19,
+              "start": "2021-04-16",
+              "end": "2021-10-15",
+              "weeks": 27,
+              "mean_without_it": -0.012514
+            },
+            {
+              "episode": 20,
+              "start": "2021-11-19",
+              "end": "2022-01-07",
+              "weeks": 8,
+              "mean_without_it": -0.005771
+            },
+            {
+              "episode": 21,
+              "start": "2022-02-18",
+              "end": "2022-02-18",
+              "weeks": 1,
+              "mean_without_it": 0.002171
+            },
+            {
+              "episode": 22,
+              "start": "2022-03-18",
+              "end": "2022-05-20",
+              "weeks": 10,
+              "mean_without_it": 0.001297
+            },
+            {
+              "episode": 23,
+              "start": "2022-09-30",
+              "end": "2022-12-09",
+              "weeks": 11,
+              "mean_without_it": 0.007722
+            },
+            {
+              "episode": 24,
+              "start": "2023-03-17",
+              "end": "2023-04-07",
+              "weeks": 4,
+              "mean_without_it": 0.002823
+            },
+            {
+              "episode": 25,
+              "start": "2023-08-18",
+              "end": "2023-11-10",
+              "weeks": 13,
+              "mean_without_it": 0.000543
+            },
+            {
+              "episode": 26,
+              "start": "2024-01-19",
+              "end": "2024-03-08",
+              "weeks": 8,
+              "mean_without_it": 0.001701
+            },
+            {
+              "episode": 27,
+              "start": "2024-07-19",
+              "end": "2024-08-23",
+              "weeks": 6,
+              "mean_without_it": 0.00261
+            },
+            {
+              "episode": 28,
+              "start": "2024-10-11",
+              "end": "2024-10-11",
+              "weeks": 1,
+              "mean_without_it": 0.001967
+            },
+            {
+              "episode": 29,
+              "start": "2025-01-10",
+              "end": "2025-03-21",
+              "weeks": 11,
+              "mean_without_it": 0.002539
+            },
+            {
+              "episode": 30,
+              "start": "2025-05-02",
+              "end": "2025-06-20",
+              "weeks": 8,
+              "mean_without_it": 0.001737
+            },
+            {
+              "episode": 31,
+              "start": "2026-01-30",
+              "end": "2026-04-10",
+              "weeks": 11,
+              "mean_without_it": 0.002062
+            },
+            {
+              "episode": 32,
+              "start": "2026-05-01",
+              "end": "2026-06-26",
+              "weeks": 9,
+              "mean_without_it": 0.002062
+            },
+            {
+              "episode": 33,
+              "start": "2026-07-31",
+              "end": "2026-08-14",
+              "weeks": 3,
+              "mean_without_it": 0.002062
+            }
+          ]
+        },
+        "slowdown": {
+          "episodes": 37,
+          "full_sample_mean": -0.02042,
+          "range_low": -0.027214,
+          "range_high": 0.001981,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": true,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2013-06-14",
+              "end": "2013-06-14",
+              "weeks": 1,
+              "mean_without_it": -0.020456
+            },
+            {
+              "episode": 2,
+              "start": "2013-08-02",
+              "end": "2013-09-20",
+              "weeks": 8,
+              "mean_without_it": -0.02034
+            },
+            {
+              "episode": 3,
+              "start": "2013-11-29",
+              "end": "2013-12-13",
+              "weeks": 3,
+              "mean_without_it": -0.020915
+            },
+            {
+              "episode": 4,
+              "start": "2014-02-14",
+              "end": "2014-04-11",
+              "weeks": 9,
+              "mean_without_it": -0.021338
+            },
+            {
+              "episode": 5,
+              "start": "2014-09-26",
+              "end": "2014-09-26",
+              "weeks": 1,
+              "mean_without_it": -0.020218
+            },
+            {
+              "episode": 6,
+              "start": "2015-02-27",
+              "end": "2015-06-19",
+              "weeks": 17,
+              "mean_without_it": -0.020123
+            },
+            {
+              "episode": 7,
+              "start": "2015-07-31",
+              "end": "2015-09-11",
+              "weeks": 7,
+              "mean_without_it": -0.021194
+            },
+            {
+              "episode": 8,
+              "start": "2015-10-16",
+              "end": "2015-11-27",
+              "weeks": 7,
+              "mean_without_it": -0.02112
+            },
+            {
+              "episode": 9,
+              "start": "2015-12-11",
+              "end": "2016-03-18",
+              "weeks": 15,
+              "mean_without_it": -0.022017
+            },
+            {
+              "episode": 10,
+              "start": "2016-04-15",
+              "end": "2016-07-29",
+              "weeks": 16,
+              "mean_without_it": -0.027214
+            },
+            {
+              "episode": 11,
+              "start": "2016-09-30",
+              "end": "2016-11-11",
+              "weeks": 7,
+              "mean_without_it": -0.021508
+            },
+            {
+              "episode": 12,
+              "start": "2016-12-16",
+              "end": "2017-02-24",
+              "weeks": 11,
+              "mean_without_it": -0.01759
+            },
+            {
+              "episode": 13,
+              "start": "2017-04-07",
+              "end": "2017-05-05",
+              "weeks": 5,
+              "mean_without_it": -0.020344
+            },
+            {
+              "episode": 14,
+              "start": "2017-08-04",
+              "end": "2017-08-11",
+              "weeks": 2,
+              "mean_without_it": -0.02055
+            },
+            {
+              "episode": 15,
+              "start": "2017-09-15",
+              "end": "2017-11-10",
+              "weeks": 9,
+              "mean_without_it": -0.020337
+            },
+            {
+              "episode": 16,
+              "start": "2018-02-16",
+              "end": "2018-03-09",
+              "weeks": 4,
+              "mean_without_it": -0.019789
+            },
+            {
+              "episode": 17,
+              "start": "2018-03-30",
+              "end": "2018-04-13",
+              "weeks": 3,
+              "mean_without_it": -0.019908
+            },
+            {
+              "episode": 18,
+              "start": "2018-10-19",
+              "end": "2020-01-10",
+              "weeks": 65,
+              "mean_without_it": 0.001981
+            },
+            {
+              "episode": 19,
+              "start": "2020-01-31",
+              "end": "2020-02-21",
+              "weeks": 4,
+              "mean_without_it": -0.017798
+            },
+            {
+              "episode": 20,
+              "start": "2020-03-06",
+              "end": "2020-03-27",
+              "weeks": 4,
+              "mean_without_it": -0.018899
+            },
+            {
+              "episode": 21,
+              "start": "2021-02-05",
+              "end": "2021-02-12",
+              "weeks": 2,
+              "mean_without_it": -0.021372
+            },
+            {
+              "episode": 22,
+              "start": "2021-10-22",
+              "end": "2021-11-12",
+              "weeks": 4,
+              "mean_without_it": -0.02392
+            },
+            {
+              "episode": 23,
+              "start": "2022-01-14",
+              "end": "2022-02-11",
+              "weeks": 5,
+              "mean_without_it": -0.020577
+            },
+            {
+              "episode": 24,
+              "start": "2022-02-25",
+              "end": "2022-03-11",
+              "weeks": 3,
+              "mean_without_it": -0.020403
+            },
+            {
+              "episode": 25,
+              "start": "2022-05-27",
+              "end": "2022-09-23",
+              "weeks": 18,
+              "mean_without_it": -0.023421
+            },
+            {
+              "episode": 26,
+              "start": "2022-12-16",
+              "end": "2023-03-10",
+              "weeks": 13,
+              "mean_without_it": -0.015081
+            },
+            {
+              "episode": 27,
+              "start": "2023-04-14",
+              "end": "2023-08-11",
+              "weeks": 18,
+              "mean_without_it": -0.023752
+            },
+            {
+              "episode": 28,
+              "start": "2023-11-17",
+              "end": "2024-01-12",
+              "weeks": 9,
+              "mean_without_it": -0.019892
+            },
+            {
+              "episode": 29,
+              "start": "2024-03-15",
+              "end": "2024-07-12",
+              "weeks": 18,
+              "mean_without_it": -0.020503
+            },
+            {
+              "episode": 30,
+              "start": "2024-08-30",
+              "end": "2024-10-04",
+              "weeks": 6,
+              "mean_without_it": -0.021627
+            },
+            {
+              "episode": 31,
+              "start": "2024-10-18",
+              "end": "2025-01-03",
+              "weeks": 12,
+              "mean_without_it": -0.022158
+            },
+            {
+              "episode": 32,
+              "start": "2025-03-28",
+              "end": "2025-04-25",
+              "weeks": 5,
+              "mean_without_it": -0.020061
+            },
+            {
+              "episode": 33,
+              "start": "2025-06-27",
+              "end": "2025-10-17",
+              "weeks": 17,
+              "mean_without_it": -0.027154
+            },
+            {
+              "episode": 34,
+              "start": "2025-12-26",
+              "end": "2026-01-09",
+              "weeks": 3,
+              "mean_without_it": -0.02119
+            },
+            {
+              "episode": 35,
+              "start": "2026-01-23",
+              "end": "2026-01-23",
+              "weeks": 1,
+              "mean_without_it": -0.02042
+            },
+            {
+              "episode": 36,
+              "start": "2026-04-17",
+              "end": "2026-04-24",
+              "weeks": 2,
+              "mean_without_it": -0.02042
+            },
+            {
+              "episode": 37,
+              "start": "2026-07-03",
+              "end": "2026-07-24",
+              "weeks": 4,
+              "mean_without_it": -0.02042
+            }
+          ]
+        },
+        "contraction": {
+          "episodes": 3,
+          "full_sample_mean": -0.079091,
+          "range_low": -0.070572,
+          "range_high": -0.05736,
+          "episodes_whose_removal_leaves_too_few_observations": 1,
+          "removing_one_episode_makes_this_phase_uncomputable": true,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2020-01-17",
+              "end": "2020-01-24",
+              "weeks": 2,
+              "mean_without_it": -0.05736
+            },
+            {
+              "episode": 2,
+              "start": "2020-02-28",
+              "end": "2020-02-28",
+              "weeks": 1,
+              "mean_without_it": -0.070572
+            },
+            {
+              "episode": 3,
+              "start": "2020-04-03",
+              "end": "2020-07-10",
+              "weeks": 15,
+              "mean_without_it": null
+            }
+          ]
+        }
+      },
+      "leave_one_macro_window_out": [
+        {
+          "window_removed": "dot-com bust (2000-03 ~ 2002-12)",
+          "weeks_removed": 0,
+          "weeks_left": 688,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 34,
+            "expansion": 288,
+            "slowdown": 338,
+            "contraction": 18
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.117792,
+            "expansion": 0.002062,
+            "slowdown": -0.02042,
+            "contraction": -0.079091
+          },
+          "incremental_r_squared_without_it": 0.09959,
+          "p_value_without_it": 0.0881,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "global financial crisis (2007-07 ~ 2009-12)",
+          "weeks_removed": 0,
+          "weeks_left": 688,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 34,
+            "expansion": 288,
+            "slowdown": 338,
+            "contraction": 18
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.117792,
+            "expansion": 0.002062,
+            "slowdown": -0.02042,
+            "contraction": -0.079091
+          },
+          "incremental_r_squared_without_it": 0.09959,
+          "p_value_without_it": 0.0881,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "covid (2020-01 ~ 2021-12)",
+          "weeks_removed": 131,
+          "weeks_left": 557,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 0,
+            "expansion": 251,
+            "slowdown": 296,
+            "contraction": 0
+          },
+          "phases_left_with_no_weeks": [
+            "recovery",
+            "contraction"
+          ],
+          "phase_means_without_it": {
+            "recovery": null,
+            "expansion": -0.022086,
+            "slowdown": -0.004953,
+            "contraction": null
+          },
+          "incremental_r_squared_without_it": 0.01752,
+          "p_value_without_it": 0.244,
+          "still_adds_something": false
+        }
+      ]
+    },
+    {
+      "labelling": "real-time",
+      "horizon_weeks": 52,
+      "by_phase": [
+        {
+          "phase": "recovery",
+          "weeks": 34,
+          "episodes": 2,
+          "observations": 34,
+          "mean_forward_value_return": 0.193143,
+          "versus_all_weeks": 0.206515,
+          "share_positive": 1.0
+        },
+        {
+          "phase": "expansion",
+          "weeks": 288,
+          "episodes": 33,
+          "observations": 265,
+          "mean_forward_value_return": -0.001818,
+          "versus_all_weeks": 0.011554,
+          "share_positive": 0.3736
+        },
+        {
+          "phase": "slowdown",
+          "weeks": 338,
+          "episodes": 37,
+          "observations": 313,
+          "mean_forward_value_return": -0.050934,
+          "versus_all_weeks": -0.037563,
+          "share_positive": 0.4153
+        },
+        {
+          "phase": "contraction",
+          "weeks": 18,
+          "episodes": 3,
+          "observations": 18,
+          "mean_forward_value_return": 0.079623,
+          "versus_all_weeks": 0.092995,
+          "share_positive": 0.8333
+        }
+      ],
+      "shift_test": {
+        "shifts_used": 585,
+        "overall_mean": -0.013372,
+        "cells": [
+          {
+            "phase": "recovery",
+            "weeks": 34,
+            "effect_versus_all_weeks": 0.206515,
+            "p_value": 0.0546
+          },
+          {
+            "phase": "expansion",
+            "weeks": 288,
+            "effect_versus_all_weeks": 0.011554,
+            "p_value": 0.6741
+          },
+          {
+            "phase": "slowdown",
+            "weeks": 338,
+            "effect_versus_all_weeks": -0.037563,
+            "p_value": 0.0085
+          },
+          {
+            "phase": "contraction",
+            "weeks": 18,
+            "effect_versus_all_weeks": 0.092995,
+            "p_value": 0.3242
+          }
+        ],
+        "dispersion": 0.003128397,
+        "dispersion_p_value": 0.1007
+      },
+      "rate_control": {
+        "usable": true,
+        "observations": 630,
+        "models": {
+          "spread": {
+            "r_squared": 0.05304,
+            "coefficients": {
+              "intercept": -0.017204,
+              "term_spread": 0.007176,
+              "term_spread_change": 0.064398
+            }
+          },
+          "phase": {
+            "r_squared": 0.16686,
+            "coefficients": {
+              "intercept": -0.001818,
+              "phase[recovery]": 0.194961,
+              "phase[slowdown]": -0.049116,
+              "phase[contraction]": 0.081441
+            }
+          },
+          "both": {
+            "r_squared": 0.19237,
+            "coefficients": {
+              "intercept": -0.006966,
+              "phase[recovery]": 0.184391,
+              "phase[slowdown]": -0.043732,
+              "phase[contraction]": 0.074815,
+              "term_spread": 0.00564,
+              "term_spread_change": 0.044735
+            }
+          }
+        },
+        "phase_coefficients_without_the_rate_control": {
+          "intercept": -0.001818,
+          "phase[recovery]": 0.194961,
+          "phase[slowdown]": -0.049116,
+          "phase[contraction]": 0.081441
+        },
+        "phase_coefficients_with_the_rate_control": {
+          "phase[recovery]": 0.184391,
+          "phase[slowdown]": -0.043732,
+          "phase[contraction]": 0.074815
+        },
+        "incremental_r_squared_of_phase_over_the_term_spread": 0.13933,
+        "incremental_r_squared_null_median": 0.04291,
+        "incremental_r_squared_p_value": 0.1061,
+        "phase_adds_something_beyond_the_term_spread": false
+      },
+      "coefficient_shrinkage": {
+        "usable": true,
+        "rows": [
+          {
+            "term": "phase[recovery]",
+            "without_control": 0.194961,
+            "with_control": 0.184391,
+            "retained_share": 0.946,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[slowdown]",
+            "without_control": -0.049116,
+            "with_control": -0.043732,
+            "retained_share": 0.89,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[contraction]",
+            "without_control": 0.081441,
+            "with_control": 0.074815,
+            "retained_share": 0.919,
+            "sign_flips": false
+          }
+        ]
+      },
+      "leave_one_episode_out_phase_means": {
+        "recovery": {
+          "episodes": 2,
+          "full_sample_mean": 0.193143,
+          "range_low": 0.192366,
+          "range_high": 0.192366,
+          "episodes_whose_removal_leaves_too_few_observations": 1,
+          "removing_one_episode_makes_this_phase_uncomputable": true,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2020-07-17",
+              "end": "2021-01-29",
+              "weeks": 29,
+              "mean_without_it": null
+            },
+            {
+              "episode": 2,
+              "start": "2021-03-12",
+              "end": "2021-04-09",
+              "weeks": 5,
+              "mean_without_it": 0.192366
+            }
+          ]
+        },
+        "expansion": {
+          "episodes": 33,
+          "full_sample_mean": -0.001818,
+          "range_low": -0.030507,
+          "range_high": 0.010962,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": true,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2013-06-21",
+              "end": "2013-07-26",
+              "weeks": 6,
+              "mean_without_it": -0.001942
+            },
+            {
+              "episode": 2,
+              "start": "2013-09-27",
+              "end": "2013-11-22",
+              "weeks": 9,
+              "mean_without_it": -0.001716
+            },
+            {
+              "episode": 3,
+              "start": "2013-12-20",
+              "end": "2014-02-07",
+              "weeks": 8,
+              "mean_without_it": -0.00096
+            },
+            {
+              "episode": 4,
+              "start": "2014-04-18",
+              "end": "2014-09-19",
+              "weeks": 23,
+              "mean_without_it": 0.00886
+            },
+            {
+              "episode": 5,
+              "start": "2014-10-03",
+              "end": "2015-02-20",
+              "weeks": 21,
+              "mean_without_it": 0.00418
+            },
+            {
+              "episode": 6,
+              "start": "2015-06-26",
+              "end": "2015-07-24",
+              "weeks": 5,
+              "mean_without_it": -0.001748
+            },
+            {
+              "episode": 7,
+              "start": "2015-09-18",
+              "end": "2015-10-09",
+              "weeks": 4,
+              "mean_without_it": -0.002066
+            },
+            {
+              "episode": 8,
+              "start": "2015-12-04",
+              "end": "2015-12-04",
+              "weeks": 1,
+              "mean_without_it": -0.002436
+            },
+            {
+              "episode": 9,
+              "start": "2016-03-25",
+              "end": "2016-04-08",
+              "weeks": 3,
+              "mean_without_it": -0.002894
+            },
+            {
+              "episode": 10,
+              "start": "2016-08-05",
+              "end": "2016-09-23",
+              "weeks": 8,
+              "mean_without_it": -0.002557
+            },
+            {
+              "episode": 11,
+              "start": "2016-11-18",
+              "end": "2016-12-09",
+              "weeks": 4,
+              "mean_without_it": -0.000594
+            },
+            {
+              "episode": 12,
+              "start": "2017-03-03",
+              "end": "2017-03-31",
+              "weeks": 5,
+              "mean_without_it": -0.000394
+            },
+            {
+              "episode": 13,
+              "start": "2017-05-12",
+              "end": "2017-07-28",
+              "weeks": 12,
+              "mean_without_it": 0.000629
+            },
+            {
+              "episode": 14,
+              "start": "2017-08-18",
+              "end": "2017-09-08",
+              "weeks": 4,
+              "mean_without_it": -0.000757
+            },
+            {
+              "episode": 15,
+              "start": "2017-11-17",
+              "end": "2018-02-09",
+              "weeks": 13,
+              "mean_without_it": 0.002951
+            },
+            {
+              "episode": 16,
+              "start": "2018-03-16",
+              "end": "2018-03-23",
+              "weeks": 2,
+              "mean_without_it": -0.000851
+            },
+            {
+              "episode": 17,
+              "start": "2018-04-20",
+              "end": "2018-10-12",
+              "weeks": 26,
+              "mean_without_it": 0.010962
+            },
+            {
+              "episode": 18,
+              "start": "2021-02-19",
+              "end": "2021-03-05",
+              "weeks": 3,
+              "mean_without_it": -0.005256
+            },
+            {
+              "episode": 19,
+              "start": "2021-04-16",
+              "end": "2021-10-15",
+              "weeks": 27,
+              "mean_without_it": -0.030507
+            },
+            {
+              "episode": 20,
+              "start": "2021-11-19",
+              "end": "2022-01-07",
+              "weeks": 8,
+              "mean_without_it": -0.010164
+            },
+            {
+              "episode": 21,
+              "start": "2022-02-18",
+              "end": "2022-02-18",
+              "weeks": 1,
+              "mean_without_it": -0.001925
+            },
+            {
+              "episode": 22,
+              "start": "2022-03-18",
+              "end": "2022-05-20",
+              "weeks": 10,
+              "mean_without_it": 0.001337
+            },
+            {
+              "episode": 23,
+              "start": "2022-09-30",
+              "end": "2022-12-09",
+              "weeks": 11,
+              "mean_without_it": 0.003842
+            },
+            {
+              "episode": 24,
+              "start": "2023-03-17",
+              "end": "2023-04-07",
+              "weeks": 4,
+              "mean_without_it": -0.001658
+            },
+            {
+              "episode": 25,
+              "start": "2023-08-18",
+              "end": "2023-11-10",
+              "weeks": 13,
+              "mean_without_it": -0.002724
+            },
+            {
+              "episode": 26,
+              "start": "2024-01-19",
+              "end": "2024-03-08",
+              "weeks": 8,
+              "mean_without_it": -0.00187
+            },
+            {
+              "episode": 27,
+              "start": "2024-07-19",
+              "end": "2024-08-23",
+              "weeks": 6,
+              "mean_without_it": -0.001206
+            },
+            {
+              "episode": 28,
+              "start": "2024-10-11",
+              "end": "2024-10-11",
+              "weeks": 1,
+              "mean_without_it": -0.001796
+            },
+            {
+              "episode": 29,
+              "start": "2025-01-10",
+              "end": "2025-03-21",
+              "weeks": 11,
+              "mean_without_it": -0.005818
+            },
+            {
+              "episode": 30,
+              "start": "2025-05-02",
+              "end": "2025-06-20",
+              "weeks": 8,
+              "mean_without_it": -0.005574
+            },
+            {
+              "episode": 31,
+              "start": "2026-01-30",
+              "end": "2026-04-10",
+              "weeks": 11,
+              "mean_without_it": -0.001818
+            },
+            {
+              "episode": 32,
+              "start": "2026-05-01",
+              "end": "2026-06-26",
+              "weeks": 9,
+              "mean_without_it": -0.001818
+            },
+            {
+              "episode": 33,
+              "start": "2026-07-31",
+              "end": "2026-08-14",
+              "weeks": 3,
+              "mean_without_it": -0.001818
+            }
+          ]
+        },
+        "slowdown": {
+          "episodes": 37,
+          "full_sample_mean": -0.050934,
+          "range_low": -0.061429,
+          "range_high": -0.003813,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2013-06-14",
+              "end": "2013-06-14",
+              "weeks": 1,
+              "mean_without_it": -0.051155
+            },
+            {
+              "episode": 2,
+              "start": "2013-08-02",
+              "end": "2013-09-20",
+              "weeks": 8,
+              "mean_without_it": -0.05255
+            },
+            {
+              "episode": 3,
+              "start": "2013-11-29",
+              "end": "2013-12-13",
+              "weeks": 3,
+              "mean_without_it": -0.051069
+            },
+            {
+              "episode": 4,
+              "start": "2014-02-14",
+              "end": "2014-04-11",
+              "weeks": 9,
+              "mean_without_it": -0.050244
+            },
+            {
+              "episode": 5,
+              "start": "2014-09-26",
+              "end": "2014-09-26",
+              "weeks": 1,
+              "mean_without_it": -0.05076
+            },
+            {
+              "episode": 6,
+              "start": "2015-02-27",
+              "end": "2015-06-19",
+              "weeks": 17,
+              "mean_without_it": -0.053239
+            },
+            {
+              "episode": 7,
+              "start": "2015-07-31",
+              "end": "2015-09-11",
+              "weeks": 7,
+              "mean_without_it": -0.052566
+            },
+            {
+              "episode": 8,
+              "start": "2015-10-16",
+              "end": "2015-11-27",
+              "weeks": 7,
+              "mean_without_it": -0.053501
+            },
+            {
+              "episode": 9,
+              "start": "2015-12-11",
+              "end": "2016-03-18",
+              "weeks": 15,
+              "mean_without_it": -0.061429
+            },
+            {
+              "episode": 10,
+              "start": "2016-04-15",
+              "end": "2016-07-29",
+              "weeks": 16,
+              "mean_without_it": -0.055647
+            },
+            {
+              "episode": 11,
+              "start": "2016-09-30",
+              "end": "2016-11-11",
+              "weeks": 7,
+              "mean_without_it": -0.052177
+            },
+            {
+              "episode": 12,
+              "start": "2016-12-16",
+              "end": "2017-02-24",
+              "weeks": 11,
+              "mean_without_it": -0.049337
+            },
+            {
+              "episode": 13,
+              "start": "2017-04-07",
+              "end": "2017-05-05",
+              "weeks": 5,
+              "mean_without_it": -0.050953
+            },
+            {
+              "episode": 14,
+              "start": "2017-08-04",
+              "end": "2017-08-11",
+              "weeks": 2,
+              "mean_without_it": -0.050835
+            },
+            {
+              "episode": 15,
+              "start": "2017-09-15",
+              "end": "2017-11-10",
+              "weeks": 9,
+              "mean_without_it": -0.049742
+            },
+            {
+              "episode": 16,
+              "start": "2018-02-16",
+              "end": "2018-03-09",
+              "weeks": 4,
+              "mean_without_it": -0.050156
+            },
+            {
+              "episode": 17,
+              "start": "2018-03-30",
+              "end": "2018-04-13",
+              "weeks": 3,
+              "mean_without_it": -0.050058
+            },
+            {
+              "episode": 18,
+              "start": "2018-10-19",
+              "end": "2020-01-10",
+              "weeks": 65,
+              "mean_without_it": -0.003813
+            },
+            {
+              "episode": 19,
+              "start": "2020-01-31",
+              "end": "2020-02-21",
+              "weeks": 4,
+              "mean_without_it": -0.048618
+            },
+            {
+              "episode": 20,
+              "start": "2020-03-06",
+              "end": "2020-03-27",
+              "weeks": 4,
+              "mean_without_it": -0.051911
+            },
+            {
+              "episode": 21,
+              "start": "2021-02-05",
+              "end": "2021-02-12",
+              "weeks": 2,
+              "mean_without_it": -0.053886
+            },
+            {
+              "episode": 22,
+              "start": "2021-10-22",
+              "end": "2021-11-12",
+              "weeks": 4,
+              "mean_without_it": -0.055333
+            },
+            {
+              "episode": 23,
+              "start": "2022-01-14",
+              "end": "2022-02-11",
+              "weeks": 5,
+              "mean_without_it": -0.052764
+            },
+            {
+              "episode": 24,
+              "start": "2022-02-25",
+              "end": "2022-03-11",
+              "weeks": 3,
+              "mean_without_it": -0.051635
+            },
+            {
+              "episode": 25,
+              "start": "2022-05-27",
+              "end": "2022-09-23",
+              "weeks": 18,
+              "mean_without_it": -0.047026
+            },
+            {
+              "episode": 26,
+              "start": "2022-12-16",
+              "end": "2023-03-10",
+              "weeks": 13,
+              "mean_without_it": -0.04844
+            },
+            {
+              "episode": 27,
+              "start": "2023-04-14",
+              "end": "2023-08-11",
+              "weeks": 18,
+              "mean_without_it": -0.055758
+            },
+            {
+              "episode": 28,
+              "start": "2023-11-17",
+              "end": "2024-01-12",
+              "weeks": 9,
+              "mean_without_it": -0.051027
+            },
+            {
+              "episode": 29,
+              "start": "2024-03-15",
+              "end": "2024-07-12",
+              "weeks": 18,
+              "mean_without_it": -0.054975
+            },
+            {
+              "episode": 30,
+              "start": "2024-08-30",
+              "end": "2024-10-04",
+              "weeks": 6,
+              "mean_without_it": -0.052122
+            },
+            {
+              "episode": 31,
+              "start": "2024-10-18",
+              "end": "2025-01-03",
+              "weeks": 12,
+              "mean_without_it": -0.054289
+            },
+            {
+              "episode": 32,
+              "start": "2025-03-28",
+              "end": "2025-04-25",
+              "weeks": 5,
+              "mean_without_it": -0.053158
+            },
+            {
+              "episode": 33,
+              "start": "2025-06-27",
+              "end": "2025-10-17",
+              "weeks": 17,
+              "mean_without_it": -0.052249
+            },
+            {
+              "episode": 34,
+              "start": "2025-12-26",
+              "end": "2026-01-09",
+              "weeks": 3,
+              "mean_without_it": -0.050934
+            },
+            {
+              "episode": 35,
+              "start": "2026-01-23",
+              "end": "2026-01-23",
+              "weeks": 1,
+              "mean_without_it": -0.050934
+            },
+            {
+              "episode": 36,
+              "start": "2026-04-17",
+              "end": "2026-04-24",
+              "weeks": 2,
+              "mean_without_it": -0.050934
+            },
+            {
+              "episode": 37,
+              "start": "2026-07-03",
+              "end": "2026-07-24",
+              "weeks": 4,
+              "mean_without_it": -0.050934
+            }
+          ]
+        },
+        "contraction": {
+          "episodes": 3,
+          "full_sample_mean": 0.079623,
+          "range_low": 0.093025,
+          "range_high": 0.12031,
+          "episodes_whose_removal_leaves_too_few_observations": 1,
+          "removing_one_episode_makes_this_phase_uncomputable": true,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2020-01-17",
+              "end": "2020-01-24",
+              "weeks": 2,
+              "mean_without_it": 0.12031
+            },
+            {
+              "episode": 2,
+              "start": "2020-02-28",
+              "end": "2020-02-28",
+              "weeks": 1,
+              "mean_without_it": 0.093025
+            },
+            {
+              "episode": 3,
+              "start": "2020-04-03",
+              "end": "2020-07-10",
+              "weeks": 15,
+              "mean_without_it": null
+            }
+          ]
+        }
+      },
+      "leave_one_macro_window_out": [
+        {
+          "window_removed": "dot-com bust (2000-03 ~ 2002-12)",
+          "weeks_removed": 0,
+          "weeks_left": 688,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 34,
+            "expansion": 288,
+            "slowdown": 338,
+            "contraction": 18
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.193143,
+            "expansion": -0.001818,
+            "slowdown": -0.050934,
+            "contraction": 0.079623
+          },
+          "incremental_r_squared_without_it": 0.13933,
+          "p_value_without_it": 0.1061,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "global financial crisis (2007-07 ~ 2009-12)",
+          "weeks_removed": 0,
+          "weeks_left": 688,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 34,
+            "expansion": 288,
+            "slowdown": 338,
+            "contraction": 18
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.193143,
+            "expansion": -0.001818,
+            "slowdown": -0.050934,
+            "contraction": 0.079623
+          },
+          "incremental_r_squared_without_it": 0.13933,
+          "p_value_without_it": 0.1061,
+          "still_adds_something": false
+        },
+        {
+          "window_removed": "covid (2020-01 ~ 2021-12)",
+          "weeks_removed": 157,
+          "weeks_left": 531,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 0,
+            "expansion": 251,
+            "slowdown": 270,
+            "contraction": 0
+          },
+          "phases_left_with_no_weeks": [
+            "recovery",
+            "contraction"
+          ],
+          "phase_means_without_it": {
+            "recovery": null,
+            "expansion": -0.044365,
+            "slowdown": -0.012941,
+            "contraction": null
+          },
+          "incremental_r_squared_without_it": 0.03423,
+          "p_value_without_it": 0.1105,
+          "still_adds_something": false
+        }
+      ]
+    },
+    {
+      "labelling": "real-time",
+      "horizon_weeks": 104,
+      "by_phase": [
+        {
+          "phase": "recovery",
+          "weeks": 34,
+          "episodes": 2,
+          "observations": 34,
+          "mean_forward_value_return": 0.425753,
+          "versus_all_weeks": 0.457647,
+          "share_positive": 1.0
+        },
+        {
+          "phase": "expansion",
+          "weeks": 288,
+          "episodes": 33,
+          "observations": 239,
+          "mean_forward_value_return": -0.073423,
+          "versus_all_weeks": -0.04153,
+          "share_positive": 0.364
+        },
+        {
+          "phase": "slowdown",
+          "weeks": 338,
+          "episodes": 37,
+          "observations": 287,
+          "mean_forward_value_return": -0.076353,
+          "versus_all_weeks": -0.04446,
+          "share_positive": 0.331
+        },
+        {
+          "phase": "contraction",
+          "weeks": 18,
+          "episodes": 3,
+          "observations": 18,
+          "mean_forward_value_return": 0.36397,
+          "versus_all_weeks": 0.395864,
+          "share_positive": 1.0
+        }
+      ],
+      "shift_test": {
+        "shifts_used": 585,
+        "overall_mean": -0.031894,
+        "cells": [
+          {
+            "phase": "recovery",
+            "weeks": 34,
+            "effect_versus_all_weeks": 0.457647,
+            "p_value": 0.0017
+          },
+          {
+            "phase": "expansion",
+            "weeks": 288,
+            "effect_versus_all_weeks": -0.04153,
+            "p_value": 0.4266
+          },
+          {
+            "phase": "slowdown",
+            "weeks": 338,
+            "effect_versus_all_weeks": -0.04446,
+            "p_value": 0.1416
+          },
+          {
+            "phase": "contraction",
+            "weeks": 18,
+            "effect_versus_all_weeks": 0.395864,
+            "p_value": 0.0017
+          }
+        ],
+        "dispersion": 0.016381349,
+        "dispersion_p_value": 0.0017
+      },
+      "rate_control": {
+        "usable": true,
+        "observations": 578,
+        "models": {
+          "spread": {
+            "r_squared": 0.06587,
+            "coefficients": {
+              "intercept": -0.000842,
+              "term_spread": -0.023956,
+              "term_spread_change": 0.117019
+            }
+          },
+          "phase": {
+            "r_squared": 0.46179,
+            "coefficients": {
+              "intercept": -0.073423,
+              "phase[recovery]": 0.499176,
+              "phase[slowdown]": -0.00293,
+              "phase[contraction]": 0.437394
+            }
+          },
+          "both": {
+            "r_squared": 0.47073,
+            "coefficients": {
+              "intercept": -0.057202,
+              "phase[recovery]": 0.481559,
+              "phase[slowdown]": -0.005927,
+              "phase[contraction]": 0.417263,
+              "term_spread": -0.010493,
+              "term_spread_change": 0.043045
+            }
+          }
+        },
+        "phase_coefficients_without_the_rate_control": {
+          "intercept": -0.073423,
+          "phase[recovery]": 0.499176,
+          "phase[slowdown]": -0.00293,
+          "phase[contraction]": 0.437394
+        },
+        "phase_coefficients_with_the_rate_control": {
+          "phase[recovery]": 0.481559,
+          "phase[slowdown]": -0.005927,
+          "phase[contraction]": 0.417263
+        },
+        "incremental_r_squared_of_phase_over_the_term_spread": 0.40486,
+        "incremental_r_squared_null_median": 0.03535,
+        "incremental_r_squared_p_value": 0.0021,
+        "phase_adds_something_beyond_the_term_spread": true
+      },
+      "coefficient_shrinkage": {
+        "usable": true,
+        "rows": [
+          {
+            "term": "phase[recovery]",
+            "without_control": 0.499176,
+            "with_control": 0.481559,
+            "retained_share": 0.965,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[slowdown]",
+            "without_control": -0.00293,
+            "with_control": -0.005927,
+            "retained_share": 2.023,
+            "sign_flips": false
+          },
+          {
+            "term": "phase[contraction]",
+            "without_control": 0.437394,
+            "with_control": 0.417263,
+            "retained_share": 0.954,
+            "sign_flips": false
+          }
+        ]
+      },
+      "leave_one_episode_out_phase_means": {
+        "recovery": {
+          "episodes": 2,
+          "full_sample_mean": 0.425753,
+          "range_low": 0.470632,
+          "range_high": 0.470632,
+          "episodes_whose_removal_leaves_too_few_observations": 1,
+          "removing_one_episode_makes_this_phase_uncomputable": true,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2020-07-17",
+              "end": "2021-01-29",
+              "weeks": 29,
+              "mean_without_it": null
+            },
+            {
+              "episode": 2,
+              "start": "2021-03-12",
+              "end": "2021-04-09",
+              "weeks": 5,
+              "mean_without_it": 0.470632
+            }
+          ]
+        },
+        "expansion": {
+          "episodes": 33,
+          "full_sample_mean": -0.073423,
+          "range_low": -0.096216,
+          "range_high": -0.036928,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2013-06-21",
+              "end": "2013-07-26",
+              "weeks": 6,
+              "mean_without_it": -0.072445
+            },
+            {
+              "episode": 2,
+              "start": "2013-09-27",
+              "end": "2013-11-22",
+              "weeks": 9,
+              "mean_without_it": -0.073001
+            },
+            {
+              "episode": 3,
+              "start": "2013-12-20",
+              "end": "2014-02-07",
+              "weeks": 8,
+              "mean_without_it": -0.072439
+            },
+            {
+              "episode": 4,
+              "start": "2014-04-18",
+              "end": "2014-09-19",
+              "weeks": 23,
+              "mean_without_it": -0.069353
+            },
+            {
+              "episode": 5,
+              "start": "2014-10-03",
+              "end": "2015-02-20",
+              "weeks": 21,
+              "mean_without_it": -0.084477
+            },
+            {
+              "episode": 6,
+              "start": "2015-06-26",
+              "end": "2015-07-24",
+              "weeks": 5,
+              "mean_without_it": -0.075597
+            },
+            {
+              "episode": 7,
+              "start": "2015-09-18",
+              "end": "2015-10-09",
+              "weeks": 4,
+              "mean_without_it": -0.075473
+            },
+            {
+              "episode": 8,
+              "start": "2015-12-04",
+              "end": "2015-12-04",
+              "weeks": 1,
+              "mean_without_it": -0.073976
+            },
+            {
+              "episode": 9,
+              "start": "2016-03-25",
+              "end": "2016-04-08",
+              "weeks": 3,
+              "mean_without_it": -0.074681
+            },
+            {
+              "episode": 10,
+              "start": "2016-08-05",
+              "end": "2016-09-23",
+              "weeks": 8,
+              "mean_without_it": -0.074088
+            },
+            {
+              "episode": 11,
+              "start": "2016-11-18",
+              "end": "2016-12-09",
+              "weeks": 4,
+              "mean_without_it": -0.072069
+            },
+            {
+              "episode": 12,
+              "start": "2017-03-03",
+              "end": "2017-03-31",
+              "weeks": 5,
+              "mean_without_it": -0.07086
+            },
+            {
+              "episode": 13,
+              "start": "2017-05-12",
+              "end": "2017-07-28",
+              "weeks": 12,
+              "mean_without_it": -0.068282
+            },
+            {
+              "episode": 14,
+              "start": "2017-08-18",
+              "end": "2017-09-08",
+              "weeks": 4,
+              "mean_without_it": -0.071326
+            },
+            {
+              "episode": 15,
+              "start": "2017-11-17",
+              "end": "2018-02-09",
+              "weeks": 13,
+              "mean_without_it": -0.066308
+            },
+            {
+              "episode": 16,
+              "start": "2018-03-16",
+              "end": "2018-03-23",
+              "weeks": 2,
+              "mean_without_it": -0.071324
+            },
+            {
+              "episode": 17,
+              "start": "2018-04-20",
+              "end": "2018-10-12",
+              "weeks": 26,
+              "mean_without_it": -0.036928
+            },
+            {
+              "episode": 18,
+              "start": "2021-02-19",
+              "end": "2021-03-05",
+              "weeks": 3,
+              "mean_without_it": -0.078714
+            },
+            {
+              "episode": 19,
+              "start": "2021-04-16",
+              "end": "2021-10-15",
+              "weeks": 27,
+              "mean_without_it": -0.096216
+            },
+            {
+              "episode": 20,
+              "start": "2021-11-19",
+              "end": "2022-01-07",
+              "weeks": 8,
+              "mean_without_it": -0.080023
+            },
+            {
+              "episode": 21,
+              "start": "2022-02-18",
+              "end": "2022-02-18",
+              "weeks": 1,
+              "mean_without_it": -0.073362
+            },
+            {
+              "episode": 22,
+              "start": "2022-03-18",
+              "end": "2022-05-20",
+              "weeks": 10,
+              "mean_without_it": -0.073331
+            },
+            {
+              "episode": 23,
+              "start": "2022-09-30",
+              "end": "2022-12-09",
+              "weeks": 11,
+              "mean_without_it": -0.070647
+            },
+            {
+              "episode": 24,
+              "start": "2023-03-17",
+              "end": "2023-04-07",
+              "weeks": 4,
+              "mean_without_it": -0.075068
+            },
+            {
+              "episode": 25,
+              "start": "2023-08-18",
+              "end": "2023-11-10",
+              "weeks": 13,
+              "mean_without_it": -0.078786
+            },
+            {
+              "episode": 26,
+              "start": "2024-01-19",
+              "end": "2024-03-08",
+              "weeks": 8,
+              "mean_without_it": -0.079364
+            },
+            {
+              "episode": 27,
+              "start": "2024-07-19",
+              "end": "2024-08-23",
+              "weeks": 6,
+              "mean_without_it": -0.073423
+            },
+            {
+              "episode": 28,
+              "start": "2024-10-11",
+              "end": "2024-10-11",
+              "weeks": 1,
+              "mean_without_it": -0.073423
+            },
+            {
+              "episode": 29,
+              "start": "2025-01-10",
+              "end": "2025-03-21",
+              "weeks": 11,
+              "mean_without_it": -0.073423
+            },
+            {
+              "episode": 30,
+              "start": "2025-05-02",
+              "end": "2025-06-20",
+              "weeks": 8,
+              "mean_without_it": -0.073423
+            },
+            {
+              "episode": 31,
+              "start": "2026-01-30",
+              "end": "2026-04-10",
+              "weeks": 11,
+              "mean_without_it": -0.073423
+            },
+            {
+              "episode": 32,
+              "start": "2026-05-01",
+              "end": "2026-06-26",
+              "weeks": 9,
+              "mean_without_it": -0.073423
+            },
+            {
+              "episode": 33,
+              "start": "2026-07-31",
+              "end": "2026-08-14",
+              "weeks": 3,
+              "mean_without_it": -0.073423
+            }
+          ]
+        },
+        "slowdown": {
+          "episodes": 37,
+          "full_sample_mean": -0.076353,
+          "range_low": -0.088861,
+          "range_high": -0.030271,
+          "episodes_whose_removal_leaves_too_few_observations": 0,
+          "removing_one_episode_makes_this_phase_uncomputable": false,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2013-06-14",
+              "end": "2013-06-14",
+              "weeks": 1,
+              "mean_without_it": -0.076351
+            },
+            {
+              "episode": 2,
+              "start": "2013-08-02",
+              "end": "2013-09-20",
+              "weeks": 8,
+              "mean_without_it": -0.075212
+            },
+            {
+              "episode": 3,
+              "start": "2013-11-29",
+              "end": "2013-12-13",
+              "weeks": 3,
+              "mean_without_it": -0.076045
+            },
+            {
+              "episode": 4,
+              "start": "2014-02-14",
+              "end": "2014-04-11",
+              "weeks": 9,
+              "mean_without_it": -0.075826
+            },
+            {
+              "episode": 5,
+              "start": "2014-09-26",
+              "end": "2014-09-26",
+              "weeks": 1,
+              "mean_without_it": -0.076262
+            },
+            {
+              "episode": 6,
+              "start": "2015-02-27",
+              "end": "2015-06-19",
+              "weeks": 17,
+              "mean_without_it": -0.084349
+            },
+            {
+              "episode": 7,
+              "start": "2015-07-31",
+              "end": "2015-09-11",
+              "weeks": 7,
+              "mean_without_it": -0.079323
+            },
+            {
+              "episode": 8,
+              "start": "2015-10-16",
+              "end": "2015-11-27",
+              "weeks": 7,
+              "mean_without_it": -0.079109
+            },
+            {
+              "episode": 9,
+              "start": "2015-12-11",
+              "end": "2016-03-18",
+              "weeks": 15,
+              "mean_without_it": -0.083281
+            },
+            {
+              "episode": 10,
+              "start": "2016-04-15",
+              "end": "2016-07-29",
+              "weeks": 16,
+              "mean_without_it": -0.079825
+            },
+            {
+              "episode": 11,
+              "start": "2016-09-30",
+              "end": "2016-11-11",
+              "weeks": 7,
+              "mean_without_it": -0.076041
+            },
+            {
+              "episode": 12,
+              "start": "2016-12-16",
+              "end": "2017-02-24",
+              "weeks": 11,
+              "mean_without_it": -0.071911
+            },
+            {
+              "episode": 13,
+              "start": "2017-04-07",
+              "end": "2017-05-05",
+              "weeks": 5,
+              "mean_without_it": -0.074536
+            },
+            {
+              "episode": 14,
+              "start": "2017-08-04",
+              "end": "2017-08-11",
+              "weeks": 2,
+              "mean_without_it": -0.075538
+            },
+            {
+              "episode": 15,
+              "start": "2017-09-15",
+              "end": "2017-11-10",
+              "weeks": 9,
+              "mean_without_it": -0.073416
+            },
+            {
+              "episode": 16,
+              "start": "2018-02-16",
+              "end": "2018-03-09",
+              "weeks": 4,
+              "mean_without_it": -0.073933
+            },
+            {
+              "episode": 17,
+              "start": "2018-03-30",
+              "end": "2018-04-13",
+              "weeks": 3,
+              "mean_without_it": -0.073478
+            },
+            {
+              "episode": 18,
+              "start": "2018-10-19",
+              "end": "2020-01-10",
+              "weeks": 65,
+              "mean_without_it": -0.030271
+            },
+            {
+              "episode": 19,
+              "start": "2020-01-31",
+              "end": "2020-02-21",
+              "weeks": 4,
+              "mean_without_it": -0.078452
+            },
+            {
+              "episode": 20,
+              "start": "2020-03-06",
+              "end": "2020-03-27",
+              "weeks": 4,
+              "mean_without_it": -0.080809
+            },
+            {
+              "episode": 21,
+              "start": "2021-02-05",
+              "end": "2021-02-12",
+              "weeks": 2,
+              "mean_without_it": -0.080128
+            },
+            {
+              "episode": 22,
+              "start": "2021-10-22",
+              "end": "2021-11-12",
+              "weeks": 4,
+              "mean_without_it": -0.078845
+            },
+            {
+              "episode": 23,
+              "start": "2022-01-14",
+              "end": "2022-02-11",
+              "weeks": 5,
+              "mean_without_it": -0.076785
+            },
+            {
+              "episode": 24,
+              "start": "2022-02-25",
+              "end": "2022-03-11",
+              "weeks": 3,
+              "mean_without_it": -0.076145
+            },
+            {
+              "episode": 25,
+              "start": "2022-05-27",
+              "end": "2022-09-23",
+              "weeks": 18,
+              "mean_without_it": -0.07546
+            },
+            {
+              "episode": 26,
+              "start": "2022-12-16",
+              "end": "2023-03-10",
+              "weeks": 13,
+              "mean_without_it": -0.073512
+            },
+            {
+              "episode": 27,
+              "start": "2023-04-14",
+              "end": "2023-08-11",
+              "weeks": 18,
+              "mean_without_it": -0.083253
+            },
+            {
+              "episode": 28,
+              "start": "2023-11-17",
+              "end": "2024-01-12",
+              "weeks": 9,
+              "mean_without_it": -0.078825
+            },
+            {
+              "episode": 29,
+              "start": "2024-03-15",
+              "end": "2024-07-12",
+              "weeks": 18,
+              "mean_without_it": -0.088861
+            },
+            {
+              "episode": 30,
+              "start": "2024-08-30",
+              "end": "2024-10-04",
+              "weeks": 6,
+              "mean_without_it": -0.076353
+            },
+            {
+              "episode": 31,
+              "start": "2024-10-18",
+              "end": "2025-01-03",
+              "weeks": 12,
+              "mean_without_it": -0.076353
+            },
+            {
+              "episode": 32,
+              "start": "2025-03-28",
+              "end": "2025-04-25",
+              "weeks": 5,
+              "mean_without_it": -0.076353
+            },
+            {
+              "episode": 33,
+              "start": "2025-06-27",
+              "end": "2025-10-17",
+              "weeks": 17,
+              "mean_without_it": -0.076353
+            },
+            {
+              "episode": 34,
+              "start": "2025-12-26",
+              "end": "2026-01-09",
+              "weeks": 3,
+              "mean_without_it": -0.076353
+            },
+            {
+              "episode": 35,
+              "start": "2026-01-23",
+              "end": "2026-01-23",
+              "weeks": 1,
+              "mean_without_it": -0.076353
+            },
+            {
+              "episode": 36,
+              "start": "2026-04-17",
+              "end": "2026-04-24",
+              "weeks": 2,
+              "mean_without_it": -0.076353
+            },
+            {
+              "episode": 37,
+              "start": "2026-07-03",
+              "end": "2026-07-24",
+              "weeks": 4,
+              "mean_without_it": -0.076353
+            }
+          ]
+        },
+        "contraction": {
+          "episodes": 3,
+          "full_sample_mean": 0.36397,
+          "range_low": 0.379436,
+          "range_high": 0.407672,
+          "episodes_whose_removal_leaves_too_few_observations": 1,
+          "removing_one_episode_makes_this_phase_uncomputable": true,
+          "sign_flips_when_any_single_episode_is_removed": false,
+          "rows": [
+            {
+              "episode": 1,
+              "start": "2020-01-17",
+              "end": "2020-01-24",
+              "weeks": 2,
+              "mean_without_it": 0.407672
+            },
+            {
+              "episode": 2,
+              "start": "2020-02-28",
+              "end": "2020-02-28",
+              "weeks": 1,
+              "mean_without_it": 0.379436
+            },
+            {
+              "episode": 3,
+              "start": "2020-04-03",
+              "end": "2020-07-10",
+              "weeks": 15,
+              "mean_without_it": null
+            }
+          ]
+        }
+      },
+      "leave_one_macro_window_out": [
+        {
+          "window_removed": "dot-com bust (2000-03 ~ 2002-12)",
+          "weeks_removed": 0,
+          "weeks_left": 688,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 34,
+            "expansion": 288,
+            "slowdown": 338,
+            "contraction": 18
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.425753,
+            "expansion": -0.073423,
+            "slowdown": -0.076353,
+            "contraction": 0.36397
+          },
+          "incremental_r_squared_without_it": 0.40486,
+          "p_value_without_it": 0.0021,
+          "still_adds_something": true
+        },
+        {
+          "window_removed": "global financial crisis (2007-07 ~ 2009-12)",
+          "weeks_removed": 0,
+          "weeks_left": 688,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 34,
+            "expansion": 288,
+            "slowdown": 338,
+            "contraction": 18
+          },
+          "phases_left_with_no_weeks": [],
+          "phase_means_without_it": {
+            "recovery": 0.425753,
+            "expansion": -0.073423,
+            "slowdown": -0.076353,
+            "contraction": 0.36397
+          },
+          "incremental_r_squared_without_it": 0.40486,
+          "p_value_without_it": 0.0021,
+          "still_adds_something": true
+        },
+        {
+          "window_removed": "covid (2020-01 ~ 2021-12)",
+          "weeks_removed": 209,
+          "weeks_left": 479,
+          "usable": true,
+          "phase_weeks_left": {
+            "recovery": 0,
+            "expansion": 217,
+            "slowdown": 252,
+            "contraction": 0
+          },
+          "phases_left_with_no_weeks": [
+            "recovery",
+            "contraction"
+          ],
+          "phase_means_without_it": {
+            "recovery": null,
+            "expansion": -0.063748,
+            "slowdown": -0.036075,
+            "contraction": null
+          },
+          "incremental_r_squared_without_it": 0.00965,
+          "p_value_without_it": 0.5281,
+          "still_adds_something": false
+        }
+      ],
+      "leave_one_episode_out_incremental_r_squared": {
+        "usable": true,
+        "full_sample": 0.40486,
+        "full_sample_p": 0.0021,
+        "range_low": 0.19811,
+        "range_high": 0.44962,
+        "episodes_tested": 75,
+        "episodes_where_it_still_adds_something": 75,
+        "collapses_when_some_single_episode_is_removed": false,
+        "rows": [
+          {
+            "phase": "recovery",
+            "episode": 1,
+            "start": "2020-07-17",
+            "end": "2021-01-29",
+            "weeks": 29,
+            "incremental_r_squared_without_it": 0.19811,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "recovery",
+            "episode": 2,
+            "start": "2021-03-12",
+            "end": "2021-04-09",
+            "weeks": 5,
+            "incremental_r_squared_without_it": 0.4246,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 1,
+            "start": "2013-06-21",
+            "end": "2013-07-26",
+            "weeks": 6,
+            "incremental_r_squared_without_it": 0.40084,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 2,
+            "start": "2013-09-27",
+            "end": "2013-11-22",
+            "weeks": 9,
+            "incremental_r_squared_without_it": 0.40506,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 3,
+            "start": "2013-12-20",
+            "end": "2014-02-07",
+            "weeks": 8,
+            "incremental_r_squared_without_it": 0.40462,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 4,
+            "start": "2014-04-18",
+            "end": "2014-09-19",
+            "weeks": 23,
+            "incremental_r_squared_without_it": 0.40664,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 5,
+            "start": "2014-10-03",
+            "end": "2015-02-20",
+            "weeks": 21,
+            "incremental_r_squared_without_it": 0.41027,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 6,
+            "start": "2015-06-26",
+            "end": "2015-07-24",
+            "weeks": 5,
+            "incremental_r_squared_without_it": 0.40675,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 7,
+            "start": "2015-09-18",
+            "end": "2015-10-09",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.40567,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 8,
+            "start": "2015-12-04",
+            "end": "2015-12-04",
+            "weeks": 1,
+            "incremental_r_squared_without_it": 0.40527,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 9,
+            "start": "2016-03-25",
+            "end": "2016-04-08",
+            "weeks": 3,
+            "incremental_r_squared_without_it": 0.40508,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 10,
+            "start": "2016-08-05",
+            "end": "2016-09-23",
+            "weeks": 8,
+            "incremental_r_squared_without_it": 0.40501,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 11,
+            "start": "2016-11-18",
+            "end": "2016-12-09",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.40223,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 12,
+            "start": "2017-03-03",
+            "end": "2017-03-31",
+            "weeks": 5,
+            "incremental_r_squared_without_it": 0.40642,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 13,
+            "start": "2017-05-12",
+            "end": "2017-07-28",
+            "weeks": 12,
+            "incremental_r_squared_without_it": 0.40819,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 14,
+            "start": "2017-08-18",
+            "end": "2017-09-08",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.40528,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 15,
+            "start": "2017-11-17",
+            "end": "2018-02-09",
+            "weeks": 13,
+            "incremental_r_squared_without_it": 0.40535,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 16,
+            "start": "2018-03-16",
+            "end": "2018-03-23",
+            "weeks": 2,
+            "incremental_r_squared_without_it": 0.40594,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 17,
+            "start": "2018-04-20",
+            "end": "2018-10-12",
+            "weeks": 26,
+            "incremental_r_squared_without_it": 0.44962,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 18,
+            "start": "2021-02-19",
+            "end": "2021-03-05",
+            "weeks": 3,
+            "incremental_r_squared_without_it": 0.42016,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 19,
+            "start": "2021-04-16",
+            "end": "2021-10-15",
+            "weeks": 27,
+            "incremental_r_squared_without_it": 0.43056,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 20,
+            "start": "2021-11-19",
+            "end": "2022-01-07",
+            "weeks": 8,
+            "incremental_r_squared_without_it": 0.41327,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 21,
+            "start": "2022-02-18",
+            "end": "2022-02-18",
+            "weeks": 1,
+            "incremental_r_squared_without_it": 0.40479,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 22,
+            "start": "2022-03-18",
+            "end": "2022-05-20",
+            "weeks": 10,
+            "incremental_r_squared_without_it": 0.40307,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 23,
+            "start": "2022-09-30",
+            "end": "2022-12-09",
+            "weeks": 11,
+            "incremental_r_squared_without_it": 0.40585,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 24,
+            "start": "2023-03-17",
+            "end": "2023-04-07",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.40583,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 25,
+            "start": "2023-08-18",
+            "end": "2023-11-10",
+            "weeks": 13,
+            "incremental_r_squared_without_it": 0.40372,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 26,
+            "start": "2024-01-19",
+            "end": "2024-03-08",
+            "weeks": 8,
+            "incremental_r_squared_without_it": 0.41299,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 27,
+            "start": "2024-07-19",
+            "end": "2024-08-23",
+            "weeks": 6,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 28,
+            "start": "2024-10-11",
+            "end": "2024-10-11",
+            "weeks": 1,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 29,
+            "start": "2025-01-10",
+            "end": "2025-03-21",
+            "weeks": 11,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 30,
+            "start": "2025-05-02",
+            "end": "2025-06-20",
+            "weeks": 8,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 31,
+            "start": "2026-01-30",
+            "end": "2026-04-10",
+            "weeks": 11,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 32,
+            "start": "2026-05-01",
+            "end": "2026-06-26",
+            "weeks": 9,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "expansion",
+            "episode": 33,
+            "start": "2026-07-31",
+            "end": "2026-08-14",
+            "weeks": 3,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 1,
+            "start": "2013-06-14",
+            "end": "2013-06-14",
+            "weeks": 1,
+            "incremental_r_squared_without_it": 0.40481,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 2,
+            "start": "2013-08-02",
+            "end": "2013-09-20",
+            "weeks": 8,
+            "incremental_r_squared_without_it": 0.40039,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 3,
+            "start": "2013-11-29",
+            "end": "2013-12-13",
+            "weeks": 3,
+            "incremental_r_squared_without_it": 0.40506,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 4,
+            "start": "2014-02-14",
+            "end": "2014-04-11",
+            "weeks": 9,
+            "incremental_r_squared_without_it": 0.40553,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 5,
+            "start": "2014-09-26",
+            "end": "2014-09-26",
+            "weeks": 1,
+            "incremental_r_squared_without_it": 0.40488,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 6,
+            "start": "2015-02-27",
+            "end": "2015-06-19",
+            "weeks": 17,
+            "incremental_r_squared_without_it": 0.41387,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 7,
+            "start": "2015-07-31",
+            "end": "2015-09-11",
+            "weeks": 7,
+            "incremental_r_squared_without_it": 0.40759,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 8,
+            "start": "2015-10-16",
+            "end": "2015-11-27",
+            "weeks": 7,
+            "incremental_r_squared_without_it": 0.40743,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 9,
+            "start": "2015-12-11",
+            "end": "2016-03-18",
+            "weeks": 15,
+            "incremental_r_squared_without_it": 0.40966,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 10,
+            "start": "2016-04-15",
+            "end": "2016-07-29",
+            "weeks": 16,
+            "incremental_r_squared_without_it": 0.40723,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 11,
+            "start": "2016-09-30",
+            "end": "2016-11-11",
+            "weeks": 7,
+            "incremental_r_squared_without_it": 0.40334,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 12,
+            "start": "2016-12-16",
+            "end": "2017-02-24",
+            "weeks": 11,
+            "incremental_r_squared_without_it": 0.39937,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 13,
+            "start": "2017-04-07",
+            "end": "2017-05-05",
+            "weeks": 5,
+            "incremental_r_squared_without_it": 0.40643,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 14,
+            "start": "2017-08-04",
+            "end": "2017-08-11",
+            "weeks": 2,
+            "incremental_r_squared_without_it": 0.40525,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 15,
+            "start": "2017-09-15",
+            "end": "2017-11-10",
+            "weeks": 9,
+            "incremental_r_squared_without_it": 0.40353,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 16,
+            "start": "2018-02-16",
+            "end": "2018-03-09",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.40412,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 17,
+            "start": "2018-03-30",
+            "end": "2018-04-13",
+            "weeks": 3,
+            "incremental_r_squared_without_it": 0.40668,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 18,
+            "start": "2018-10-19",
+            "end": "2020-01-10",
+            "weeks": 65,
+            "incremental_r_squared_without_it": 0.41655,
+            "p_value_without_it": 0.0024,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 19,
+            "start": "2020-01-31",
+            "end": "2020-02-21",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.40744,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 20,
+            "start": "2020-03-06",
+            "end": "2020-03-27",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.41719,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 21,
+            "start": "2021-02-05",
+            "end": "2021-02-12",
+            "weeks": 2,
+            "incremental_r_squared_without_it": 0.41988,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 22,
+            "start": "2021-10-22",
+            "end": "2021-11-12",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.40903,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 23,
+            "start": "2022-01-14",
+            "end": "2022-02-11",
+            "weeks": 5,
+            "incremental_r_squared_without_it": 0.40491,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 24,
+            "start": "2022-02-25",
+            "end": "2022-03-11",
+            "weeks": 3,
+            "incremental_r_squared_without_it": 0.40438,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 25,
+            "start": "2022-05-27",
+            "end": "2022-09-23",
+            "weeks": 18,
+            "incremental_r_squared_without_it": 0.39647,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 26,
+            "start": "2022-12-16",
+            "end": "2023-03-10",
+            "weeks": 13,
+            "incremental_r_squared_without_it": 0.4069,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 27,
+            "start": "2023-04-14",
+            "end": "2023-08-11",
+            "weeks": 18,
+            "incremental_r_squared_without_it": 0.41097,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 28,
+            "start": "2023-11-17",
+            "end": "2024-01-12",
+            "weeks": 9,
+            "incremental_r_squared_without_it": 0.40605,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 29,
+            "start": "2024-03-15",
+            "end": "2024-07-12",
+            "weeks": 18,
+            "incremental_r_squared_without_it": 0.43171,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 30,
+            "start": "2024-08-30",
+            "end": "2024-10-04",
+            "weeks": 6,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 31,
+            "start": "2024-10-18",
+            "end": "2025-01-03",
+            "weeks": 12,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 32,
+            "start": "2025-03-28",
+            "end": "2025-04-25",
+            "weeks": 5,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 33,
+            "start": "2025-06-27",
+            "end": "2025-10-17",
+            "weeks": 17,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 34,
+            "start": "2025-12-26",
+            "end": "2026-01-09",
+            "weeks": 3,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 35,
+            "start": "2026-01-23",
+            "end": "2026-01-23",
+            "weeks": 1,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 36,
+            "start": "2026-04-17",
+            "end": "2026-04-24",
+            "weeks": 2,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "slowdown",
+            "episode": 37,
+            "start": "2026-07-03",
+            "end": "2026-07-24",
+            "weeks": 4,
+            "incremental_r_squared_without_it": 0.40486,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "contraction",
+            "episode": 1,
+            "start": "2020-01-17",
+            "end": "2020-01-24",
+            "weeks": 2,
+            "incremental_r_squared_without_it": 0.41643,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "contraction",
+            "episode": 2,
+            "start": "2020-02-28",
+            "end": "2020-02-28",
+            "weeks": 1,
+            "incremental_r_squared_without_it": 0.40709,
+            "p_value_without_it": 0.0021,
+            "still_adds_something": true
+          },
+          {
+            "phase": "contraction",
+            "episode": 3,
+            "start": "2020-04-03",
+            "end": "2020-07-10",
+            "weeks": 15,
+            "incremental_r_squared_without_it": 0.35783,
+            "p_value_without_it": 0.0022,
+            "still_adds_something": true
+          }
+        ]
+      }
+    }
+  ],
+  "layer_c": {
+    "layer": "C — 어느 산업의 싼 주식이 이기는지가 국면에 따라 다른가",
+    "status": "blocked",
+    "why": "종목 단위 재무제표가 있어야 산업 x 가치 교차를 만들 수 있다. Fama-French는 포트폴리오 수준 수익률만 공개하고 산업 x 장부가/시가 교차를 제공하지 않는다.",
+    "what_would_unblock_it": [
+      "CRSP 월간 종목 수익률 (주가·시가총액·상장폐지 수익률)",
+      "Compustat 연간 재무제표 (장부가, 이익, 현금흐름)",
+      "또는 둘을 합쳐 산업 x 가치 이중 정렬을 만들 수 있는 동등한 자료"
+    ],
+    "not_attempted_here": true
+  },
+  "verdict": {
+    "test_a_value_premium_positive_in_the_label_window": false,
+    "test_b_cells_where_phase_adds_beyond_the_term_spread": [
+      {
+        "labelling": "real-time",
+        "horizon_weeks": 104
+      }
+    ],
+    "test_b_cells_that_survive_removing_the_covid_window": [],
+    "phase_model_adds_something_beyond_the_term_spread": false,
+    "layer_c": {
+      "layer": "C — 어느 산업의 싼 주식이 이기는지가 국면에 따라 다른가",
+      "status": "blocked",
+      "why": "종목 단위 재무제표가 있어야 산업 x 가치 교차를 만들 수 있다. Fama-French는 포트폴리오 수준 수익률만 공개하고 산업 x 장부가/시가 교차를 제공하지 않는다.",
+      "what_would_unblock_it": [
+        "CRSP 월간 종목 수익률 (주가·시가총액·상장폐지 수익률)",
+        "Compustat 연간 재무제표 (장부가, 이익, 현금흐름)",
+        "또는 둘을 합쳐 산업 x 가치 이중 정렬을 만들 수 있는 동등한 자료"
+      ],
+      "not_attempted_here": true
+    },
+    "statement": "국면 모델은 기간 스프레드가 이미 주는 것 이상을 더하지 못한다."
+  }
+}

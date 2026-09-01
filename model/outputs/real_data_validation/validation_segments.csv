@@ -1,0 +1,5 @@
+segment,start,end,weeks,phase_changes,broad_changes,contraction_false_positive_weeks,mean_detail_confidence
+development,1995-01-06,2012-12-28,939,158,61,150,59.657616670684774
+stability,2013-01-04,2019-12-27,365,101,27,111,43.1002579445313
+pandemic_stress,2020-01-03,2020-12-25,52,10,3,12,65.01224496544287
+recent,2021-01-01,2026-08-14,294,62,26,77,41.712747699950604

@@ -1,0 +1,47 @@
+[
+  {
+    "start_date": "2020-01-17",
+    "end_date": "2020-01-24",
+    "duration_weeks": 2,
+    "kind": "short_preliminary_signal",
+    "four_week_confirmed": false,
+    "negative_level_domains": 0,
+    "negative_momentum_domains": 2,
+    "confirming_domains": 2,
+    "concentration": 0.7385,
+    "dominant_domain": "labor_stress",
+    "recession_alert": "high",
+    "recession_alert_character": "broad_and_confirmed",
+    "weeks_to_nearest_nber_recession": 7
+  },
+  {
+    "start_date": "2020-02-28",
+    "end_date": "2020-02-28",
+    "duration_weeks": 1,
+    "kind": "isolated_week",
+    "four_week_confirmed": false,
+    "negative_level_domains": 0,
+    "negative_momentum_domains": 3,
+    "confirming_domains": 3,
+    "concentration": 0.6607,
+    "dominant_domain": "labor_stress",
+    "recession_alert": "watch",
+    "recession_alert_character": "preliminary",
+    "weeks_to_nearest_nber_recession": 1
+  },
+  {
+    "start_date": "2020-05-01",
+    "end_date": "2020-07-10",
+    "duration_weeks": 11,
+    "kind": "four_week_confirmed",
+    "four_week_confirmed": true,
+    "negative_level_domains": 4,
+    "negative_momentum_domains": 4,
+    "confirming_domains": 4,
+    "concentration": 0.3398,
+    "dominant_domain": "labor_stress",
+    "recession_alert": "high",
+    "recession_alert_character": "broad_and_confirmed",
+    "weeks_to_nearest_nber_recession": 8
+  }
+]

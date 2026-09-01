@@ -1,0 +1,4 @@
+episode,sample_role,nber_trough_month,turning_month_interval,first_official_recovery,position,calendar_recovery_latency_weeks,calendar_band,first_week_out_of_official_contraction,contraction_exit_latency_weeks,contraction_exit_band,gated
+recession_2001,development_latest_vintage,2001-11,"['2001-11-01', '2001-11-30']",2002-07-05,post_trough_delay,31,red,2002-01-25,8,green,False
+gfc_2009,development_latest_vintage,2009-06,"['2009-06-01', '2009-06-30']",2009-06-05,within_turning_month,0,green,2009-06-05,0,green,False
+recession_2020,strict_alfred_real_time,2020-04,"['2020-04-01', '2020-04-30']",2020-07-17,post_trough_delay,11,amber,2020-07-17,11,amber,True

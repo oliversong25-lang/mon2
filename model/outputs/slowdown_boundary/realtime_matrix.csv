@@ -1,0 +1,5 @@
+cell,gate,transitions,phases_shorter_than_four_weeks,slowdown_weeks,slowdown_share,expansion_weeks,recovery_weeks,contraction_weeks,withheld_weeks,slowdown_discrimination,slowdown_discrimination_p,progression_rate,progressed_to_contraction,closed_slowdown_blocks,contraction_delay_weeks,recovery_delay_weeks,nber_false_positive_episodes,breadth_gate_holds,current_call
+baseline,baseline,72,19,338,0.4913,288,34,18,10,,,0.081,3,37,0,0,2,True,expansion
+gate_only,gate_only,63,11,350,0.5087,279,34,15,10,,,0.03,1,33,0,0,1,True,expansion
+boundary_only,boundary_only,28,9,49,0.0712,577,34,18,10,,,0.231,3,13,0,0,2,True,expansion
+boundary_and_gate,boundary_and_gate,22,6,50,0.0727,579,34,15,10,,,0.1,1,10,0,0,1,True,expansion

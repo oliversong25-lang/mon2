@@ -1,0 +1,32 @@
+{
+  "stage": "A-5",
+  "candidate": "candidate_h2_systemic_override",
+  "preserved_failed_candidate": "candidate_h_breadth_gate",
+  "latest_vintage_passed": true,
+  "alfred_passed": false,
+  "adopted": false,
+  "latest_vintage_identical_to_h": true,
+  "systemic_override_weeks_latest_vintage": 0,
+  "detection": {
+    "first_contraction_signal_date": "2020-05-01",
+    "first_signal_lag_weeks": 8.0,
+    "confirmation_decision_date": "2020-05-22",
+    "confirmation_lag_weeks": 11.0,
+    "official_recession_weeks": 8,
+    "official_recession_weeks_called_contraction": 0,
+    "confirmation_within_official_recession": false,
+    "pre_recession_contraction_weeks": 0,
+    "pre_recession_confirmed_weeks": 0,
+    "late_2019_confirmed_contraction_weeks": 0,
+    "systemic_override_weeks": 0,
+    "override_weeks_in_any_history": 0,
+    "weeks_with_observations_after_as_of": 0,
+    "weeks": 688
+  },
+  "measurements": {
+    "recall": 0.8842975206611571,
+    "false_positive_rate": 0.02223675604970569,
+    "precision": 0.7588652482269503,
+    "f1": 0.816793893129771
+  }
+}

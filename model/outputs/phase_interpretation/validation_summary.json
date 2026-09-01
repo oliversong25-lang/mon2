@@ -1,0 +1,163 @@
+{
+  "core_model_parity": true,
+  "recorded_hash": "ddc16fff62b72421e2d0cb28a794d03885c7417e1e856bccb852528813fb67b3",
+  "measured_hash": "ddc16fff62b72421e2d0cb28a794d03885c7417e1e856bccb852528813fb67b3",
+  "weeks_compared": 1650,
+  "first_difference": "",
+  "compared_fields": [
+    "official_broad_phase",
+    "official_detailed_phase",
+    "phase_probabilities",
+    "x",
+    "y",
+    "radius",
+    "model_status"
+  ],
+  "artifact_hashes": {
+    "phase6/frozen_model_config.sha256": "b1ad9886f06e6e3c1380b5960f640c9add12576512eaeaa91a12c5510a759063",
+    "phase6/frozen_model_config.yaml": "c367e2a0f8e907b6f927191f03379bab5ea5eace6b671454c4b63e44d4b2bb21",
+    "phase6/validation_summary.json": "d575696dd29a1076de76d0ec800a2959bf24d3812ddcb2b978abc5bea2c9484f",
+    "phase7/realtime_path.csv": "3fcffb598f5e4be02e1603357ed2fb564d584baa90c1b63930919296575900ad",
+    "phase7/validation_summary.json": "6b9fb2ff06e4a70020b62f6dbb0f65408a8a5e30b11300944e9f7e1099f0bb7d",
+    "phase8/alfred/realtime_path.csv": "446b8187b27d4689ae2eb9c2e5f5936a4e8a19ff043de9d3894d6330d171d1dd",
+    "phase8/validation_summary.json": "4ab2c76b343c98feb9d65eaea8e5108fe2f48111f593118d4aaff3b15922ff6b"
+  },
+  "layer": "phase_interpretation",
+  "model_baseline": "candidate_h_breadth_gate",
+  "model_modified": false,
+  "boundary_policy": {
+    "calibration_window": [
+      "1995-01-01",
+      "2026-08-14"
+    ],
+    "weeks": 1650,
+    "phase_switch_weeks": 211,
+    "gap_median_on_switch_weeks": 0.112362,
+    "gap_median_on_steady_weeks": 0.315633,
+    "selected_threshold": 0.1124,
+    "threshold_matches_measurement": true,
+    "flagged_weeks": 302,
+    "flagged_share": 0.18303,
+    "gap_quantiles": {
+      "0.05": 0.031108,
+      "0.1": 0.067877,
+      "0.25": 0.14697,
+      "0.5": 0.284899,
+      "0.75": 0.536736,
+      "0.9": 0.916051
+    },
+    "entropy_median": 0.915466,
+    "weekly_movement_median": 0.105431
+  },
+  "transition_policy": {
+    "sustained_four_week_rise": 0.1667,
+    "minimum_rising_weeks": 3,
+    "overwhelming_one_week_rise": 0.2315
+  },
+  "confidence_policy": {
+    "weak_agreement": 0.6516,
+    "calibrated": false
+  },
+  "industry_dimensions_available": 0,
+  "industry_dimensions_required": 7,
+  "countries": {
+    "US": {
+      "status": "implemented",
+      "as_of_date": "2026-08-14"
+    },
+    "KR": {
+      "country": "KR",
+      "status": "not_implemented",
+      "as_of_date": null,
+      "official_broad_phase": null,
+      "official_detailed_phase": null,
+      "reason": "인과 국가 모델이 없다. 현재 국면을 만들지 않는다.",
+      "required_domains": [
+        "employment",
+        "income",
+        "production",
+        "consumption",
+        "claims"
+      ],
+      "candidate_series": [
+        {
+          "domain": "employment",
+          "candidate": "통계청 경제활동인구조사 취업자수",
+          "requirement": "월간, 발표지연 확인, 계절조정, 수정 이력(빈티지) 확보"
+        },
+        {
+          "domain": "income",
+          "candidate": "가계동향조사 실질소득 또는 국민계정 실질 GNI",
+          "requirement": "분기 계열은 주간 가교 규칙을 따로 정해야 한다"
+        },
+        {
+          "domain": "production",
+          "candidate": "전산업생산지수 / 광공업생산지수",
+          "requirement": "월간, 기준연도 개편 시 소급 수정 처리 필요"
+        },
+        {
+          "domain": "consumption",
+          "candidate": "소매판매액지수 / 서비스업생산지수",
+          "requirement": "월간, 명목·실질 구분"
+        },
+        {
+          "domain": "claims",
+          "candidate": "고용보험 구직급여 신규신청자수",
+          "requirement": "주간 가교로 쓰려면 주간 또는 월간 고빈도 확보 필요"
+        }
+      ]
+    },
+    "CN": {
+      "country": "CN",
+      "status": "not_implemented",
+      "as_of_date": null,
+      "official_broad_phase": null,
+      "official_detailed_phase": null,
+      "reason": "인과 국가 모델이 없다. 현재 국면을 만들지 않는다.",
+      "required_domains": [
+        "employment",
+        "income",
+        "production",
+        "consumption",
+        "claims"
+      ],
+      "candidate_series": [
+        {
+          "domain": "employment",
+          "candidate": "도시조사실업률 / 도시 신규취업자수",
+          "requirement": "월간, 계열 정의 변경 이력 확인 필요"
+        },
+        {
+          "domain": "income",
+          "candidate": "주민 1인당 가처분소득",
+          "requirement": "분기·누계 발표라 주간 가교와 누계 해제 규칙이 필요하다"
+        },
+        {
+          "domain": "production",
+          "candidate": "규모이상 공업부가가치 증가율",
+          "requirement": "월간, 1~2월 합산 발표 처리 필요"
+        },
+        {
+          "domain": "consumption",
+          "candidate": "사회소비재 소매총액",
+          "requirement": "월간, 1~2월 합산 발표 처리 필요"
+        },
+        {
+          "domain": "claims",
+          "candidate": "(직접 대응 없음)",
+          "requirement": "주간 가교 대체 지표를 별도로 정의해야 한다"
+        }
+      ]
+    }
+  },
+  "current_us": {
+    "as_of_date": "2026-08-14",
+    "official_broad_phase": "slowdown",
+    "official_detailed_phase": "slowdown_late",
+    "recession_status": "no",
+    "confidence_level": "high",
+    "boundary_flag": false,
+    "transition_watch": false
+  },
+  "produces_investment_recommendation": false
+}

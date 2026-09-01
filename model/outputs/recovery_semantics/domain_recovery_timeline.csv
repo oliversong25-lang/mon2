@@ -1,0 +1,6 @@
+domain,role,series,first_as_of_covering_the_trough_month,first_as_of_covering_the_following_month,first_positive_momentum_week,first_non_deteriorating_level_week,first_week_supporting_recovery,first_week_the_domain_supported_the_raw_phase,momentum_contribution_at_first_official_recovery,level_contribution_at_first_official_recovery
+production,coincident,INDPRO,2020-05-15,2020-06-19,2020-07-17,2020-04-10,2020-07-17,2020-04-03,0.75094,-0.696463
+employment,coincident,PAYEMS,2020-05-08,2020-06-05,2020-07-03,2020-04-10,2020-07-03,2020-05-08,0.75094,-0.50704
+real_income,coincident,W875RX1,2020-05-29,2020-06-26,2020-04-03,2020-04-10,2020-04-03,2020-05-01,-0.75094,-0.75526
+consumption,coincident,RRSFS|CMRMTSPL,2020-05-15,2020-06-19,2020-06-19,2020-04-10,2020-06-19,2020-04-03,0.75094,-0.75526
+labor_stress,bridge_only,ICSA|CCSA,2020-04-10,2020-05-08,2020-05-22,2020-04-10,2020-05-22,2020-04-03,0.75094,-0.75526

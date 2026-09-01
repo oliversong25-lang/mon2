@@ -1,0 +1,117 @@
+{
+  "country": "US",
+  "as_of_date": "2026-08-14",
+  "official_broad_phase": "slowdown",
+  "official_detailed_phase": "slowdown_late",
+  "recession_status": "no",
+  "official_phase_probability": 0.98506,
+  "runner_up_phase": "slowdown_middle",
+  "runner_up_probability": 0.01494,
+  "winner_runner_up_gap": 0.97012,
+  "confidence_level": "high",
+  "boundary_flag": false,
+  "boundary_reason": "1·2순위 확률 차이 0.970로 전환 주 중앙값 0.1124보다 크다.",
+  "transition_watch": false,
+  "transition_direction": "contraction_early",
+  "data_status": "official",
+  "supporting_domains": [
+    "consumption",
+    "production"
+  ],
+  "opposing_domains": [],
+  "domain_breadth": {
+    "measure": "economic_domain_breadth",
+    "total_domains": 5,
+    "supporting": 2,
+    "opposing": 0,
+    "mixed": 3,
+    "negative_contribution_domains": 2
+  },
+  "industry_breadth_status": "not_available",
+  "industry_concentration_status": "not_measured",
+  "short_explanation": "consumption, production이(가) slowdown 판정을 뒷받침한다. claims, employment, income은(는) 수준과 모멘텀이 엇갈린다.",
+  "limitations": [
+    "이 모델은 갑작스러운 외생 침체를 광범위한 동행지표가 발표된 뒤에야 인식할 수 있다. 엄격 ALFRED 검증에서 2020년 공식 침체 8주 중 수축으로 부른 주가 0주였다.",
+    "실시간 검증이 가능한 침체가 2020년 하나뿐이라 실시간 탐지 성능을 일반화할 수 없다.",
+    "확신도는 보정된 확률이 아니다. 보정을 시연한 적이 없다.",
+    "이 결과는 경기국면 진단이며 투자 판단이 아니다. 종목·섹터·비중 판단은 사용자 몫이다."
+  ],
+  "model_detailed_phase_code": "slowdown_late",
+  "phase_entropy": 0.077632,
+  "confidence_reasons": [],
+  "confidence_is_calibrated": false,
+  "transition_detail": {
+    "transition_probability": 0.0,
+    "probability_change_1w": 0.0,
+    "probability_change_4w": 0.0,
+    "rising_weeks_of_four": 0,
+    "trigger": "none",
+    "supporting_domain_changes": {
+      "claims": 0.03084,
+      "consumption": -0.03009,
+      "employment": -0.002508,
+      "income": -0.002549,
+      "production": -0.035122
+    }
+  },
+  "domain_detail": [
+    {
+      "domain": "claims",
+      "direction": "positive",
+      "standardized_contribution": 0.029852,
+      "contribution_share": 0.05758,
+      "recent_change": 0.03084,
+      "stance": "mixed",
+      "data_freshness_weeks": 0.0,
+      "missing": false
+    },
+    {
+      "domain": "consumption",
+      "direction": "positive",
+      "standardized_contribution": 0.002692,
+      "contribution_share": 0.005192,
+      "recent_change": -0.03009,
+      "stance": "supports",
+      "data_freshness_weeks": 4.0,
+      "missing": false
+    },
+    {
+      "domain": "employment",
+      "direction": "negative",
+      "standardized_contribution": -0.055561,
+      "contribution_share": 0.10717,
+      "recent_change": -0.002508,
+      "stance": "mixed",
+      "data_freshness_weeks": 5.0,
+      "missing": false
+    },
+    {
+      "domain": "income",
+      "direction": "negative",
+      "standardized_contribution": -0.362199,
+      "contribution_share": 0.698636,
+      "recent_change": -0.002549,
+      "stance": "mixed",
+      "data_freshness_weeks": 6.0,
+      "missing": false
+    },
+    {
+      "domain": "production",
+      "direction": "positive",
+      "standardized_contribution": 0.068134,
+      "contribution_share": 0.131422,
+      "recent_change": -0.035122,
+      "stance": "supports",
+      "data_freshness_weeks": 8.0,
+      "missing": false
+    }
+  ],
+  "industry_basis": "산업 단위 계열이 저장소에 없다. 총량 지표에서 산업 상태를 추론하지 않는다.",
+  "status_reason": "",
+  "model_baseline": "candidate_h_breadth_gate",
+  "coordinates": {
+    "x_momentum": -0.031434,
+    "y_level": -0.238862,
+    "radius": 0.240922
+  }
+}

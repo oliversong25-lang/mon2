@@ -1,0 +1,65 @@
+{
+  "official_current_phase": "expansion",
+  "phase_status": "official",
+  "phase_separation": 0.557125,
+  "evidence_quality": "medium",
+  "activity_level": -0.247821,
+  "activity_momentum": 0.274323,
+  "domain_breadth": {
+    "negative_level_domains": 2,
+    "negative_momentum_domains": 1,
+    "positive_momentum_domains": 1,
+    "coincident_domains": 4
+  },
+  "contribution_concentration": 0.525839,
+  "supporting_domains": [
+    "labor_stress"
+  ],
+  "opposing_domains": [
+    "employment"
+  ],
+  "mixed_domains": [
+    "production",
+    "real_income",
+    "consumption"
+  ],
+  "transition_watch": "none",
+  "recession_alert": "none",
+  "as_of_date": "2026-08-14",
+  "latest_observation_by_domain": {
+    "production": 8.0,
+    "employment": 5.0,
+    "real_income": 6.0,
+    "consumption": 4.0,
+    "labor_stress": 0.0
+  },
+  "known_limitations": [
+    "이 모델은 검증을 완료하지 않았고 채택되지 않았다. 게이트 모순으로 최신 수정치 검증 전에 중단했다.",
+    "official_current_phase는 현재상태 측정이며 예측이 아니다.",
+    "phase_separation은 내부 점수 차이이며 보정된 확률이 아니다.",
+    "evidence_quality도 보정된 확률이 아니다.",
+    "이 결과는 투자 판단이 아니다. 섹터·비중·종목 판단은 사용자 몫이다."
+  ],
+  "raw_current_phase": "expansion",
+  "raw_scores": {
+    "recovery": 0.25,
+    "expansion": 0.501614,
+    "slowdown": 0.248385,
+    "contraction": 1e-06
+  },
+  "filtered_scores": {
+    "recovery": 0.118965,
+    "expansion": 0.71908,
+    "slowdown": 0.161955,
+    "contraction": 0.0
+  },
+  "evidence_reasons": [
+    "activity level and momentum are both inside the neutral zone"
+  ],
+  "coordinates_diagnostic_only": {
+    "x": 0.274323,
+    "y": -0.247821,
+    "angle": 317.905692,
+    "radius": 0.369687
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "development_window": [
+    "1995-01-06",
+    "2012-12-28"
+  ],
+  "development_weeks": 939,
+  "measured": {
+    "overall_recall": 0.938053,
+    "false_positive_rate": 0.033898,
+    "f1": 0.8583,
+    "first_third_recall": 0.918919,
+    "middle_third_recall": 1.0,
+    "final_third_recall": 0.894737,
+    "first_half_recall": 0.946429,
+    "core_recall": 1.0,
+    "four_week_confirmed_false_positive_episodes": 3,
+    "two_step_transitions": 3,
+    "three_week_whipsaws": 0,
+    "longest_disagreement_run": 10,
+    "gfc_first_official_contraction_weeks": 7.0,
+    "median_transition_delay_weeks": 2.0,
+    "maximum_transition_delay_weeks": 2
+  },
+  "checks": {
+    "official_contraction_breadth_at_least_two": true,
+    "overall_recall": true,
+    "core_recall": true,
+    "false_positive_rate": true,
+    "gfc_first_official_contraction": true,
+    "all_phases_reachable": true,
+    "two_step_transitions": true,
+    "three_week_whipsaws": true,
+    "no_practical_absorbing_state": true,
+    "longest_disagreement_run": true,
+    "confirmation_delay_within_the_rule": true
+  },
+  "passed": true,
+  "frontier_reproduction": {
+    "compared": true,
+    "mismatches": {},
+    "matches": true
+  }
+}

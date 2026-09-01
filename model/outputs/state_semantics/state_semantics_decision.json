@@ -1,0 +1,49 @@
+{
+  "classification": "provisional_model_locked",
+  "reason": "높은 증거 의미 충돌 0건, 유계 지연이 한도 안, 낮은 증거가 낮다고 보고됐고, 2001년 경로에 숨은 높은 증거 모순이 없으며, 이전 게이트와 보호 지문이 그대로다",
+  "allowed_classifications": [
+    "provisional_model_locked",
+    "operational_rejection_confirmed"
+  ],
+  "forbidden_classification": "final_validated",
+  "rejection_reasons": [],
+  "high_evidence_semantic_conflicts": 0,
+  "hard_rules_literally_failing": [
+    "no_high_evidence_week_contradicts_both_level_and_momentum"
+  ],
+  "hard_rule_failures_are_disclosed_not_gated": true,
+  "counterfactual_if_every_section_five_rule_gated": "operational_rejection_confirmed",
+  "counterfactual_changes_the_decision": true,
+  "model_status": "provisional",
+  "is_final_validation": false,
+  "phase_order_reversal_alone_is_not_a_failure": true,
+  "semantic_digest": "0ea6db2eaabd9adf0c20d9bbf31e633fd4c82737a36dd561550f9f693bd75c1d",
+  "semantic_digest_covers": [
+    "classification",
+    "protected_hashes",
+    "weekly_semantic_classifications",
+    "path_2001_classification",
+    "high_evidence_conflict_count",
+    "current_phase_semantic_classification",
+    "previous_state_dependence",
+    "hard_rules",
+    "episode_kinds",
+    "decision_reasons"
+  ],
+  "semantic_digest_excludes": [
+    "executed_at_utc",
+    "head_commit",
+    "runtime_seconds"
+  ],
+  "source_commit": "81941a79c66c5bd39888ec66de9921c0e6dcb445",
+  "executed_at_utc": "2026-08-27T07:02:20+00:00",
+  "hashes": {
+    "v1_1_config": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+    "v1_0_stopped_config": "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027",
+    "selection_rule": "71647ea8e81951229d67f1556bc504aa0f38877ca713c069b8b68a20a88cbcd0",
+    "frontier_csv": "2390a22c2e2a877e803767a5ca894573694e92461607f2b30bf7ef666c9b2607",
+    "candidate_h": "c367e2a0f8e907b6f927191f03379bab5ea5eace6b671454c4b63e44d4b2bb21",
+    "candidate_i": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
+    "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f"
+  }
+}

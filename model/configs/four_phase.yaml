@@ -1,0 +1,85 @@
+# 미국 4국면 경기시계 v1 — 개발구간 잠금 설정
+#
+# 상태: **검증 미완료·미채택**. §18의 게이트 모순 조항에 따라 최신 수정치 검증 전에
+# 중단했다. 이 파일은 개발구간(1995-01-01~2012-12-31)에서만 도출한 값을 담은
+# 연구 기록이며, 채택된 운영 설정이 아니다.
+#
+# 중단 사유는 `outputs/four_phase/validation_report.md`에 있다. 요약하면, §9가 금지한
+# "한 동행 도메인 단독 침체 선언"을 지키면서 §18의 재현율 0.85·오탐률 0.05를 동시에
+# 만족하는 규칙이 개발구간에 존재하지 않는다.
+#
+# 후보 H/H2·phase6/7/8·해석층·후보 I·후보 J는 건드리지 않는다.
+
+model: us_four_phase_v1
+status: development_locked_not_validated
+development_window: ["1995-01-01", "2012-12-31"]
+
+# 후보 I·J에서 확정된 전처리 결론을 그대로 승계한다. 다시 열지 않는다.
+inherited_preprocessing:
+  transformations: candidate_h_breadth_gate
+  no_additional_deflation: [RRSFS, W875RX1, CMRMTSPL, INDPRO]
+  no_scale_division: [payems_population, payems_labor_force, icsa_covered, ccsa_covered]
+  momentum_scale_method: rolling_mad
+  release_aware_momentum: true
+  fabricate_zero_between_releases: false
+
+momentum_scale:
+  method: rolling_mad
+  window_years: 10.0
+  minimum_years: 2.0
+momentum_weeks: 8
+
+# 도메인 기여 상한. 개발구간 |도메인 점수| p99. 한 도메인이 총량을 끌고 갈 수 없지만
+# 여러 도메인이 함께 극단이면 총량도 상한까지 간다.
+domain_caps:
+  level: 3.7763
+  momentum: 3.7547
+
+thresholds:
+  # 침체 전후 26주를 뺀 개발구간 평상시 주의 |총량| 중앙값.
+  neutral_level: 0.5030
+  neutral_momentum: 0.3903
+  # 개발구간 침체 주 총량의 중앙값 크기.
+  level_severity: 1.7915
+  momentum_severity: 1.2954
+  # 개발구간 침체 주 동행 도메인 음수 개수의 p25.
+  level_breadth: 3
+  momentum_breadth: 3
+  # 뒷받침(노동시장 등 독립 도메인)이 침체 증거에 더할 수 있는 최대 몫.
+  # 진입 문턱보다 작아야 노동시장 단독 선언이 불가능하다 — 0.20 < 0.8818.
+  corroboration_share: 0.20
+  # 개발구간 평상시 침체증거의 p99.
+  contraction_entry: 0.8818
+  # 회복 요건. 저점 이후 26주 구간에서 도출했다.
+  recovery_breadth: 1
+  recovery_momentum: 0.7640
+  # 평상시 양수 모멘텀 연속 길이의 p75. 잡음과 구분되는 최소 지속.
+  recovery_persistence_weeks: 9
+  # 중립대 안에서 폭이 결정을 돕는 정도. 개발구간 격자 탐색에서 선택.
+  breadth_weight: 0.3
+  # 개발구간 도메인 집중도 p95. 증거 품질 표시일 뿐 국면을 바꾸지 않는다.
+  concentration_flag: 0.6104
+
+# 4상태 소프트 필터. 모수는 lambda 하나와 epsilon 하나뿐이다.
+# 개발구간 격자에서 2단계 전이 <= 5 AND 3주 왕복 <= 5 를 만족하는 조합 중 재현율 최대.
+soft_filter:
+  lambda: 1.8
+  epsilon: 0.01
+
+# 반지름·각도는 진단 출력일 뿐 공식 분류에 쓰이지 않는다.
+radius_role: diagnostic_only
+
+# 검증 전에 잠근 채택 게이트(§18). 검증을 실행하지 않았으므로 판정도 하지 않았다.
+adoption_gates:
+  recession_recall_minimum: 0.85
+  core_recession_recall_minimum: 0.90
+  false_positive_rate_maximum: 0.05
+  two_step_transitions_maximum: 5
+  three_week_whipsaws_maximum: 5
+  gfc_first_signal_maximum_weeks: 10
+  pandemic_first_signal_maximum_weeks: 10
+  pandemic_recession_weeks_as_contraction_minimum: 1
+  late_2019_confirmed_contraction_maximum: 0
+  post_2022_confirmed_contraction_maximum: 0
+  all_phases_reachable: true
+  no_zero_transition_support: true

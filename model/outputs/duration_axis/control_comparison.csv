@@ -1,0 +1,5 @@
+target,weeks,usable,control_columns,control_only_r_squared,phase_only_r_squared,both_r_squared,incremental_r_squared_of_phase,incremental_r_squared_of_control_over_phase,phase_absorbs_the_control,shifts_used,null_median_increment,null_p90_increment,null_p
+"long minus short, forward 3m",378,True,"['realised_variance_4m', 'realised_volatility_4m', 'term_spread']",0.094124,0.040498,0.122422,0.028298,0.081924,False,275,0.010652,0.055249,0.2862
+ex_2022,366,True,"['realised_variance_4m', 'realised_volatility_4m', 'term_spread']",0.101862,0.039495,0.129128,0.027266,0.089633,False,263,0.010382,0.039694,0.2083
+ex_covid,366,True,"['realised_variance_4m', 'realised_volatility_4m', 'term_spread']",0.068434,0.024989,0.09859,0.030156,0.073601,False,263,0.010032,0.041327,0.1742
+ex_gfc,354,True,"['realised_variance_4m', 'realised_volatility_4m', 'term_spread']",0.058848,0.032263,0.091645,0.032797,0.059382,False,251,0.013243,0.043048,0.1786

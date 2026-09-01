@@ -1,0 +1,54 @@
+{
+  "verified": true,
+  "hashes": {
+    "v1_1_config": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+    "v1_0_stopped_config": "892fbbfb4b9f72f1611097354298380b14875e955a6f3b0e36a47376c2b53027",
+    "selection_rule": "71647ea8e81951229d67f1556bc504aa0f38877ca713c069b8b68a20a88cbcd0",
+    "frontier_csv": "2390a22c2e2a877e803767a5ca894573694e92461607f2b30bf7ef666c9b2607",
+    "candidate_h": "c367e2a0f8e907b6f927191f03379bab5ea5eace6b671454c4b63e44d4b2bb21",
+    "candidate_i": "765e2ee65b70a185159faa928c2df9c734c19e583dc8655ae47c80ec3d056993",
+    "candidate_j": "a0d875268f1d720a29659f96695e74391db7fd9a3a0213b8c8970e6399a6098f"
+  },
+  "expected_source_commit": "4f7160445d36f2f064763afd8f1b39590aff1baa",
+  "head_commit": "fdfa325fcb97ae84ec2fbadbaa2b3019d79bc9eb",
+  "protected_paths": [
+    "configs/four_phase.yaml",
+    "configs/four_phase_v1_1.yaml",
+    "src/business_cycle/four_phase/evidence.py",
+    "src/business_cycle/four_phase/filter.py",
+    "src/business_cycle/four_phase/freshness.py",
+    "src/business_cycle/four_phase/engine.py",
+    "src/business_cycle/four_phase/contract.py",
+    "src/business_cycle/four_phase/frontier.py",
+    "src/business_cycle/four_phase/alfred.py",
+    "src/business_cycle/four_phase/alfred_audit.py",
+    "src/business_cycle/four_phase/validation.py",
+    "src/business_cycle/operational_review",
+    "outputs/four_phase",
+    "outputs/four_phase_v1_1",
+    "outputs/robustness_validation/phase6/validation_summary.json",
+    "outputs/current_state/frozen_candidate_config.sha256",
+    "outputs/candidate_j/frozen_candidate_config.sha256"
+  ],
+  "protected_paths_clean": true,
+  "stage": "recovery_semantics",
+  "stage_is_read_only": true,
+  "parameter_search_run": false,
+  "model_logic_changed": false,
+  "prior_decisions_preserved": {
+    "four_phase_v1_1_latest_vintage_protocol": "rejected",
+    "operational_review": "operational_rejection"
+  },
+  "prior_decision_record": {
+    "path": "outputs/operational_review/operational_decision.json",
+    "classification": "operational_rejection",
+    "v1_1_status": "rejected",
+    "failed_gates": [
+      "recovery_and_exit.development_benchmark_post_trough_contraction_run",
+      "recovery_and_exit.no_premature_four_week_recovery_inside_a_recession"
+    ],
+    "preserved": true,
+    "compared_by": "decision_content_not_file_bytes"
+  },
+  "executed_at_utc": "2026-08-27T07:01:59+00:00"
+}

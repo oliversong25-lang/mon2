@@ -1,0 +1,97 @@
+{
+  "expected_as_of_dates": 688,
+  "actual_as_of_dates": 688,
+  "missing_as_of_dates": [],
+  "duplicate_as_of_dates": 0,
+  "first_week": "2013-06-14",
+  "last_week": "2026-08-14",
+  "cache_coverage": {
+    "series": {
+      "PAYEMS": {
+        "cached": true,
+        "rows": 7220,
+        "first_realtime_start": "1985-02-01",
+        "last_realtime_start": "2026-08-07",
+        "open_ended_vintages": 499,
+        "rows_after_window_end": 0,
+        "covers_window": true
+      },
+      "W875RX1": {
+        "cached": true,
+        "rows": 4186,
+        "first_realtime_start": "2010-05-28",
+        "last_realtime_start": "2026-07-30",
+        "open_ended_vintages": 498,
+        "rows_after_window_end": 0,
+        "covers_window": true
+      },
+      "INDPRO": {
+        "cached": true,
+        "rows": 11295,
+        "first_realtime_start": "1985-02-15",
+        "last_realtime_start": "2026-07-17",
+        "open_ended_vintages": 498,
+        "rows_after_window_end": 0,
+        "covers_window": true
+      },
+      "CMRMTSPL": {
+        "cached": true,
+        "rows": 2930,
+        "first_realtime_start": "2013-06-14",
+        "last_realtime_start": "2026-07-30",
+        "open_ended_vintages": 497,
+        "rows_after_window_end": 0,
+        "covers_window": true
+      },
+      "RRSFS": {
+        "cached": true,
+        "rows": 6713,
+        "first_realtime_start": "2001-06-15",
+        "last_realtime_start": "2026-08-14",
+        "open_ended_vintages": 415,
+        "rows_after_window_end": 0,
+        "covers_window": true
+      },
+      "ICSA": {
+        "cached": true,
+        "rows": 6844,
+        "first_realtime_start": "2009-05-28",
+        "last_realtime_start": "2026-08-13",
+        "open_ended_vintages": 2171,
+        "rows_after_window_end": 0,
+        "covers_window": true
+      },
+      "CCSA": {
+        "cached": true,
+        "rows": 7419,
+        "first_realtime_start": "2009-09-10",
+        "last_realtime_start": "2026-08-13",
+        "open_ended_vintages": 2170,
+        "rows_after_window_end": 0,
+        "covers_window": true
+      }
+    },
+    "series_without_full_coverage": [],
+    "all_series_cover_window": true
+  },
+  "new_vintage_activity": {
+    "weeks_with_no_new_vintage_in_any_series": 7,
+    "longest_all_series_publication_pause_weeks": 7,
+    "pause_weeks": [
+      "2025-10-03",
+      "2025-10-10",
+      "2025-10-17",
+      "2025-10-24",
+      "2025-10-31",
+      "2025-11-07",
+      "2025-11-14"
+    ]
+  },
+  "weeks_to_withhold": [],
+  "network_used": false,
+  "api_key_used": false,
+  "latest_vintage_substitution": false,
+  "backward_fill_used": false,
+  "inferred_releases_used": false,
+  "provenance": "data/cache/alfred/*.csv — ALFRED 값만. URL도 키도 저장하지 않는다."
+}

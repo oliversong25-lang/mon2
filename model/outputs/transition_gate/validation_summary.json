@@ -1,0 +1,2136 @@
+{
+  "variant": "parallel_gate_over_frozen_v1_1",
+  "frozen_model_modified": false,
+  "frozen_config_sha256": "e052a4f41ca2d01431bab32e6df8bbd383ea9a2dab09982a6675e789bcc3265a",
+  "executed_at_utc": "2026-08-25T03:14:11+00:00",
+  "characterisation": {
+    "weeks": 688,
+    "window": [
+      "2013-06-14",
+      "2026-08-14"
+    ],
+    "transitions": 72,
+    "transition_pairs": {
+      "slowdown->expansion": 32,
+      "expansion->slowdown": 31,
+      "slowdown->contraction": 3,
+      "contraction->slowdown": 2,
+      "contraction->recovery": 1,
+      "recovery->slowdown": 1,
+      "expansion->recovery": 1,
+      "recovery->expansion": 1
+    },
+    "separation_distribution": {
+      "eligible_weeks": 678,
+      "all_weeks": {
+        "min": 0.0002,
+        "p10": 0.1784,
+        "p25": 0.3936,
+        "median": 0.6365,
+        "p75": 0.8259,
+        "p90": 0.9292,
+        "max": 0.9996,
+        "mean": 0.5906
+      },
+      "transition_weeks": {
+        "min": 0.0184,
+        "p10": 0.1612,
+        "p25": 0.2442,
+        "median": 0.4929,
+        "p75": 0.7215,
+        "p90": 0.8437,
+        "max": 0.9151,
+        "mean": 0.5019
+      },
+      "non_transition_weeks": {
+        "min": 0.0002,
+        "p10": 0.1827,
+        "p25": 0.4019,
+        "median": 0.6531,
+        "p75": 0.8294,
+        "p90": 0.9355,
+        "max": 0.9996,
+        "mean": 0.6011
+      },
+      "share_below": {
+        "below_0.4": {
+          "all_weeks": 0.2611,
+          "transition_weeks": 0.3889
+        },
+        "below_0.5": {
+          "all_weeks": 0.3555,
+          "transition_weeks": 0.5
+        },
+        "below_0.6": {
+          "all_weeks": 0.4572,
+          "transition_weeks": 0.5972
+        },
+        "below_0.7": {
+          "all_weeks": 0.5929,
+          "transition_weeks": 0.6944
+        }
+      }
+    },
+    "separation_versus_duration": {
+      "transitions": 71,
+      "spearman_rank_correlation": 0.138,
+      "by_band": [
+        {
+          "band": "0.0–0.2",
+          "transitions": 9,
+          "median_duration_weeks": 9,
+          "short_phases": 1,
+          "short_rate": 0.111,
+          "reverted": 1
+        },
+        {
+          "band": "0.2–0.4",
+          "transitions": 19,
+          "median_duration_weeks": 7,
+          "short_phases": 7,
+          "short_rate": 0.368,
+          "reverted": 4
+        },
+        {
+          "band": "0.4–0.5",
+          "transitions": 8,
+          "median_duration_weeks": 4.0,
+          "short_phases": 3,
+          "short_rate": 0.375,
+          "reverted": 2
+        },
+        {
+          "band": "0.5–0.6",
+          "transitions": 6,
+          "median_duration_weeks": 5.0,
+          "short_phases": 2,
+          "short_rate": 0.333,
+          "reverted": 1
+        },
+        {
+          "band": "0.6–0.7",
+          "transitions": 7,
+          "median_duration_weeks": 8,
+          "short_phases": 0,
+          "short_rate": 0.0,
+          "reverted": 0
+        },
+        {
+          "band": "0.7–0.8",
+          "transitions": 9,
+          "median_duration_weeks": 5,
+          "short_phases": 2,
+          "short_rate": 0.222,
+          "reverted": 1
+        },
+        {
+          "band": "0.8–1.0",
+          "transitions": 13,
+          "median_duration_weeks": 10,
+          "short_phases": 0,
+          "short_rate": 0.0,
+          "reverted": 0
+        }
+      ],
+      "where_it_fails": {
+        "high_separation_but_short": [
+          {
+            "week": "2020-02-28",
+            "to": "contraction",
+            "separation": 0.7543993519889234,
+            "weeks": 1
+          },
+          {
+            "week": "2022-02-25",
+            "to": "slowdown",
+            "separation": 0.7688220464585592,
+            "weeks": 3
+          }
+        ],
+        "low_separation_but_lasted_13_weeks_or_more": [
+          {
+            "week": "2014-10-03",
+            "to": "expansion",
+            "separation": 0.0295236779633125,
+            "weeks": 21
+          },
+          {
+            "week": "2015-02-27",
+            "to": "slowdown",
+            "separation": 0.3661164394315781,
+            "weeks": 17
+          },
+          {
+            "week": "2015-12-11",
+            "to": "slowdown",
+            "separation": 0.2768552485329312,
+            "weeks": 15
+          },
+          {
+            "week": "2018-04-20",
+            "to": "expansion",
+            "separation": 0.1328908569146231,
+            "weeks": 26
+          },
+          {
+            "week": "2018-10-19",
+            "to": "slowdown",
+            "separation": 0.2413262593268686,
+            "weeks": 65
+          },
+          {
+            "week": "2024-03-15",
+            "to": "slowdown",
+            "separation": 0.2448323478713894,
+            "weeks": 18
+          }
+        ]
+      }
+    },
+    "raw_official_disagreement": {
+      "eligible_weeks": 678,
+      "weeks_where_raw_differs_from_official": 90,
+      "disagreement_rate": 0.1327,
+      "at_transition": {
+        "raw_agrees_with_the_new_phase": {
+          "transitions": 63,
+          "reverted_within_window": 5,
+          "reversion_rate": 0.079,
+          "short_phases": 10,
+          "short_rate": 0.159,
+          "median_duration_weeks": 8
+        },
+        "raw_does_not_agree": {
+          "transitions": 8,
+          "reverted_within_window": 4,
+          "reversion_rate": 0.5,
+          "short_phases": 5,
+          "short_rate": 0.625,
+          "median_duration_weeks": 2.5
+        }
+      },
+      "raw_stayed_on_the_previous_phase": 7
+    },
+    "gated_versus_ungated_phases": {
+      "recovery": {
+        "has_breadth_or_persistence_gate": true,
+        "episodes": 2,
+        "total_weeks": 34,
+        "median_episode_weeks": 17.0,
+        "episodes_shorter_than_four_weeks": 0
+      },
+      "expansion": {
+        "has_breadth_or_persistence_gate": false,
+        "episodes": 33,
+        "total_weeks": 288,
+        "median_episode_weeks": 8,
+        "episodes_shorter_than_four_weeks": 7
+      },
+      "slowdown": {
+        "has_breadth_or_persistence_gate": false,
+        "episodes": 37,
+        "total_weeks": 338,
+        "median_episode_weeks": 6,
+        "episodes_shorter_than_four_weeks": 10
+      },
+      "contraction": {
+        "has_breadth_or_persistence_gate": true,
+        "episodes": 3,
+        "total_weeks": 18,
+        "median_episode_weeks": 2,
+        "episodes_shorter_than_four_weeks": 2
+      }
+    },
+    "transition_rows": [
+      {
+        "week": "2013-06-21",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.1236310250852968,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 6,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2013-08-02",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.3178525915662243,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 8,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2013-09-27",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.464063178515962,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 9,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2013-11-29",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.392818128993609,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 3,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2013-12-20",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.656161977202316,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 8,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2014-02-14",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.8446201833905097,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 9,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2014-04-18",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.8229337004922329,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 23,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2014-09-26",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.3142921880465269,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 1,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2014-10-03",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.0295236779633125,
+        "raw": "slowdown",
+        "raw_agrees": false,
+        "raw_stayed_on_previous": true,
+        "duration_weeks": 21,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2015-02-27",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.3661164394315781,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 17,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2015-06-26",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.1592365930575798,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 5,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2015-07-31",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.2281943392351382,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 7,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2015-09-18",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.4115305168542163,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2015-10-16",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.617723819128315,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 7,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2015-12-04",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.126860236035755,
+        "raw": "slowdown",
+        "raw_agrees": false,
+        "raw_stayed_on_previous": true,
+        "duration_weeks": 1,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2015-12-11",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.2768552485329312,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 15,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2016-03-25",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.5660268446668681,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 3,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2016-04-15",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.5573788562272469,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 16,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2016-08-05",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.2066957131446467,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 8,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2016-09-30",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.327647585839483,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 7,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2016-11-18",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.2250757445467536,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2016-12-16",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.5005734916706327,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 11,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2017-03-03",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.711905930317955,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 5,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2017-04-07",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.5734327480074167,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 5,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2017-05-12",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.379890797244281,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 12,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2017-08-04",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.4238936562244683,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 2,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2017-08-18",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.4110083619457481,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2017-09-15",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.9151410569519028,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 9,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2017-11-17",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.8023244160930919,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 13,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2018-02-16",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.4687511451186788,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2018-03-16",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.5229099528950918,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 2,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2018-03-30",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.2155537020734844,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 3,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2018-04-20",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.1328908569146231,
+        "raw": "slowdown",
+        "raw_agrees": false,
+        "raw_stayed_on_previous": true,
+        "duration_weeks": 26,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2018-10-19",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.2413262593268686,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 65,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2020-01-17",
+        "from": "slowdown",
+        "to": "contraction",
+        "separation": 0.4190550209920983,
+        "raw": "slowdown",
+        "raw_agrees": false,
+        "raw_stayed_on_previous": true,
+        "duration_weeks": 2,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": true
+      },
+      {
+        "week": "2020-01-31",
+        "from": "contraction",
+        "to": "slowdown",
+        "separation": 0.8955472082895085,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2020-02-28",
+        "from": "slowdown",
+        "to": "contraction",
+        "separation": 0.7543993519889234,
+        "raw": "slowdown",
+        "raw_agrees": false,
+        "raw_stayed_on_previous": true,
+        "duration_weeks": 1,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": true
+      },
+      {
+        "week": "2020-03-06",
+        "from": "contraction",
+        "to": "slowdown",
+        "separation": 0.7280090374447405,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2020-04-03",
+        "from": "slowdown",
+        "to": "contraction",
+        "separation": 0.861513415857319,
+        "raw": "contraction",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 15,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": true
+      },
+      {
+        "week": "2020-07-17",
+        "from": "contraction",
+        "to": "recovery",
+        "separation": 0.6501754623940581,
+        "raw": "recovery",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 29,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": true
+      },
+      {
+        "week": "2021-02-05",
+        "from": "recovery",
+        "to": "slowdown",
+        "separation": 0.4742711840642252,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 2,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2021-02-19",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.2138777093523556,
+        "raw": "recovery",
+        "raw_agrees": false,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 3,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2021-03-12",
+        "from": "expansion",
+        "to": "recovery",
+        "separation": 0.5634727932943455,
+        "raw": "recovery",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 5,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": true
+      },
+      {
+        "week": "2021-04-16",
+        "from": "recovery",
+        "to": "expansion",
+        "separation": 0.6059864350025264,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 27,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2021-10-22",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.8337970045990507,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2021-11-19",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.8353195255131005,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 8,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2022-01-14",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.7110156042635567,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 5,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2022-02-18",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.2250468699635319,
+        "raw": "slowdown",
+        "raw_agrees": false,
+        "raw_stayed_on_previous": true,
+        "duration_weeks": 1,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2022-02-25",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.7688220464585592,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 3,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2022-03-18",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.9045040299552864,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 10,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2022-05-27",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.7169320757212259,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 18,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2022-09-30",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.7192907202989709,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 11,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2022-12-16",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.8759257424016409,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 13,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2023-03-17",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.7314352204447919,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2023-04-14",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.8973535235777756,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 18,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2023-08-18",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.6209192326401625,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 13,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2023-11-17",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.8072466892747738,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 9,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2024-01-19",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.3964431845781724,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 8,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2024-03-15",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.2448323478713894,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 18,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2024-07-19",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.693156742523046,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 6,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2024-08-30",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.1787132023217491,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 6,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2024-10-11",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.2422505472297988,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 1,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2024-10-18",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.1230290000822858,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 12,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2025-01-10",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.3604170602876495,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 11,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2025-03-28",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.7779829203496722,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 5,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2025-05-02",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.6825075795765456,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 8,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2025-06-27",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.8797051027059763,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 17,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2026-01-30",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.0725367406627239,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 11,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2026-04-17",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.2418024815279912,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 2,
+        "censored": false,
+        "short": true,
+        "reverted_within_window": true,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2026-05-01",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.0184413515436796,
+        "raw": "slowdown",
+        "raw_agrees": false,
+        "raw_stayed_on_previous": true,
+        "duration_weeks": 9,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2026-07-03",
+        "from": "expansion",
+        "to": "slowdown",
+        "separation": 0.4851921061528268,
+        "raw": "slowdown",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 4,
+        "censored": false,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      },
+      {
+        "week": "2026-07-31",
+        "from": "slowdown",
+        "to": "expansion",
+        "separation": 0.5940075291735556,
+        "raw": "expansion",
+        "raw_agrees": true,
+        "raw_stayed_on_previous": false,
+        "duration_weeks": 3,
+        "censored": true,
+        "short": false,
+        "reverted_within_window": false,
+        "target_is_gated_phase": false
+      }
+    ]
+  },
+  "sweep": [
+    {
+      "gate": "sep:off · raw:off",
+      "separation_threshold": null,
+      "require_raw_agreement": false,
+      "stale_hold_weeks": 8,
+      "transitions": 72,
+      "phases_shorter_than_four_weeks": 18,
+      "short_phase_list": [
+        {
+          "phase": "slowdown",
+          "start": "2013-06-14",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2013-11-29",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2014-09-26",
+          "weeks": 1
+        },
+        {
+          "phase": "expansion",
+          "start": "2015-12-04",
+          "weeks": 1
+        },
+        {
+          "phase": "expansion",
+          "start": "2016-03-25",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2017-08-04",
+          "weeks": 2
+        },
+        {
+          "phase": "expansion",
+          "start": "2018-03-16",
+          "weeks": 2
+        },
+        {
+          "phase": "slowdown",
+          "start": "2018-03-30",
+          "weeks": 3
+        },
+        {
+          "phase": "contraction",
+          "start": "2020-01-17",
+          "weeks": 2
+        },
+        {
+          "phase": "contraction",
+          "start": "2020-02-28",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2021-02-05",
+          "weeks": 2
+        },
+        {
+          "phase": "expansion",
+          "start": "2021-02-19",
+          "weeks": 3
+        },
+        {
+          "phase": "expansion",
+          "start": "2022-02-18",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2022-02-25",
+          "weeks": 3
+        },
+        {
+          "phase": "expansion",
+          "start": "2024-10-11",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-01-23",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-04-17",
+          "weeks": 2
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-17",
+      "recovery_delay_weeks": 0,
+      "phase_weeks": {
+        "recovery": 34,
+        "expansion": 288,
+        "slowdown": 338,
+        "contraction": 18
+      },
+      "withheld_weeks": 10,
+      "degraded_to_withheld_weeks": 0,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 0,
+      "blocked_transitions_that_were_short": 0,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 0,
+      "whipsaw_to_real_ratio": null,
+      "longest_blocked_run_weeks": 0,
+      "final_phase": "expansion",
+      "final_week_phase": "expansion"
+    },
+    {
+      "gate": "sep:off · raw:on",
+      "separation_threshold": null,
+      "require_raw_agreement": true,
+      "stale_hold_weeks": 8,
+      "transitions": 63,
+      "phases_shorter_than_four_weeks": 10,
+      "short_phase_list": [
+        {
+          "phase": "slowdown",
+          "start": "2013-06-14",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2013-11-29",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2014-09-26",
+          "weeks": 2
+        },
+        {
+          "phase": "expansion",
+          "start": "2016-03-25",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2017-08-04",
+          "weeks": 2
+        },
+        {
+          "phase": "expansion",
+          "start": "2018-03-16",
+          "weeks": 2
+        },
+        {
+          "phase": "expansion",
+          "start": "2024-10-11",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-01-23",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-04-17",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-17",
+      "recovery_delay_weeks": 0,
+      "phase_weeks": {
+        "recovery": 34,
+        "expansion": 279,
+        "slowdown": 350,
+        "contraction": 15
+      },
+      "withheld_weeks": 10,
+      "degraded_to_withheld_weeks": 0,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 12,
+      "blocked_transitions_that_were_short": 5,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 3,
+      "whipsaw_to_real_ratio": 1.67,
+      "longest_blocked_run_weeks": 3,
+      "final_phase": "expansion",
+      "final_week_phase": "expansion"
+    },
+    {
+      "gate": "sep>=0.4 · raw:off",
+      "separation_threshold": 0.4,
+      "require_raw_agreement": false,
+      "stale_hold_weeks": 8,
+      "transitions": 55,
+      "phases_shorter_than_four_weeks": 8,
+      "short_phase_list": [
+        {
+          "phase": "expansion",
+          "start": "2016-03-25",
+          "weeks": 3
+        },
+        {
+          "phase": "expansion",
+          "start": "2016-12-02",
+          "weeks": 2
+        },
+        {
+          "phase": "slowdown",
+          "start": "2017-08-04",
+          "weeks": 2
+        },
+        {
+          "phase": "expansion",
+          "start": "2018-03-16",
+          "weeks": 3
+        },
+        {
+          "phase": "contraction",
+          "start": "2020-01-17",
+          "weeks": 2
+        },
+        {
+          "phase": "contraction",
+          "start": "2020-02-28",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-01-23",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-17",
+      "recovery_delay_weeks": 0,
+      "phase_weeks": {
+        "recovery": 34,
+        "expansion": 277,
+        "slowdown": 349,
+        "contraction": 18
+      },
+      "withheld_weeks": 10,
+      "degraded_to_withheld_weeks": 0,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 49,
+      "blocked_transitions_that_were_short": 8,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 14,
+      "whipsaw_to_real_ratio": 0.57,
+      "longest_blocked_run_weeks": 6,
+      "final_phase": "expansion",
+      "final_week_phase": "expansion"
+    },
+    {
+      "gate": "sep>=0.5 · raw:off",
+      "separation_threshold": 0.5,
+      "require_raw_agreement": false,
+      "stale_hold_weeks": 8,
+      "transitions": 47,
+      "phases_shorter_than_four_weeks": 6,
+      "short_phase_list": [
+        {
+          "phase": "expansion",
+          "start": "2016-03-25",
+          "weeks": 3
+        },
+        {
+          "phase": "expansion",
+          "start": "2016-12-02",
+          "weeks": 2
+        },
+        {
+          "phase": "contraction",
+          "start": "2020-02-28",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-01-23",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-07-10",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-17",
+      "recovery_delay_weeks": 0,
+      "phase_weeks": {
+        "recovery": 35,
+        "expansion": 287,
+        "slowdown": 340,
+        "contraction": 16
+      },
+      "withheld_weeks": 10,
+      "degraded_to_withheld_weeks": 0,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 70,
+      "blocked_transitions_that_were_short": 10,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 19,
+      "whipsaw_to_real_ratio": 0.53,
+      "longest_blocked_run_weeks": 6,
+      "final_phase": "expansion",
+      "final_week_phase": "expansion"
+    },
+    {
+      "gate": "sep>=0.6 · raw:off",
+      "separation_threshold": 0.6,
+      "require_raw_agreement": false,
+      "stale_hold_weeks": 8,
+      "transitions": 40,
+      "phases_shorter_than_four_weeks": 5,
+      "short_phase_list": [
+        {
+          "phase": "slowdown",
+          "start": "2013-11-29",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2016-11-11",
+          "weeks": 3
+        },
+        {
+          "phase": "expansion",
+          "start": "2016-12-02",
+          "weeks": 3
+        },
+        {
+          "phase": "contraction",
+          "start": "2020-02-28",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-17",
+      "recovery_delay_weeks": 0,
+      "phase_weeks": {
+        "recovery": 39,
+        "expansion": 256,
+        "slowdown": 362,
+        "contraction": 16
+      },
+      "withheld_weeks": 15,
+      "degraded_to_withheld_weeks": 5,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 101,
+      "blocked_transitions_that_were_short": 9,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 21,
+      "whipsaw_to_real_ratio": 0.43,
+      "longest_blocked_run_weeks": 11,
+      "final_phase": "slowdown",
+      "final_week_phase": "slowdown"
+    },
+    {
+      "gate": "sep>=0.7 · raw:off",
+      "separation_threshold": 0.7,
+      "require_raw_agreement": false,
+      "stale_hold_weeks": 8,
+      "transitions": 26,
+      "phases_shorter_than_four_weeks": 2,
+      "short_phase_list": [
+        {
+          "phase": "contraction",
+          "start": "2020-02-28",
+          "weeks": 1
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-24",
+      "recovery_delay_weeks": 1,
+      "phase_weeks": {
+        "recovery": 43,
+        "expansion": 202,
+        "slowdown": 408,
+        "contraction": 17
+      },
+      "withheld_weeks": 18,
+      "degraded_to_withheld_weeks": 8,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 139,
+      "blocked_transitions_that_were_short": 10,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 22,
+      "whipsaw_to_real_ratio": 0.45,
+      "longest_blocked_run_weeks": 11,
+      "final_phase": "slowdown",
+      "final_week_phase": "slowdown"
+    },
+    {
+      "gate": "sep>=0.4 · raw:on",
+      "separation_threshold": 0.4,
+      "require_raw_agreement": true,
+      "stale_hold_weeks": 8,
+      "transitions": 51,
+      "phases_shorter_than_four_weeks": 6,
+      "short_phase_list": [
+        {
+          "phase": "expansion",
+          "start": "2016-03-25",
+          "weeks": 3
+        },
+        {
+          "phase": "expansion",
+          "start": "2016-12-02",
+          "weeks": 2
+        },
+        {
+          "phase": "slowdown",
+          "start": "2017-08-04",
+          "weeks": 2
+        },
+        {
+          "phase": "expansion",
+          "start": "2018-03-16",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-01-23",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-17",
+      "recovery_delay_weeks": 0,
+      "phase_weeks": {
+        "recovery": 34,
+        "expansion": 277,
+        "slowdown": 352,
+        "contraction": 15
+      },
+      "withheld_weeks": 10,
+      "degraded_to_withheld_weeks": 0,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 52,
+      "blocked_transitions_that_were_short": 10,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 14,
+      "whipsaw_to_real_ratio": 0.71,
+      "longest_blocked_run_weeks": 6,
+      "final_phase": "expansion",
+      "final_week_phase": "expansion"
+    },
+    {
+      "gate": "sep>=0.5 · raw:on",
+      "separation_threshold": 0.5,
+      "require_raw_agreement": true,
+      "stale_hold_weeks": 8,
+      "transitions": 45,
+      "phases_shorter_than_four_weeks": 5,
+      "short_phase_list": [
+        {
+          "phase": "expansion",
+          "start": "2016-03-25",
+          "weeks": 3
+        },
+        {
+          "phase": "expansion",
+          "start": "2016-12-02",
+          "weeks": 2
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-01-23",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2026-07-10",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-17",
+      "recovery_delay_weeks": 0,
+      "phase_weeks": {
+        "recovery": 35,
+        "expansion": 287,
+        "slowdown": 341,
+        "contraction": 15
+      },
+      "withheld_weeks": 10,
+      "degraded_to_withheld_weeks": 0,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 71,
+      "blocked_transitions_that_were_short": 11,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 19,
+      "whipsaw_to_real_ratio": 0.58,
+      "longest_blocked_run_weeks": 6,
+      "final_phase": "expansion",
+      "final_week_phase": "expansion"
+    },
+    {
+      "gate": "sep>=0.6 · raw:on",
+      "separation_threshold": 0.6,
+      "require_raw_agreement": true,
+      "stale_hold_weeks": 8,
+      "transitions": 38,
+      "phases_shorter_than_four_weeks": 4,
+      "short_phase_list": [
+        {
+          "phase": "slowdown",
+          "start": "2013-11-29",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2016-11-11",
+          "weeks": 3
+        },
+        {
+          "phase": "expansion",
+          "start": "2016-12-02",
+          "weeks": 3
+        },
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-17",
+      "recovery_delay_weeks": 0,
+      "phase_weeks": {
+        "recovery": 39,
+        "expansion": 256,
+        "slowdown": 363,
+        "contraction": 15
+      },
+      "withheld_weeks": 15,
+      "degraded_to_withheld_weeks": 5,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 102,
+      "blocked_transitions_that_were_short": 10,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 21,
+      "whipsaw_to_real_ratio": 0.48,
+      "longest_blocked_run_weeks": 11,
+      "final_phase": "slowdown",
+      "final_week_phase": "slowdown"
+    },
+    {
+      "gate": "sep>=0.7 · raw:on",
+      "separation_threshold": 0.7,
+      "require_raw_agreement": true,
+      "stale_hold_weeks": 8,
+      "transitions": 24,
+      "phases_shorter_than_four_weeks": 1,
+      "short_phase_list": [
+        {
+          "phase": "slowdown",
+          "start": "2025-12-26",
+          "weeks": 3
+        }
+      ],
+      "contraction_call_week": "2020-04-03",
+      "contraction_delay_weeks": 0,
+      "recovery_call_week": "2020-07-24",
+      "recovery_delay_weeks": 1,
+      "phase_weeks": {
+        "recovery": 43,
+        "expansion": 202,
+        "slowdown": 409,
+        "contraction": 16
+      },
+      "withheld_weeks": 18,
+      "degraded_to_withheld_weeks": 8,
+      "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+      "blocked_weeks": 140,
+      "blocked_transitions_that_were_short": 11,
+      "blocked_transitions_that_lasted_four_weeks_or_more": 22,
+      "whipsaw_to_real_ratio": 0.5,
+      "longest_blocked_run_weeks": 11,
+      "final_phase": "slowdown",
+      "final_week_phase": "slowdown"
+    }
+  ],
+  "nber": [
+    {
+      "gate": "sep:off · raw:off",
+      "nber_recession": "2020-02 ~ 2020-04",
+      "recession_weeks_in_window": 12,
+      "recession_weeks_called_contraction": 5,
+      "recall": 0.417,
+      "first_contraction_call": "2020-02-28",
+      "weeks_after_the_peak_month_started": 3,
+      "false_positive_contraction_weeks": 13,
+      "false_positive_episodes": [
+        {
+          "start": "2020-01-17",
+          "end": "2020-01-24",
+          "weeks": 2
+        },
+        {
+          "start": "2020-05-01",
+          "end": "2020-07-10",
+          "weeks": 11
+        }
+      ],
+      "first_recovery_after_the_trough_month": "2020-07-17",
+      "recovery_lag_weeks_from_trough_month_end": 11,
+      "withheld_weeks": 10,
+      "phases_present": [
+        "contraction",
+        "expansion",
+        "recovery",
+        "slowdown"
+      ],
+      "single_recession_limitation": "이 창에는 NBER 침체가 하나뿐이다. 재현율·오탐을 하나의 에피소드에서 재는 것이므로 일반화할 수 없다."
+    },
+    {
+      "gate": "sep:off · raw:on",
+      "nber_recession": "2020-02 ~ 2020-04",
+      "recession_weeks_in_window": 12,
+      "recession_weeks_called_contraction": 4,
+      "recall": 0.333,
+      "first_contraction_call": "2020-04-03",
+      "weeks_after_the_peak_month_started": 8,
+      "false_positive_contraction_weeks": 11,
+      "false_positive_episodes": [
+        {
+          "start": "2020-05-01",
+          "end": "2020-07-10",
+          "weeks": 11
+        }
+      ],
+      "first_recovery_after_the_trough_month": "2020-07-17",
+      "recovery_lag_weeks_from_trough_month_end": 11,
+      "withheld_weeks": 10,
+      "phases_present": [
+        "contraction",
+        "expansion",
+        "recovery",
+        "slowdown"
+      ],
+      "single_recession_limitation": "이 창에는 NBER 침체가 하나뿐이다. 재현율·오탐을 하나의 에피소드에서 재는 것이므로 일반화할 수 없다."
+    },
+    {
+      "gate": "sep>=0.4 · raw:on",
+      "nber_recession": "2020-02 ~ 2020-04",
+      "recession_weeks_in_window": 12,
+      "recession_weeks_called_contraction": 4,
+      "recall": 0.333,
+      "first_contraction_call": "2020-04-03",
+      "weeks_after_the_peak_month_started": 8,
+      "false_positive_contraction_weeks": 11,
+      "false_positive_episodes": [
+        {
+          "start": "2020-05-01",
+          "end": "2020-07-10",
+          "weeks": 11
+        }
+      ],
+      "first_recovery_after_the_trough_month": "2020-07-17",
+      "recovery_lag_weeks_from_trough_month_end": 11,
+      "withheld_weeks": 10,
+      "phases_present": [
+        "contraction",
+        "expansion",
+        "recovery",
+        "slowdown"
+      ],
+      "single_recession_limitation": "이 창에는 NBER 침체가 하나뿐이다. 재현율·오탐을 하나의 에피소드에서 재는 것이므로 일반화할 수 없다."
+    },
+    {
+      "gate": "sep>=0.5 · raw:on",
+      "nber_recession": "2020-02 ~ 2020-04",
+      "recession_weeks_in_window": 12,
+      "recession_weeks_called_contraction": 4,
+      "recall": 0.333,
+      "first_contraction_call": "2020-04-03",
+      "weeks_after_the_peak_month_started": 8,
+      "false_positive_contraction_weeks": 11,
+      "false_positive_episodes": [
+        {
+          "start": "2020-05-01",
+          "end": "2020-07-10",
+          "weeks": 11
+        }
+      ],
+      "first_recovery_after_the_trough_month": "2020-07-17",
+      "recovery_lag_weeks_from_trough_month_end": 11,
+      "withheld_weeks": 10,
+      "phases_present": [
+        "contraction",
+        "expansion",
+        "recovery",
+        "slowdown"
+      ],
+      "single_recession_limitation": "이 창에는 NBER 침체가 하나뿐이다. 재현율·오탐을 하나의 에피소드에서 재는 것이므로 일반화할 수 없다."
+    },
+    {
+      "gate": "sep>=0.6 · raw:on",
+      "nber_recession": "2020-02 ~ 2020-04",
+      "recession_weeks_in_window": 12,
+      "recession_weeks_called_contraction": 4,
+      "recall": 0.333,
+      "first_contraction_call": "2020-04-03",
+      "weeks_after_the_peak_month_started": 8,
+      "false_positive_contraction_weeks": 11,
+      "false_positive_episodes": [
+        {
+          "start": "2020-05-01",
+          "end": "2020-07-10",
+          "weeks": 11
+        }
+      ],
+      "first_recovery_after_the_trough_month": "2020-07-17",
+      "recovery_lag_weeks_from_trough_month_end": 11,
+      "withheld_weeks": 15,
+      "phases_present": [
+        "contraction",
+        "expansion",
+        "recovery",
+        "slowdown"
+      ],
+      "single_recession_limitation": "이 창에는 NBER 침체가 하나뿐이다. 재현율·오탐을 하나의 에피소드에서 재는 것이므로 일반화할 수 없다."
+    },
+    {
+      "gate": "sep>=0.7 · raw:on",
+      "nber_recession": "2020-02 ~ 2020-04",
+      "recession_weeks_in_window": 12,
+      "recession_weeks_called_contraction": 4,
+      "recall": 0.333,
+      "first_contraction_call": "2020-04-03",
+      "weeks_after_the_peak_month_started": 8,
+      "false_positive_contraction_weeks": 12,
+      "false_positive_episodes": [
+        {
+          "start": "2020-05-01",
+          "end": "2020-07-17",
+          "weeks": 12
+        }
+      ],
+      "first_recovery_after_the_trough_month": "2020-07-24",
+      "recovery_lag_weeks_from_trough_month_end": 12,
+      "withheld_weeks": 18,
+      "phases_present": [
+        "contraction",
+        "expansion",
+        "recovery",
+        "slowdown"
+      ],
+      "single_recession_limitation": "이 창에는 NBER 침체가 하나뿐이다. 재현율·오탐을 하나의 에피소드에서 재는 것이므로 일반화할 수 없다."
+    }
+  ],
+  "recommended": {
+    "gate": "sep:off · raw:on",
+    "separation_threshold": null,
+    "require_raw_agreement": true,
+    "stale_hold_weeks": 8,
+    "transitions": 63,
+    "phases_shorter_than_four_weeks": 10,
+    "short_phase_list": [
+      {
+        "phase": "slowdown",
+        "start": "2013-06-14",
+        "weeks": 1
+      },
+      {
+        "phase": "slowdown",
+        "start": "2013-11-29",
+        "weeks": 3
+      },
+      {
+        "phase": "slowdown",
+        "start": "2014-09-26",
+        "weeks": 2
+      },
+      {
+        "phase": "expansion",
+        "start": "2016-03-25",
+        "weeks": 3
+      },
+      {
+        "phase": "slowdown",
+        "start": "2017-08-04",
+        "weeks": 2
+      },
+      {
+        "phase": "expansion",
+        "start": "2018-03-16",
+        "weeks": 2
+      },
+      {
+        "phase": "expansion",
+        "start": "2024-10-11",
+        "weeks": 1
+      },
+      {
+        "phase": "slowdown",
+        "start": "2025-12-26",
+        "weeks": 3
+      },
+      {
+        "phase": "slowdown",
+        "start": "2026-01-23",
+        "weeks": 1
+      },
+      {
+        "phase": "slowdown",
+        "start": "2026-04-17",
+        "weeks": 3
+      }
+    ],
+    "contraction_call_week": "2020-04-03",
+    "contraction_delay_weeks": 0,
+    "recovery_call_week": "2020-07-17",
+    "recovery_delay_weeks": 0,
+    "phase_weeks": {
+      "recovery": 34,
+      "expansion": 279,
+      "slowdown": 350,
+      "contraction": 15
+    },
+    "withheld_weeks": 10,
+    "degraded_to_withheld_weeks": 0,
+    "contraction_weeks_meet_the_two_domain_breadth_gate": true,
+    "blocked_weeks": 12,
+    "blocked_transitions_that_were_short": 5,
+    "blocked_transitions_that_lasted_four_weeks_or_more": 3,
+    "whipsaw_to_real_ratio": 1.67,
+    "longest_blocked_run_weeks": 3,
+    "final_phase": "expansion",
+    "final_week_phase": "expansion"
+  },
+  "recommended_config": {
+    "separation_threshold": null,
+    "require_raw_agreement": true,
+    "stale_hold_weeks": 8
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "horizon_weeks": 13,
+  "measure": "forward_negative_week_share",
+  "path": "revised_latest_vintage",
+  "groups": [
+    {
+      "group": "lower",
+      "label": "회복기·확장기",
+      "phases": [
+        "recovery",
+        "expansion"
+      ],
+      "share_negative": 0.2733,
+      "observations": 1405,
+      "episodes": 21
+    },
+    {
+      "group": "higher",
+      "label": "후퇴기·침체기",
+      "phases": [
+        "slowdown",
+        "contraction"
+      ],
+      "share_negative": 0.5179,
+      "observations": 251,
+      "episodes": 16
+    }
+  ],
+  "detail_by_phase": [
+    {
+      "phase": "recovery",
+      "share_negative": 0.1667,
+      "observations": 144,
+      "episodes": 4
+    },
+    {
+      "phase": "expansion",
+      "share_negative": 0.2855,
+      "observations": 1261,
+      "episodes": 17
+    },
+    {
+      "phase": "slowdown",
+      "share_negative": 0.5172,
+      "observations": 87,
+      "episodes": 11
+    },
+    {
+      "phase": "contraction",
+      "share_negative": 0.5183,
+      "observations": 164,
+      "episodes": 5
+    }
+  ],
+  "detail_expanded_by_default": "expansion",
+  "why_two_groups": "네 숫자를 나란히 놓으면 자료가 받쳐 주지 않는 순위가 보인다. 회복기와 확장기는 에피소드 4개와 17개에서 나온 값이라 서로 구분되지 않고, 후퇴기와 침체기는 사실상 같은 값이다. 그래서 기본은 두 묶음이고 국면별 숫자는 에피소드 수를 달아 상세로만 낸다.",
+  "path_note": "최종 수정치 경로에서 잰 **역사적 분포**다. 실시간 경로와 섞어 읽으면 안 되고, 앞날에 대한 확률이 아니다."
+}

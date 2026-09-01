@@ -1,0 +1,14 @@
+gate,discrimination,nominal_p
+persist17w+band1.25,3.456,0.0307
+persist17w+band2,3.509,0.0442
+persist17w,3.078,0.0458
+persist15w,2.86,0.049
+persist21w,3.153,0.0525
+persist17w+band0.75,2.459,0.0709
+persist17w+band0.5,2.166,0.0999
+persist13w,2.081,0.1043
+persist11w,1.578,0.2337
+persist9w,1.451,0.2679
+persist17w+band1.5,1.53,0.2687
+persist7w,1.366,0.2918
+persist5w,1.094,0.4315
