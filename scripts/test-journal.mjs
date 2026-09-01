@@ -147,6 +147,9 @@ try {
     await page.locator('#action-input[type="text"]').count() === 1, "직접 입력 필드가 없음");
   record("무엇을 했는지 고르는 선택 버튼이 없다",
     await page.locator("[data-action]").count() === 0, "선택 버튼이 남아 있음");
+  record("보유 자산을 고르는 영역이 없다",
+    await page.locator("#holding").count() === 0 && !journal.includes("어느 자산에 대한 결정입니까"),
+    "보유 자산 선택 영역이 남아 있음");
 
   // 행동 한 문장과 근거 네 칸을 직접 입력한다.
   const typed = await page.locator("#action-input, [data-f]").count();
@@ -173,44 +176,8 @@ try {
   record("주가지수가 자동으로 채워진다", Number.isFinite(filled.equity), String(filled.equity));
   record("날짜가 자동으로 채워진다", Boolean(filled.capturedAt), String(filled.capturedAt));
 
-  // 보유 자산이 붙었을 때도 자동 채움이 실제로 값을 채우는지. 자산 없는 상태만 보면
-  // "—"만 확인하고 넘어가게 되고, 정작 쓰이는 경로는 검증되지 않는다.
-  const withHolding = await page.evaluate(async () => {
-    const session = {
-      schema: 7,
-      assets: [{
-        id: "journal-test-1",
-        group: "equity",
-        // quotes.json에 있는 실제 종목코드라야 평가금액이 나온다. 없는 코드를 쓰면
-        // 자동 채움이 아니라 시세 결측을 검증하게 된다.
-        fields: { productCode: "100030", productName: "검증용 종목", quantity: "10", averagePrice: "18000", currency: "KRW" },
-        autoFields: {}, isEstimated: false,
-      }],
-      snapshots: [],
-    };
-    localStorage.setItem("assetInput.session", JSON.stringify(session));
-    await window.Valuation.load();
-    const summary = window.Portfolio.summarize(session.assets);
-    const row = summary.rows[0];
-    const ctx = await window.DecisionContext.build({ holding: row, totalKrw: summary.total });
-    return {
-      name: ctx.holding && ctx.holding.name,
-      quantity: ctx.holding && ctx.holding.quantity,
-      unitPrice: ctx.holding && ctx.holding.unitPrice,
-      valueKrw: ctx.holding && ctx.holding.valueKrw,
-      share: ctx.holding && ctx.holding.shareOfTotal,
-    };
-  });
-  record("자산이 붙으면 종목명이 자동으로 들어간다", withHolding.name === "검증용 종목", JSON.stringify(withHolding));
-  record("수량이 자동으로 들어간다", withHolding.quantity === 10, String(withHolding.quantity));
-  record("단가가 자동으로 들어간다", Number.isFinite(withHolding.unitPrice) && withHolding.unitPrice > 0, String(withHolding.unitPrice));
-  record("평가금액이 자동으로 들어간다", Number.isFinite(withHolding.valueKrw) && withHolding.valueKrw > 0, String(withHolding.valueKrw));
-  record("자산 내 비중이 자동으로 계산된다", withHolding.share === 1, String(withHolding.share));
-
   record("국면이 신호가 아니라 맥락이라고 밝힌다",
     journal.includes("맥락") && journal.includes("신호가 아닙니다"), "");
-
-  record("보유와 무관한 결정도 고를 수 있다", journal.includes("보유와 무관"), "");
 
   // 반증 조건 두 종류가 화면에서 갈린다.
   record("반증 조건을 두 종류로 나눈다",
@@ -298,7 +265,7 @@ try {
   record("결정 기록이 저장되고 목록에 나온다",
     afterRecord.includes("값이 내렸지만 산 이유는 그대로다"), "");
   record("직접 입력한 행동이 기록된다", afterRecord.includes("그대로 보유했다"), "");
-  record("보유 자산 없이 기록해도 목록에 나온다", afterRecord.includes("보유와 무관"), "");
+  record("자산 선택 없이 기록해도 목록에 나온다", afterRecord.includes("그대로 보유했다"), "");
   record("저장 뒤 안내가 뜬다", afterRecord.includes("기록했습니다"), "");
 
   const stored = await round.evaluate(() => window.__journalStore.user_decision_records[0]);

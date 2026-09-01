@@ -59,8 +59,6 @@
 <script src="lib/session.js"></script>
 <script src="lib/shell.js?v=20260901-1"></script>
 <script src="lib/format.js"></script>
-<script src="lib/valuation.js"></script>
-<script src="lib/portfolio.js"></script>
 <script src="lib/journal-store.js"></script>
 <script src="lib/decision-context.js"></script>
 <script>
@@ -75,7 +73,7 @@
 // ── 마찰이 유일한 실패 원인이다 ────────────────────────────────────────────
 // 한 건에 10분이 걸리면 아무도 쓰지 않는다. 그래서 사용자가 타자로 치는 것은 **다섯 칸**
 // 뿐이고, 날짜·종목·수량·단가·비중·환율·주가지수·금리·경기국면은 앱이 채운다.
-const { escapeHtml, won } = Format;
+const { escapeHtml } = Format;
 
 // 사용자가 실제로 타자로 치는 칸. 이 넷이 근거의 전부다.
 const QUESTIONS = [
@@ -97,12 +95,9 @@ const OPS = [
   { id: "gte", label: "이상으로 오르면" },
 ];
 
-let rows = [];
-let total = 0;
 let records = [];
 let context = null;
 let action = "";
-let holdingId = "";
 let kind = "human";
 let loaded = false;
 let busy = false;
@@ -120,25 +115,12 @@ function head() {
   </div>`;
 }
 
-function selectedRow() {
-  return rows.find((row) => String(row.id) === String(holdingId)) || null;
-}
-
 function actionCard() {
-  const options = ['<option value="">보유와 무관한 결정</option>']
-    .concat(rows.map((row) => `<option value="${escapeHtml(String(row.id))}" ${String(row.id) === String(holdingId) ? "selected" : ""}>${escapeHtml(row.name)}</option>`))
-    .join("");
-
   return `<div class="card">
     <div class="q" style="margin-top:0">
       <label for="action-input">무엇을 했습니까?</label>
       <input id="action-input" type="text" maxlength="120" value="${escapeHtml(action)}" autocomplete="off">
       <div class="q-note" id="action-help">선택지 없이 한 문장으로 직접 기록합니다.</div>
-    </div>
-    <div class="q">
-      <label for="holding">어느 자산에 대한 결정입니까?</label>
-      <select id="holding">${options}</select>
-      <div class="q-note">사지 않기로 한 결정처럼 보유 자산이 없는 것도 그대로 저장됩니다.</div>
     </div>
   </div>`;
 }
@@ -146,7 +128,6 @@ function actionCard() {
 // 자동 채움을 **보여준다.** 무엇이 함께 저장되는지 모르면 기록을 믿을 수 없다.
 function autoCard() {
   if (!context) return "";
-  const holding = context.holding;
   const cycle = context.businessCycle || {};
   const market = context.market || {};
   const fx = market.fx || {};
@@ -155,11 +136,6 @@ function autoCard() {
 
   const lines = [
     ["날짜", new Date(context.capturedAt).toISOString().slice(0, 10)],
-    ["자산", holding ? holding.name : "—"],
-    ["수량", holding && holding.quantity != null ? `${holding.quantity}${holding.unitLabel || ""}` : "—"],
-    ["단가", holding && holding.unitPrice != null ? String(holding.unitPrice) : "—"],
-    ["평가금액", holding && holding.valueKrw != null ? won(holding.valueKrw) : "—"],
-    ["자산 내 비중", holding && holding.shareOfTotal != null ? `${(holding.shareOfTotal * 100).toFixed(1)}%` : "—"],
     ["환율(USD)", fx.usdkrw ? `${Math.round(fx.usdkrw).toLocaleString()}원` : "—"],
     [equity ? equity.label : "주가지수", equity ? `${equity.value.toFixed(1)} (${equity.period})` : "—"],
     ["미 국채 3개월", rates.us3m ? `${rates.us3m.value}%` : "—"],
@@ -176,7 +152,6 @@ function autoCard() {
 
 function ruleFields() {
   if (kind !== "machine") return "";
-  const holding = selectedRow();
   const metricOptions = METRICS.map((m) => `<option value="${m.id}">${escapeHtml(m.label)}</option>`).join("");
   const opOptions = OPS.map((o) => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join("");
   return `<div class="rule">
@@ -184,7 +159,7 @@ function ruleFields() {
     <select id="rule-op" aria-label="어떻게">${opOptions}</select>
     <input id="rule-value" type="number" step="any" aria-label="얼마">
   </div>
-  <div class="q-note">${holding ? "이 자산에 대해 자동으로 확인할 수 있는 조건입니다." : "자동 확인 조건은 자산이 붙어 있을 때만 확인할 수 있습니다. 지금은 조건만 저장됩니다."}</div>`;
+  <div class="q-note">지금은 조건만 저장합니다. 자동 확인 연결은 이후 단계에서 다룹니다.</div>`;
 }
 
 function formCard() {
@@ -233,7 +208,7 @@ function recordCard() {
       <div class="rec-head">
         <span class="rec-when">${escapeHtml(String(rec.decided_at || "").slice(0, 10))}</span>
         <span class="pill">${escapeHtml(label[rec.action] || rec.action)}</span>
-        <span class="rec-reason">${escapeHtml(rec.holding_label || "보유와 무관")}</span>
+        ${rec.holding_label ? `<span class="rec-reason">${escapeHtml(rec.holding_label)}</span>` : ""}
       </div>
       <div class="rec-body">
         <div><b>왜</b> ${escapeHtml(rec.reasoning || "—")}</div>
@@ -267,12 +242,6 @@ function render() {
   document.querySelectorAll("[data-kind]").forEach((node) => {
     node.addEventListener("click", () => { kind = node.dataset.kind; render(); });
   });
-  const select = document.getElementById("holding");
-  if (select) select.addEventListener("change", async () => {
-    holdingId = select.value;
-    context = await DecisionContext.build({ holding: selectedRow(), totalKrw: total });
-    render();
-  });
   const save = document.getElementById("save");
   if (save) save.addEventListener("click", onSave);
 }
@@ -297,9 +266,8 @@ function collectRule() {
     metric: metric ? metric.value : "price",
     op: op ? op.value : "lte",
     value: parsed,
-    // 어느 자산에 대한 조건인지 없으면 나중에 확인할 수 없다.
-    holdingId: holdingId || null,
-    checkable: Boolean(holdingId),
+    holdingId: null,
+    checkable: false,
   };
 }
 
@@ -318,8 +286,7 @@ async function onSave() {
   const rule = collectRule();
   busy = true; notice = ""; render();
   try {
-    const holding = selectedRow();
-    const fresh = await DecisionContext.build({ holding: holding, totalKrw: total });
+    const fresh = await DecisionContext.build({ holding: null, totalKrw: 0 });
     await JournalStore.saveRecord({
       action: action,
       reasoning: typed.reasoning,
@@ -328,8 +295,8 @@ async function onSave() {
       falsificationKind: kind,
       falsificationText: typed.falsificationText,
       falsificationRule: rule,
-      holdingId: holdingId || null,
-      holdingLabel: holding ? holding.name : "",
+      holdingId: null,
+      holdingLabel: "",
       context: fresh,
     });
     records = await JournalStore.loadRecords();
@@ -346,20 +313,8 @@ async function onSave() {
 (async function () {
   render();
   if (!(await AccountStore.bootstrapProtected())) return;
-  // 평가금액과 비중을 채우려면 시세가 있어야 한다. 못 받아도 기록 자체는 쓸 수 있어야
-  // 하므로 실패를 삼키고 진행한다 — 맥락 한 조각 때문에 근거를 못 적게 만들면 본말이 뒤집힌다.
-  try { await Valuation.load(); }
-  catch (error) { console.error("[결정 기록] 시세를 읽지 못했습니다:", error); }
-  const state = SessionStore.read();
   try {
-    const summary = Portfolio.summarize(state.assets || []);
-    rows = summary.rows || [];
-    total = summary.total || 0;
-  } catch (error) {
-    console.error("[결정 기록] 보유 자산을 읽지 못했습니다:", error);
-  }
-  try {
-    context = await DecisionContext.build({ holding: null, totalKrw: total });
+    context = await DecisionContext.build({ holding: null, totalKrw: 0 });
     records = await JournalStore.loadRecords();
   } catch (problem) {
     notice = problem.message || "불러오지 못했습니다.";
