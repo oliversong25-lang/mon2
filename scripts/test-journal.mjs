@@ -12,6 +12,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { installTestAuth, launchTestBrowser } from "./lib/test-auth.mjs";
+import { installJournalMock } from "./lib/test-journal-mock.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = 4338;
@@ -214,6 +215,109 @@ try {
   });
   record("내비게이션에서 원칙이 기록보다 앞에 있다",
     order.philosophy >= 0 && order.journal > order.philosophy, JSON.stringify(order));
+
+  // ── 3. 왕복 ──────────────────────────────────────────────────────────────
+  // 화면이 그려지는 것과 저장한 것이 다시 읽히는 것은 다른 이야기다. 여기서부터는
+  // 기록 테이블을 목으로 받아 저장 → 다시 읽기를 실제로 통과시킨다.
+  const round = await context.newPage();
+  await installTestAuth(round);
+  await installJournalMock(round);
+
+  await round.goto(`http://127.0.0.1:${PORT}/philosophy.html`, { waitUntil: "networkidle" });
+  await round.waitForTimeout(700);
+
+  record("목을 붙이면 원칙 화면이 오류 없이 뜬다",
+    !(await round.innerText("body")).includes("불러오지 못했어요"), "");
+
+  await round.fill('[data-q="buy"]', "내가 아는 사업이고 값이 싸 보일 때");
+  await round.fill('[data-q="sell"]', "산 이유가 사라졌을 때");
+  await round.fill("#reason", "처음 적음");
+  await round.click("#save");
+  await round.waitForTimeout(600);
+
+  const afterSave = await round.innerText("body");
+  record("저장한 원칙이 바뀐 기록에 남는다", afterSave.includes("처음 적음"), "");
+  record("저장한 답이 이력 본문에 남는다", afterSave.includes("산 이유가 사라졌을 때"), "");
+  record("저장 뒤 횟수가 표시된다", afterSave.includes("1번 저장"), "");
+
+  // 두 번째 저장. 이력이 쌓이는지, 그리고 **이전 것이 지워지지 않는지**를 본다.
+  await round.fill('[data-q="sell"]', "산 이유가 사라졌거나 더 나은 것을 찾았을 때");
+  await round.fill("#reason", "매도 조건을 넓힘");
+  await round.click("#save");
+  await round.waitForTimeout(600);
+
+  const afterSecond = await round.innerText("body");
+  record("두 번째 저장이 이력에 쌓인다", afterSecond.includes("매도 조건을 넓힘"), "");
+  record("첫 기록이 지워지지 않는다", afterSecond.includes("처음 적음"), "");
+  record("저장 횟수가 늘어난다", afterSecond.includes("2번 저장"), "");
+
+  const revisionRows = await round.evaluate(() => window.__journalStore.user_philosophy_revisions.length);
+  record("이력이 덧붙기만 한다", revisionRows === 2, `${revisionRows}건`);
+
+  // 새로 고쳐도 저장한 답이 다시 읽혀야 한다. 화면 상태만 바뀌고 서버에 안 갔으면
+  // 여기서 드러난다.
+  await round.reload({ waitUntil: "networkidle" });
+  await round.waitForTimeout(700);
+  const reloaded = await round.inputValue('[data-q="sell"]');
+  record("새로 고쳐도 저장한 원칙이 다시 읽힌다",
+    reloaded === "산 이유가 사라졌거나 더 나은 것을 찾았을 때", reloaded);
+
+  // ── 결정 기록 왕복 ───────────────────────────────────────────────────────
+  await round.goto(`http://127.0.0.1:${PORT}/decisions.html`, { waitUntil: "networkidle" });
+  await round.waitForTimeout(900);
+
+  // 무엇을 했는지 고르지 않으면 저장되지 않아야 한다. 빈 action은 기록의 뜻을 지운다.
+  await round.click("#save");
+  await round.waitForTimeout(400);
+  record("결정 종류를 고르지 않으면 저장하지 않는다",
+    (await round.innerText("body")).includes("먼저 골라"), "");
+
+  await round.click('[data-action="hold"]');
+  await round.fill('[data-f="reasoning"]', "값이 내렸지만 산 이유는 그대로다");
+  await round.fill('[data-f="expectation"]', "2년 안에 이익이 회복되기를 기대");
+  await round.fill('[data-f="uncertainty"]', "경쟁사 진입 속도를 모른다");
+  await round.fill('[data-f="falsificationText"]', "두 분기 연속 매출이 줄면 틀린 것");
+  await round.click("#save");
+  await round.waitForTimeout(700);
+
+  const afterRecord = await round.innerText("body");
+  record("결정 기록이 저장되고 목록에 나온다",
+    afterRecord.includes("값이 내렸지만 산 이유는 그대로다"), "");
+  record("보류도 결정으로 기록된다", afterRecord.includes("그대로 뒀다"), "");
+  record("보유 자산 없이 기록해도 목록에 나온다", afterRecord.includes("보유와 무관"), "");
+  record("저장 뒤 안내가 뜬다", afterRecord.includes("기록했습니다"), "");
+
+  const stored = await round.evaluate(() => window.__journalStore.user_decision_records[0]);
+  record("사람이 판단할 조건으로 저장된다", stored.falsification_kind === "human", stored.falsification_kind);
+  record("보유 없는 기록의 holding_id가 null이다", stored.holding_id === null, String(stored.holding_id));
+  record("맥락이 기록과 함께 저장된다",
+    Boolean(stored.context && stored.context.businessCycle && stored.context.businessCycle.phase),
+    JSON.stringify(stored.context && stored.context.businessCycle));
+  record("국면이 신호가 아니라 맥락으로 표시돼 저장된다",
+    stored.context.businessCycle.recordedAs === "context_not_signal",
+    String(stored.context.businessCycle.recordedAs));
+
+  // 숫자로 확인되는 조건은 구조로 저장돼야 한다. 본문에만 남으면 트랙 30이 자동 확인과
+  // 사람 판단을 가를 수 없다.
+  await round.click('[data-action="sell"]');
+  await round.click('[data-kind="machine"]');
+  await round.waitForTimeout(300);
+  await round.fill("#rule-value", "12000");
+  await round.fill('[data-f="reasoning"]', "손절선을 정해 둔다");
+  await round.fill('[data-f="falsificationText"]', "12000원 아래로 내려가면");
+  await round.click("#save");
+  await round.waitForTimeout(700);
+
+  const machineRow = await round.evaluate(() =>
+    window.__journalStore.user_decision_records.find((row) => row.falsification_kind === "machine"));
+  record("숫자 조건이 구조로 저장된다",
+    Boolean(machineRow && machineRow.falsification_rule && machineRow.falsification_rule.value === 12000),
+    JSON.stringify(machineRow && machineRow.falsification_rule));
+  record("자산이 없으면 자동 확인 불가로 표시된다",
+    machineRow.falsification_rule.checkable === false, String(machineRow.falsification_rule.checkable));
+
+  const total = await round.evaluate(() => window.__journalStore.user_decision_records.length);
+  record("기록 두 건이 모두 남는다", total === 2, `${total}건`);
 } catch (error) {
   record("화면 검증", false, error.message);
 } finally {

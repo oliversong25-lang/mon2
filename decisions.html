@@ -324,7 +324,10 @@ function collectRule() {
 
 async function onSave() {
   if (!action) { notice = "무엇을 했는지 먼저 골라 주세요."; render(); return; }
+  // **화면을 다시 그리기 전에 다 읽는다.** `render()`가 DOM을 통째로 새로 만들기 때문에,
+  // 그 뒤에 읽으면 빈 칸을 읽게 된다 — 숫자 조건 값이 매번 조용히 0으로 저장되고 있었다.
   const typed = collect();
+  const rule = collectRule();
   busy = true; notice = ""; render();
   try {
     const holding = selectedRow();
@@ -336,7 +339,7 @@ async function onSave() {
       uncertainty: typed.uncertainty,
       falsificationKind: kind,
       falsificationText: typed.falsificationText,
-      falsificationRule: collectRule(),
+      falsificationRule: rule,
       holdingId: holdingId || null,
       holdingLabel: holding ? holding.name : "",
       context: fresh,
