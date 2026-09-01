@@ -158,6 +158,40 @@ try {
   record("주가지수가 자동으로 채워진다", Number.isFinite(filled.equity), String(filled.equity));
   record("날짜가 자동으로 채워진다", Boolean(filled.capturedAt), String(filled.capturedAt));
 
+  // 보유 자산이 붙었을 때도 자동 채움이 실제로 값을 채우는지. 자산 없는 상태만 보면
+  // "—"만 확인하고 넘어가게 되고, 정작 쓰이는 경로는 검증되지 않는다.
+  const withHolding = await page.evaluate(async () => {
+    const session = {
+      schema: 7,
+      assets: [{
+        id: "journal-test-1",
+        group: "equity",
+        // quotes.json에 있는 실제 종목코드라야 평가금액이 나온다. 없는 코드를 쓰면
+        // 자동 채움이 아니라 시세 결측을 검증하게 된다.
+        fields: { productCode: "100030", productName: "검증용 종목", quantity: "10", averagePrice: "18000", currency: "KRW" },
+        autoFields: {}, isEstimated: false,
+      }],
+      snapshots: [],
+    };
+    localStorage.setItem("assetInput.session", JSON.stringify(session));
+    await window.Valuation.load();
+    const summary = window.Portfolio.summarize(session.assets);
+    const row = summary.rows[0];
+    const ctx = await window.DecisionContext.build({ holding: row, totalKrw: summary.total });
+    return {
+      name: ctx.holding && ctx.holding.name,
+      quantity: ctx.holding && ctx.holding.quantity,
+      unitPrice: ctx.holding && ctx.holding.unitPrice,
+      valueKrw: ctx.holding && ctx.holding.valueKrw,
+      share: ctx.holding && ctx.holding.shareOfTotal,
+    };
+  });
+  record("자산이 붙으면 종목명이 자동으로 들어간다", withHolding.name === "검증용 종목", JSON.stringify(withHolding));
+  record("수량이 자동으로 들어간다", withHolding.quantity === 10, String(withHolding.quantity));
+  record("단가가 자동으로 들어간다", Number.isFinite(withHolding.unitPrice) && withHolding.unitPrice > 0, String(withHolding.unitPrice));
+  record("평가금액이 자동으로 들어간다", Number.isFinite(withHolding.valueKrw) && withHolding.valueKrw > 0, String(withHolding.valueKrw));
+  record("자산 내 비중이 자동으로 계산된다", withHolding.share === 1, String(withHolding.share));
+
   record("국면이 신호가 아니라 맥락이라고 밝힌다",
     journal.includes("맥락") && journal.includes("신호가 아닙니다"), "");
 
