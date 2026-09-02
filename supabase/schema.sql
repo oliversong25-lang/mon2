@@ -118,6 +118,8 @@ revoke all on table public.user_decision_records from anon;
 
 grant select, insert, update, delete on table public.user_investment_philosophy to authenticated;
 -- 원칙 이력은 고치거나 지울 수 없다. 바뀐 기록을 나중에 손볼 수 있으면 기록이 아니다.
+-- Supabase가 authenticated에 이미 준 기본 권한이 남을 수 있으므로 grant만 좁혀 쓰면 안 된다.
+revoke all on table public.user_philosophy_revisions from authenticated;
 grant select, insert on table public.user_philosophy_revisions to authenticated;
 grant select, insert, update, delete on table public.user_decision_records to authenticated;
 

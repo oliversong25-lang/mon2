@@ -59,10 +59,11 @@ try {
 
   // 이력은 덧붙이기만 한다. update/delete 권한을 주면 나중에 손볼 수 있고, 그러면 이력이 아니다.
   const revisionGrant = (sql.match(/grant [^;]*on table public\.user_philosophy_revisions to authenticated;/) || [""])[0];
+  const revisionRevoke = "revoke all on table public.user_philosophy_revisions from authenticated;";
   record("원칙 이력에 수정·삭제 권한이 없다",
-    revisionGrant.includes("select") && revisionGrant.includes("insert")
+    sql.includes(revisionRevoke) && revisionGrant.includes("select") && revisionGrant.includes("insert")
       && !revisionGrant.includes("update") && !revisionGrant.includes("delete"),
-    revisionGrant);
+    `${sql.includes(revisionRevoke) ? "revoke 있음" : "revoke 없음"} / ${revisionGrant}`);
 
   // 무엇을 했는지는 사용자의 문장이다. 정해진 네 값으로 제한하면 직접 입력 UI와 저장이 갈라진다.
   record("무엇을 했는지 자유 문장으로 저장할 수 있다",
