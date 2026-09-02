@@ -69,37 +69,78 @@ create index if not exists user_philosophy_revisions_user_time
 
 -- 의사결정 기록.
 --
--- `action`에 hold와 skip이 들어 있는 것이 핵심이다. 매수·매도만 받으면 이것은 거래
--- 기록부가 되고, 정작 남겨야 할 "안 팔기로 했다"와 "안 사기로 했다"가 사라진다.
+-- 형태가 트랙 29와 다르다. 그때는 근거를 자유 문장 네 칸으로 받았는데, "무엇이 불확실한가"는
+-- 얼마든지 뭉뚱그려 답할 수 있고 대개 그렇게 된다. 지금은 **검토 중인 행동 하나를 적고,
+-- 해야 할 이유와 하지 말아야 할 이유를 각각 목록으로 쓴 뒤에** 결정을 고른다. 반대 이유를
+-- 채우지 못하는 사람은 그 결정을 살펴보지 않은 것이고, 목록은 물러설 자리를 남기지 않는다.
 --
--- `holding_id`는 null을 허용한다. 사지 않기로 한 결정에는 붙일 보유 자산이 없다.
--- `holding_label`을 따로 두는 이유는 자산이 나중에 지워져도 기록이 읽혀야 하기 때문이다.
+-- ── 이유를 낱개로 담는 이유 ────────────────────────────────────────────────
+-- 한 덩어리 문장으로 담으면 나중에 "그때 세 번째 이유가 어떻게 됐나"를 물을 수 없다.
+-- 각 항목이 자기 id를 갖고, 반증 표시도 항목에 붙는다.
 --
--- `context`는 앱이 채운다. 사용자가 타자로 치는 것은 근거 네 칸과 반증 조건뿐이다 —
--- 마찰이 의사결정 기록이 실패하는 유일한 이유이고, 한 건에 10분이 걸리면 아무도 쓰지 않는다.
+-- ── 반증 조건은 반대 목록에서 나온다 ───────────────────────────────────────
+-- 따로 칸을 두지 않는다. 반대 이유 중 "이게 실제로 일어나면 내 판단이 틀린 것"에 표시하면
+-- 그것이 반증 조건이다. 자연스러운 자리이고 칸이 하나 줄어든다. 기계가 확인할 수 있는
+-- 것과 사람이 판단할 것의 구분은 표시된 항목에 그대로 남는다.
+--
+-- ── 네 가지 행동 종류가 사라진 이유 ────────────────────────────────────────
+-- 위에 행동을 적고 아래에서 결정을 고르면 넷이 다 덮인다.
+--   "삼성전자 매수" + 실행 안 함 = 사지 않기로 함
+--   "삼성전자 매도" + 실행 안 함 = 계속 들고 있기로 함
+--
+-- ── 보류는 안 하기로 함과 다르다 ───────────────────────────────────────────
+-- `deferred`는 결정에 이르지 못한 것이고 `not_executed`는 결정에 이르렀는데 하지 않기로
+-- 한 것이다. 앞의 것은 **열린 고리**라 다시 돌아와야 하고 뒤의 것은 끝난 기록이다.
+-- 그래서 상태를 합치지 않고, 나중에 "정한 조건을 지켰는가"를 셀 때 보류는 결정으로
+-- 세지 않는다.
 create table if not exists public.user_decision_records (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   decided_at timestamptz not null default now(),
-  action text not null check (action in ('buy', 'sell', 'hold', 'skip')),
-  reasoning text not null default '',
+  -- 검토 중인 행동. "삼성전자 매수"처럼 한 줄이다.
+  action_statement text not null default '',
+  -- 이유 목록. 각 항목은 {id, text}이고, 반대 쪽은 {falsifies, kind, rule}을 더 갖는다.
+  reasons_for jsonb not null default '[]'::jsonb,
+  reasons_against jsonb not null default '[]'::jsonb,
+  -- 두 목록을 다 쓴 뒤에 고른다.
+  decision text not null check (decision in ('executed', 'not_executed', 'deferred')),
+  -- 무엇을 기대했나. 이유가 아니라 **결과에 대한 예상**이라 어느 목록에도 들어가지 않는다.
+  -- 목록에 섞으면 나중에 되돌아볼 때 이유와 구분되지 않는다.
   expectation text not null default '',
-  uncertainty text not null default '',
-  -- 반증 조건은 두 종류를 **구분해서** 담는다. 기계가 확인할 수 있는 것과 사람만 판단할
-  -- 수 있는 것은 이후 단계에서 다르게 다뤄야 한다.
-  falsification_kind text not null default 'human' check (falsification_kind in ('machine', 'human')),
-  falsification_text text not null default '',
-  falsification_rule jsonb,
+  -- 보류의 열린 고리. 해소되면 그때 채운다. `decision = 'deferred' and resolved_at is null`이
+  -- 아직 돌아와야 하는 기록이다.
+  resolved_at timestamptz,
+  superseded_by uuid references public.user_decision_records(id) on delete set null,
   holding_id text,
   holding_label text not null default '',
   context jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
 
+-- 트랙 29 모양으로 이미 적용한 데이터베이스를 위한 전환. 새로 만드는 곳에서는 아무 일도
+-- 하지 않는다. 브랜치가 main에 합쳐지기 전이라 지금은 값이 거의 없다.
+alter table public.user_decision_records add column if not exists action_statement text not null default '';
+alter table public.user_decision_records add column if not exists reasons_for jsonb not null default '[]'::jsonb;
+alter table public.user_decision_records add column if not exists reasons_against jsonb not null default '[]'::jsonb;
+alter table public.user_decision_records add column if not exists decision text;
+alter table public.user_decision_records add column if not exists expectation text not null default '';
+alter table public.user_decision_records add column if not exists resolved_at timestamptz;
+alter table public.user_decision_records add column if not exists superseded_by uuid references public.user_decision_records(id) on delete set null;
+alter table public.user_decision_records drop column if exists action;
+alter table public.user_decision_records drop column if exists reasoning;
+alter table public.user_decision_records drop column if exists uncertainty;
+alter table public.user_decision_records drop column if exists falsification_kind;
+alter table public.user_decision_records drop column if exists falsification_text;
+alter table public.user_decision_records drop column if exists falsification_rule;
+
 create index if not exists user_decision_records_user_time
   on public.user_decision_records (user_id, decided_at desc);
 create index if not exists user_decision_records_holding
   on public.user_decision_records (user_id, holding_id);
+-- 아직 돌아와야 하는 보류 기록. 표면화 방식은 다음 단계가 정하지만 자료는 지금 받쳐 둔다.
+create index if not exists user_decision_records_open_deferred
+  on public.user_decision_records (user_id, decided_at)
+  where decision = 'deferred' and resolved_at is null;
 
 alter table public.user_investment_philosophy enable row level security;
 alter table public.user_investment_philosophy force row level security;
