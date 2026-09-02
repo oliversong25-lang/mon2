@@ -24,6 +24,51 @@
     .q textarea { min-height:5rem; resize:vertical; }
     .q-note { margin-top:var(--space-2); color:var(--dim); font-size:var(--font-xs); line-height:1.6; }
 
+    /* 셋을 같은 크기로 둔다. 하나가 작아 보이면 그 선택은 덜 쓰인다. */
+    .actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));
+      gap:var(--space-3); margin-top:var(--space-3); }
+    .actions button { padding:var(--space-4) var(--space-3); border:var(--border) solid var(--line);
+      border-radius:var(--radius-md); background:var(--surface-2); color:inherit;
+      font:inherit; font-weight:600; cursor:pointer; text-align:center; }
+    .actions button[aria-pressed="true"] { border-color:var(--brand-ink);
+      outline:2px solid var(--brand-ink); outline-offset:-2px; }
+
+    /* 두 목록은 나란히 놓는다. 위아래로 쌓으면 아래쪽이 덜 채워진다 — 반대 이유가
+       아래로 밀리는 배치는 이 구조가 하려는 일과 정확히 반대다. */
+    .cols { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-5);
+      margin-top:var(--space-4); }
+    @media (max-width:40rem) { .cols { grid-template-columns:1fr; } }
+    .col-head { display:flex; align-items:baseline; justify-content:space-between;
+      gap:var(--space-3); padding-bottom:var(--space-2);
+      border-bottom:var(--border) solid var(--line); }
+    .col-count { font-variant-numeric:tabular-nums; color:var(--muted); font-weight:600; }
+    .items { list-style:none; margin:var(--space-3) 0 0; padding:0; }
+    .item { margin-top:var(--space-3); }
+    .item:first-child { margin-top:0; }
+    .item-line { display:flex; gap:var(--space-2); align-items:flex-start; }
+    .item-line textarea { flex:1 1 auto; margin-top:0; min-height:3.5rem; }
+    .item-drop { flex:0 0 auto; width:2rem; height:2rem; border:var(--border) solid var(--line);
+      border-radius:var(--radius-sm); background:var(--surface-2); color:var(--dim);
+      font:inherit; cursor:pointer; line-height:1; }
+    .item-mark { margin-top:var(--space-2); color:var(--muted); font-size:var(--font-xs); }
+    .item-mark label { display:flex; gap:var(--space-2); align-items:flex-start;
+      font-size:var(--font-xs); font-weight:400; line-height:1.6; }
+    .item-mark input[type=checkbox] { width:auto; margin:.2rem 0 0; }
+    .item-add { margin-top:var(--space-3); padding:var(--space-2) var(--space-3);
+      border:var(--border) dashed var(--line); border-radius:var(--radius-sm);
+      background:transparent; color:var(--muted); font:inherit; cursor:pointer; }
+
+    /* 숫자만 보여준다. "3 대 1"은 사실이고, 그 위에 얹는 평가는 우리 몫이 아니다. */
+    .tally { margin-top:var(--space-5); padding-top:var(--space-3);
+      border-top:var(--border) solid var(--line); color:var(--muted);
+      font-variant-numeric:tabular-nums; }
+
+    .rec-cols { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);
+      margin-top:var(--space-3); color:var(--muted); font-size:var(--font-sm); }
+    @media (max-width:40rem) { .rec-cols { grid-template-columns:1fr; } }
+    .rec-cols b { color:var(--dim); font-weight:600; font-size:var(--font-xs); }
+    .rec-cols ul { margin:var(--space-2) 0 0; padding-left:var(--space-5); line-height:1.8; }
+
     .kinds { display:flex; flex-wrap:wrap; gap:var(--space-3); margin-top:var(--space-3); }
     .kinds button { padding:var(--space-2) var(--space-4); border:var(--border) solid var(--line);
       border-radius:var(--radius-md); background:var(--surface-2); color:inherit; font:inherit; cursor:pointer; }
@@ -70,18 +115,32 @@
 // 하는 것이다. 사람은 결과를 알기 전에 무엇을 생각했는지 기억하지 못하고, 기억은 결과
 // 쪽으로 재구성된다.
 //
+// ── 형태 ───────────────────────────────────────────────────────────────────
+// 검토 중인 행동 하나를 위에 적고, 해야 할 이유와 하지 말아야 할 이유를 각각 **목록으로**
+// 쓴 뒤에 결정을 고른다. "무엇이 불확실한가"를 자유 문장으로 물으면 얼마든지 뭉뚱그려
+// 답할 수 있지만, 반대 이유를 낱개로 적으라고 하면 물러설 자리가 없다.
+//
+// 행동을 위에 적고 결정을 아래에서 고르면 매수·매도·보유·안 함이 다 덮인다.
+//   "삼성전자 매수" + 실행 안 함 = 사지 않기로 함
+//   "삼성전자 매도" + 실행 안 함 = 계속 들고 있기로 함
+//
 // ── 마찰이 유일한 실패 원인이다 ────────────────────────────────────────────
-// 한 건에 10분이 걸리면 아무도 쓰지 않는다. 그래서 사용자가 타자로 치는 것은 **다섯 칸**
-// 뿐이고, 날짜·종목·수량·단가·비중·환율·주가지수·금리·경기국면은 앱이 채운다.
+// 한 건에 10분이 걸리면 아무도 쓰지 않는다. 고정 칸은 **둘**(행동 한 줄, 기대 한 칸)이고
+// 나머지는 이유 한 줄에 한 칸이다. 날짜·종목·수량·단가·비중·환율·주가지수·금리·
+// 경기국면은 앱이 채운다.
 const { escapeHtml } = Format;
 
-// 사용자가 실제로 타자로 치는 칸. 이 넷이 근거의 전부다.
-const QUESTIONS = [
-  { id: "reasoning", label: "왜 그렇게 했습니까?" },
-  { id: "expectation", label: "무엇을 기대했습니까?" },
-  { id: "uncertainty", label: "무엇이 불확실합니까?" },
-  { id: "falsificationText", label: "무엇을 보면 이 판단이 틀린 것입니까?" },
+// 네 가지 전부가 결정이다. 보류와 안 하기로 함을 빼면 이것은 거래 기록부가 된다.
+// 결정 셋. **보류는 안 하기로 함과 다르다** — 앞은 결정에 이르지 못한 열린 고리이고
+// 뒤는 결정에 이르러 하지 않기로 한 끝난 기록이다. 합치면 나중에 "정한 조건을 지켰는가"를
+// 셀 때 아직 정하지도 않은 것이 분모에 들어간다.
+const DECISIONS = [
+  { id: "executed", label: "실행함" },
+  { id: "not_executed", label: "실행 안 함" },
+  { id: "deferred", label: "판단 보류" },
 ];
+
+const DECISION_LABEL = { executed: "실행함", not_executed: "실행 안 함", deferred: "판단 보류" };
 
 // 기계가 확인할 수 있는 반증 조건의 재료. 트랙 30이 자동 확인과 주기적 검토를 가르려면
 // 이 구분이 데이터에 있어야 한다.
@@ -97,11 +156,24 @@ const OPS = [
 
 let records = [];
 let context = null;
-let action = "";
-let kind = "human";
 let loaded = false;
 let busy = false;
 let notice = "";
+let seq = 0;
+
+function newItem() {
+  seq += 1;
+  return { id: "r" + Date.now() + "-" + seq, text: "", falsifies: false, kind: "human", rule: null };
+}
+
+// 기록 본문. 두 목록은 **결정보다 먼저** 쓸 수 있어야 하므로 결정이 비어 있어도 편집된다.
+let draft = {
+  actionStatement: "",
+  expectation: "",
+  decision: "",
+  reasonsFor: [newItem()],
+  reasonsAgainst: [newItem()],
+};
 
 function navOptions() {
   const state = SessionStore.read();
@@ -118,9 +190,78 @@ function head() {
 function actionCard() {
   return `<div class="card">
     <div class="q" style="margin-top:0">
-      <label for="action-input">무엇을 했습니까?</label>
-      <input id="action-input" type="text" maxlength="120" value="${escapeHtml(action)}" autocomplete="off">
-      <div class="q-note" id="action-help">선택지 없이 한 문장으로 직접 기록합니다.</div>
+      <label for="statement">검토 중인 행동</label>
+      <input id="statement" type="text" data-draft="actionStatement" value="${escapeHtml(draft.actionStatement)}">
+    </div>
+  </div>`;
+}
+
+// 반증 조건은 **반대 목록에서 나온다.** 따로 칸을 두지 않고, 반대 이유 중 "이게 실제로
+// 일어나면 내 판단이 틀린 것"에 표시하면 그것이 반증 조건이다.
+function itemRow(item, side, index) {
+  const marked = side === "against" && item.falsifies;
+  const machine = marked && item.kind === "machine";
+  const rule = item.rule || {};
+  const sideKo = side === "for" ? "해야 할" : "하지 말아야 할";
+  const markBlock = side !== "against" ? "" : `<div class="item-mark">
+      <label><input type="checkbox" data-falsifies="${escapeHtml(item.id)}" ${marked ? "checked" : ""}>
+        이게 실제로 일어나면 내 판단이 틀린 것</label>
+      ${marked ? `<div class="kinds">
+        <button type="button" data-kind="human" data-for="${escapeHtml(item.id)}" aria-pressed="${!machine}">사람이 판단</button>
+        <button type="button" data-kind="machine" data-for="${escapeHtml(item.id)}" aria-pressed="${machine}">숫자로 확인</button>
+      </div>` : ""}
+      ${machine ? `<div class="rule">
+        <select data-rule="metric" data-for="${escapeHtml(item.id)}">${METRICS.map((m) => `<option value="${m.id}" ${rule.metric === m.id ? "selected" : ""}>${escapeHtml(m.label)}</option>`).join("")}</select>
+        <select data-rule="op" data-for="${escapeHtml(item.id)}">${OPS.map((o) => `<option value="${o.id}" ${rule.op === o.id ? "selected" : ""}>${escapeHtml(o.label)}</option>`).join("")}</select>
+        <input type="number" step="any" data-rule="value" data-for="${escapeHtml(item.id)}" value="${rule.value == null ? "" : escapeHtml(String(rule.value))}" aria-label="기준값">
+      </div>` : ""}
+    </div>`;
+
+  return `<li class="item">
+    <div class="item-line">
+      <textarea rows="2" data-item-text="${escapeHtml(item.id)}" aria-label="${sideKo} 이유 ${index + 1}">${escapeHtml(item.text)}</textarea>
+      <button type="button" class="item-drop" data-drop="${escapeHtml(item.id)}" aria-label="이 줄 지우기">×</button>
+    </div>
+    ${markBlock}
+  </li>`;
+}
+
+// **숫자를 보여주되 해석하지 않는다.** "3 대 1"은 사실이고 "반대 근거가 부족합니다"는
+// 우리가 내릴 판단이 아니다.
+function listColumn(side) {
+  const items = side === "for" ? draft.reasonsFor : draft.reasonsAgainst;
+  const title = side === "for" ? "해야 할 이유" : "하지 말아야 할 이유";
+  return `<div class="col">
+    <div class="col-head"><b>${title}</b><span class="col-count">${items.length}</span></div>
+    <ul class="items">${items.map((item, index) => itemRow(item, side, index)).join("")}</ul>
+    <button type="button" class="item-add" data-add="${side}">＋ 한 줄 더</button>
+  </div>`;
+}
+
+function reasonsCard() {
+  return `<div class="card">
+    <h2>이유</h2>
+    <div class="card-sub">두 쪽을 다 쓴 뒤에 결정을 고릅니다. 결정을 먼저 고르지 않아도 목록은 씁니다.</div>
+    <div class="cols">${listColumn("for")}${listColumn("against")}</div>
+    <div class="tally">${draft.reasonsFor.length} 대 ${draft.reasonsAgainst.length}</div>
+  </div>`;
+}
+
+function decisionCard() {
+  const buttons = DECISIONS.map((item) => `<button type="button" data-decision="${item.id}"
+    aria-pressed="${draft.decision === item.id}">${escapeHtml(item.label)}</button>`).join("");
+  return `<div class="card">
+    <h2>결정</h2>
+    <div class="actions">${buttons}</div>
+    <div class="q">
+      <label for="expectation">이 결정으로 무엇을 기대합니까?</label>
+      <textarea id="expectation" data-draft="expectation" rows="3">${escapeHtml(draft.expectation)}</textarea>
+      <div class="q-note">이유가 아니라 <b>결과에 대한 예상</b>이라 어느 목록에도 넣지 않았습니다. 나중에 되돌아볼 때 이유와 구분돼야 합니다.</div>
+    </div>
+    ${autoCard()}
+    <div style="margin-top:var(--space-6)">
+      <button type="button" class="btn" id="save" ${busy ? "disabled" : ""}>기록하기</button>
+      ${notice ? `<span class="q-note" style="margin-left:var(--space-4)">${escapeHtml(notice)}</span>` : ""}
     </div>
   </div>`;
 }
@@ -150,80 +291,45 @@ function autoCard() {
   </div>`;
 }
 
-function ruleFields() {
-  if (kind !== "machine") return "";
-  const metricOptions = METRICS.map((m) => `<option value="${m.id}">${escapeHtml(m.label)}</option>`).join("");
-  const opOptions = OPS.map((o) => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join("");
-  return `<div class="rule">
-    <select id="rule-metric" aria-label="무엇을">${metricOptions}</select>
-    <select id="rule-op" aria-label="어떻게">${opOptions}</select>
-    <input id="rule-value" type="number" step="any" aria-label="얼마">
-  </div>
-  <div class="q-note">지금은 조건만 저장합니다. 자동 확인 연결은 이후 단계에서 다룹니다.</div>`;
-}
-
-function formCard() {
-  const fields = QUESTIONS.map((q) => {
-    if (q.id !== "falsificationText") {
-      return `<div class="q">
-        <label for="f-${q.id}">${escapeHtml(q.label)}</label>
-        <textarea id="f-${q.id}" data-f="${q.id}" rows="3"></textarea>
-      </div>`;
-    }
-    return `<div class="q">
-      <label for="f-${q.id}">${escapeHtml(q.label)}</label>
-      <div class="kinds">
-        <button type="button" data-kind="human" aria-pressed="${kind === "human"}">사람이 판단할 조건</button>
-        <button type="button" data-kind="machine" aria-pressed="${kind === "machine"}">숫자로 확인되는 조건</button>
-      </div>
-      ${ruleFields()}
-      <textarea id="f-${q.id}" data-f="${q.id}" rows="3"></textarea>
-      <div class="q-note">두 가지를 구분해 저장합니다. 숫자 조건은 나중에 자동으로 확인할 수 있고, 사람이 판단할 조건은 직접 돌아봐야 합니다.</div>
-    </div>`;
-  }).join("");
-
-  return `<div class="card">
-    <h2>근거</h2>
-    <div class="card-sub">직접 입력할 칸은 <b>${QUESTIONS.length + 1}개</b>입니다. 나머지는 앱이 채웁니다.</div>
-    ${fields}
-    ${autoCard()}
-    <div style="margin-top:var(--space-6)">
-      <button type="button" class="btn" id="save" ${busy ? "disabled" : ""}>기록하기</button>
-      ${notice ? `<span class="q-note" style="margin-left:var(--space-4)">${escapeHtml(notice)}</span>` : ""}
-    </div>
-  </div>`;
-}
-
 function recordCard() {
   if (!records.length) {
     return `<div class="card"><h2>지난 기록</h2>
       <p class="soon-body" style="margin-top:var(--space-3)">아직 기록이 없습니다.</p></div>`;
   }
-  // 기존 네 가지 선택값으로 저장된 기록도 사람이 읽던 문구로 계속 보여준다.
-  const label = { buy: "샀다", sell: "팔았다", hold: "그대로 뒀다", skip: "안 하기로 했다" };
+  const open = records.filter((rec) => rec.decision === "deferred" && !rec.resolved_at);
+  const bullets = (list) => list.map((item) =>
+    `<li>${escapeHtml(item.text)}${item.falsifies
+      ? ` <span class="pill">${item.kind === "machine" ? "숫자 확인" : "사람 판단"}</span>` : ""}</li>`).join("");
+
   const items = records.map((rec) => {
     const ctx = rec.context || {};
     const cycle = ctx.businessCycle || {};
+    const forList = rec.reasons_for || [];
+    const againstList = rec.reasons_against || [];
+    const marked = againstList.filter((item) => item.falsifies);
     return `<div class="rec">
       <div class="rec-head">
         <span class="rec-when">${escapeHtml(String(rec.decided_at || "").slice(0, 10))}</span>
-        <span class="pill">${escapeHtml(label[rec.action] || rec.action)}</span>
+        <span class="pill">${escapeHtml(DECISION_LABEL[rec.decision] || rec.decision)}</span>
+        <span class="rec-reason">${escapeHtml(rec.action_statement || "행동을 적지 않음")}</span>
         ${rec.holding_label ? `<span class="rec-reason">${escapeHtml(rec.holding_label)}</span>` : ""}
       </div>
+      <div class="rec-cols">
+        <div><b>해야 할 이유 ${forList.length}</b><ul>${bullets(forList)}</ul></div>
+        <div><b>하지 말아야 할 이유 ${againstList.length}</b><ul>${bullets(againstList)}</ul></div>
+      </div>
       <div class="rec-body">
-        <div><b>왜</b> ${escapeHtml(rec.reasoning || "—")}</div>
         <div><b>기대</b> ${escapeHtml(rec.expectation || "—")}</div>
-        <div><b>불확실</b> ${escapeHtml(rec.uncertainty || "—")}</div>
-        <div><b>틀렸다고 볼 조건</b> ${escapeHtml(rec.falsification_text || "—")}
-          <span class="pill">${rec.falsification_kind === "machine" ? "숫자 확인" : "사람 판단"}</span></div>
+        <div><b>틀렸다고 볼 조건</b> ${marked.length ? `${marked.length}건 표시됨` : "표시 없음"}</div>
       </div>
       <div class="rec-ctx">그때: ${escapeHtml(cycle.phaseKo || "국면 기록 없음")}${
         ctx.holding && ctx.holding.shareOfTotal != null ? ` · 비중 ${(ctx.holding.shareOfTotal * 100).toFixed(1)}%` : ""
       }${ctx.market && ctx.market.fx && ctx.market.fx.usdkrw ? ` · 환율 ${Math.round(ctx.market.fx.usdkrw).toLocaleString()}원` : ""}</div>
     </div>`;
   }).join("");
+
   return `<div class="card"><h2>지난 기록</h2>
-    <div class="card-sub">${records.length}건. 결과로 채점하지 않습니다.</div>
+    <div class="card-sub">${records.length}건${open.length ? ` · 판단 보류 ${open.length}건은 아직 열려 있습니다` : ""}. 결과로 채점하지 않습니다.</div>
     <div style="margin-top:var(--space-4)">${items}</div></div>`;
 }
 
@@ -233,75 +339,133 @@ function render() {
     return;
   }
   Shell.mount("app", "journal",
-    `${head()}${actionCard()}<div style="margin-top:var(--space-4)">${formCard()}</div><div style="margin-top:var(--space-4)">${recordCard()}</div>`,
+    `${head()}${actionCard()}<div style="margin-top:var(--space-4)">${reasonsCard()}</div>` +
+    `<div style="margin-top:var(--space-4)">${decisionCard()}</div>` +
+    `<div style="margin-top:var(--space-4)">${recordCard()}</div>`,
     navOptions());
+  bind();
+}
 
-  const actionInput = document.getElementById("action-input");
-  // 입력 중 DOM을 다시 그리지 않는다. 한글 조합과 커서가 끊기지 않아야 한다.
-  if (actionInput) actionInput.addEventListener("input", () => { action = actionInput.value; });
+function itemById(id) {
+  return draft.reasonsFor.concat(draft.reasonsAgainst).find((item) => item.id === id) || null;
+}
+
+// 화면을 다시 그리기 전에 입력값을 초안으로 걷어 온다. `render()`가 DOM을 통째로 새로
+// 만들기 때문에, 걷지 않고 그리면 방금 친 글자가 사라진다 — 트랙 29에서 숫자 조건 값이
+// 조용히 0으로 저장되던 것이 정확히 이 부류의 결함이었다.
+function harvest() {
+  document.querySelectorAll("[data-draft]").forEach((node) => { draft[node.dataset.draft] = node.value; });
+  document.querySelectorAll("[data-item-text]").forEach((node) => {
+    const item = itemById(node.dataset.itemText);
+    if (item) item.text = node.value;
+  });
+  document.querySelectorAll("[data-rule]").forEach((node) => {
+    const item = itemById(node.dataset.for);
+    if (!item) return;
+    item.rule = item.rule || { metric: "price", op: "lte", value: null };
+    if (node.dataset.rule === "value") {
+      const parsed = Number(node.value);
+      item.rule.value = node.value === "" || !Number.isFinite(parsed) ? null : parsed;
+    } else {
+      item.rule[node.dataset.rule] = node.value;
+    }
+  });
+}
+
+function bind() {
+  document.querySelectorAll("[data-decision]").forEach((node) => {
+    node.addEventListener("click", () => { harvest(); draft.decision = node.dataset.decision; render(); });
+  });
+  document.querySelectorAll("[data-add]").forEach((node) => {
+    node.addEventListener("click", () => {
+      harvest();
+      (node.dataset.add === "for" ? draft.reasonsFor : draft.reasonsAgainst).push(newItem());
+      render();
+    });
+  });
+  document.querySelectorAll("[data-drop]").forEach((node) => {
+    node.addEventListener("click", () => {
+      harvest();
+      const id = node.dataset.drop;
+      // 마지막 한 줄은 남긴다. 전부 지우면 다시 더할 자리가 사라진다.
+      ["reasonsFor", "reasonsAgainst"].forEach((key) => {
+        if (draft[key].some((item) => item.id === id) && draft[key].length > 1) {
+          draft[key] = draft[key].filter((item) => item.id !== id);
+        }
+      });
+      render();
+    });
+  });
+  document.querySelectorAll("[data-falsifies]").forEach((node) => {
+    node.addEventListener("change", () => {
+      harvest();
+      const item = itemById(node.dataset.falsifies);
+      if (item) item.falsifies = node.checked;
+      render();
+    });
+  });
   document.querySelectorAll("[data-kind]").forEach((node) => {
-    node.addEventListener("click", () => { kind = node.dataset.kind; render(); });
+    node.addEventListener("click", () => {
+      harvest();
+      const item = itemById(node.dataset.for);
+      if (item) {
+        item.kind = node.dataset.kind;
+        if (item.kind === "machine" && !item.rule) item.rule = { metric: "price", op: "lte", value: null };
+      }
+      render();
+    });
   });
   const save = document.getElementById("save");
   if (save) save.addEventListener("click", onSave);
 }
 
-function collect() {
-  const out = {};
-  QUESTIONS.forEach((q) => {
-    const node = document.querySelector(`[data-f="${q.id}"]`);
-    out[q.id] = node ? String(node.value || "").trim() : "";
-  });
-  return out;
+function filled(list) {
+  return list.filter((item) => String(item.text || "").trim());
 }
 
-function collectRule() {
-  if (kind !== "machine") return null;
-  const metric = document.getElementById("rule-metric");
-  const op = document.getElementById("rule-op");
-  const value = document.getElementById("rule-value");
-  const parsed = value ? Number(value.value) : NaN;
-  if (!Number.isFinite(parsed)) return null;
-  return {
-    metric: metric ? metric.value : "price",
-    op: op ? op.value : "lte",
-    value: parsed,
-    holdingId: null,
-    checkable: false,
-  };
+// 저장용으로 다듬는다. 빈 줄은 버리고, 표시된 반대 항목만 종류와 규칙을 갖는다.
+function pack(list, side) {
+  return filled(list).map((item) => {
+    const out = { id: item.id, text: item.text.trim() };
+    if (side !== "against") return out;
+    out.falsifies = Boolean(item.falsifies);
+    if (out.falsifies) {
+      out.kind = item.kind === "machine" ? "machine" : "human";
+      out.rule = out.kind === "machine"
+        ? Object.assign({ metric: "price", op: "lte", value: null }, item.rule, { holdingId: null, checkable: false })
+        : null;
+    }
+    return out;
+  });
 }
 
 async function onSave() {
-  action = String((document.getElementById("action-input") || {}).value || action).trim();
-  if (!action) {
-    const input = document.getElementById("action-input");
-    const help = document.getElementById("action-help");
-    if (help) help.textContent = "무엇을 했는지 직접 입력해 주세요.";
-    if (input) input.focus();
-    return;
-  }
-  // **화면을 다시 그리기 전에 다 읽는다.** `render()`가 DOM을 통째로 새로 만들기 때문에,
-  // 그 뒤에 읽으면 빈 칸을 읽게 된다 — 숫자 조건 값이 매번 조용히 0으로 저장되고 있었다.
-  const typed = collect();
-  const rule = collectRule();
+  harvest();
+  const forList = pack(draft.reasonsFor, "for");
+  const againstList = pack(draft.reasonsAgainst, "against");
+
+  // 사실만 말한다. "근거가 부족합니다"는 우리가 내릴 판단이 아니다.
+  if (!draft.actionStatement.trim()) { notice = "검토 중인 행동이 비어 있습니다."; render(); return; }
+  if (!forList.length) { notice = "해야 할 이유가 비어 있습니다."; render(); return; }
+  if (!againstList.length) { notice = "하지 말아야 할 이유가 비어 있습니다."; render(); return; }
+  if (!draft.decision) { notice = "결정을 고르지 않았습니다."; render(); return; }
+
   busy = true; notice = ""; render();
   try {
     const fresh = await DecisionContext.build({ holding: null, totalKrw: 0 });
     await JournalStore.saveRecord({
-      action: action,
-      reasoning: typed.reasoning,
-      expectation: typed.expectation,
-      uncertainty: typed.uncertainty,
-      falsificationKind: kind,
-      falsificationText: typed.falsificationText,
-      falsificationRule: rule,
+      actionStatement: draft.actionStatement.trim(),
+      reasonsFor: forList,
+      reasonsAgainst: againstList,
+      decision: draft.decision,
+      expectation: draft.expectation.trim(),
       holdingId: null,
       holdingLabel: "",
       context: fresh,
     });
     records = await JournalStore.loadRecords();
     notice = "기록했습니다.";
-    action = "";
+    draft = { actionStatement: "", expectation: "", decision: "", reasonsFor: [newItem()], reasonsAgainst: [newItem()] };
   } catch (problem) {
     notice = problem.message || "저장하지 못했습니다.";
   } finally {
@@ -310,9 +474,11 @@ async function onSave() {
   }
 }
 
+
 (async function () {
   render();
   if (!(await AccountStore.bootstrapProtected())) return;
+  // 신규매수처럼 아직 보유목록에 없는 행동도 같은 구조로 기록하므로 자산 연결은 요구하지 않는다.
   try {
     context = await DecisionContext.build({ holding: null, totalKrw: 0 });
     records = await JournalStore.loadRecords();

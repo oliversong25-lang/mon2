@@ -24,13 +24,8 @@ const record = (label, ok, detail) => {
 };
 
 // 셸 내용만 바꾸고 URL을 그대로 두면 이미 방문한 사용자는 예전 내비게이션을 계속 본다.
-// 공통 셸을 쓰는 모든 화면이 같은 배포 버전을 가리키는지 계약으로 고정한다.
 const SHELL_VERSION = "20260901-1";
-const shellPages = [
-  "home.html", "assets.html", "settings.html", "analysis.html",
-  "indicators.html", "philosophy.html", "decisions.html",
-];
-for (const pageName of shellPages) {
+for (const pageName of ["home.html", "assets.html", "settings.html", "analysis.html", "indicators.html", "philosophy.html", "decisions.html"]) {
   const source = await readFile(resolve(ROOT, pageName), "utf8");
   record(`${pageName}이 최신 공통 내비게이션을 읽는다`,
     source.includes(`lib/shell.js?v=${SHELL_VERSION}`), "셸 버전이 다름");
@@ -65,16 +60,31 @@ try {
       && !revisionGrant.includes("update") && !revisionGrant.includes("delete"),
     `${sql.includes(revisionRevoke) ? "revoke 있음" : "revoke 없음"} / ${revisionGrant}`);
 
-  // 무엇을 했는지는 사용자의 문장이다. 정해진 네 값으로 제한하면 직접 입력 UI와 저장이 갈라진다.
-  record("무엇을 했는지 자유 문장으로 저장할 수 있다",
-    /action text not null,/.test(sql) && !/action in\s*\(/.test(sql), "action 선택 제한이 남아 있음");
+  // 결정 셋. **보류가 안 하기로 함과 합쳐지면 안 된다** — 앞은 아직 결정에 이르지 못한
+  // 것이고 뒤는 결정에 이른 것이라, 합치면 나중에 셀 때 분모가 틀린다.
+  record("결정이 셋으로 갈린다",
+    ["'executed'", "'not_executed'", "'deferred'"].every((value) => sql.includes(value)), "");
+
+  record("이유가 목록으로 저장된다",
+    /reasons_for jsonb/.test(sql) && /reasons_against jsonb/.test(sql), "");
+
+  record("행동 한 줄이 따로 저장된다", /action_statement text/.test(sql), "");
+
+  record("기대가 남아 있다", /expectation text/.test(sql), "");
+
+  // 보류는 열린 고리다. 다시 돌아올 길을 자료가 받쳐야 한다.
+  record("보류가 열린 채로 남는 자리가 있다",
+    /resolved_at timestamptz/.test(sql) && /superseded_by uuid/.test(sql), "");
+  record("열린 보류를 찾는 인덱스가 있다",
+    /where decision = 'deferred' and resolved_at is null/.test(sql), "");
 
   record("보유 자산 없이도 기록할 수 있다",
     /holding_id text,/.test(sql) && !/holding_id text not null/.test(sql), "holding_id가 not null입니다");
 
-  record("반증 조건의 두 종류가 구분돼 저장된다",
-    sql.includes("falsification_kind") && sql.includes("'machine'") && sql.includes("'human'")
-      && sql.includes("falsification_rule jsonb"), "");
+  // 트랙 29의 칸들은 사라져야 한다. 남아 있으면 두 형태가 섞인다.
+  record("옛 자유 문장 칸이 정리된다",
+    /drop column if exists reasoning/.test(sql) && /drop column if exists uncertainty/.test(sql)
+      && /drop column if exists falsification_text/.test(sql), "");
 } catch (error) {
   record("스키마 계약 검증", false, error.message);
 }
@@ -144,21 +154,39 @@ try {
   await page.waitForTimeout(900);
   const journal = await page.innerText("body");
 
-  record("무엇을 했는지 직접 입력한다",
-    await page.locator('#action-input[type="text"]').count() === 1, "직접 입력 필드가 없음");
-  record("무엇을 했는지 고르는 선택 버튼이 없다",
-    await page.locator("[data-action]").count() === 0, "선택 버튼이 남아 있음");
+  for (const label of ["실행함", "실행 안 함", "판단 보류"]) {
+    record(`결정에 "${label}"이 있다`, journal.includes(label), "");
+  }
+  record("검토 중인 행동을 위에 적는다", journal.includes("검토 중인 행동"), "");
+  record("두 목록이 다 있다",
+    journal.includes("해야 할 이유") && journal.includes("하지 말아야 할 이유"), "");
   record("보유 자산을 고르는 영역이 없다",
     await page.locator("#holding").count() === 0 && !journal.includes("어느 자산에 대한 결정입니까"),
     "보유 자산 선택 영역이 남아 있음");
 
-  // 행동 한 문장과 근거 네 칸을 직접 입력한다.
-  const typed = await page.locator("#action-input, [data-f]").count();
-  record("사용자가 직접 입력하는 칸이 다섯 개다", typed === 5, `${typed}개`);
-  record("화면이 그 수를 밝힌다", journal.includes("5개"), "");
+  // **두 목록은 결정보다 먼저 쓸 수 있어야 한다.** 결정 뒤로 감추면 결정을 먼저 고르고
+  // 이유를 나중에 맞추게 된다 — 이 구조가 막으려던 것이 정확히 그것이다.
+  const listsBeforeDecision = await page.evaluate(() => ({
+    lists: document.querySelectorAll("[data-item-text]").length,
+    decisionChosen: Array.from(document.querySelectorAll("[data-decision]"))
+      .some((node) => node.getAttribute("aria-pressed") === "true"),
+  }));
+  record("결정을 고르기 전에도 목록을 쓸 수 있다",
+    listsBeforeDecision.lists >= 2 && !listsBeforeDecision.decisionChosen,
+    JSON.stringify(listsBeforeDecision));
+
+  // 고정 칸의 수. 이유 줄은 늘어나는 것이 정상이므로 따로 센다.
+  const fixed = await page.locator("[data-draft]").count();
+  record("고정으로 치는 칸이 둘이다", fixed === 2, `${fixed}개`);
 
   const autofilled = await page.evaluate(() => window.DecisionContext.AUTOFILLED_FIELDS.length);
-  record("앱이 채우는 칸이 사용자가 치는 칸보다 많다", autofilled > 5, `${autofilled}개`);
+  record("앱이 채우는 칸이 고정 칸보다 많다", autofilled > fixed, `${autofilled}개`);
+
+  // **숫자는 보여주되 해석하지 않는다.**
+  record("두 목록의 개수를 보여준다", /\d+ 대 \d+/.test(journal), "");
+  const judged = ["부족", "충분", "권장", "주의", "경고", "위험합니다", "바람직"]
+    .filter((word) => journal.includes(word));
+  record("개수에 평가를 붙이지 않는다", judged.length === 0, judged.join(" / "));
 
   // 자동 채움이 실제로 값을 채웠는지. 목록만 있고 값이 비면 자동 채움이 아니다.
   const filled = await page.evaluate(async () => {
@@ -180,9 +208,18 @@ try {
   record("국면이 신호가 아니라 맥락이라고 밝힌다",
     journal.includes("맥락") && journal.includes("신호가 아닙니다"), "");
 
-  // 반증 조건 두 종류가 화면에서 갈린다.
-  record("반증 조건을 두 종류로 나눈다",
-    journal.includes("사람이 판단할 조건") && journal.includes("숫자로 확인되는 조건"), "");
+  // 반증 조건은 **반대 목록에서 나온다.** 따로 칸을 두지 않았으므로, 표시할 자리가
+  // 반대 항목에 붙어 있는지를 본다. 두 종류의 구분은 표시한 뒤에 드러나며 왕복 검사가 본다.
+  record("반증 조건을 반대 목록에서 표시한다",
+    journal.includes("이게 실제로 일어나면 내 판단이 틀린 것"), "");
+  const markSpots = await page.evaluate(() => ({
+    against: document.querySelectorAll("[data-falsifies]").length,
+    forSide: document.querySelectorAll('.cols .col:nth-child(1) [data-falsifies]').length,
+  }));
+  record("반증 표시가 반대 목록에만 붙는다",
+    markSpots.against >= 1 && markSpots.forSide === 0, JSON.stringify(markSpots));
+  record("반증 전용 칸이 따로 있지 않다",
+    !journal.includes("무엇을 보면 이 판단이 틀린 것입니까"), "");
 
   // 결과 채점이 아니라는 것이 화면에 있어야 한다.
   record("결과로 채점하지 않는다고 밝힌다", journal.includes("채점하지 않습니다"), "");
@@ -245,61 +282,116 @@ try {
     reloaded === "산 이유가 사라졌거나 더 나은 것을 찾았을 때", reloaded);
 
   // ── 결정 기록 왕복 ───────────────────────────────────────────────────────
+  // **쓴 목록이 같은 목록으로 돌아와야 한다.** 트랙 29가 잡은 결함이 정확히 이 부류였다 —
+  // 화면은 멀쩡한데 저장되는 값이 달랐다.
   await round.goto(`http://127.0.0.1:${PORT}/decisions.html`, { waitUntil: "networkidle" });
   await round.waitForTimeout(900);
 
-  // 무엇을 했는지 쓰지 않으면 저장되지 않아야 한다. 빈 action은 기록의 뜻을 지운다.
+  // 빈 채로 저장하면 무엇이 비었는지 사실만 말해야 한다.
   await round.click("#save");
-  await round.waitForTimeout(400);
-  record("무엇을 했는지 쓰지 않으면 저장하지 않는다",
-    (await round.innerText("body")).includes("직접 입력해"), "");
-
-  await round.fill("#action-input", "그대로 보유했다");
-  await round.fill('[data-f="reasoning"]', "값이 내렸지만 산 이유는 그대로다");
-  await round.fill('[data-f="expectation"]', "2년 안에 이익이 회복되기를 기대");
-  await round.fill('[data-f="uncertainty"]', "경쟁사 진입 속도를 모른다");
-  await round.fill('[data-f="falsificationText"]', "두 분기 연속 매출이 줄면 틀린 것");
-  await round.click("#save");
-  await round.waitForTimeout(700);
-
-  const afterRecord = await round.innerText("body");
-  record("결정 기록이 저장되고 목록에 나온다",
-    afterRecord.includes("값이 내렸지만 산 이유는 그대로다"), "");
-  record("직접 입력한 행동이 기록된다", afterRecord.includes("그대로 보유했다"), "");
-  record("자산 선택 없이 기록해도 목록에 나온다", afterRecord.includes("그대로 보유했다"), "");
-  record("저장 뒤 안내가 뜬다", afterRecord.includes("기록했습니다"), "");
-
-  const stored = await round.evaluate(() => window.__journalStore.user_decision_records[0]);
-  record("사람이 판단할 조건으로 저장된다", stored.falsification_kind === "human", stored.falsification_kind);
-  record("보유 없는 기록의 holding_id가 null이다", stored.holding_id === null, String(stored.holding_id));
-  record("맥락이 기록과 함께 저장된다",
-    Boolean(stored.context && stored.context.businessCycle && stored.context.businessCycle.phase),
-    JSON.stringify(stored.context && stored.context.businessCycle));
-  record("국면이 신호가 아니라 맥락으로 표시돼 저장된다",
-    stored.context.businessCycle.recordedAs === "context_not_signal",
-    String(stored.context.businessCycle.recordedAs));
-
-  // 숫자로 확인되는 조건은 구조로 저장돼야 한다. 본문에만 남으면 트랙 30이 자동 확인과
-  // 사람 판단을 가를 수 없다.
-  await round.fill("#action-input", "일부 매도했다");
-  await round.click('[data-kind="machine"]');
   await round.waitForTimeout(300);
-  await round.fill("#rule-value", "12000");
-  await round.fill('[data-f="reasoning"]', "손절선을 정해 둔다");
-  await round.fill('[data-f="falsificationText"]', "12000원 아래로 내려가면");
+  record("행동이 비면 그대로 말한다",
+    (await round.innerText("body")).includes("검토 중인 행동이 비어 있습니다"), "");
+
+  await round.fill("#statement", "삼성전자 매수");
+  await round.fill('[data-item-text]', "값이 내렸고 사업은 그대로다");
   await round.click("#save");
-  await round.waitForTimeout(700);
+  await round.waitForTimeout(300);
+  record("반대 이유가 비면 그대로 말한다",
+    (await round.innerText("body")).includes("하지 말아야 할 이유가 비어 있습니다"), "");
 
-  const machineRow = await round.evaluate(() =>
-    window.__journalStore.user_decision_records.find((row) => row.falsification_kind === "machine"));
+  // 반대 목록을 채운다. 두 번째 줄을 더해 **낱개로 저장되는지**를 본다.
+  const againstBoxes = () => round.locator('.cols .col:nth-child(2) [data-item-text]');
+  await againstBoxes().nth(0).fill("경쟁사가 같은 제품을 준비 중이다");
+  await round.click('[data-add="against"]');
+  await round.waitForTimeout(250);
+  await againstBoxes().nth(1).fill("환율이 더 오르면 원가가 오른다");
+  await round.click('[data-add="for"]');
+  await round.waitForTimeout(250);
+  await round.locator('.cols .col:nth-child(1) [data-item-text]').nth(1).fill("배당이 늘고 있다");
+  await round.waitForTimeout(200);
+
+  record("개수 표시가 실제 줄 수를 따라간다",
+    (await round.innerText("body")).includes("2 대 2"), await round.innerText(".tally"));
+
+  // 반증은 반대 목록의 항목에 표시해서 만든다.
+  await round.locator("[data-falsifies]").nth(0).check();
+  await round.waitForTimeout(250);
+  await round.locator('[data-kind="machine"]').first().click();
+  await round.waitForTimeout(250);
+  await round.locator('[data-rule="value"]').first().fill("52000");
+  await round.fill("#expectation", "2년 안에 이익이 회복되기를 기대");
+  await round.click('[data-decision="executed"]');
+  await round.waitForTimeout(200);
+  await round.click("#save");
+  await round.waitForTimeout(800);
+
+  const saved = await round.evaluate(() => window.__journalStore.user_decision_records[0]);
+  record("행동 한 줄이 그대로 저장된다", saved.action_statement === "삼성전자 매수", saved.action_statement);
+  record("결정이 실행함으로 저장된다", saved.decision === "executed", saved.decision);
+  record("기대가 그대로 저장된다",
+    saved.expectation === "2년 안에 이익이 회복되기를 기대", saved.expectation);
+
+  // 목록 왕복. 순서와 글자가 그대로여야 한다.
+  record("해야 할 이유가 같은 목록으로 돌아온다",
+    JSON.stringify((saved.reasons_for || []).map((item) => item.text))
+      === JSON.stringify(["값이 내렸고 사업은 그대로다", "배당이 늘고 있다"]),
+    JSON.stringify(saved.reasons_for));
+  record("하지 말아야 할 이유가 같은 목록으로 돌아온다",
+    JSON.stringify((saved.reasons_against || []).map((item) => item.text))
+      === JSON.stringify(["경쟁사가 같은 제품을 준비 중이다", "환율이 더 오르면 원가가 오른다"]),
+    JSON.stringify(saved.reasons_against));
+
+  record("이유가 낱개로 자기 id를 갖는다",
+    (saved.reasons_for || []).every((item) => item.id) &&
+    new Set((saved.reasons_for || []).concat(saved.reasons_against || []).map((item) => item.id)).size === 4,
+    JSON.stringify((saved.reasons_for || []).map((item) => item.id)));
+
+  const marked = (saved.reasons_against || []).filter((item) => item.falsifies);
+  record("표시한 반대 항목만 반증 조건이 된다", marked.length === 1, `${marked.length}건`);
+  record("반증 종류가 남는다", marked[0] && marked[0].kind === "machine", marked[0] && marked[0].kind);
   record("숫자 조건이 구조로 저장된다",
-    Boolean(machineRow && machineRow.falsification_rule && machineRow.falsification_rule.value === 12000),
-    JSON.stringify(machineRow && machineRow.falsification_rule));
-  record("자산이 없으면 자동 확인 불가로 표시된다",
-    machineRow.falsification_rule.checkable === false, String(machineRow.falsification_rule.checkable));
+    Boolean(marked[0] && marked[0].rule && marked[0].rule.value === 52000),
+    JSON.stringify(marked[0] && marked[0].rule));
+  record("표시하지 않은 항목에는 규칙이 붙지 않는다",
+    (saved.reasons_against || []).filter((item) => !item.falsifies).every((item) => !item.rule),
+    JSON.stringify(saved.reasons_against));
 
-  const total = await round.evaluate(() => window.__journalStore.user_decision_records.length);
-  record("기록 두 건이 모두 남는다", total === 2, `${total}건`);
+  const shown = await round.innerText("body");
+  record("저장한 기록이 목록에 나온다", shown.includes("삼성전자 매수"), "");
+  record("저장한 이유가 목록에 나온다", shown.includes("경쟁사가 같은 제품을 준비 중이다"), "");
+  record("맥락이 함께 저장된다",
+    Boolean(saved.context && saved.context.businessCycle && saved.context.businessCycle.phase),
+    JSON.stringify(saved.context && saved.context.businessCycle));
+  record("국면이 신호가 아니라 맥락으로 표시돼 저장된다",
+    saved.context.businessCycle.recordedAs === "context_not_signal",
+    String(saved.context.businessCycle.recordedAs));
+  record("보유 없는 기록의 holding_id가 null이다", saved.holding_id === null, String(saved.holding_id));
+
+  // ── 보류는 안 하기로 함과 다르다 ─────────────────────────────────────────
+  await round.fill("#statement", "삼성전자 매도");
+  await round.locator('.cols .col:nth-child(1) [data-item-text]').nth(0).fill("비중이 커졌다");
+  await round.locator('.cols .col:nth-child(2) [data-item-text]').nth(0).fill("아직 팔 이유를 못 찾았다");
+  await round.click('[data-decision="deferred"]');
+  await round.waitForTimeout(200);
+  await round.click("#save");
+  await round.waitForTimeout(800);
+
+  const store = await round.evaluate(() => window.__journalStore.user_decision_records);
+  const deferred = store.find((row) => row.decision === "deferred");
+  record("판단 보류가 따로 저장된다", Boolean(deferred), JSON.stringify(store.map((r) => r.decision)));
+  record("보류는 열린 채로 남는다", deferred.resolved_at == null, String(deferred && deferred.resolved_at));
+  record("보류와 실행 안 함이 합쳐지지 않는다",
+    deferred.decision !== "not_executed", deferred.decision);
+
+  // 보류는 결정으로 세지 않는다. 나중에 "정한 조건을 지켰는가"의 분모에 들어가면 안 된다.
+  const counted = await round.evaluate((rowsIn) =>
+    rowsIn.filter((row) => window.JournalStore.countsAsDecision(row)).length, store);
+  record("보류는 결정 수에 들어가지 않는다", counted === store.length - 1, `${counted}/${store.length}`);
+
+  record("열린 보류가 화면에 표시된다",
+    (await round.innerText("body")).includes("아직 열려 있습니다"), "");
+
 } catch (error) {
   record("화면 검증", false, error.message);
 } finally {

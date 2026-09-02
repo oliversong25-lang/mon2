@@ -85,20 +85,24 @@ record("A도 자기 원칙 이력을 지울 수 없다", await blocked(call(`/re
 const made = await call("/rest/v1/user_decision_records", {
   method: "POST", headers: auth(a.access_token, { Prefer: "return=representation" }),
   body: JSON.stringify({
-    user_id: a.user.id, action: "그대로 보유했다", reasoning: `rls-${stamp}`,
-    falsification_kind: "machine", falsification_text: "테스트",
-    falsification_rule: { metric: "price", op: "lte", value: 1 },
+    user_id: a.user.id, action_statement: `rls-${stamp}`,
+    reasons_for: [{ id: "for-1", text: "테스트 근거" }],
+    reasons_against: [{ id: "against-1", text: "테스트 반대", falsifies: true,
+      kind: "machine", rule: { metric: "price", op: "lte", value: 1, holdingId: null, checkable: false } }],
+    decision: "executed", expectation: "테스트 기대",
     holding_id: null, holding_label: "", context: { businessCycle: { phase: "expansion" } },
   }),
 });
-const ownRec = await call(`/rest/v1/user_decision_records?select=id,action,falsification_kind&user_id=eq.${a.user.id}&reasoning=eq.rls-${stamp}`, { headers: auth(a.access_token) });
+const ownRec = await call(`/rest/v1/user_decision_records?select=id,action_statement,reasons_against,decision&user_id=eq.${a.user.id}&action_statement=eq.rls-${stamp}`, { headers: auth(a.access_token) });
 const crossRec = await call(`/rest/v1/user_decision_records?select=id&user_id=eq.${a.user.id}`, { headers: auth(b.access_token) });
-record("A가 자기 결정 기록을 본다", ownRec.length === 1 && ownRec[0].action === "그대로 보유했다", JSON.stringify(ownRec));
+record("A가 자기 결정 기록을 본다", ownRec.length === 1 && ownRec[0].decision === "executed", JSON.stringify(ownRec));
 record("보유 자산 없이도 기록이 저장된다", made[0].holding_id === null, JSON.stringify(made[0]?.holding_id));
-record("반증 조건의 종류가 구분돼 저장된다", ownRec[0].falsification_kind === "machine", ownRec[0]?.falsification_kind);
+record("반증 조건의 종류가 구분돼 저장된다", ownRec[0].reasons_against?.[0]?.kind === "machine", JSON.stringify(ownRec[0]?.reasons_against));
 record("B가 A의 결정 기록을 보지 못한다", crossRec.length === 0, `${crossRec.length}건`);
 record("B가 A의 결정 기록을 만들지 못한다", await blocked(call("/rest/v1/user_decision_records", {
-  method: "POST", headers: auth(b.access_token), body: JSON.stringify({ user_id: a.user.id, action: "buy", reasoning: "forged" }),
+  method: "POST", headers: auth(b.access_token), body: JSON.stringify({
+    user_id: a.user.id, action_statement: "forged", reasons_for: [], reasons_against: [], decision: "executed",
+  }),
 })), "삽입이 통과했습니다");
 record("B가 A의 결정 기록을 지우지 못한다", await blocked(call(`/rest/v1/user_decision_records?id=eq.${made[0].id}`, {
   method: "DELETE", headers: auth(b.access_token),
