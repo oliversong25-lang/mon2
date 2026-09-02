@@ -45,7 +45,8 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 - 변경: `42c92f3`의 **검토 행동 → 해야 할 이유/하지 말아야 할 이유 → 결정** 구조를 통합했습니다. 최신 요구에 따라 보유 자산 선택은 되살리지 않았습니다. `user_philosophy_revisions`에는 `authenticated`의 기존 권한을 먼저 전부 회수한 뒤 select·insert만 다시 부여합니다. README에 `main`을 유일한 작업·통합 브랜치로, `model/*`를 읽기 전용 연구 이력으로 명시했습니다.
 - 이유: `grant select, insert`만으로는 Supabase가 이미 부여한 update·delete 권한이 사라지지 않았고, 움직이는 연구 브랜치에 앱 변경을 쌓는 방식이 배포 상태와 저장소 상태를 반복해서 갈라놓았습니다.
 - 검증: 운영 DB의 두 계정 RLS **13/13 통과는 사용자 실측으로 확인**했습니다. 병합 전·후 전체 `npm test`가 모두 통과했고, 병합 후 `test:journal`은 **92/92**입니다. 모델 산출물은 `v1.1+persist17w`, `variant.id=persist17w`, `transition_gate_applied=false`, slowdown **33주**입니다.
-- 남은 일: 운영 DB에 이번 찬반 대조 스키마 변경을 적용한 뒤 갱신된 RLS 시험을 다시 실행하고, main 푸시 후 Pages 배포·라이브 모델 파일 일반/캐시 우회 응답·저널 렌더를 확인합니다.
+- 배포: main `53ba986` 푸시 뒤 Pages 실행 `33600124488`이 성공했습니다. 라이브 모델의 일반 URL과 `?cb=53ba986` 캐시 우회 URL은 저장소와 같은 SHA-256을 반환했고, 둘 다 `v1.1+persist17w`·slowdown 33주였습니다. 라이브 `decisions.html`에서 검토 행동·찬성 목록·반대 목록이 확인됐고 보유 자산 질문은 없었습니다.
+- 남은 일: 없음. 운영 DB의 두 계정 RLS 13/13은 사용자가 새 저널 스키마에서 실측했으며, 이 실행 환경에는 시험 계정 자격 증명이 없어 별도로 재실행하지 않았습니다.
 - 관련 파일: `README.md`, `WORKLOG.md`, `decisions.html`, `lib/journal-store.js`, `scripts/test-journal.mjs`, `supabase/schema.sql`
 
 ### 2026-09-01 — 의사결정의 보유 자산 선택 제거
