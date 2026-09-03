@@ -50,6 +50,11 @@ const EXPECT = {
 EXPECT.total = EXPECT.samsung + EXPECT.kakao + EXPECT.savings + EXPECT.realestate + EXPECT.btc;
 const EXPECT_PHYSICAL = EXPECT.realestate; // 실물자산 = 부동산만 (원자재 미등록)
 
+// 자산군 선택을 필터로 바꾼 뒤의 경로. 현금만 고르고 시작해 주식·가상자산을 나중에
+// 더한다 — 손으로 계산한 값과 대조하려고 여기 따로 적어 둔다.
+const ADDED = { cash: 1000000, samsung: 10 * 73400, btc: 0.5 * 91000000 };
+ADDED.total = ADDED.cash + ADDED.samsung + ADDED.btc; // 47,234,000
+
 // 자산군 8개가 모두 있는 포트폴리오. 색 구분과 성장 가능성 축 확인용이다.
 const SAMPLE_ASSETS = [
   { id: "s1", group: "cash", fields: { currency: "KRW", amount: 3000000 }, autoFields: {} },
@@ -1808,6 +1813,104 @@ try {
     return Math.abs(report.growth - report.risky) < 1e-9
       ? { ok: true }
       : { ok: false, reason: `두 값이 다름: ${report.growth} vs ${report.risky}` };
+  });
+
+  // ===== 7. 자산군 선택은 관문이 아니라 필터다 =====
+  // 처음에 현금만 고른 사용자가 나중에 주식·가상자산을 넣을 수 있어야 한다. 예전에는
+  // 고르지 않은 자산군으로 가는 버튼이 아예 없어서 그 자산군에 영원히 도달할 수 없었다.
+  // 아래는 전부 실제 클릭·타이핑이고, 중간에 저장소를 비우지 않는다.
+  await page.goto(INPUT_URL);
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.click('input[data-group-check="cash"]'); // 체크박스 실제 클릭
+  await page.click("[data-start]");
+  await type(page, "#field-cash-amount", "1000000");
+  await page.click("[data-next]");
+
+  await record("현금만 골라도 검토 화면에 자산군 여덟 가지가 모두 있다", async () => {
+    const shown = await page.locator(".review-group").count();
+    if (shown !== 8) return { ok: false, reason: `검토 화면 자산군 ${shown}개 (8개 기대)` };
+    const reachable = await page.locator('button[data-review-group="equity"]').count();
+    return reachable ? { ok: true } : { ok: false, reason: "주식·ETF를 여는 버튼이 없음 — 고르지 않은 자산군에 도달할 수 없다" };
+  });
+
+  await record("고르지 않았던 주식·ETF를 실제 클릭으로 추가한다", async () => {
+    await page.click('button[data-review-group="equity"]');
+    await searchAndPick(page, "field-equity-search", "삼성전자");
+    await type(page, "#field-equity-quantity", "10");
+    await type(page, "#field-equity-averagePrice", "60000");
+    await page.click("[data-next]");
+    const state = await page.evaluate(() => ({ screen, groups: session.assets.map((asset) => asset.group) }));
+    if (!state.groups.includes("equity")) return { ok: false, reason: `등록된 자산군: ${state.groups.join(",")}` };
+    return state.screen === "review" ? { ok: true } : { ok: false, reason: `등록 뒤 화면이 "${state.screen}"` };
+  });
+
+  await record("입력 도중 새로고침해도 진행 단계와 입력값이 남는다", async () => {
+    await page.click('button[data-review-group="crypto"]');
+    await searchAndPick(page, "field-crypto-search", "비트코인");
+    await type(page, "#field-crypto-quantity", "0.5");
+    await page.waitForTimeout(400); // scheduleSave 디바운스(300ms)
+    await page.reload();
+    if (!(await page.locator("[data-resume]").count())) return { ok: false, reason: "새로고침 뒤 이어하기 카드가 없음" };
+    // 이어하기 카드가 가리키는 이름과 실제로 열리는 자산군이 같아야 한다.
+    const label = await page.locator(".resume p").textContent();
+    if (!label.includes("가상자산")) return { ok: false, reason: `이어하기 카드가 가리키는 자산군: "${label}"` };
+    await page.click("[data-resume]");
+    const value = await page.locator("#field-crypto-quantity").inputValue();
+    const kept = await page.evaluate(() => session.assets.length);
+    if (kept !== 2) return { ok: false, reason: `새로고침 뒤 자산 ${kept}건 (2건 기대)` };
+    return value.replace(/[^0-9.]/g, "") === "0.5" ? { ok: true } : { ok: false, reason: `수량이 "${value}"로 돌아옴` };
+  });
+
+  await record("나중에 더한 자산까지 홈 총자산에 그대로 들어간다", async () => {
+    await type(page, "#field-crypto-averagePrice", "80000000");
+    await page.click("[data-next]");
+    await page.click("[data-complete]");
+    await page.click("button[data-home]");
+    await page.waitForURL(/home\.html/, { timeout: 5000 });
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+    const total = await page.evaluate(() => Portfolio.summarize(session.assets).total);
+    return total === ADDED.total ? { ok: true } : { ok: false, reason: `총자산 ${total} ≠ 기대값 ${ADDED.total}` };
+  });
+
+  await record("나중에 더한 자산이 전체 자산 화면의 해당 탭에 나온다", async () => {
+    await page.goto(`http://127.0.0.1:${PORT}/assets.html`);
+    await page.waitForSelector(".group-tabs", { timeout: 10000 });
+    await page.click('button[data-group="equity"]');
+    const equityText = await page.locator("#app").textContent();
+    if (!equityText.includes("삼성전자")) return { ok: false, reason: "주식·ETF 탭에 삼성전자가 없음" };
+    await page.click('button[data-group="crypto"]');
+    const cryptoText = await page.locator("#app").textContent();
+    return cryptoText.includes("비트코인") ? { ok: true } : { ok: false, reason: "가상자산 탭에 비트코인이 없음" };
+  });
+
+  // 해제는 삭제가 아니다. 스키마가 달라도 사용자 자산을 지우지 않는다는 규칙과 같은 자리다.
+  await record("선택에서 빼도 입력한 자산은 지워지지 않고 어디에 남는지 알려준다", async () => {
+    await page.goto(`${INPUT_URL}#add`);
+    await page.waitForSelector(".review-list", { timeout: 8000 });
+    await page.click("button[data-choose-groups]");
+    await page.click('input[data-group-check="cash"]'); // 실제 클릭으로 해제
+    const after = await page.evaluate(() => ({
+      selected: session.selectedGroups,
+      cashAssets: session.assets.filter((asset) => asset.group === "cash").length,
+      notice: document.querySelector("p[data-deselect-note]")?.textContent || "",
+      badge: document.querySelector('input[data-group-check="cash"]')?.closest(".group-option")?.textContent || "",
+    }));
+    if (after.selected.includes("cash")) return { ok: false, reason: "체크가 풀리지 않음" };
+    if (after.cashAssets !== 1) return { ok: false, reason: `현금 자산 ${after.cashAssets}건 — 해제가 기록을 지웠다` };
+    if (!after.notice.includes("현금")) return { ok: false, reason: `해제 안내가 화면에 없음: "${after.notice}"` };
+    if (!after.badge.includes("1건")) return { ok: false, reason: `건수 배지가 사라짐: "${after.badge}"` };
+    return { ok: true };
+  });
+
+  await record("선택에서 뺀 자산군이 검토 화면과 총자산에 그대로 남는다", async () => {
+    await page.click("button[data-to-review]");
+    const reviewText = await page.locator(".review-list").textContent();
+    if (!reviewText.includes("현금")) return { ok: false, reason: "검토 화면에서 현금이 사라짐" };
+    await page.goto(HOME_URL);
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+    const total = await page.evaluate(() => Portfolio.summarize(session.assets).total);
+    return total === ADDED.total ? { ok: true } : { ok: false, reason: `해제 뒤 총자산 ${total} ≠ ${ADDED.total}` };
   });
 } finally {
   if (browser) await browser.close();
