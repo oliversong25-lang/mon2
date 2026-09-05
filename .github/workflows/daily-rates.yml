@@ -41,10 +41,21 @@ jobs:
           ECOS_AUTH_KEY: ${{ secrets.ECOS_AUTH_KEY }}
         run: node scripts/build-daily-rates.mjs
 
-      # 결과는 셋이다. 이 셋을 뭉치면 "아무 일도 안 한 실행"이 성공으로 읽힌다.
-      #   updated         새 금리를 받아 커밋했다
-      #   already-current 배치는 정상이었고 데이터가 이미 최신이라 커밋할 게 없었다
-      #   failed          배치가 실패했다 (이 스텝까지 오지 못한다)
+      # 결과는 **넷**이다. 이 넷을 뭉치면 "일부만 받아온 실행"이 성공으로 읽힌다.
+      #   updated         모든 출처가 정상이고 새 금리를 받아 커밋했다
+      #   already-current 모든 출처가 정상이고 데이터가 이미 최신이라 커밋할 게 없었다
+      #   partial         일부 출처가 실패했다. 성공한 것은 커밋했고 **잡은 실패로 끝난다**
+      #   failed          배치 자체가 죽었다 (커밋 스텝까지 오지 못한다)
+      #
+      # partial이 없어서 3주를 잃었다. ECOS_AUTH_KEY가 시크릿에 없던 동안 이 배치는
+      # 43번 돌면서 매번 success를 냈다. 미 재무부·뉴욕 연준은 정상이라 git diff에
+      # 변경이 잡혔고, 커밋 스텝은 updated 가지를 타고 "일간 금리를 갱신해
+      # 커밋했습니다"를 찍었다. 그 문장은 미 국채에 대해서는 참이고 이 배치가 존재하는
+      # 이유(국내 금리 12계열)에 대해서는 거짓이었다.
+      #
+      # 커밋을 먼저 하고 판정을 나중에 한다. 순서를 바꾸면(스크립트가 아무 출처나
+      # 실패할 때 exit 1을 내게 하면) 부분 실패한 날 정상적으로 받아온 미 재무부·
+      # 뉴욕 연준 데이터까지 버리게 된다 — 이 파일이 맨 위에 적어 둔 설계와 어긋난다.
       - name: Commit refreshed rates
         id: commit
         run: |
@@ -59,16 +70,73 @@ jobs:
             git pull --rebase origin main
             git push
             echo "outcome=updated" >> "$GITHUB_OUTPUT"
-            echo "::notice title=updated::일간 금리를 갱신해 커밋했습니다 (최신 관측 $(node -p "require('./data/indicators/index-daily.json').newestPeriod"))."
+            echo "::notice title=committed::일간 금리를 커밋했습니다 (최신 관측 $(node -p "require('./data/indicators/index-daily.json').newestPeriod")). 출처별 성패는 다음 스텝이 판정합니다."
           fi
 
-      - name: Record outcome
+      # 배치가 이미 써 둔 실패 기록을 **읽는다**. 3주 동안 증거는 저장소 안에
+      # `data/indicators/index-daily.json`의 failures에 그대로 있었고, 아무도 읽지
+      # 않았을 뿐이다. 모양은 문자열 배열이 아니라 객체 배열이다:
+      #     [{ "source": "ECOS", "label": "ECOS 시장금리·기준금리",
+      #        "message": "ECOS 인증키가 없습니다 (ECOS_AUTH_KEY)" }]
+      #
+      # ── 어느 출처가 필수인가 ────────────────────────────────────────────
+      # **셋 다 필수다.** 등급을 만들지 않는다.
+      #   ECOS       국내 금리 12계열 — 이 배치가 존재하는 이유
+      #   USTREASURY 미 국채 수익률
+      #   NYFED      EFFR·목표범위
+      # 셋 다 화면에 나오는 계열을 만들고, 스크립트에는 "없어도 되는 출처"라는 개념이
+      # 아예 없다 — 키가 없으면 건너뛰지 않고 실패로 기록한다. (비교: build-quotes.mjs의
+      # 은 시세는 진짜 선택이라 미설정이면 조용히 건너뛰고 failures에 넣지 않는다.)
+      # 그래서 failures가 비어 있지 않으면 무조건 잡는다. 두 번째 등급은 필요 없다.
+      - name: Judge the run
+        id: judge
         if: always()
         run: |
-          OUTCOME="${{ steps.commit.outputs.outcome }}"
-          if [ "${{ job.status }}" != "success" ]; then OUTCOME="failed"; fi
-          if [ -z "$OUTCOME" ]; then OUTCOME="failed"; fi
-          echo "## 일간 금리 배치 결과: $OUTCOME" >> "$GITHUB_STEP_SUMMARY"
+          INDEX=data/indicators/index-daily.json
+          # 배치나 커밋이 죽었으면 이 파일은 이번 실행의 결과가 아니다. 읽지 않는다.
+          if [ "${{ job.status }}" != "success" ] || [ -z "${{ steps.commit.outputs.outcome }}" ]; then
+            echo "outcome=failed" >> "$GITHUB_OUTPUT"
+            echo "clean=false" >> "$GITHUB_OUTPUT"
+            echo "## 일간 금리 배치 결과: failed" >> "$GITHUB_STEP_SUMMARY"
+            echo "배치가 죽어 data/indicators를 갱신하지 못했습니다. 기존 파일은 그대로입니다." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          FAILED=$(node -p "(require('./$INDEX').failures || []).length")
+          OK=$(node -p "Object.keys(require('./$INDEX').sources || {}).filter(s => !(require('./$INDEX').failures || []).some(f => f.source === s)).join(', ') || '없음'")
+
+          if [ "$FAILED" = "0" ]; then
+            OUTCOME="${{ steps.commit.outputs.outcome }}"
+            echo "outcome=$OUTCOME" >> "$GITHUB_OUTPUT"
+            echo "clean=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "## 일간 금리 배치 결과: $OUTCOME"
+              echo ""
+              echo "모든 출처 정상: $OK"
+              echo ""
+              echo "최신 관측 $(node -p "require('./$INDEX').newestPeriod")"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # 여기부터가 3주 동안 없던 자리다.
+          echo "outcome=partial" >> "$GITHUB_OUTPUT"
+          echo "clean=false" >> "$GITHUB_OUTPUT"
+          LIST=$(node -p "(require('./$INDEX').failures || []).map(f => '- **' + (f.label || f.source) + '** (' + f.source + '): ' + f.message).join('\n')")
+          {
+            echo "## 일간 금리 배치 결과: partial"
+            echo ""
+            echo "**일부 출처가 실패했습니다. 성공한 것은 커밋했지만 갱신은 완료되지 않았습니다.**"
+            echo ""
+            echo "실패 $FAILED건:"
+            echo "$LIST"
+            echo ""
+            echo "정상 갱신된 출처: $OK"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "[실패] 출처 $FAILED건이 실패했습니다:"
+          node -p "(require('./$INDEX').failures || []).map(f => '  - ' + (f.label || f.source) + ' (' + f.source + '): ' + f.message).join('\n')"
+          echo "::error title=partial::출처 $FAILED건 실패 — 성공한 출처는 커밋했으나 갱신이 완료되지 않았습니다"
+          exit 1
 
       # 예약 워크플로가 실패해도 GitHub은 아무에게도 알리지 않는다. 금리가 굳어도
       # 화면은 멀쩡해 보이므로(값이 그대로 남아 있으므로) 신호가 없으면 아무도 모른다.
@@ -83,15 +151,29 @@ jobs:
               owner: context.repo.owner, repo: context.repo.repo, state: "open", labels: label,
             });
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const body = `${new Date().toISOString()} 실행에서 일간 금리 배치가 실패했습니다.\n\n실행 로그: ${runUrl}\n\n기존 파일은 그대로 남아 있어 화면은 계속 동작합니다. 다만 계속 실패하면 금리가 굳고, 관측일이 낡아집니다.`;
+            // 어느 출처가 왜 죽었는지를 이슈에 담는다. "배치 실패" 한 줄만 있으면
+            // 로그를 열기 전까지 무엇이 굳었는지 알 수 없다.
+            let detail = "";
+            try {
+              const failures = require(`${process.env.GITHUB_WORKSPACE}/data/indicators/index-daily.json`).failures || [];
+              if (failures.length) {
+                detail = `\n\n실패한 출처 ${failures.length}건:\n` +
+                  failures.map((f) => `- **${f.label || f.source}** (${f.source}): ${f.message}`).join("\n");
+              }
+            } catch (error) {
+              detail = `\n\n(실패 기록을 읽지 못했습니다: ${error.message})`;
+            }
+            const body = `${new Date().toISOString()} 실행에서 일간 금리 배치가 실패했습니다.${detail}\n\n실행 로그: ${runUrl}\n\n기존 파일은 그대로 남아 있어 화면은 계속 동작합니다. 다만 계속 실패하면 금리가 굳고, 관측일이 낡아집니다.`;
             if (existing.length) {
               await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing[0].number, body });
             } else {
               await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: [label] });
             }
 
+      # `if: success()`는 틀렸다. 미 재무부만 받아 커밋한 날도 job은 성공이라,
+      # ECOS가 죽어 있는 채로 열린 이슈를 닫아 버린다. failures가 빈 경우에만 닫는다.
       - name: Close the tracking issue on recovery
-        if: success()
+        if: steps.judge.outputs.clean == 'true' 
         uses: actions/github-script@v7
         with:
           script: |

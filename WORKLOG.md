@@ -39,6 +39,24 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-09-05 — 부분 실패를 성공으로 부르지 않는다 (일간 금리 배치)
+
+- 작업자: Claude Code
+- **`failures` 모양을 먼저 확인했습니다.** 문자열 배열이 아니라 객체 배열입니다 — `[{ source, label, message }]`. 3주 동안 `data/indicators/index-daily.json`에 `ECOS 인증키가 없습니다 (ECOS_AUTH_KEY)`가 그대로 들어 있었고, 읽는 코드가 없었을 뿐입니다.
+- 변경: `daily-rates.yml`에 **커밋 뒤** 판정 스텝(`Judge the run`)을 넣었습니다. `failures`를 읽어 비어 있지 않으면 실패한 출처를 이름·메시지와 함께 로그와 스텝 요약에 적고 job을 실패시킵니다. 결과에 **`partial`**을 더해 넷으로 만들었고, 성공 문구를 "갱신해 커밋했습니다"에서 "커밋했습니다 — 출처별 성패는 다음 스텝이 판정합니다"로 바꿨습니다. 이슈 닫기 조건을 `if: success()`에서 `steps.judge.outputs.clean == 'true'`로 고쳤고, 이슈 본문에 실패한 출처 목록을 담습니다.
+- 이유: `ECOS_AUTH_KEY` 미등록 상태로 배치가 43번 돌면서 매번 `success`를 냈습니다. 미 재무부·뉴욕 연준이 정상이라 diff가 잡혔고 커밋 스텝이 `updated` 가지를 탔습니다. 그 문구는 미 국채에 대해서는 참이고 이 배치가 존재하는 이유에 대해서는 거짓이었습니다. `if: failure()`는 job이 실패한 적이 없어 한 번도 발화하지 않았고, `if: success()`는 이슈가 열렸더라도 다음 실행이 닫았을 조건이었습니다.
+- **커밋 순서는 그대로 뒀습니다.** 스크립트가 아무 출처나 실패할 때 exit 1을 내게 하는 것이 간단하지만, 그러면 부분 실패한 날 정상적으로 받아온 데이터까지 버립니다 — 파일이 맨 위에 적어 둔 설계(`한쪽이 죽어도 다른 쪽은 갱신돼야 한다`)와 어긋납니다. 커밋 먼저, 판정 나중.
+- 필수/선택: **세 출처 다 필수입니다. 등급을 만들지 않았습니다.** ECOS·USTREASURY·NYFED 모두 화면 계열을 만들고, 스크립트에 "없어도 되는 출처" 개념이 없습니다(키가 없으면 건너뛰지 않고 실패로 기록). 진짜 선택인 예: `build-quotes.mjs`의 은 시세는 미설정 시 조용히 건너뛰고 `failures`에 넣지 않습니다. 워크플로 주석에 남겼습니다.
+- 검증 3종 (워크플로의 `run:` 블록을 그대로 꺼내 셸에서 실행 — 로직을 베끼면 워크플로가 아니라 베낀 것을 시험하게 됩니다):
+  - **깨끗한 실행**: `outcome=updated · clean=true`, exit 0, 요약에 `모든 출처 정상: ECOS, USTREASURY, NYFED`.
+  - **배치 자체 실패**: `outcome=failed · clean=false`, `failures` 파일을 읽지 않습니다(이번 실행 결과가 아니므로).
+  - **실제 부분 실패**: `ECOS_AUTH_KEY`를 빼고 진짜 배치를 돌렸습니다. 배치는 **exit 0**으로 끝나고 결과가 `already-current`였습니다(미 계열이 이미 최신이라 — 더 지독한 경우입니다). 판정 스텝은 **exit 1**, `outcome=partial`, 요약에 `**ECOS 시장금리·기준금리** (ECOS): ECOS 인증키가 없습니다 (ECOS_AUTH_KEY)`와 `정상 갱신된 출처: USTREASURY, NYFED`. 그 실행이 USTREASURY·NYFED 파일을 실제로 수정한 것도 확인했습니다 — 커밋 스텝이 그걸 커밋하고 나서 판정이 잡습니다.
+  - 부수 확인: 부분 실행은 실패한 출처의 계열을 **인덱스에서 빼 버립니다**(`countries: ['USA']`, ECOS 지표 0개). `daily/ECOS.json`은 남지만 인덱스에 없어 화면에서는 사라집니다.
+- 다른 배치 조사(고치지 않음): `indicators.yml`은 **같은 구멍**입니다 — `build-indicators.mjs`도 `failures`를 채우고 exit 0으로 끝나며 워크플로가 읽지 않습니다. `quotes.yml`·`tickers.yml`은 아닙니다(검증 실패·최소 건수 미달에서 throw). 다만 `quotes.yml`은 가상자산 갱신 실패와 은 시세 미확보를 경고로 두므로 그 경우 초록으로 끝납니다 — 화면이 그 사실을 따로 밝히므로 지금은 의도된 동작입니다.
+- 손대지 않은 것: `scripts/build-daily-rates.mjs` **무변경**(견디고 계속하는 동작이 맞습니다). `lib/`·화면 코드 무변경. 전체 스위트 **465/465** 그대로(워크플로만 바뀌어 영향 없음). `data/indicators`는 검증 뒤 `git checkout`으로 원복했습니다.
+- 남은 일: `indicators.yml`에 같은 판정 스텝을 넣는 작업. `quotes.yml`·`tickers.yml`의 이슈 닫기는 `if: success()` 그대로지만, 두 스크립트가 실패 시 throw하므로 현재는 `failures` 비어 있음과 동치입니다.
+- 관련 파일: `.github/workflows/daily-rates.yml`, `README.md`
+
 ### 2026-09-05 — 시세가 얼마나 낡았는지 화면이 말하게 한다
 
 - 작업자: Claude Code
