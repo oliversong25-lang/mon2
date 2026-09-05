@@ -39,6 +39,20 @@ README는 설치·실행·구조 설명용으로 유지하고, 작업 이력과 
 
 ## 최근 변경
 
+### 2026-09-05 — 시세 배치를 수동으로 전환 (일시적)
+
+- 작업자: Claude Code
+- 변경: `quotes.yml`의 `schedule` 블록을 **주석으로 막고** `workflow_dispatch`는 남겼습니다. 파일 맨 위에 왜·언제·무엇이 확인되면 되돌리는지를 적었습니다. 국내 IP에서 한 줄로 돌리도록 `npm run quotes:local`(= `node --env-file=.env scripts/build-quotes.mjs`)을 추가하고 `.env.example`을 저장소에 넣었습니다. README의 배치 표 두 개를 고쳤습니다.
+- 이유: data.go.kr이 Actions 러너를 TCP 층에서 막습니다(Track 35 확정 — 러너에서 `apis.data.go.kr` TCP 443이 **60초 한도로도 타임아웃**, 같은 러너에서 금감원·한국은행·수출입은행은 0.5초 내 연결, DNS는 정상). 타임아웃을 늘려서 될 일이 아닙니다. 매일 빨갛게 실패하도록 두면 실패 알림을 무시하는 습관이 들어 정작 다른 것이 깨졌을 때 놓치므로, 방치 대신 의도적으로 껐습니다. 키를 매번 손으로 export하는 방식은 일주일이면 안 하게 되므로 `.env` 한 번 채우고 한 줄로 끝나게 했습니다.
+- 검증: 전체 스위트 **436/436**. 워크플로 5개 전부 YAML 파싱 확인 — `quotes.yml`의 트리거는 이제 `workflow_dispatch` 하나뿐입니다.
+  - **이름을 바꾸려다 되돌렸습니다.** `pages.yml`의 `workflow_run`이 `"Daily domestic quotes batch"`라는 **문자열로** 이 워크플로를 찾습니다. 이름에 "(수동)"을 붙이면 배포 연결이 조용히 끊깁니다. 그 이유를 파일에 주석으로 박아 뒀습니다.
+  - `--env-file`은 **CI에 닿지 않습니다.** 워크플로 4개는 전부 `node scripts/*.mjs`를 직접 부르고 npm을 거치지 않으며, CI는 `node-version: 20` 고정입니다. 기존 `build:quotes`도 그대로 뒀습니다.
+  - `.env`가 없으면 `.env: not found`로 즉시 멈춥니다 — 키 없이 조용히 도는 것보다 낫습니다.
+- 자동 커밋: **붙이지 않았습니다.** 배치가 여러 소스를 순서대로 받아서, 중간에 하나가 실패하면 반쯤 채워진 `quotes.json`이 남을 수 있습니다. 예약 실행에서는 실패 시 커밋 스텝에 도달하지 못하는 구조가 막아 줬지만 수동 실행에는 그 보호가 없습니다. 사람이 로그를 보고 `git add data/quotes.json`을 직접 하는 쪽을 권합니다.
+- 손대지 않은 것: `build-quotes.mjs`·`http.mjs`·`data-go-kr.mjs` 무변경. 환율 가드(`result===1`이 없으면 배치 중단)도 그대로입니다 — 1로 폴백하면 USD 2,000이 2,000원이 됩니다. `tickers.yml`도 그대로 뒀습니다: 같은 호스트를 쓰지만 주 1회라 08-29 이후 안 돌았고, 그 실행이 차단 범위가 저장소 전체인지 이 배치만인지 알려줍니다. **그 실패는 예상된 것입니다.**
+- 남은 일: 인프라 결정(국내 서버·자체 호스팅 러너·data.go.kr 정책 문의)은 미뤘습니다. 환율 `result !== 1` 10일치는 저장소 밖에서 확인 중입니다. `ECOS_AUTH_KEY`는 여전히 Secret 미등록이라 `daily-rates.yml`이 매일 국내 금리를 빠뜨린 채 "성공"으로 끝납니다.
+- 관련 파일: `.github/workflows/quotes.yml`, `package.json`, `.env.example`, `.gitignore`, `README.md`
+
 ### 2026-09-03 — 자산군 선택을 게이트에서 필터로, 새 자산군 추가 경로 복구
 
 - 작업자: Claude Code

@@ -15,6 +15,7 @@
     "test": "npm run test:focus && npm run test:numeric && npm run test:groups && npm run test:quotes-mock && npm run test:tickers-mock && npm run test:quotes-integration && npm run test:indicators-mock && npm run test:home && npm run test:business-cycle && npm run test:journal",
     "build:tickers": "node scripts/build-tickers.mjs",
     "build:quotes": "node scripts/build-quotes.mjs",
+    "quotes:local": "node --env-file=.env scripts/build-quotes.mjs",
     "test:indicators-mock": "node scripts/test-indicators-mock.mjs",
     "build:indicators": "node scripts/build-indicators.mjs",
     "build:daily-rates": "node scripts/build-daily-rates.mjs",

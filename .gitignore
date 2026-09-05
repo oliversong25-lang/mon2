@@ -3,6 +3,8 @@ node_modules/
 .npm-cache/
 .env
 .env.*
+# 예시 파일은 추적한다. 부정 규칙은 반드시 .env.* 뒤에 와야 효력이 있다.
+!.env.example
 !model/.env.example
 supabase/.temp/
 node_modules/

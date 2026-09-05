@@ -39,15 +39,18 @@ scripts/*.mjs       배치와 회귀 테스트 (ESM · Node 20)
 scripts/lib/*.mjs   배치가 쓰는 외부 API 클라이언트
 data/*.json         배치 산출물. 앱은 이걸 fetch만 합니다
 supabase/schema.sql 계정·RLS
-.github/workflows/  배치 4개 (quotes · tickers · indicators · pages)
+.github/workflows/  배치 5개 (quotes · tickers · indicators · daily-rates) + pages 배포
 ```
 
 | 배치 | 주기 | 산출물 |
 |---|---|---|
-| `quotes.yml` | 매일 14:00 KST | `data/quotes.json` |
+| `quotes.yml` | **수동 (2026-09-05부터 예약 중지)** | `data/quotes.json` |
 | `indicators.yml` | 매일 15:00 KST | `data/indicators/**` |
+| `daily-rates.yml` | 매일 2회 | `data/indicators/daily/**` |
 | `tickers.yml` | 매주 일요일 05:00 KST | `data/tickers-*.json` |
-| `pages.yml` | 위 셋 완료 시 + push | 배포 |
+| `pages.yml` | 위 배치 완료 시 + push | 배포 |
+
+`quotes.yml`은 data.go.kr이 Actions 러너를 막아 예약을 껐습니다 — 아래 [국내 시세 배치](#국내-시세-배치-dataquotesjson) 참고. 국내 IP에서 `npm run quotes:local`로 돌립니다.
 
 브라우저 보안 정책 때문에 HTML을 `file://`로 직접 열면 `data/*.json` 로드가 차단될 수 있습니다. 저장소 루트에서 로컬 서버를 실행한 뒤 접속하세요.
 
@@ -445,13 +448,56 @@ DART 기업개황의 `induty_code`는 한국표준산업분류(KSIC) 코드를 3
 
 ## 국내 시세 배치 (data/quotes.json)
 
-국내 주식·ETF·ETN 시세, 금·환율(및 있으면 은)을 매일 1회 받아 `data/quotes.json`을 굽습니다. `.github/workflows/quotes.yml`이 매일 **14:00 KST**에 자동 실행하고, 변경분이 있을 때만 커밋합니다. 앱은 이 정적 파일을 fetch만 할 뿐 API 키를 전혀 갖고 있지 않습니다.
+국내 주식·ETF·ETN 시세, 금·환율(및 있으면 은)을 받아 `data/quotes.json`을 굽습니다. 앱은 이 정적 파일을 fetch만 할 뿐 API 키를 전혀 갖고 있지 않습니다.
+
+### ⛔ 2026-09-05부터 수동입니다
+
+**data.go.kr이 GitHub Actions 러너를 TCP 층에서 막습니다.** 08-30 이후 13회 연속 실패했고 사유는 전부 같았습니다 — `fetch failed (UND_ERR_CONNECT_TIMEOUT)`. 러너에서 잰 값(실행 [33937391146](https://github.com/oliversong25-lang/mon2/actions/runs/33937391146)):
+
+| 호스트 | TCP 443 (한도 60초) |
+|---|---|
+| `apis.data.go.kr` | **타임아웃 60.5초** |
+| `www.data.go.kr` | **타임아웃 60.2초** |
+| `opendart.fss.or.kr` | 0.4초 OK |
+| `ecos.bok.or.kr` | 0.3초 OK |
+| `www.koreaexim.go.kr` | 0.5초 OK |
+
+**타임아웃을 늘려서 될 일이 아닙니다** — 60초에도 연결이 성립하지 않습니다. DNS는 정상이고 올바른 IP(27.101.236.63)를 돌려줍니다. 같은 러너에서 다른 한국 정부 호스트는 전부 붙으므로 "러너가 한국에 못 간다"가 아니라 **data.go.kr 두 호스트만** 막힌 것입니다. 같은 배치가 국내 IP에서는 그대로 성공합니다.
+
+매일 빨갛게 실패하도록 두지 않았습니다 — 실패 알림을 무시하는 습관이 들면 정작 다른 것이 깨졌을 때 놓칩니다. `quotes.yml`의 `schedule` 블록을 주석으로 막았고 `workflow_dispatch`는 남겨 뒀습니다.
+
+**다시 켜는 조건**: 러너에서 `apis.data.go.kr`에 TCP 연결이 성립하면. `workflow_dispatch`로 한 번 돌려 확인하고, `quotes.yml`의 `schedule` 주석만 풀면 원래대로 돌아갑니다. 인프라 결정(국내 서버·자체 호스팅 러너)은 미뤄 둔 상태입니다.
+
+`tickers.yml`은 일부러 그대로 뒀습니다. 같은 호스트를 쓰지만 주 1회(일요일)라 08-29 이후 안 돌았고, 그 실행이 차단 범위가 저장소 전체인지 이 배치만인지 알려줍니다. **그 실패는 예상된 것입니다.**
+
+### 손으로 돌리는 법 (국내 IP에서)
+
+`.env.example`을 `.env`로 복사해 키를 채운 뒤, 저장소 루트에서:
+
+```powershell
+npm run quotes:local
+```
+
+`.env`는 `.gitignore`가 막습니다. 이 스크립트는 `node --env-file=.env`를 쓰므로 **Node 20.6 이상**이 필요하고, `.env`가 없으면 조용히 넘어가지 않고 `.env: not found`로 즉시 멈춥니다 — 키 없이 도는 것보다 낫습니다.
+
+**이 플래그는 CI에 닿지 않습니다.** 워크플로 4개는 전부 `node scripts/*.mjs`를 직접 부르고 npm 스크립트를 거치지 않으며, CI는 `node-version: 20`에 고정돼 있습니다. 기존 `build:quotes` 스크립트도 그대로 뒀습니다.
+
+배치가 성공하면 결과를 **손으로 커밋합니다**:
+
+```powershell
+git add data/quotes.json
+git commit -m "data: refresh domestic quotes (manual)"
+git push
+```
+
+자동 커밋을 붙이지 않았습니다. 이 배치는 여러 소스를 순서대로 받는데(주식·ETF·ETN·금·환율·가상자산), 중간에 하나가 실패하면 반쯤 채워진 파일이 남을 수 있습니다. 예약 실행 때는 실패 시 커밋 스텝에 도달하지 못하는 구조가 그걸 막아 줬지만, 손으로 돌릴 때는 사람이 로그를 보고 판단하는 편이 안전합니다 — 반쯤 채워진 `quotes.json`을 밀어 넣으면 앱이 구조적으로는 멀쩡한 채 틀린 총자산을 보여줍니다.
 
 **14:00인 이유**: 금융위원회_주식시세정보는 기준일 *다음 영업일 13시 이후*에 갱신됩니다. 06:00에 돌리면 전일 데이터가 아직 없어 소급 조회가 그 전 영업일로 내려가고, 결과적으로 **항상 2영업일 전 종가**를 쓰게 됩니다(실측: 8/11 06:38 실행이 8/10 대신 8/7 종가를 가져옴). 제공 시각보다 1시간 뒤에 돌려 전일 종가를 잡습니다.
 
 배치는 데이터가 있는 날짜를 찾을 때까지 소급 조회하므로 제공이 밀려도 실패하지 않고 조용히 하루 뒤처진 값을 씁니다. 그래서 기준일이 직전 영업일보다 이르면 **경고**를 남깁니다 — 공휴일이면 정상이지만 매일 반복되면 배치 시각을 다시 봐야 한다는 신호입니다. 공휴일을 알 수 없으므로 실패로 처리하지는 않습니다.
 
 ```powershell
+# .env를 쓰는 쪽을 권합니다 (위 참고). 환경변수를 직접 넣어도 됩니다:
 $env:DATA_GO_KR_KEY="..."; $env:KOREAEXIM_AUTH_KEY="..."; node scripts/build-quotes.mjs
 ```
 
@@ -469,8 +515,12 @@ GitHub Actions에서 쓰려면 위 값들을 저장소 Settings → Secrets and 
 
 | 워크플로 | 주기 | 쓰는 Secret |
 |---|---|---|
-| `quotes.yml` (시세) | 매일 14:00 KST | `DATA_GO_KR_KEY`, `KOREAEXIM_AUTH_KEY`, `COINGECKO_API_KEY`, `ECOS_AUTH_KEY`, `ECOS_SILVER_STAT_CODE` |
+| `quotes.yml` (시세) | **수동 (예약 중지, 2026-09-05)** | `DATA_GO_KR_KEY`, `KOREAEXIM_AUTH_KEY`, `COINGECKO_API_KEY`, `ECOS_AUTH_KEY`, `ECOS_SILVER_STAT_CODE` |
 | `tickers.yml` (종목 목록·업종) | 매주 일요일 05:00 KST | `DATA_GO_KR_KEY`, `DART_API_KEY` |
+| `daily-rates.yml` (일간 금리) | 매일 2회 | `ECOS_AUTH_KEY` |
+| `indicators.yml` (OECD 지표) | 매일 15:00 KST | 없음 |
+
+**이 표가 빠뜨리면 조용히 망가집니다.** `daily-rates.yml`이 여기 없던 동안 `ECOS_AUTH_KEY`가 Secret에 등록되지 않은 채로 지나갔고, 배치는 국내 금리를 통째로 빠뜨린 채 매일 "성공"으로 끝났습니다(부분 실패를 허용하는 구조). 워크플로를 추가하면 이 표도 함께 고치세요.
 
 `quotes.json` 형식:
 ```json
