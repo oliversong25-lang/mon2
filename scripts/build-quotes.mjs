@@ -213,11 +213,39 @@ async function fetchGoldPerGram(basDt) {
   return { price: Math.round(price), prevClose: prevClose === null ? null : Math.round(prevClose) };
 }
 
+// 수출입은행 API의 result 코드. **원인이 전혀 다른데 응답 모양은 똑같다** —
+// HTTP 200에 잘 만들어진 JSON 배열이 오고 result 숫자만 다르다. 이걸 "데이터 없음"
+// 하나로 뭉치면 로그가 원인을 가린다. 실제로 그렇게 열흘을 잃었다: 환율이 낡아가는
+// 동안 로그는 "최근 10일 내 유효한 데이터를 찾지 못했습니다"만 반복했고, 그 문장은
+// 사실이지만 아무 쓸모가 없었다 — 무엇을 고쳐야 하는지 한 글자도 말하지 않았다.
+const FX_RESULT_MEANING = {
+  1: "성공",
+  2: "DATA 코드 오류",
+  3: "인증코드 오류",
+  4: "일일 호출 한도 초과(1,000회)",
+};
+
+// 코드마다 사람이 해야 할 일이 다르다. 그 일을 로그가 말하게 한다.
+const FX_RESULT_ACTION = {
+  2: "요청이 잘못됐다는 뜻이다. 호스트·경로·data 파라미터를 확인할 것. " +
+     "구 도메인 www.koreaexim.go.kr은 2026-04-30자로 병행 가동이 끝났고 그 뒤로 result=2를 돌려준다 " +
+     "(신 도메인 oapi.koreaexim.go.kr, 2025-06-25 전환).",
+  3: "키 문제다. KOREAEXIM_AUTH_KEY가 만료·폐기됐거나 등록되지 않았는지 확인할 것.",
+  4: "오늘 호출 한도를 다 썼다. 내일 다시 돌리거나 호출 수를 줄일 것.",
+};
+
+function describeFxResult(code) {
+  const meaning = FX_RESULT_MEANING[code];
+  return meaning ? `result=${code}(${meaning})` : `result=${JSON.stringify(code)}(문서에 없는 코드)`;
+}
+
 // 데이터 없는 날짜(주말 등)에도 result:3("인증코드 오류") 한 건짜리 배열이 오고,
 // length만 보면 이걸 정상 응답으로 오인해 소급 재시도가 아예 안 돈다(실측 확인됨).
 // result===1(정상)인 행이 하나라도 있어야 유효한 응답으로 취급한다.
 async function fetchFxRates(startDate) {
   let probe = startDate || kstToday();
+  // 열흘을 다 쓰고 실패하면 "무엇을 봤는지"를 통째로 들고 나간다.
+  const seen = [];
   for (let attempt = 0; attempt < 10; attempt += 1) {
     const url = new URL(KOREAEXIM_FX_URL);
     url.searchParams.set("authkey", KOREAEXIM_AUTH_KEY);
@@ -225,6 +253,7 @@ async function fetchFxRates(startDate) {
     url.searchParams.set("data", "AP01");
     const response = await fetchWithRetry("한국수출입은행 환율", url);
     const rows = await response.json();
+    seen.push({ date: probe, rows });
     const validRows = Array.isArray(rows) ? rows.filter((row) => row.result === 1) : [];
     if (validRows.length) {
       console.log("[raw-sample] fx:", JSON.stringify(validRows[0]));
@@ -242,7 +271,49 @@ async function fetchFxRates(startDate) {
     }
     probe = shiftDate(probe, -1);
   }
-  throw new Error("환율 API: 최근 10일 내 유효한(result===1) 데이터를 찾지 못했습니다");
+  throw new Error(summariseFxFailure(seen));
+}
+
+// 실패의 이름을 로그가 직접 말하게 한다. 열흘 전부 같은 코드면 그 코드를,
+// 섞여 있으면 각각 몇 번인지를 적는다 — 읽는 사람이 해야 할 일이 코드마다 다르다.
+function summariseFxFailure(seen) {
+  const host = (() => { try { return new URL(KOREAEXIM_FX_URL).host; } catch { return KOREAEXIM_FX_URL; } })();
+  const span = seen.length ? `${seen[seen.length - 1].date}~${seen[0].date}` : "(조회 없음)";
+  const head = `환율 API(${host}): ${seen.length}일(${span}) 조회에서 유효한(result===1) 데이터를 찾지 못했습니다.`;
+
+  const counts = new Map();       // result 값 -> 날짜 수
+  let emptyDays = 0;              // 빈 배열로 온 날
+  let nonArrayDays = 0;           // 배열이 아예 아닌 응답
+  let stringResultSeen = false;   // result가 숫자가 아니라 문자열로 온 경우
+  for (const { rows } of seen) {
+    if (!Array.isArray(rows)) { nonArrayDays += 1; continue; }
+    if (!rows.length) { emptyDays += 1; continue; }
+    for (const row of rows) {
+      const raw = row?.result;
+      if (typeof raw === "string") stringResultSeen = true;
+      const key = typeof raw === "number" ? raw : JSON.stringify(raw);
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+  }
+
+  const parts = [head];
+  if (nonArrayDays) parts.push(`${nonArrayDays}일은 배열이 아닌 응답이었습니다(API 형식이 바뀌었는지 확인).`);
+  if (emptyDays) parts.push(`${emptyDays}일은 빈 배열이었습니다 — 비영업일일 수 있습니다.`);
+
+  const codes = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  if (codes.length === 1) {
+    const [code, n] = codes[0];
+    parts.push(`응답은 ${n}건 전부 ${describeFxResult(code)}입니다.`);
+    if (FX_RESULT_ACTION[code]) parts.push(FX_RESULT_ACTION[code]);
+  } else if (codes.length > 1) {
+    parts.push(`응답 코드: ${codes.map(([code, n]) => `${describeFxResult(code)} ${n}건`).join(" · ")}.`);
+    codes.forEach(([code]) => { if (FX_RESULT_ACTION[code]) parts.push(FX_RESULT_ACTION[code]); });
+  }
+  // 값은 맞는데 타입이 달라 걸러졌다면 그건 원인이 전혀 다른 사건이다. 반드시 짚는다.
+  if (stringResultSeen) {
+    parts.push('주의: result가 숫자가 아니라 문자열로 왔습니다. 값이 "1"이라면 정상 응답을 타입 때문에 버리고 있는 것입니다.');
+  }
+  return parts.join(" ");
 }
 
 // ECOS 은 시세는 선택 사항이다 — 통계표코드가 확정되지 않았거나 키가 없으면

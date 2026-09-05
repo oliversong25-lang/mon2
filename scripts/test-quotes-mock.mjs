@@ -69,8 +69,35 @@ const ETF_ROWS = [withChange({ basDt: TRADING_DAY, srtnCd: "069500", isinCd: "KR
 const ETN_ROWS = [];
 const GOLD_ROWS = [withChange({ basDt: TRADING_DAY, isuNm: "금99.99_1g", itmsNm: "금99.99_1g", clpr: "151200" }, -800)];
 
+// 손으로 받아 둔 실제 응답(oapi.koreaexim.go.kr, AP01, 20260904). 필드를 줄이지 않고
+// 그대로 둔다 — 숫자가 **천 단위 쉼표가 붙은 문자열**로 온다는 것이 이 픽스처의 요점이고,
+// 요약한 모양으로 바꾸면 그 사실이 시험에서 사라진다.
+const FX_CAPTURED = [
+  { result: 1, cur_unit: "USD", cur_nm: "미국 달러", ttb: "1,346.2", tts: "1,372.8", deal_bas_r: "1,359.5", bkpr: "1,359", yy_efee_r: "0", ten_dd_efee_r: "0", kftc_bkpr: "1,359", kftc_deal_bas_r: "1,359.5" },
+  { result: 1, cur_unit: "JPY(100)", cur_nm: "일본 옌", ttb: "912.15", tts: "930.57", deal_bas_r: "921.36", bkpr: "921", yy_efee_r: "0", ten_dd_efee_r: "0", kftc_bkpr: "921", kftc_deal_bas_r: "921.36" },
+  // 목록에 원화가 섞여 온다. deal_bas_r이 "1"이라 덮어써도 값은 같지만, 그 사실을
+  // 시험이 알고 있어야 나중에 이 행이 다른 값으로 바뀌었을 때 걸린다.
+  { result: 1, cur_unit: "KRW", cur_nm: "한국 원", ttb: "0", tts: "0", deal_bas_r: "1", bkpr: "1", yy_efee_r: "0", ten_dd_efee_r: "0", kftc_bkpr: "1", kftc_deal_bas_r: "1" },
+  { result: 1, cur_unit: "EUR", cur_nm: "유로", ttb: "1,489.1", tts: "1,519.2", deal_bas_r: "1,504.15", bkpr: "1,504", yy_efee_r: "0", ten_dd_efee_r: "0", kftc_bkpr: "1,504", kftc_deal_bas_r: "1,504.15" },
+  // IDR도 통화코드에 배수가 붙는다. JPY 하나만 두면 "JPY 전용 예외"로 굳어질 수 있어 함께 둔다.
+  { result: 1, cur_unit: "IDR(100)", cur_nm: "인도네시아 루피아", ttb: "8.15", tts: "8.32", deal_bas_r: "8.24", bkpr: "8", yy_efee_r: "0", ten_dd_efee_r: "0", kftc_bkpr: "8", kftc_deal_bas_r: "8.24" },
+  // 아래는 통화 수 하한(10개) 검증을 통과시키기 위한 나머지다. 값 자체는 검사하지 않는다.
+  ...["AED", "AUD", "CAD", "CHF", "CNH", "GBP", "HKD", "SGD", "THB"].map((code) => ({
+    result: 1, cur_unit: code, cur_nm: code, ttb: "100.00", tts: "100.00", deal_bas_r: "100.00",
+    bkpr: "100", yy_efee_r: "0", ten_dd_efee_r: "0", kftc_bkpr: "100", kftc_deal_bas_r: "100.00",
+  })),
+];
+
+// 구 도메인(www.koreaexim.go.kr)이 2026-04-30 병행 가동 종료 뒤 돌려주는 모양.
+// HTTP 200 · 잘 만들어진 JSON 배열 · result만 2. **연결 실패처럼 보이지 않는다.**
+const FX_RESULT2 = [{ result: 2, cur_unit: null, cur_nm: null, ttb: null, tts: null, deal_bas_r: null, bkpr: null, yy_efee_r: null, ten_dd_efee_r: null, kftc_bkpr: null, kftc_deal_bas_r: null }];
+
 // 실측: 데이터 없는 날짜에도 result:3 한 건짜리 배열이 온다 (빈 배열이 아니다).
-function fxEnvelopeForDate(date) {
+function fxEnvelopeForDate(date, mode = "ok") {
+  if (mode === "result2") return FX_RESULT2;
+  // 키가 만료·폐기되면 어느 날짜를 물어도 result:3만 온다.
+  if (mode === "authfail") return [{ result: 3, cur_unit: null, cur_nm: null, ttb: null, tts: null, deal_bas_r: null, bkpr: null, yy_efee_r: null, ten_dd_efee_r: null, kftc_bkpr: null, kftc_deal_bas_r: null }];
+  if (mode === "captured") return date === FX_DAY || date === FX_PREV_DAY ? FX_CAPTURED : [{ result: 3, cur_unit: null, deal_bas_r: null }];
   // 수출입은행은 비영업일에 데이터를 주지 않고 result:3 한 건만 돌려준다(실측).
   // FX_DAY와 FX_PREV_DAY 사이를 비워 두어, 전일 환율 조회가 "어제"를 가정하지 않고
   // 데이터가 있는 날까지 거슬러 올라가는지 확인한다.
@@ -108,7 +135,7 @@ function cryptoResponseFor(mode) {
   return jsonResponse(CRYPTO_BODY);
 }
 
-function makeFetchMock({ stockRows = STOCK_ROWS, cryptoMode = "ok" } = {}) {
+function makeFetchMock({ stockRows = STOCK_ROWS, cryptoMode = "ok", fxMode = "ok" } = {}) {
   const fetchCallLog = [];
   const fn = async (input) => {
     const url = new URL(String(input));
@@ -145,7 +172,11 @@ function makeFetchMock({ stockRows = STOCK_ROWS, cryptoMode = "ok" } = {}) {
 
     if (url.hostname === "oapi.koreaexim.go.kr") {
       const searchdate = url.searchParams.get("searchdate");
-      return jsonResponse(fxEnvelopeForDate(searchdate));
+      return jsonResponse(fxEnvelopeForDate(searchdate, fxMode));
+    }
+    // 구 도메인으로 부르면 목이 터진다 — 코드가 www로 되돌아가면 시험이 즉시 잡는다.
+    if (url.hostname === "www.koreaexim.go.kr") {
+      throw new Error("환율을 구 도메인(www.koreaexim.go.kr)으로 불렀습니다 — 2026-04-30 병행 가동 종료됨");
     }
 
     if (url.hostname === "api.coingecko.com") return cryptoResponseFor(cryptoMode);
@@ -161,10 +192,15 @@ function jsonResponse(body) {
 
 // build-quotes.mjs is a top-level-await-free "main().catch()" script; importing it
 // twice needs a cache-busting specifier since Node caches ES modules by URL.
-async function runBatch({ stockRows, cryptoMode } = {}) {
-  const { fn, fetchCallLog } = makeFetchMock({ stockRows, cryptoMode });
+async function runBatch({ stockRows, cryptoMode, fxMode } = {}) {
+  const { fn, fetchCallLog } = makeFetchMock({ stockRows, cryptoMode, fxMode });
   global.fetch = fn;
   process.exitCode = undefined;
+  // 실패 메시지를 시험이 읽어야 한다. 로그가 원인을 말하는지가 이번 검사의 대상이라,
+  // exitCode만 봐서는 "멈췄다"는 것밖에 확인할 수 없다.
+  const errorLog = [];
+  const originalError = console.error;
+  console.error = (...args) => { errorLog.push(args.map(String).join(" ")); originalError(...args); };
   // 배치는 import 시점에 main()을 띄우고 바로 반환한다. 고정 시간만 기다리면 재시도가
   // 붙은 실패 경로가 다음 실행과 겹쳐 exitCode와 콘솔이 뒤섞인다 — 실행이 실제로
   // 끝났다는 신호(카운터)를 기다린다.
@@ -174,9 +210,10 @@ async function runBatch({ stockRows, cryptoMode } = {}) {
   while ((globalThis.__quotesBatchRuns || 0) === before && Date.now() < deadline) {
     await new Promise((r) => setTimeout(r, 50));
   }
+  console.error = originalError;
   const exitCode = process.exitCode;
   process.exitCode = undefined;
-  return { fetchCallLog, exitCode };
+  return { fetchCallLog, exitCode, errorLog };
 }
 
 const results = [];
@@ -458,6 +495,76 @@ try {
     JSON.stringify(written.quotes["005930"]));
 }
 
+
+  // ===== 환율: 도메인 이전과 응답 코드 =====
+  // 열흘 동안 환율이 낡아갔는데 로그는 "유효한 데이터를 찾지 못했습니다"만 반복했다.
+  // 그 문장은 사실이지만 무엇을 고쳐야 하는지 한 글자도 말하지 않는다. 아래 검사들은
+  // (1) 실제 응답 모양을 그대로 통과시키는지와 (2) 실패가 스스로 이름을 대는지를 본다.
+  {
+    await rm(QUOTES_PATH, { force: true });
+    const { exitCode } = await runBatch({ fxMode: "captured" });
+    const written = JSON.parse(await readFile(QUOTES_PATH, "utf8"));
+    record("캡처한 실제 응답으로 배치가 성공한다", exitCode !== 1, `exitCode=${exitCode}`);
+    // "1,359.5"를 Number()에 그대로 넣으면 NaN이다. 쉼표를 떼는 코드가 사라지면 여기서 걸린다.
+    record("천 단위 쉼표가 붙은 문자열 환율을 숫자로 읽는다 (USD 1,359.5 -> 1359.5)",
+      written.rates && written.rates.USD === 1359.5,
+      `USD=${JSON.stringify(written.rates && written.rates.USD)} (NaN이면 쉼표 제거가 빠진 것)`);
+    // JPY(100)은 통화코드 자체에 배수가 들어 있다. 100으로 나누지 않으면 조용한 100배 오류다.
+    record("JPY(100)의 배수 100이 실제로 나눠진다 (921.36 -> 9.2136)",
+      written.rates && Math.abs(written.rates.JPY - 9.2136) < 1e-9,
+      `JPY=${JSON.stringify(written.rates && written.rates.JPY)} (921.36이면 100배 오류)`);
+    record("IDR(100)도 같은 규칙으로 나눠진다 (8.24 -> 0.0824)",
+      written.rates && Math.abs(written.rates.IDR - 0.0824) < 1e-9,
+      `IDR=${JSON.stringify(written.rates && written.rates.IDR)}`);
+    record("통화코드에서 배수 괄호가 떨어져 JPY로 저장된다",
+      written.rates && written.rates["JPY(100)"] === undefined && written.rates.JPY > 0,
+      JSON.stringify(Object.keys(written.rates || {})));
+    // 목록에 KRW 행이 섞여 온다(deal_bas_r "1"). 값이 같아 지금은 무해하지만,
+    // 그 행이 다른 값으로 바뀌면 원화 환산이 통째로 틀어진다.
+    record("응답에 섞여 오는 KRW 행이 원화 기준 1을 흔들지 않는다",
+      written.rates && written.rates.KRW === 1,
+      `KRW=${JSON.stringify(written.rates && written.rates.KRW)}`);
+    record("쉼표 붙은 다른 통화도 같은 방식으로 읽힌다 (EUR 1,504.15)",
+      written.rates && written.rates.EUR === 1504.15,
+      `EUR=${JSON.stringify(written.rates && written.rates.EUR)}`);
+  }
+
+  // 구 도메인이 돌려주는 모양. HTTP 200 · 정상적인 JSON 배열 · result만 2다.
+  // 연결 실패처럼 보이지 않으므로, 로그가 코드를 말하지 않으면 원인을 찾을 길이 없다.
+  {
+    const previous = await readFile(QUOTES_PATH, "utf8").catch(() => null);
+    const { exitCode, errorLog } = await runBatch({ fxMode: "result2" });
+    const message = errorLog.join(" ");
+    record("result:2면 배치가 멈춘다 (환율 없이 진행하지 않는다)", exitCode === 1, `exitCode=${exitCode}`);
+    record("실패 메시지가 result 코드를 그대로 말한다",
+      /result=2/.test(message), message.slice(0, 200));
+    record("실패 메시지가 그 코드의 뜻을 말한다",
+      /DATA 코드 오류/.test(message), message.slice(0, 200));
+    record("실패 메시지가 무엇을 확인해야 하는지 말한다",
+      /호스트|경로|data 파라미터/.test(message), message.slice(0, 250));
+    record("실패 메시지가 어느 호스트를 불렀는지 밝힌다",
+      /oapi\.koreaexim\.go\.kr/.test(message), message.slice(0, 200));
+    record("실패 메시지가 조회한 날짜 범위를 밝힌다",
+      /\d{8}~\d{8}/.test(message), message.slice(0, 200));
+    // 인증 문제와 요청 문제를 한 문장으로 뭉치면 읽는 사람이 할 일이 갈리지 않는다.
+    record("인증코드 오류(3)를 요청 오류(2)로 뭉치지 않는다",
+      !/인증코드 오류/.test(message), message.slice(0, 250));
+    // 실패했으면 파일을 건드리지 않아야 한다 — 반쯤 채워진 산출물이 남으면 안 된다.
+    const after = await readFile(QUOTES_PATH, "utf8").catch(() => null);
+    record("환율 실패 시 기존 quotes.json을 덮어쓰지 않는다", after === previous,
+      after === previous ? "" : "파일이 바뀌었다");
+  }
+
+  // 열흘 전부 result:3이면 그건 키 문제다. 위와 다른 문장이 나와야 한다.
+  {
+    const { exitCode, errorLog } = await runBatch({ fxMode: "authfail" });
+    const message = errorLog.join(" ");
+    record("result:3만 열흘이면 키 문제라고 말한다",
+      exitCode === 1 && /result=3/.test(message) && /인증코드 오류/.test(message),
+      message.slice(0, 200));
+    record("키 문제일 때 KOREAEXIM_AUTH_KEY를 지목한다",
+      /KOREAEXIM_AUTH_KEY/.test(message), message.slice(0, 250));
+  }
 
 } finally {
   if (originalTickersKr !== null) await writeFile(TICKERS_KR_PATH, originalTickersKr, "utf8");
