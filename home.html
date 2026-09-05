@@ -200,7 +200,7 @@
 const INPUT_URL="asset-input.html";
 const ASSETS_URL="assets.html";
 const ANALYSIS_URL="analysis.html";
-const { won, pct, escapeHtml, daysBetween } = Format;
+const { won, pct, escapeHtml, daysBetween, quoteAge } = Format;
 
 let sessionState=SessionStore.read();
 let session=toSession(sessionState);
@@ -449,12 +449,24 @@ function pageHead(){
 // 여기 찍히는 것은 경고가 아니다. 3개월 전 관측은 낡은 값이 아니라 그 시점의 값이고,
 // 그 사실을 읽을 수 있게 만드는 것이 이 줄의 일이다. 정말로 갱신이 필요한 상태는
 // 각 카드가 따로 말한다.
+// 날짜 옆에 경과를 붙인다. 날짜만 적으면 읽는 사람이 매번 뺄셈을 해야 하고,
+// 그 뺄셈을 안 하는 동안 아홉 날이 지나갔다.
+//
+// 문턱을 넘어도 "낡았다"고 단정하지 않는다 — 연휴에는 정상적으로도 넘긴다.
+// 사실(며칠 전인지)과 다른 가능성(연휴)을 함께 적고 판단은 읽는 사람이 한다.
+function ageMark(date){
+  const age=quoteAge(date,kstToday());
+  if(!age)return"";
+  if(!age.stale)return `<span class="age">${escapeHtml(age.label)}</span>`;
+  return `<span class="age stale" title="연휴면 정상입니다. 계속 늘어나면 시세 배치를 돌려주세요">${escapeHtml(age.label)}</span>`;
+}
+
 function rail(){
   const status=Valuation.state.status;
   const date=Valuation.asOfDate();
   const anchor=status==="loading"
     ?`<b>기준일 확인 중</b>`
-    :date?`<b>${escapeHtml(date)}</b><span>종가 기준</span>`:`<b>기준일 없음</b><span>시세 파일을 확인하세요</span>`;
+    :date?`<b>${escapeHtml(date)}</b><span>종가 기준</span>${ageMark(date)}`:`<b>기준일 없음</b><span>시세 파일을 확인하세요</span>`;
 
   const marks=[];
   const crypto=status==="ready"?Valuation.staleCryptoDate():null;
@@ -1028,7 +1040,7 @@ function holdingsCard(summary){
       <td class="right num">${won(row.krw)}</td>
       <td class="right">${pl}</td>
       <td class="right num">${pct(share)}</td>
-      <td class="right" style="color:var(--dim)">${escapeHtml(updatedLabel(row.asset))}</td>
+      <td class="right" style="color:var(--dim)">${quoteDateCell(row)}</td>
     </tr>`;
   }).join("");
   const hasPhysicalProfit=summary.physical.gap.count>0;
@@ -1069,14 +1081,29 @@ function quantityCell(row){
   return `${text}${row.unitLabel?` ${row.unitLabel}`:""}`;
 }
 
-function updatedLabel(asset){
-  const raw=asset&&(asset.updatedAt||asset.createdAt);
-  if(!raw)return"–";
-  const days=daysBetween(String(raw).slice(0,10),new Date().toISOString().slice(0,10));
-  if(!Number.isFinite(days))return"–";
-  if(days<=0)return"오늘";
-  if(days===1)return"어제";
-  return `${days}일 전`;
+// 이 열은 오랫동안 **사용자가 입력한 시각**을 보여줬다. 삼성전자 행에도 그랬다.
+// 그래서 "이 가격이 언제 것인가"라는 물음에 답하는 자리가 화면 어디에도 없었고,
+// 시세가 아홉 날 낡는 동안 평가금액은 정상인 숫자와 똑같이 생겨 있었다.
+//
+// 이제 시세로 값이 나온 자산은 **시세 기준일**을, 직접 입력한 자산은 그 사실을 적는다.
+// 없는 날짜를 만들어 붙이지 않는다 — `–`와 `매입 정보 없음`이 이미 쓰는 방식이다.
+const QUOTE_PRICED=["equity","crypto","commodity"];
+function quoteDateFor(group){
+  if(group==="crypto"){
+    // 가상자산은 실시간이라 국내 종가와 기준일이 다르다. 코인게코가 실패한 날에만
+    // 뒤처지고, 그 경우는 이미 레일과 확인 항목이 따로 말한다.
+    const state=(window.Valuation&&Valuation.state)||{};
+    return state.cryptoAsOf||Valuation.asOfDate();
+  }
+  return Valuation.asOfDate();
+}
+function quoteDateCell(row){
+  if(!QUOTE_PRICED.includes(row.group))return `<span class="hand-valued" title="시세가 아니라 직접 입력한 값입니다">직접 입력</span>`;
+  const date=quoteDateFor(row.group);
+  if(!date)return `<span style="color:var(--dim)">–</span>`;
+  const age=quoteAge(date,kstToday());
+  const mark=age?`<span class="age${age.stale?" stale":""}">${escapeHtml(age.label)}</span>`:"";
+  return `<span class="stamp">${escapeHtml(date)}</span>${mark}`;
 }
 
 function comingCards(){

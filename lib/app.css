@@ -280,3 +280,10 @@ table.data .name { font-weight: 700; }
   .main { padding: var(--space-5); }
   .grid-top, .grid-half, .grid-third, .grid-mid { grid-template-columns: 1fr; }
 }
+
+/* 시세 기준일 옆의 경과 표기. 날짜만으로는 읽는 사람이 뺄셈을 해야 한다.
+   문턱(3영업일)을 넘으면 눈에 띄게 하되 색으로 "나쁨"을 말하지는 않는다 —
+   연휴에는 정상적으로도 넘기고, 우리는 그 둘을 구별할 달력이 없다. */
+.age { margin-left:var(--space-2); color:var(--dim); font-size:var(--font-xs); font-variant-numeric:tabular-nums; }
+.age.stale { padding:0 var(--space-2); border:var(--border) solid var(--line); border-radius:var(--radius-round); background:var(--surface-2); color:var(--ink); font-weight:700; }
+.hand-valued { color:var(--dim); font-size:var(--font-xs); }

@@ -1912,6 +1912,220 @@ try {
     const total = await page.evaluate(() => Portfolio.summarize(session.assets).total);
     return total === ADDED.total ? { ok: true } : { ok: false, reason: `해제 뒤 총자산 ${total} ≠ ${ADDED.total}` };
   });
+
+  // ===== 8. 시세가 얼마나 낡았는지 화면이 말하는가 =====
+  // 08-27부터 09-05까지 시세 배치가 열세 번 실패했다. 아홉 날 동안 평가금액은 낡은
+  // 가격으로 계산됐고, 어느 화면도 그 사실을 말하지 않았다 — 숫자가 정상인 숫자와
+  // 똑같이 생겨 있었다. 아래는 그 침묵이 돌아오지 못하게 막는 검사들이다.
+  await restoreRegistered();
+
+  // 기준일만 바꿔 끼운다. 파일을 덮어쓰는 대신 응답을 가로채는 이유: 앱은
+  // `cache: "no-cache"`로 재검증만 하는데, 파이썬 http.server의 Last-Modified는 초
+  // 단위라 같은 초 안에 덮어쓰면 304가 돌아와 **직전 내용이 그대로 나온다**(실제로
+  // 그렇게 한 칸씩 밀린 값을 봤다). 라우트로 주면 그 경합이 사라진다.
+  let quotesMode = null; // null=실제 파일 · "abort"=조회 실패 · 그 외=그 문자열을 본문으로
+  await page.route("**/data/quotes.json", async (route) => {
+    if (quotesMode === null) return route.continue();
+    if (quotesMode === "abort") return route.abort();
+    await route.fulfill({ status: 200, contentType: "application/json", body: quotesMode });
+  });
+
+  // 오늘로부터 N영업일 전(주말 건너뜀). 문턱이 달력일이 아니라 영업일이라 시험도
+  // 같은 방식으로 날짜를 만든다.
+  const weekdaysAgo = (n) => {
+    const d = new Date();
+    let left = n;
+    while (left > 0) {
+      d.setDate(d.getDate() - 1);
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) left -= 1;
+    }
+    return d.toISOString().slice(0, 10);
+  };
+  // 화면이 세는 방식과 같은 셈: (기준일, 오늘] 사이의 평일 수. 오늘이 주말이면
+  // weekdaysAgo(n)과 한 칸 어긋나므로, 기대값은 여기서 다시 센다.
+  const weekdaysBetween = (a, b) => {
+    const from = new Date(a), to = new Date(b);
+    let count = 0;
+    const cursor = new Date(from.getTime());
+    while (cursor < to) {
+      cursor.setDate(cursor.getDate() + 1);
+      if (cursor > to) break;
+      const day = cursor.getDay();
+      if (day !== 0 && day !== 6) count += 1;
+    }
+    return count;
+  };
+  const todayKst = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+
+  const withAsOf = async (date) => {
+    quotesMode = JSON.stringify({ ...QUOTES_FIXTURE, asOf: date + "T00:00:00+09:00", cryptoAsOf: date });
+    await page.goto(HOME_URL);
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+  };
+
+  await record("시세 기준일 옆에 경과가 함께 나온다 (뺄셈을 요구하지 않는다)", async () => {
+    const date = weekdaysAgo(1);
+    await withAsOf(date);
+    const rail = await page.locator(".rail-anchor").textContent();
+    if (!rail.includes(date)) return { ok: false, reason: `레일에 기준일이 없음: "${rail}"` };
+    if (!/영업일 전|최신/.test(rail)) return { ok: false, reason: `레일에 경과가 없음: "${rail}"` };
+    return { ok: true };
+  });
+
+  // 정상적인 주에도 화요일 아침이면 금요일 종가를 본다(2영업일). 여기서 표시가 뜨면
+  // 매주 오작동하고, 그러면 사람은 표시를 무시하게 된다 — 이 과제가 막으려는 그것.
+  await record("2영업일까지는 낡음 표시가 뜨지 않는다 (월·화 아침의 정상 상태)", async () => {
+    for (let back = 1; back <= 6; back += 1) {
+      const date = weekdaysAgo(back);
+      if (weekdaysBetween(date, todayKst()) > 2) continue;
+      await withAsOf(date);
+      const marked = await page.locator(".rail-anchor .age.stale").count();
+      const label = await page.locator(".rail-anchor .age").textContent();
+      if (marked) return { ok: false, reason: `${date}(${label})인데 낡음 표시가 떴다` };
+    }
+    return { ok: true };
+  });
+
+  await record("3영업일부터 낡음 표시가 뜬다", async () => {
+    let date = null;
+    for (let back = 2; back <= 10; back += 1) {
+      const candidate = weekdaysAgo(back);
+      if (weekdaysBetween(candidate, todayKst()) === 3) { date = candidate; break; }
+    }
+    if (!date) return { ok: false, reason: "3영업일 전 날짜를 만들지 못함" };
+    await withAsOf(date);
+    const marked = await page.locator(".rail-anchor .age.stale").count();
+    const label = await page.locator(".rail-anchor .age").textContent();
+    if (!/3영업일 전/.test(label)) return { ok: false, reason: `라벨이 "${label}" (3영업일 전 기대)` };
+    return marked ? { ok: true } : { ok: false, reason: `3영업일 전인데 표시가 없다 (라벨: "${label}")` };
+  });
+
+  await record("기준일을 더 뒤로 돌리면 경과도 함께 늘어난다", async () => {
+    await withAsOf(weekdaysAgo(3));
+    const near = await page.locator(".rail-anchor .age").textContent();
+    const far = weekdaysAgo(10);
+    await withAsOf(far);
+    const farLabel = await page.locator(".rail-anchor .age").textContent();
+    if (near === farLabel) return { ok: false, reason: `경과가 그대로다: "${near}"` };
+    const expected = `${weekdaysBetween(far, todayKst())}영업일 전`;
+    return farLabel.trim() === expected ? { ok: true } : { ok: false, reason: `"${farLabel}" (기대 "${expected}")` };
+  });
+
+  const lastCells = async () => page.evaluate(() => {
+    const out = {};
+    document.querySelectorAll("table.data tbody tr").forEach((tr) => {
+      const name = ((tr.children[0] && tr.children[0].textContent) || "").trim();
+      const last = tr.children[tr.children.length - 1];
+      out[name] = {
+        text: ((last && last.textContent) || "").trim(),
+        hand: Boolean(last && last.querySelector(".hand-valued")),
+        age: Boolean(last && last.querySelector(".age")),
+      };
+    });
+    return out;
+  });
+
+  // 값을 직접 입력한 자산에는 시세 기준일이 없다. 없는 날짜를 만들어 붙이면
+  // 있는 날짜와 구별되지 않는다 — `-`와 `매입 정보 없음`이 이미 쓰는 방식이다.
+  await record("직접 입력한 자산(부동산·예적금)에는 시세 기준일이 붙지 않는다", async () => {
+    await withAsOf(weekdaysAgo(10));
+    const cells = await lastCells();
+    const hand = Object.entries(cells).filter(([, v]) => v.hand);
+    if (!hand.length) return { ok: false, reason: `직접 입력 표시가 있는 행이 없음: ${JSON.stringify(cells)}` };
+    for (const [name, v] of hand) {
+      if (v.age) return { ok: false, reason: `${name}: 직접 입력인데 시세 경과가 붙었다` };
+      if (/[0-9]{4}-[0-9]{2}-[0-9]{2}/.test(v.text)) return { ok: false, reason: `${name}: 직접 입력인데 날짜가 붙었다 — "${v.text}"` };
+    }
+    return { ok: true };
+  });
+
+  await record("시세로 값이 나온 자산(주식·가상자산)에는 기준일과 경과가 붙는다", async () => {
+    const cells = await lastCells();
+    const priced = Object.entries(cells).filter(([name]) => /삼성전자|카카오|비트코인/.test(name));
+    if (!priced.length) return { ok: false, reason: `시세 자산 행을 못 찾음: ${Object.keys(cells)}` };
+    for (const [name, v] of priced) {
+      if (!v.age) return { ok: false, reason: `${name}: 시세 자산인데 경과가 없다 — "${v.text}"` };
+      if (!/[0-9]{4}-[0-9]{2}-[0-9]{2}/.test(v.text)) return { ok: false, reason: `${name}: 기준일이 없다 — "${v.text}"` };
+    }
+    return { ok: true };
+  });
+
+  // 이 열은 예전에 사용자의 입력 시각을 보여줬다. 삼성전자 행에도 그랬다.
+  await record("이 열이 다시 사용자의 입력 시각으로 돌아가지 않는다", async () => {
+    const header = await page.evaluate(() => [...document.querySelectorAll("table.data thead th")].map((th) => th.textContent.trim()));
+    if (!header.includes("최근 업데이트")) return { ok: false, reason: `열 이름이 바뀜: ${JSON.stringify(header)}` };
+    const cells = await lastCells();
+    const samsung = Object.entries(cells).find(([name]) => /삼성전자/.test(name));
+    if (!samsung) return { ok: false, reason: "삼성전자 행을 못 찾음" };
+    // 입력은 오늘 했고 기준일은 10영업일 전이다. "오늘"이 보이면 입력 시각으로 돌아간 것이다.
+    return /오늘|어제/.test(samsung[1].text) ? { ok: false, reason: `입력 시각으로 보인다: "${samsung[1].text}"` } : { ok: true };
+  });
+
+  // 세 상황은 서로 다르게 보여야 한다. 하나로 뭉치면 무엇을 해야 하는지 갈리지 않는다.
+  await record("자산 0건 · 조회 실패 · 낡음이 서로 다르게 보인다", async () => {
+    await withAsOf(weekdaysAgo(10));
+    const stale = {
+      amount: await page.locator(".total-amount").count(),
+      staleMark: await page.locator(".age.stale").count(),
+      banner: await page.locator(".banner").count(),
+    };
+
+    quotesMode = "abort";
+    await page.goto(HOME_URL);
+    await page.waitForFunction(() => document.querySelector(".banner"), { timeout: 8000 });
+    const failed = {
+      amount: await page.locator(".total-amount").count(),
+      staleMark: await page.locator(".age.stale").count(),
+      banner: await page.locator(".banner").count(),
+    };
+
+    quotesMode = null;
+    await page.goto(HOME_URL);
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector(".empty-state"), { timeout: 8000 });
+    const empty = {
+      amount: await page.locator(".total-amount").count(),
+      staleMark: await page.locator(".age.stale").count(),
+      empty: await page.locator(".empty-state").count(),
+    };
+
+    if (!(stale.amount && stale.staleMark && !stale.banner)) return { ok: false, reason: `낡음: ${JSON.stringify(stale)}` };
+    if (!(failed.banner && !failed.staleMark)) return { ok: false, reason: `조회 실패: ${JSON.stringify(failed)}` };
+    if (!(empty.empty && !empty.amount && !empty.staleMark)) return { ok: false, reason: `0건: ${JSON.stringify(empty)}` };
+    return { ok: true };
+  });
+
+  await record("자산 화면 머리말에도 기준일과 경과가 함께 나온다", async () => {
+    await page.evaluate((raw) => localStorage.setItem("assetInput.session", raw), REGISTERED);
+    const date = weekdaysAgo(10);
+    quotesMode = JSON.stringify({ ...QUOTES_FIXTURE, asOf: date + "T00:00:00+09:00", cryptoAsOf: date });
+    await page.goto(`http://127.0.0.1:${PORT}/assets.html`);
+    await page.waitForSelector(".group-tabs", { timeout: 10000 });
+    const head = await page.locator(".page-head .sub").textContent();
+    const marked = await page.locator(".page-head .age.stale").count();
+    if (!head.includes(date)) return { ok: false, reason: `기준일이 없음: "${head}"` };
+    const expected = `${weekdaysBetween(date, todayKst())}영업일 전`;
+    if (!head.includes(expected)) return { ok: false, reason: `"${expected}"가 없음: "${head}"` };
+    return marked ? { ok: true } : { ok: false, reason: `낡음 표시가 없음: "${head}"` };
+  });
+
+  // 픽스처만 통과하고 진짜 파일에서 깨지면 의미가 없다.
+  await record("현재 실제 quotes.json도 정상 렌더된다", async () => {
+    if (originalQuotes === null) return { ok: false, reason: "원본 quotes.json이 없다" };
+    quotesMode = originalQuotes;
+    await page.goto(HOME_URL);
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 10000 });
+    const rail = await page.locator(".rail-anchor").textContent();
+    const date = String(JSON.parse(originalQuotes).asOf).slice(0, 10);
+    if (!rail.includes(date)) return { ok: false, reason: `실제 기준일 ${date}이 레일에 없음: "${rail}"` };
+    const expected = `${weekdaysBetween(date, todayKst())}영업일 전`;
+    if (!rail.includes(expected) && !/최신/.test(rail)) return { ok: false, reason: `"${expected}"가 없음: "${rail}"` };
+    return { ok: true };
+  });
+  await page.unroute("**/data/quotes.json");
+
 } finally {
   if (browser) await browser.close();
   if (server) server.kill();

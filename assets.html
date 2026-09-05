@@ -48,7 +48,7 @@
 <script src="lib/format.js"></script>
 <script>
 const INPUT_URL="asset-input.html";
-const { won, pct, escapeHtml } = Format;
+const { won, pct, escapeHtml, quoteAge } = Format;
 
 // 자산군 정의는 lib/portfolio.js의 GROUP_NAMES가 단일 출처다. 여기서 순서만 정한다.
 const GROUP_TABS=["cash","savings","equity","fund","bond","crypto","commodity","realestate"];
@@ -117,11 +117,23 @@ function render(){
   bind();
 }
 
+// 기준일 옆에 경과를 붙인다. 이 화면의 모든 평가금액이 그 날짜에서 나오는데,
+// 날짜만 적혀 있으면 얼마나 뒤처졌는지는 읽는 사람이 뺄셈해야 한다.
+// 문턱을 넘어도 단정하지 않는다 — 연휴에는 정상적으로도 넘기고, 우리에게는 그 둘을
+// 가릴 공휴일 달력이 없다. 사실과 다른 가능성을 함께 적는다.
+function ageMark(date){
+  const age=quoteAge(date,new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul"}).format(new Date()));
+  if(!age)return"";
+  const title=age.stale?' title="연휴면 정상입니다. 계속 늘어나면 시세 배치를 돌려주세요"':"";
+  return `<span class="age${age.stale?" stale":""}"${title}>${escapeHtml(age.label)}</span>`;
+}
+
 function pageHead(){
   const date=Valuation.asOfDate();
-  const stamp=Valuation.state.status==="loading"?"기준일 확인 중":(date?`${date} 종가 기준`:"기준일 없음");
+  const loading=Valuation.state.status==="loading";
+  const stamp=loading?"기준일 확인 중":(date?`${date} 종가 기준`:"기준일 없음");
   return `<div class="page-head">
-    <div><h1>전체 자산</h1><div class="sub"><span class="stamp">${escapeHtml(stamp)}</span> · 보유 자산을 자산군별로 나눠 봅니다</div></div>
+    <div><h1>전체 자산</h1><div class="sub"><span class="stamp">${escapeHtml(stamp)}</span>${!loading&&date?ageMark(date):""} · 보유 자산을 자산군별로 나눠 봅니다</div></div>
     <div class="head-actions"><a class="btn primary" href="${INPUT_URL}#add">자산 추가</a></div>
   </div>`;
 }
