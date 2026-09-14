@@ -96,6 +96,25 @@
     .rec-body b { color:var(--dim); font-weight:600; }
     .rec-ctx { margin-top:var(--space-3); color:var(--dim); font-size:var(--font-xs); line-height:1.7; }
     .soon-body { color:var(--dim); font-size:var(--font-sm); line-height:1.7; }
+    /* 1단계 · 원칙에 비추어. 사용자가 쓴 문구를 **그대로** 보여준다 — 질문으로 고쳐 쓰지
+       않는다. 고쳐 쓰는 순간 우리 말이 그 사람의 원칙에 들어간다. */
+    .stage { color:var(--brand-ink); font-size:var(--font-xs); font-weight:800; letter-spacing:.02em; }
+    .plist { list-style:none; margin:var(--space-4) 0 0; padding:0; }
+    .pitem { padding:var(--space-4) 0; border-top:var(--border) solid var(--line); }
+    .pitem:first-child { border-top:0; }
+    .pitem label { display:flex; gap:var(--space-2); align-items:baseline; font-size:var(--font-md); font-weight:600; line-height:1.6; }
+    .pitem textarea { width:100%; margin-top:var(--space-2); padding:var(--space-3) var(--space-4);
+      border:var(--border) solid var(--line); border-radius:var(--radius-md); background:var(--surface-2);
+      color:inherit; font:inherit; line-height:1.7; min-height:3rem; resize:vertical; }
+    .ptag { flex:none; padding:0 var(--space-2); border-radius:var(--radius-round); background:var(--surface-2);
+      color:var(--muted); font-size:var(--font-xs); font-weight:600; }
+    .ptag.core { background:var(--brand-soft); color:var(--ink); }
+    .prest { margin-top:var(--space-3); border-top:var(--border) solid var(--line); }
+    .prest > summary { padding:var(--space-3) 0; color:var(--muted); font-size:var(--font-sm); font-weight:600; cursor:pointer; }
+    .rec-stage { margin-top:var(--space-3); color:var(--muted); font-size:var(--font-sm); line-height:1.8; }
+    .rec-stage > b { color:var(--dim); font-weight:600; font-size:var(--font-xs); }
+    .rec-stage ul { margin:var(--space-1) 0 0; padding-left:var(--space-5); }
+    .rec-stage i { color:var(--dim); }
   </style>
 </head>
 <body>
@@ -104,7 +123,7 @@
 <script src="lib/session.js"></script>
 <script src="lib/shell.js?v=20260901-1"></script>
 <script src="lib/format.js"></script>
-<script src="lib/journal-store.js"></script>
+<script src="lib/journal-store.js?v=20260914-1"></script>
 <script src="lib/decision-context.js"></script>
 <script>
 // 의사결정 기록.
@@ -155,6 +174,8 @@ const OPS = [
 ];
 
 let records = [];
+let principles = [];
+let restOpen = false;
 let context = null;
 let loaded = false;
 let busy = false;
@@ -173,7 +194,20 @@ let draft = {
   decision: "",
   reasonsFor: [newItem()],
   reasonsAgainst: [newItem()],
+  // 1단계 답. 원칙 id → { answer, touched }. touched는 **손댔는지**다 — 손대지 않은 것과
+  // 손대고 비워 둔 것을 저장에서 가르려고 둔다.
+  principleAnswers: {},
 };
+
+function emptyDraft() {
+  return { actionStatement: "", expectation: "", decision: "", reasonsFor: [newItem()], reasonsAgainst: [newItem()], principleAnswers: {} };
+}
+
+// ── 1단계가 몇 줄까지 읽히는가 ────────────────────────────────────────────
+// 원칙이 열 개면 결정마다 열 번 묻는다. 트랙 29가 짚었듯 마찰은 기록장이 실패하는
+// 유일한 이유다. 그래서 **핵심은 언제나 펼치고**, 나머지는 항목이 이 수를 넘으면 하나의
+// 접힘 아래로 모은다. 잘라내지 않는다 — 몇 개가 접혀 있는지 늘 적고, 한 번 누르면 다 보인다.
+const COLLAPSE_AT = 5;
 
 function navOptions() {
   const state = SessionStore.read();
@@ -193,6 +227,52 @@ function actionCard() {
       <label for="statement">검토 중인 행동</label>
       <input id="statement" type="text" data-draft="actionStatement" value="${escapeHtml(draft.actionStatement)}">
     </div>
+  </div>`;
+}
+
+function answerState(id) {
+  return draft.principleAnswers[id] || { answer: "", touched: false };
+}
+
+function principleRow(item) {
+  const state = answerState(item.id);
+  const kind = JournalStore.KINDS[item.kind] || JournalStore.KINDS.principle;
+  return `<li class="pitem" data-principle="${escapeHtml(item.id)}">
+    <label for="pa-${escapeHtml(item.id)}">
+      ${item.core ? `<span class="ptag core" title="답을 적어야 기록을 마칠 수 있습니다">★ 핵심</span>` : ""}
+      <span class="ptag">${escapeHtml(kind)}</span>
+      <span>${escapeHtml(item.text)}</span>
+    </label>
+    <textarea id="pa-${escapeHtml(item.id)}" rows="2" data-principle-answer="${escapeHtml(item.id)}">${escapeHtml(state.answer)}</textarea>
+  </li>`;
+}
+
+function principlesCard() {
+  if (!principles.length) {
+    return `<div class="card">
+      <div class="stage">1단계 · 원칙에 비추어</div>
+      <h2>투자 전 검토할 사항</h2>
+      <p class="soon-body" style="margin-top:var(--space-3)">아직 적은 원칙이 없습니다.
+        <a href="philosophy.html">투자 원칙</a>에 한 줄씩 적으면 여기 그대로 나옵니다.</p>
+    </div>`;
+  }
+  const core = principles.filter((item) => item.core);
+  const rest = principles.filter((item) => !item.core);
+  const collapse = principles.length > COLLAPSE_AT && rest.length > 0;
+  const restAnswered = rest.filter((item) => answerState(item.id).answer.trim()).length;
+  const body = collapse
+    ? `<ol class="plist">${core.map(principleRow).join("")}</ol>
+       <details class="prest" data-principle-rest ${restOpen ? "open" : ""}>
+         <summary>나머지 ${rest.length}개 — 비워 둬도 기록됩니다 (답한 것 ${restAnswered})</summary>
+         <ol class="plist">${rest.map(principleRow).join("")}</ol>
+       </details>`
+    : `<ol class="plist">${principles.map(principleRow).join("")}</ol>`;
+  return `<div class="card">
+    <div class="stage">1단계 · 원칙에 비추어</div>
+    <h2>투자 전 검토할 사항 <span class="pill">${principles.length}</span></h2>
+    <div class="card-sub">투자 원칙에 적어 둔 문구를 그대로 가져왔습니다. 이 행동을 각 항목에 비추어 적습니다.
+      ${core.length ? `★ 핵심 ${core.length}개는 답을 적어야 기록을 마칠 수 있고, 나머지는 비워 둬도 됩니다.` : "모두 비워 둬도 기록됩니다."}</div>
+    ${body}
   </div>`;
 }
 
@@ -240,8 +320,9 @@ function listColumn(side) {
 
 function reasonsCard() {
   return `<div class="card">
+    <div class="stage">2단계 · 정보에 기반하여</div>
     <h2>이유</h2>
-    <div class="card-sub">두 쪽을 다 쓴 뒤에 결정을 고릅니다. 결정을 먼저 고르지 않아도 목록은 씁니다.</div>
+    <div class="card-sub">원칙이 아니라 지금 가진 정보에서 나온 이유입니다. 두 쪽을 다 쓴 뒤에 결정을 고릅니다. 결정을 먼저 고르지 않아도 목록은 씁니다.</div>
     <div class="cols">${listColumn("for")}${listColumn("against")}</div>
     <div class="tally">${draft.reasonsFor.length} 대 ${draft.reasonsAgainst.length}</div>
   </div>`;
@@ -291,6 +372,28 @@ function autoCard() {
   </div>`;
 }
 
+// 1단계 답을 **답할 당시의 문구로** 보여준다. 원칙을 나중에 고치거나 지워도 이 답은
+// 그대로 읽혀야 한다 — 그래서 문구를 기록에 함께 저장했다.
+function recordStage(rec) {
+  const answers = rec.principle_answers;
+  if (answers === null || answers === undefined) {
+    return `<div class="rec-stage"><b>1단계 · 원칙에 비추어</b> <i>이 단계가 생기기 전에 쓴 기록입니다.</i></div>`;
+  }
+  if (!answers.length) {
+    return `<div class="rec-stage"><b>1단계 · 원칙에 비추어</b> <i>그때 적어 둔 원칙이 없었습니다.</i></div>`;
+  }
+  const current = new Map(principles.map((item) => [item.id, item]));
+  const lines = answers.map((a) => {
+    const now = current.get(a.principleId);
+    const tag = !now ? ` <span class="pill">지금은 목록에 없는 항목</span>`
+      : now.text !== a.text ? ` <span class="pill">지금 문구와 다름</span>` : "";
+    const said = a.skipped ? "<i>건너뜀</i>" : a.answer === "" ? "<i>빈 답</i>" : escapeHtml(a.answer);
+    return `<li>${a.core ? "★ " : ""}<b>${escapeHtml(a.text)}</b>${tag} — ${said}</li>`;
+  }).join("");
+  const skipped = answers.filter((a) => a.skipped).length;
+  return `<div class="rec-stage"><b>1단계 · 원칙에 비추어 ${answers.length - skipped}/${answers.length}</b><ul>${lines}</ul></div>`;
+}
+
 function recordCard() {
   if (!records.length) {
     return `<div class="card"><h2>지난 기록</h2>
@@ -314,6 +417,7 @@ function recordCard() {
         <span class="rec-reason">${escapeHtml(rec.action_statement || "행동을 적지 않음")}</span>
         ${rec.holding_label ? `<span class="rec-reason">${escapeHtml(rec.holding_label)}</span>` : ""}
       </div>
+      ${recordStage(rec)}
       <div class="rec-cols">
         <div><b>해야 할 이유 ${forList.length}</b><ul>${bullets(forList)}</ul></div>
         <div><b>하지 말아야 할 이유 ${againstList.length}</b><ul>${bullets(againstList)}</ul></div>
@@ -339,7 +443,8 @@ function render() {
     return;
   }
   Shell.mount("app", "journal",
-    `${head()}${actionCard()}<div style="margin-top:var(--space-4)">${reasonsCard()}</div>` +
+    `${head()}${actionCard()}<div style="margin-top:var(--space-4)">${principlesCard()}</div>` +
+    `<div style="margin-top:var(--space-4)">${reasonsCard()}</div>` +
     `<div style="margin-top:var(--space-4)">${decisionCard()}</div>` +
     `<div style="margin-top:var(--space-4)">${recordCard()}</div>`,
     navOptions());
@@ -355,6 +460,11 @@ function itemById(id) {
 // 조용히 0으로 저장되던 것이 정확히 이 부류의 결함이었다.
 function harvest() {
   document.querySelectorAll("[data-draft]").forEach((node) => { draft[node.dataset.draft] = node.value; });
+  document.querySelectorAll("[data-principle-answer]").forEach((node) => {
+    const id = node.dataset.principleAnswer;
+    const prev = answerState(id);
+    draft.principleAnswers[id] = { answer: node.value, touched: prev.touched || node.value !== "" };
+  });
   document.querySelectorAll("[data-item-text]").forEach((node) => {
     const item = itemById(node.dataset.itemText);
     if (item) item.text = node.value;
@@ -370,9 +480,20 @@ function harvest() {
       item.rule[node.dataset.rule] = node.value;
     }
   });
+  // 새로 고침이나 창을 닫는 것에서 살아남게 이 기기에 적어 둔다. 예전에는 초안이 메모리에만
+  // 있어 새로 고치면 통째로 사라졌다.
+  JournalStore.saveDraft("decision", draft);
 }
 
+let draftTimer = null;
 function bind() {
+  document.querySelectorAll("[data-principle-answer]").forEach((node) => {
+    node.addEventListener("input", () => {
+      const id = node.dataset.principleAnswer;
+      draft.principleAnswers[id] = { answer: node.value, touched: true };
+    });
+  });
+  document.querySelector("details[data-principle-rest]")?.addEventListener("toggle", (event) => { restOpen = event.currentTarget.open; });
   document.querySelectorAll("[data-decision]").forEach((node) => {
     node.addEventListener("click", () => { harvest(); draft.decision = node.dataset.decision; render(); });
   });
@@ -446,6 +567,12 @@ async function onSave() {
 
   // 사실만 말한다. "근거가 부족합니다"는 우리가 내릴 판단이 아니다.
   if (!draft.actionStatement.trim()) { notice = "검토 중인 행동이 비어 있습니다."; render(); return; }
+  const missingCore = principles.filter((item) => item.core && !answerState(item.id).answer.trim());
+  if (missingCore.length) {
+    notice = `핵심 항목에 답이 비어 있습니다: ${missingCore.map((item) => `"${item.text}"`).join(", ")}`;
+    render();
+    return;
+  }
   if (!forList.length) { notice = "해야 할 이유가 비어 있습니다."; render(); return; }
   if (!againstList.length) { notice = "하지 말아야 할 이유가 비어 있습니다."; render(); return; }
   if (!draft.decision) { notice = "결정을 고르지 않았습니다."; render(); return; }
@@ -453,7 +580,8 @@ async function onSave() {
   busy = true; notice = ""; render();
   try {
     const fresh = await DecisionContext.build({ holding: null, totalKrw: 0 });
-    await JournalStore.saveRecord({
+    const saved = await JournalStore.saveRecord({
+      principleAnswers: principles.map((item) => JournalStore.principleAnswer(item, answerState(item.id))),
       actionStatement: draft.actionStatement.trim(),
       reasonsFor: forList,
       reasonsAgainst: againstList,
@@ -464,8 +592,11 @@ async function onSave() {
       context: fresh,
     });
     records = await JournalStore.loadRecords();
-    notice = "기록했습니다.";
-    draft = { actionStatement: "", expectation: "", decision: "", reasonsFor: [newItem()], reasonsAgainst: [newItem()] };
+    notice = saved && saved.principleAnswersFallback
+      ? "기록했습니다. 서버에 원칙 답 칸이 아직 없어 이번 1단계 답은 맥락 칸에 함께 저장했습니다 — 지난 기록에서는 그대로 보입니다."
+      : "기록했습니다.";
+    draft = emptyDraft();
+    JournalStore.clearDraft("decision");
   } catch (problem) {
     notice = problem.message || "저장하지 못했습니다.";
   } finally {
@@ -475,13 +606,29 @@ async function onSave() {
 }
 
 
+// 입력할 때마다(다시 그리지 않고) 잠시 뒤 초안을 걷어 이 기기에 적어 둔다.
+document.getElementById("app").addEventListener("input", () => {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(harvest, 300);
+});
+
 (async function () {
   render();
   if (!(await AccountStore.bootstrapProtected())) return;
   // 신규매수처럼 아직 보유목록에 없는 행동도 같은 구조로 기록하므로 자산 연결은 요구하지 않는다.
   try {
     context = await DecisionContext.build({ holding: null, totalKrw: 0 });
+    // 1단계는 **저장된** 원칙을 쓴다. 원칙 화면의 저장하지 않은 초안은 여기 오지 않는다.
+    const philosophy = await JournalStore.loadPhilosophy();
+    principles = philosophy.doc.items;
     records = await JournalStore.loadRecords();
+    const saved = JournalStore.loadDraft("decision");
+    if (saved && typeof saved === "object") {
+      draft = Object.assign(emptyDraft(), saved);
+      if (!Array.isArray(draft.reasonsFor) || !draft.reasonsFor.length) draft.reasonsFor = [newItem()];
+      if (!Array.isArray(draft.reasonsAgainst) || !draft.reasonsAgainst.length) draft.reasonsAgainst = [newItem()];
+      if (!draft.principleAnswers || typeof draft.principleAnswers !== "object") draft.principleAnswers = {};
+    }
   } catch (problem) {
     notice = problem.message || "불러오지 못했습니다.";
   } finally {

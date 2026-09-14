@@ -114,6 +114,11 @@ create table if not exists public.user_decision_records (
   holding_id text,
   holding_label text not null default '',
   context jsonb not null default '{}'::jsonb,
+  -- 1단계 · 원칙에 비추어 (트랙 40). 원칙 하나에 답 하나를 따로 담는다 —
+  -- {principleId, text(답할 당시 문구), kind, core, skipped, answer,
+  --  classification, classificationBy, userOverride}. 분류 세 칸은 지금 비워 둔다.
+  -- null이면 이 단계가 생기기 전에 쓴 기록, []이면 그때 적은 원칙이 없었던 기록이다.
+  principle_answers jsonb,
   created_at timestamptz not null default now()
 );
 
@@ -126,6 +131,9 @@ alter table public.user_decision_records add column if not exists decision text;
 alter table public.user_decision_records add column if not exists expectation text not null default '';
 alter table public.user_decision_records add column if not exists resolved_at timestamptz;
 alter table public.user_decision_records add column if not exists superseded_by uuid references public.user_decision_records(id) on delete set null;
+-- 트랙 40. 이 칸이 없는 동안 앱은 원칙 답을 context.principleAnswers에 담아 저장한다
+-- (기록이 실패하거나 답을 버리지 않도록). 적용한 뒤에는 새 기록부터 이 칸을 쓴다.
+alter table public.user_decision_records add column if not exists principle_answers jsonb;
 alter table public.user_decision_records drop column if exists action;
 alter table public.user_decision_records drop column if exists reasoning;
 alter table public.user_decision_records drop column if exists uncertainty;

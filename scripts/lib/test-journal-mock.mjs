@@ -60,6 +60,12 @@ export async function installJournalMock(page) {
       }
 
       if (method === "POST") {
+        // 서버에 새 칸이 아직 없는 상태를 흉내 낸다(supabase/schema.sql 적용 전). PostgREST가
+        // 실제로 돌려주는 모양 그대로 400을 준다 — 앱이 그 사이에 기록을 잃지 않는지 보려고.
+        const missing = sessionStorage.getItem("assetflow.test.missingColumn");
+        if (missing && body && Object.prototype.hasOwnProperty.call(body, missing)) {
+          return reply({ code: "PGRST204", message: `Could not find the '${missing}' column of '${table}' in the schema cache` }, 400);
+        }
         const now = new Date(Date.now() + (seq += 1)).toISOString();
         const row = Object.assign({ id: `${table}-${seq}` }, body);
         if (table === "user_philosophy_revisions") row.changed_at = row.changed_at || now;
