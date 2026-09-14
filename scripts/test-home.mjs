@@ -1890,6 +1890,14 @@ try {
     await page.waitForSelector(".review-list", { timeout: 8000 });
     await page.click("button[data-choose-groups]");
     await page.click('input[data-group-check="cash"]'); // 실제 클릭으로 해제
+    // 트랙 41: 자산이 있는 자산군은 조용히 빠지지 않는다. 먼저 무엇을 들고 있는지 말하고 묻는다.
+    const sheet = page.locator('[data-remove-sheet="cash"]');
+    if (!(await sheet.count())) return { ok: false, reason: "자산이 있는데 해제 전에 묻지 않았다" };
+    const asked = await sheet.textContent();
+    const stillChosen = await page.evaluate(() => session.selectedGroups.includes("cash"));
+    if (!stillChosen) return { ok: false, reason: "묻기도 전에 이미 빠졌다" };
+    if (!/1건/.test(asked) || !/1,000,000원/.test(asked)) return { ok: false, reason: `건수·금액을 말하지 않음: "${asked}"` };
+    await page.click('button[data-remove-confirm="cash"]');
     const after = await page.evaluate(() => ({
       selected: session.selectedGroups,
       cashAssets: session.assets.filter((asset) => asset.group === "cash").length,
@@ -2125,6 +2133,154 @@ try {
     return { ok: true };
   });
   await page.unroute("**/data/quotes.json");
+
+
+  // ===== 9. 자산군을 목록에서 내리기 (트랙 41) =====
+  // 트랙 32가 추가하는 길을 열었지만 반대 방향이 없었다. 다 팔아 0이 된 자산군을 내릴
+  // 방법이 검토 화면에 없었고, 입력을 다시 볼 때마다 그 자산군이 다시 나왔다.
+  // 무엇을 내리든 자산은 지우지 않는다. 전부 실제 클릭이다.
+  const reviewState = () => page.evaluate(() => ({
+    inSet: [...document.querySelectorAll('[data-section="in"] .review-group')].map((node) =>
+      (node.querySelector("[data-review-group],[data-details]")?.getAttribute("data-review-group")
+        || (node.querySelector("[data-details]")?.dataset.details || "").replace("review-", ""))),
+    outSet: [...document.querySelectorAll('[data-section="out"] .review-group')].map((node) =>
+      (node.querySelector("[data-review-group],[data-details]")?.getAttribute("data-review-group")
+        || (node.querySelector("[data-details]")?.dataset.details || "").replace("review-", ""))),
+    selected: session.selectedGroups.slice(),
+    skipped: session.skippedGroups.slice(),
+    counts: Object.fromEntries(["cash", "savings", "equity"].map((g) => [g, session.assets.filter((a) => a.group === g).length])),
+    total: session.assets.length,
+  }));
+
+  await page.goto(INPUT_URL);
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.click('input[data-group-check="cash"]');
+  await page.click('input[data-group-check="savings"]');
+  await page.click("[data-start]");
+  await type(page, "#field-cash-amount", "1000000");
+  await page.click("[data-next]");
+  await page.click("[data-skip]"); // 예금·적금은 비운 채 넘긴다 → 홈이 "아직 입력하지 않은 자산군"으로 조른다
+
+  await record("빈 자산군은 묻지 않고 곧바로 목록에서 내린다", async () => {
+    const before = await reviewState();
+    if (!before.inSet.includes("savings")) return { ok: false, reason: `예금이 관리 목록에 없음: ${JSON.stringify(before)}` };
+    if (!before.skipped.includes("savings")) return { ok: false, reason: "건너뛴 기록이 없어 시험 전제가 성립하지 않는다" };
+    await page.click('button[data-remove-group="savings"]');
+    if (await page.locator("[data-remove-sheet]").count()) return { ok: false, reason: "빈 자산군인데 경고 시트가 떴다" };
+    const after = await reviewState();
+    if (after.selected.includes("savings")) return { ok: false, reason: "목록에서 빠지지 않았다" };
+    if (!after.outSet.includes("savings")) return { ok: false, reason: `목록 밖에 보이지 않는다: ${JSON.stringify(after.outSet)}` };
+    if (after.skipped.includes("savings")) return { ok: false, reason: "내렸는데도 '아직 입력하지 않은 자산군'으로 남는다" };
+    return { ok: true };
+  });
+
+  await record("내린 빈 자산군도 여덟 가지 목록에 그대로 있고 ＋ 추가로 다시 열린다", async () => {
+    const groups = await page.locator(".review-group").count();
+    if (groups !== 8) return { ok: false, reason: `검토 화면 자산군 ${groups}개 (8개 기대)` };
+    const reachable = await page.locator('[data-section="out"] button[data-review-group="savings"]').count();
+    return reachable ? { ok: true } : { ok: false, reason: "목록 밖의 예금에 ＋ 추가가 없다" };
+  });
+
+  // 자산 두 건을 실제로 넣는다(주식은 처음에 고르지 않았다 — 트랙 32의 길로 들어간다).
+  await page.click('button[data-review-group="equity"]');
+  await searchAndPick(page, "field-equity-search", "삼성전자");
+  await type(page, "#field-equity-quantity", "10");
+  await type(page, "#field-equity-averagePrice", "60000");
+  await page.click("[data-add-another]");
+  await searchAndPick(page, "field-equity-search", "카카오");
+  await type(page, "#field-equity-quantity", "20");
+  await type(page, "#field-equity-averagePrice", "50000");
+  await page.click("[data-next]");
+  const TWO_EQUITY = 10 * 73400 + 20 * 52300; // 1,780,000
+
+  await record("자산 두 건이 든 자산군을 내리려 하면, 내리기 전에 건수와 평가금액을 말한다", async () => {
+    const before = await reviewState();
+    if (before.counts.equity !== 2) return { ok: false, reason: `주식 ${before.counts.equity}건 (2건 기대)` };
+    if (!before.inSet.includes("equity")) return { ok: false, reason: "＋ 추가로 넣은 주식이 관리 목록에 올라가지 않았다" };
+    await page.click('button[data-remove-group="equity"]');
+    const sheet = page.locator('[data-remove-sheet="equity"]');
+    if (!(await sheet.count())) return { ok: false, reason: "경고 없이 지나갔다" };
+    const text = await sheet.textContent();
+    if (!/2건/.test(text)) return { ok: false, reason: `건수를 말하지 않음: "${text}"` };
+    if (!text.includes(TWO_EQUITY.toLocaleString("ko-KR") + "원")) return { ok: false, reason: `평가금액을 말하지 않음(기대 ${TWO_EQUITY.toLocaleString("ko-KR")}원): "${text}"` };
+    if (!/지우지 않습니다/.test(text)) return { ok: false, reason: "자산이 어떻게 되는지 말하지 않음" };
+    if (!/총자산에도 계속 들어갑니다/.test(text)) return { ok: false, reason: "총자산에 들어가는지 말하지 않음" };
+    // 아직 아무 일도 일어나지 않았어야 한다.
+    const still = await reviewState();
+    return still.selected.includes("equity") ? { ok: true } : { ok: false, reason: "묻기도 전에 빠졌다" };
+  });
+
+  await record("묻는 도중 새로고침해도 아무것도 사라지지 않는다", async () => {
+    await page.reload();
+    await page.waitForSelector(".review-list", { timeout: 8000 });
+    const state = await reviewState();
+    if (!state.selected.includes("equity")) return { ok: false, reason: "확인하지 않았는데 빠졌다" };
+    if (state.counts.equity !== 2) return { ok: false, reason: `주식 ${state.counts.equity}건` };
+    if (await page.locator("[data-remove-sheet]").count()) return { ok: false, reason: "시트가 새로고침을 넘어 남았다" };
+    return { ok: true };
+  });
+
+  await record("내려도 자산 두 건은 남고, 화면이 어디에 있는지 말한다", async () => {
+    await page.click('button[data-remove-group="equity"]');
+    await page.click('button[data-remove-confirm="equity"]');
+    const state = await reviewState();
+    if (state.selected.includes("equity")) return { ok: false, reason: "목록에서 빠지지 않았다" };
+    if (state.counts.equity !== 2) return { ok: false, reason: `주식 ${state.counts.equity}건 — 내리기가 자산을 지웠다` };
+    if (!state.outSet.includes("equity")) return { ok: false, reason: "목록 밖에 보이지 않는다" };
+    const note = await page.locator('[data-section="out"] .section-note').textContent();
+    if (!/주식·ETF 2건/.test(note) || !/총자산/.test(note)) return { ok: false, reason: `어디 있는지 말하지 않음: "${note}"` };
+    const tag = await page.locator('[data-section="out"] [data-details="review-equity"] summary').textContent();
+    return /목록 밖 · 총자산 포함/.test(tag) ? { ok: true } : { ok: false, reason: `행에 표시가 없음: "${tag}"` };
+  });
+
+  await record("내린 뒤 새로고침해도 그대로다", async () => {
+    await page.reload();
+    await page.waitForSelector(".review-list", { timeout: 8000 });
+    const state = await reviewState();
+    return !state.selected.includes("equity") && state.counts.equity === 2 && state.outSet.includes("equity")
+      ? { ok: true } : { ok: false, reason: JSON.stringify(state) };
+  });
+
+  await record("내린 자산군의 자산도 홈 총자산에 들어간다 (화면이 말한 대로)", async () => {
+    await page.goto(HOME_URL);
+    await page.waitForFunction(() => document.querySelector(".total-amount"), { timeout: 8000 });
+    const total = await page.evaluate(() => Portfolio.summarize(session.assets).total);
+    const expected = 1000000 + TWO_EQUITY;
+    const nag = await page.locator("#app").textContent();
+    if (total !== expected) return { ok: false, reason: `총자산 ${total} ≠ ${expected}` };
+    if (/아직 입력하지 않은 자산군/.test(nag)) return { ok: false, reason: "내린 자산군을 여전히 입력하라고 조른다" };
+    return { ok: true };
+  });
+
+  await record("다시 올리면 자산 두 건이 그대로 있고 중복되지 않는다", async () => {
+    await page.goto(`${INPUT_URL}#add`);
+    await page.waitForSelector(".review-list", { timeout: 8000 });
+    await page.click('button[data-readd-group="equity"]');
+    const state = await reviewState();
+    if (!state.selected.includes("equity")) return { ok: false, reason: "목록에 올라가지 않았다" };
+    if (state.counts.equity !== 2) return { ok: false, reason: `주식 ${state.counts.equity}건 (2건 기대 — 중복되거나 사라짐)` };
+    return state.inSet.includes("equity") ? { ok: true } : { ok: false, reason: "관리 목록 칸에 보이지 않는다" };
+  });
+
+  // 새 사용자가 처음 서는 자리와 같은 상태다. 여기서 화면이 깨지면 안 된다.
+  await record("모든 자산군을 내려도 화면이 깨지지 않고 되돌아갈 길이 있다", async () => {
+    for (const group of ["cash", "equity"]) {
+      await page.click(`button[data-remove-group="${group}"]`);
+      if (await page.locator(`[data-remove-sheet="${group}"]`).count()) await page.click(`button[data-remove-confirm="${group}"]`);
+    }
+    const state = await reviewState();
+    if (state.selected.length) return { ok: false, reason: `아직 목록에 남음: ${state.selected}` };
+    if (state.total !== 3) return { ok: false, reason: `자산 ${state.total}건 (3건 기대 — 내리기가 지웠다)` };
+    const inNote = await page.locator('[data-section="in"] .section-note').textContent();
+    if (!/관리하는 자산군이 없습니다/.test(inNote)) return { ok: false, reason: `빈 목록 안내가 없음: "${inNote}"` };
+    const groups = await page.locator(".review-group").count();
+    if (groups !== 8) return { ok: false, reason: `자산군 ${groups}개` };
+    await page.click('button[data-review-group="savings"]'); // 되돌아가는 길이 실제로 열리는가
+    const opened = await page.evaluate(() => ({ screen, group: orderedGroups()[session.currentGroupIndex] }));
+    return opened.screen === "input" && opened.group === "savings"
+      ? { ok: true } : { ok: false, reason: JSON.stringify(opened) };
+  });
 
 } finally {
   if (browser) await browser.close();
